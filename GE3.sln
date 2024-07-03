@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GE3", "GE3.vcxproj", "{2168B2AB-5DAC-4F60-9A33-86742390701D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2168B2AB-5DAC-4F60-9A33-86742390701D}.Debug|x64.ActiveCfg = Debug|x64
+		{2168B2AB-5DAC-4F60-9A33-86742390701D}.Debug|x64.Build.0 = Debug|x64
+		{2168B2AB-5DAC-4F60-9A33-86742390701D}.Release|x64.ActiveCfg = Release|x64
+		{2168B2AB-5DAC-4F60-9A33-86742390701D}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E875EA99-4F90-4625-B700-CCB85C2ECFD4}
+	EndGlobalSection
+EndGlobal

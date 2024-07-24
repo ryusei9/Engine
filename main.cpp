@@ -1640,8 +1640,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	input = new Input();
 	input->Initialize(wc.hInstance,hwnd);
 
+	// 入力の更新
+	input->Update();
+
 	// 入力解放
 	delete input;
+
+	
 
 	/////////////////////
 	// ImGuiの初期化

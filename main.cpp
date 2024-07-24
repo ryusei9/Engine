@@ -16,6 +16,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #include <fstream>
 #include <sstream>
 #include <wrl.h>
+#include "Input.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -1631,6 +1632,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	};
 
 	bool useMonsterBall = true;
+
+	// ポインタ
+	Input* input = nullptr;
+
+	// 入力の初期化
+	input = new Input();
+	input->Initialize(wc.hInstance,hwnd);
+
+	// 入力解放
+	delete input;
 
 	/////////////////////
 	// ImGuiの初期化

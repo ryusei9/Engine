@@ -799,9 +799,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// COMの初期化
 	CoInitializeEx(0, COINIT_MULTITHREADED);
-
+#ifdef _DEBUG
 	D3DResourceLeakChecker leakCheck;
-
+#endif
 	///////////////////////
 	// ウィンドウの作成
 	///////////////////////

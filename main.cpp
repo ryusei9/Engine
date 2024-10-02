@@ -800,8 +800,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// COMの初期化
 	CoInitializeEx(0, COINIT_MULTITHREADED);
 
+#ifdef _DEBUG
 	D3DResourceLeakChecker leakCheck;
-
+#endif
 	///////////////////////
 	// ウィンドウの作成
 	///////////////////////
@@ -1638,7 +1639,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 入力の初期化
 	input = new Input();
-	input->Initialize(wc.hInstance,hwnd);
+	input->Initialize(wc.hInstance, hwnd);
 
 	// 入力解放
 	delete input;
@@ -1866,9 +1867,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	////////////////////
 	// 解放処理
 	////////////////////
-	
+
 	CloseHandle(fenceEvent);
-	
+
 	CloseWindow(hwnd);
 
 

@@ -7,7 +7,7 @@ using namespace Microsoft::WRL;
 #include <dinput.h>
 
 #pragma comment(lib,"dinput8.lib")
-//#pragma comment(lib,"dxquid.lib")
+#pragma comment(lib,"dxguid.lib")
 
 
 void Input::Initialize(HINSTANCE hInstance, HWND hwnd) {

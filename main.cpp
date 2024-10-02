@@ -954,6 +954,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	hr = dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
 	assert(SUCCEEDED(hr));
 
+	////////////////////////
+	// input
+	////////////////////////
+	// ポインタ
+	Input* input = nullptr;
+
+	// 入力の初期化
+	input = new Input();
+	input->Initialize(wc.hInstance, hwnd);
+
+	
+
+	
+
 	//////////////////////////
 	// PSO(Pipeline State Object)
 	//////////////////////////
@@ -1633,18 +1647,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	bool useMonsterBall = true;
 
-	// ポインタ
-	Input* input = nullptr;
-
-	// 入力の初期化
-	input = new Input();
-	input->Initialize(wc.hInstance,hwnd);
-
-	// 入力の更新
-	input->Update();
-
-	// 入力解放
-	delete input;
+	
 
 	
 
@@ -1690,7 +1693,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 			ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 			// ゲームの処理
-
+			// 入力の更新
+			input->Update();
+			// 操作
+			if (input->TriggerKey(DIK_RIGHTARROW)) {
+				cameraTransform.translate.x -= 1.0f;
+			}
+			if (input->PushKey(DIK_LEFTARROW)) {
+				cameraTransform.translate.x += 0.01f;
+			}
 			//transform.rotate.y += 0.01f;
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 
@@ -1719,6 +1730,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
 			materialDataSprite->uvTransform = uvTransformMatrix;
+
+
 			///////////////////
 			// コマンドをキック
 			///////////////////
@@ -1871,7 +1884,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	////////////////////
 	// 解放処理
 	////////////////////
-	
+	// 入力解放
+	delete input;
 	CloseHandle(fenceEvent);
 	
 	CloseWindow(hwnd);

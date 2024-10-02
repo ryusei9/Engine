@@ -17,8 +17,24 @@ public:
 	// 更新
 	void Update();
 
+	/// <summary>
+	/// キーの押下をチェック
+	/// </summary>
+	/// 押されているか
+	bool PushKey(BYTE keyNumber);
+
+	/// <summary>
+	/// キーのトリガーをチェック
+	/// </summary>
+	bool TriggerKey(BYTE keyNumber);
 private:
 	// メンバ変数
 	// キーボードのデバイス
 	ComPtr<IDirectInputDevice8> keyboard;
+	// 全キーの状態
+	BYTE key[256] = {};
+	// 前回の全キーの状態
+	BYTE keyPre[256] = {};
+	// DirectInputのインスタンス
+	ComPtr<IDirectInput8> directInput = nullptr;
 };

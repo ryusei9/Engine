@@ -17,6 +17,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #include <sstream>
 #include <wrl.h>
 #include "Input.h"
+#include "WinApp.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -796,66 +797,13 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
+	// ポインタ
+	WinApp* winApp = nullptr;
 
-	// COMの初期化
-	CoInitializeEx(0, COINIT_MULTITHREADED);
-#ifdef _DEBUG
-	D3DResourceLeakChecker leakCheck;
-#endif
-	///////////////////////
-	// ウィンドウの作成
-	///////////////////////
-
-	WNDCLASS wc{};
-	// ウィンドウプロシーシャ
-	wc.lpfnWndProc = WindowProc;
-	// ウィンドウクラス名
-	wc.lpszClassName = L"GE3WindowClass";
-	// インスタンスハンドル
-	wc.hInstance = GetModuleHandle(nullptr);
-	// カーソル
-	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-
-	// ウィンドウクラスを登録する
-	RegisterClass(&wc);
-
-	// クライアント領域のサイズ
-	const int32_t kClientWidth = 1280;
-	const int32_t kClientHeight = 720;
-
-	// ウィンドウサイズを表す構造体にクライアント領域を入れる
-	RECT wrc = { 0,0,kClientWidth,kClientHeight };
-
-	// クライアント領域を元に実際のサイズにrcを変更してもらう
-	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
-
-	// ウィンドウの生成
-	HWND hwnd = CreateWindow(
-		// 利用するクラス名
-		wc.lpszClassName,
-		// タイトルバーの文字
-		L"GE3",
-		// ウィンドウスタイル
-		WS_OVERLAPPEDWINDOW,
-		// 表示X座標
-		CW_USEDEFAULT,
-		// 表示Y座標
-		CW_USEDEFAULT,
-		// ウィンドウ横幅
-		wrc.right - wrc.left,
-		// ウィンドウ縦幅
-		wrc.bottom - wrc.top,
-		// 親ウィンドウハンドル
-		nullptr,
-		// メニューハンドル
-		nullptr,
-		// インスタンスハンドル
-		wc.hInstance,
-		// オプション
-		nullptr);
-
-	// ウィンドウを表示する
-	ShowWindow(hwnd, SW_SHOW);
+	// WindowsAPIの初期化
+	winApp = new WinApp();
+	winApp->Initialize();
+	
 
 	// 出力ウィンドウへの文字出力
 	OutputDebugStringA("Hello,DirectX!\n");
@@ -1886,6 +1834,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	////////////////////
 	// 入力解放
 	delete input;
+	delete winApp;
 	CloseHandle(fenceEvent);
 	
 	CloseWindow(hwnd);

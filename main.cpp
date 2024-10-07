@@ -796,6 +796,8 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+	// COMの初期化
+	CoInitializeEx(0, COINIT_MULTITHREADED);
 
 	// ポインタ
 	WinApp* winApp = nullptr;
@@ -803,7 +805,35 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// WindowsAPIの初期化
 	winApp = new WinApp();
 	winApp->Initialize();
+
 	
+	// ウィンドウの生成
+	//HWND hwnd = CreateWindow(
+	//	// 利用するクラス名
+	//	wc.lpszClassName,
+	//	// タイトルバーの文字
+	//	L"GE3",
+	//	// ウィンドウスタイル
+	//	WS_OVERLAPPEDWINDOW,
+	//	// 表示X座標
+	//	CW_USEDEFAULT,
+	//	// 表示Y座標
+	//	CW_USEDEFAULT,
+	//	// ウィンドウ横幅
+	//	wrc.right - wrc.left,
+	//	// ウィンドウ縦幅
+	//	wrc.bottom - wrc.top,
+	//	// 親ウィンドウハンドル
+	//	nullptr,
+	//	// メニューハンドル
+	//	nullptr,
+	//	// インスタンスハンドル
+	//	wc.hInstance,
+	//	// オプション
+	//	nullptr);
+
+	//// ウィンドウを表示する
+	//ShowWindow(hwnd, SW_SHOW);
 
 	// 出力ウィンドウへの文字出力
 	OutputDebugStringA("Hello,DirectX!\n");
@@ -910,7 +940,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 入力の初期化
 	input = new Input();
-	input->Initialize(wc.hInstance, hwnd);
+	input->Initialize(winApp->GetHInstance(), winApp->GetHwnd());
 
 	
 
@@ -1181,7 +1211,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource = CreateBufferResource(device, sizeof(TransformationMatrix));
 
 	// DepthStencilTextureをウィンドウのサイズで作成
-	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource = CreateDepthStencilTextureResource(device, WinApp::kClientWidth, WinApp::kClientHeight);
 
 	// データを書き込む
 	TransformationMatrix* wvpData = nullptr;
@@ -1360,8 +1390,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	D3D12_VIEWPORT viewport{};
 
 	// クライアント領域のサイズと一緒にして画面全体に表示
-	viewport.Width = kClientWidth;
-	viewport.Height = kClientHeight;
+	viewport.Width = WinApp::kClientWidth;
+	viewport.Height = WinApp::kClientHeight;
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
 	viewport.MinDepth = 0.0f;
@@ -1372,9 +1402,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 基本的にビューポートと同じ矩形が構成されるようにする
 	scissorRect.left = 0;
-	scissorRect.right = kClientWidth;
+	scissorRect.right = WinApp::kClientWidth;
 	scissorRect.top = 0;
-	scissorRect.bottom = kClientHeight;
+	scissorRect.bottom = WinApp::kClientHeight;
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
@@ -1434,9 +1464,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain = nullptr;
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
 	// 画面の幅
-	swapChainDesc.Width = kClientWidth;
+	swapChainDesc.Width = WinApp::kClientWidth;
 	// 画面の高さ
-	swapChainDesc.Height = kClientHeight;
+	swapChainDesc.Height = WinApp::kClientHeight;
 	// 色の形式
 	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	// マルチサンプルしない
@@ -1448,7 +1478,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// モニタにうつしたら、中身を破棄
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	// コマンドキュー、ウィンドウハンドル、設定を渡して生成する
-	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), hwnd, &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain.GetAddressOf()));
+	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), winApp->GetHwnd(), &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain.GetAddressOf()));
 	assert(SUCCEEDED(hr));
 
 	// ディスクリプタヒープの生成
@@ -1605,7 +1635,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
-	ImGui_ImplWin32_Init(hwnd);
+	ImGui_ImplWin32_Init(winApp->GetHwnd());
 	ImGui_ImplDX12_Init(device.Get(),
 		swapChainDesc.BufferCount,
 		rtvDesc.Format,
@@ -1656,7 +1686,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 			Matrix4x4 viewMatrix = Inverse(cameraMatrix);
-			Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+			Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(WinApp::kClientWidth) / float(WinApp::kClientHeight), 0.1f, 100.0f);
 			Matrix4x4 worldProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 
 			wvpData->WVP = worldProjectionMatrix;
@@ -1668,7 +1698,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// Sprite用のWorldViewProjectionMatrixを作る
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
-			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
+			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
 			Matrix4x4 worldProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
 
 			transformationMatrixDataSprite->WVP = worldProjectionMatrixSprite;
@@ -1837,7 +1867,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete winApp;
 	CloseHandle(fenceEvent);
 	
-	CloseWindow(hwnd);
+	CloseWindow(winApp->GetHwnd());
 
 
 	// COMの終了処理

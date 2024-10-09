@@ -799,6 +799,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// COMの初期化
 	CoInitializeEx(0, COINIT_MULTITHREADED);
 
+	// COMの初期化
+	//HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
+
 	// ポインタ
 	WinApp* winApp = nullptr;
 
@@ -940,7 +943,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 入力の初期化
 	input = new Input();
-	input->Initialize(winApp->GetHInstance(), winApp->GetHwnd());
+	input->Initialize(winApp);
 
 	
 
@@ -1864,13 +1867,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	////////////////////
 	// 入力解放
 	delete input;
+
+	// WindowsAPIの終了処理
+	winApp->Finalize();
 	delete winApp;
+	
 	CloseHandle(fenceEvent);
 	
-	CloseWindow(winApp->GetHwnd());
-
-
-	// COMの終了処理
-	CoUninitialize();
+	
 	return 0;
 }

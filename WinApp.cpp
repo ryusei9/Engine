@@ -56,29 +56,29 @@ void WinApp::Initialize()
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
 
 	// ウィンドウの生成
-	//HWND hwnd = CreateWindow(
-	//	// 利用するクラス名
-	//	wc.lpszClassName,
-	//	// タイトルバーの文字
-	//	L"GE3",
-	//	// ウィンドウスタイル
-	//	WS_OVERLAPPEDWINDOW,
-	//	// 表示X座標
-	//	CW_USEDEFAULT,
-	//	// 表示Y座標
-	//	CW_USEDEFAULT,
-	//	// ウィンドウ横幅
-	//	wrc.right - wrc.left,
-	//	// ウィンドウ縦幅
-	//	wrc.bottom - wrc.top,
-	//	// 親ウィンドウハンドル
-	//	nullptr,
-	//	// メニューハンドル
-	//	nullptr,
-	//	// インスタンスハンドル
-	//	wc.hInstance,
-	//	// オプション
-	//	nullptr);
+	hwnd = CreateWindow(
+		// 利用するクラス名
+		wc.lpszClassName,
+		// タイトルバーの文字
+		L"GE3",
+		// ウィンドウスタイル
+		WS_OVERLAPPEDWINDOW,
+		// 表示X座標
+		CW_USEDEFAULT,
+		// 表示Y座標
+		CW_USEDEFAULT,
+		// ウィンドウ横幅
+		wrc.right - wrc.left,
+		// ウィンドウ縦幅
+		wrc.bottom - wrc.top,
+		// 親ウィンドウハンドル
+		nullptr,
+		// メニューハンドル
+		nullptr,
+		// インスタンスハンドル
+		wc.hInstance,
+		// オプション
+		nullptr);
 
 	// ウィンドウを表示する
 	ShowWindow(hwnd, SW_SHOW);
@@ -87,4 +87,10 @@ void WinApp::Initialize()
 void WinApp::Update()
 {
 
+}
+
+void WinApp::Finalize()
+{
+	CloseWindow(hwnd);
+	CoUninitialize();
 }

@@ -1648,12 +1648,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
-	while (msg.message != WM_QUIT) {
-		// Windowにメッセージが来てたら最優先で処理させる
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		} else {
+	while (true) {
+		// Windowsのメッセージ処理
+		if (winApp->ProcessMessage()) {
+			// ゲームループを抜ける
+			break;
+		}
 			// ImGuiにここからフレームが始まる旨を伝える
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
@@ -1856,7 +1856,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			assert(SUCCEEDED(hr));
 			hr = commandList->Reset(commandAllocator.Get(), nullptr);
 			assert(SUCCEEDED(hr));
-		}
+		
 	}
 	// ImGuiの終了処理
 	ImGui_ImplDX12_Shutdown();

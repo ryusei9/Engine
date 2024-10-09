@@ -10,8 +10,7 @@ public:	// 静的メンバ関数
 	// メンバ関数
 	// 初期化
 	void Initialize();
-	// 更新
-	void Update();
+	
 
 	// getter
 	HWND GetHwnd() const { return hwnd; }
@@ -20,6 +19,9 @@ public:	// 静的メンバ関数
 
 	// 終了
 	void Finalize();
+
+	// メッセージの処理
+	bool ProcessMessage();
 
 	// 定数
 	// クライアント領域のサイズ

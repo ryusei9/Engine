@@ -1,0 +1,163 @@
+#pragma once
+#include <wrl.h>
+#include <d3d12.h>
+#include <dxgi1_6.h>
+#include "WinApp.h"
+#include <array>
+#include <dxcapi.h>
+// DirectX基盤
+class DirectXCommon
+{
+public: // メンバ関数
+	// 初期化
+	void Initialize(WinApp* winApp);
+
+	// デバイスの初期化
+	void DeviceInitialize();
+
+	// コマンド関連の初期化
+	void CommandInitialize();
+
+	// スワップチェーンの生成
+	void SwapChain();
+
+	// 深度バッファの生成
+	void CreateBuffer(int32_t width, int32_t height);
+
+	// 各種デスクリプタヒープの生成
+	void DescriptorHeap();
+
+	/// <summary>
+	/// デスクリプタヒープを生成する
+	/// </summary>
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(
+		D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible
+	);
+
+	// レンダーターゲットビューの初期化
+	void RenderTargetView();
+
+	/// <summary>
+	/// SRVの指定番号のCPUデスクリプタハンドルを取得する
+	/// </summary>
+	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUDescriptorHandle(uint32_t index);
+
+	/// <summary>
+	/// SRVの指定番号のGPUデスクリプタハンドルを取得する
+	/// </summary>
+	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUDescriptorHandle(uint32_t index);
+
+	// 深度ステンシルビューの初期化
+	void DepthStencilViewInitialize();
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, int32_t width, int32_t height);
+
+	// フェンスの生成
+	void FenceInitialize();
+
+	// ビューポート矩形の初期化
+	void ViewPortInitialize();
+
+	// シザリング矩形の初期化
+	void ScissorRectInitialize();
+
+	// DXCコンパイラの生成
+	void CreateDXCCompiler();
+
+	// ImGuiの初期化
+	void ImGuiInitialize();
+
+	/// <summary>
+	/// ゲッター
+	/// </summary>
+	Microsoft::WRL::ComPtr<ID3D12Device> GetDevice() { return device; }
+
+	IDxcUtils* GetDxcUtils() { return dxcUtils; }
+
+	IDxcCompiler3* GetDxcCompiler() { return dxcCompiler; }
+
+	IDxcIncludeHandler* GetIncludeHandler() { return includeHandler; }
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetSRVDescriptorHeap() { return srvDescriptorHeap; }
+
+	uint32_t GetDescriptorSizeSRV() { return descriptorSizeSRV; }
+
+	Microsoft::WRL::ComPtr<IDXGISwapChain4> GetSwapChain() { return swapChain; }
+
+	//std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> GetSwapChainResources(){return swapChainResources[0] }
+	HANDLE GetFenceEvent() { return fenceEvent; }
+private:
+	// 関数
+
+	/// <summary>
+	/// 指定番号のCPUデスクリプタハンドルを取得する
+	/// </summary>
+	static D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
+
+	/// <summary>
+	/// 指定番号のGPUデスクリプタハンドルを取得する
+	/// </summary>
+	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
+
+
+
+	// DirectX12デバイス
+	Microsoft::WRL::ComPtr<ID3D12Device> device;
+	// DXGIファクトリ
+	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory;
+	// WindowsAPI
+	WinApp* winApp_ = nullptr;
+
+	// スワップチェーン
+	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain = nullptr;
+	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
+	// リソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
+	// 各種DescriptorSize
+	uint32_t descriptorSizeRTV;
+	uint32_t descriptorSizeSRV;
+	uint32_t descriptorSizeDSV;
+
+	// デスクリプタ
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap;
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap;
+
+	// SwapChainからResourceを引っ張ってくる
+	//Microsoft::WRL::ComPtr<ID3D12Resource> swapChainResources[2];
+
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
+	// RTVハンドル
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
+
+	// コマンドアロケータ
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator = nullptr;
+	// コマンドリスト
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList = nullptr;
+	// コマンドキュー
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue = nullptr;
+
+	// スワップチェーンリソース
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> swapChainResources;
+
+	// フェンス生成
+	Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;
+	uint64_t fenceValue = 0;
+
+	// Fenceのsignalを待つためのイベントを作成
+	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+
+	// ビューポート
+	D3D12_VIEWPORT viewport{};
+
+	// シザー矩形
+	D3D12_RECT scissorRect{};
+
+	// DXCの生成物
+	IDxcUtils* dxcUtils = nullptr;
+	IDxcCompiler3* dxcCompiler = nullptr;
+	IDxcIncludeHandler* includeHandler = nullptr;
+};
+

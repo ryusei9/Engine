@@ -67,6 +67,12 @@ public: // メンバ関数
 	// ImGuiの初期化
 	void ImGuiInitialize();
 
+	// 描画前処理
+	void PreDraw();
+
+	// 描画後処理
+	void PostDraw();
+
 	/// <summary>
 	/// ゲッター
 	/// </summary>
@@ -86,6 +92,8 @@ public: // メンバ関数
 
 	//std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> GetSwapChainResources(){return swapChainResources[0] }
 	HANDLE GetFenceEvent() { return fenceEvent; }
+
+	
 private:
 	// 関数
 
@@ -159,5 +167,8 @@ private:
 	IDxcUtils* dxcUtils = nullptr;
 	IDxcCompiler3* dxcCompiler = nullptr;
 	IDxcIncludeHandler* includeHandler = nullptr;
+
+	// TransitionBarrierの設定
+	D3D12_RESOURCE_BARRIER barrier{};
 };
 

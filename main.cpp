@@ -1662,10 +1662,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// ゲームループを抜ける
 			break;
 		}
-		//// ImGuiにここからフレームが始まる旨を伝える
-		//ImGui_ImplDX12_NewFrame();
-		//ImGui_ImplWin32_NewFrame();
-		//ImGui::NewFrame();
+		// ImGuiにここからフレームが始まる旨を伝える
+		ImGui_ImplDX12_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
 
 		//// 開発用の処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
 		////ImGui::ShowDemoWindow();
@@ -1725,6 +1725,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//// コマンドをキック
 		/////////////////////
 
+		// 描画前処理
+		dxCommon->PreDraw();
 		//// これから書き込むバックバッファのインデックスを取得する
 		//UINT backBufferIndex = dxCommon->GetSwapChain()->GetCurrentBackBufferIndex();
 
@@ -1822,7 +1824,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		////commandList->DrawIndexedInstanced(6, 1, 0, 0,0);
 
 
-
+		dxCommon->PostDraw();
 		//// 実際のcommandListのImGuiの描画コマンドを積む
 		//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
 

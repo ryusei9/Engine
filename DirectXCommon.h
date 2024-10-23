@@ -5,6 +5,8 @@
 #include "WinApp.h"
 #include <array>
 #include <dxcapi.h>
+#include "externals/DirectXTex/DirectXTex.h"
+#include "string"
 // DirectX基盤
 class DirectXCommon
 {
@@ -73,10 +75,28 @@ public: // メンバ関数
 	// 描画後処理
 	void PostDraw();
 
+	// CompileShader関数
+	Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
+// compilerするshaderファイルへのパス
+		const std::wstring& filePath,
+		// compilerに使用するprofile
+		const wchar_t* profile
+	);
+	// BufferResourceの作成
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
+
+	// DirectX12のTextureResourceを作る
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, const DirectX::TexMetadata& metadata);
+
+	// TextureResourceにデータを転送する
+	Microsoft::WRL::ComPtr <ID3D12Resource> UploadTextureData(const Microsoft::WRL::ComPtr<ID3D12Resource>& texture, const DirectX::ScratchImage& mipImages);
+	
+	D3D12_CPU_DESCRIPTOR_HANDLE GetDSVCPUDescriptorHandle(uint32_t index);
+	D3D12_GPU_DESCRIPTOR_HANDLE GetDSVGPUDescriptorHandle(uint32_t index);
 	/// <summary>
 	/// ゲッター
 	/// </summary>
-	Microsoft::WRL::ComPtr<ID3D12Device> GetDevice() { return device; }
+	Microsoft::WRL::ComPtr<ID3D12Device> GetDevice() const{ return device.Get(); }
 
 	IDxcUtils* GetDxcUtils() { return dxcUtils; }
 
@@ -85,29 +105,38 @@ public: // メンバ関数
 	IDxcIncludeHandler* GetIncludeHandler() { return includeHandler; }
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetSRVDescriptorHeap() { return srvDescriptorHeap; }
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetDSVDescriptorHeap() { return dsvDescriptorHeap; }
 
 	uint32_t GetDescriptorSizeSRV() { return descriptorSizeSRV; }
+	uint32_t GetDescriptorSizeDSV() { return descriptorSizeDSV; }
 
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> GetSwapChain() { return swapChain; }
 
 	//std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> GetSwapChainResources(){return swapChainResources[0] }
 	HANDLE GetFenceEvent() { return fenceEvent; }
 
-	
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() const { return commandList.Get(); }
+
+	D3D12_CPU_DESCRIPTOR_HANDLE(&GetRtvHandles())[2] {return rtvHandles; }
+
+	UINT GetBackBufferIndex() { return backBufferIndex; }
+
 private:
 	// 関数
 
 	/// <summary>
 	/// 指定番号のCPUデスクリプタハンドルを取得する
 	/// </summary>
-	static D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
+	static D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
 	/// <summary>
 	/// 指定番号のGPUデスクリプタハンドルを取得する
 	/// </summary>
-	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
+	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
-
+	
+	// DirectXTexを使ってTextureを読むためのLoadTexture関数
+	static DirectX::ScratchImage LoadTexture(const std::string& filePath);
 
 	// DirectX12デバイス
 	Microsoft::WRL::ComPtr<ID3D12Device> device;
@@ -120,7 +149,7 @@ private:
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain = nullptr;
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
 	// リソース
-	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource = nullptr;
 	// 各種DescriptorSize
 	uint32_t descriptorSizeRTV;
 	uint32_t descriptorSizeSRV;
@@ -155,7 +184,7 @@ private:
 	uint64_t fenceValue = 0;
 
 	// Fenceのsignalを待つためのイベントを作成
-	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	HANDLE fenceEvent;
 
 	// ビューポート
 	D3D12_VIEWPORT viewport{};
@@ -170,5 +199,7 @@ private:
 
 	// TransitionBarrierの設定
 	D3D12_RESOURCE_BARRIER barrier{};
+
+	UINT backBufferIndex;
 };
 

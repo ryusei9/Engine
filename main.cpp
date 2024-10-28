@@ -20,6 +20,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #include "WinApp.h"
 #include "DirectXCommon.h"
 #include "D3DresourceLeakChecker.h"
+#include "Sprite.h"
+#include "SpriteCommon.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -845,7 +847,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	input->Initialize(winApp);
 
 
+	SpriteCommon* spriteCommon = nullptr;
+	// スプライト共通部の初期化
+	spriteCommon = new SpriteCommon;
+	spriteCommon->Initialize();
 
+	Sprite* sprite = new Sprite();
+	sprite->Initialize();
 
 
 	//////////////////////////
@@ -1478,7 +1486,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	////////////////////
 	// 入力解放
 	delete input;
-
+	delete spriteCommon;
+	delete sprite;
 	// WindowsAPIの終了処理
 	winApp->Finalize();
 	delete winApp;

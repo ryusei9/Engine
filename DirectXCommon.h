@@ -7,6 +7,7 @@
 #include <dxcapi.h>
 #include "externals/DirectXTex/DirectXTex.h"
 #include "string"
+#include "chrono"
 // DirectX基盤
 class DirectXCommon
 {
@@ -93,6 +94,14 @@ public: // メンバ関数
 	
 	D3D12_CPU_DESCRIPTOR_HANDLE GetDSVCPUDescriptorHandle(uint32_t index);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetDSVGPUDescriptorHandle(uint32_t index);
+
+	// FPS固定初期化
+	void initializeFixFPS();
+	// FPS固定更新
+	void UpdateFixFPS();
+
+	// 記録時間
+	std::chrono::steady_clock::time_point reference_;
 	/// <summary>
 	/// ゲッター
 	/// </summary>
@@ -201,5 +210,6 @@ private:
 	D3D12_RESOURCE_BARRIER barrier{};
 
 	UINT backBufferIndex;
+
 };
 

@@ -10,11 +10,7 @@
 class SpriteCommon;
 
 // 頂点データ
-struct VertexData {
-	Vector4 position;
-	Vector2 texcoord;
-	Vector3 normal;
-};
+
 
 // マテリアルデータ
 struct Material {
@@ -34,12 +30,14 @@ class Sprite
 {
 public:
 	// 初期化
-	void Initialize(SpriteCommon* spriteCommon,DirectXCommon* dxCommon,ModelData modelData);
+	void Initialize(SpriteCommon* spriteCommon,DirectXCommon* dxCommon);
 
 	// 更新
 	void Update();
 
-	void Draw();
+	void Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+
+	
 private:
 	// BufferResourceの作成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes);
@@ -66,8 +64,9 @@ private:
 
 	DirectXCommon* dxCommon_ = nullptr;
 
-	ModelData modelData_;
-
 	Material* materialData = nullptr;
+
 };
+
+
 

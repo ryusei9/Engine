@@ -4,13 +4,15 @@
 #include "MakeAffineMatrix.h"
 #include "MakePerspectiveFovMatrix.h"
 #include "Multiply.h"
+#include "MakeOrthographicMatrix.h"
 
-void Sprite::Initialize(SpriteCommon* spriteCommon, DirectXCommon* dxCommon, ModelData modelData)
+void Sprite::Initialize(SpriteCommon* spriteCommon, DirectXCommon* dxCommon)
 {
 	spriteCommon_ = spriteCommon;
 	dxCommon_ = dxCommon;
-	modelData_ = modelData;
 	CreateVertexData();
+	CreateMaterialData();
+	CreateWVPData();
 }
 
 void Sprite::Update()
@@ -41,20 +43,30 @@ void Sprite::Update()
 	};
 
 	Matrix4x4 worldMatrix = MakeAffineMatrix::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-
 	Matrix4x4 viewMatrix = MakeIdentity4x4::MakeIdentity4x4();
-	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix::MakePerspectiveFovMatrix(0.45f, float(WinApp::kClientWidth) / float(WinApp::kClientHeight), 0.1f, 100.0f);
-	Matrix4x4 worldProjectionMatrix = Multiply::Multiply(worldMatrix, Multiply::Multiply(viewMatrix, projectionMatrix));
+	Matrix4x4 projectionMatrix = MakeOrthographicMatrix::MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
 
-	transformationMatrixData->WVP = worldProjectionMatrix;
+
+	transformationMatrixData->WVP = Multiply::Multiply(worldMatrix, Multiply::Multiply(viewMatrix, projectionMatrix));
 	transformationMatrixData->World = worldMatrix;
 }
 
-void Sprite::Draw()
+void Sprite::Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 {
 	// VBVを設定
 	dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-	dxCommon_->GetCommandList()->IASetIndexBuffer(&indexBufferView)
+	dxCommon_->GetCommandList()->IASetIndexBuffer(&indexBufferView);
+
+	// 第一引数の0はRootParameter配列の0番目
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+
+	// wvp用のCBufferの場所を設定
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+
+	// Spriteを常にuvCheckerにする
+	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+	// 描画
+	dxCommon_->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
 Microsoft::WRL::ComPtr<ID3D12Resource> Sprite::CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes)
@@ -98,16 +110,16 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Sprite::CreateBufferResource(Microsoft::W
 
 void Sprite::CreateVertexData()
 {
-	vertexResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(VertexData) * modelData_.vertices.size());
+	vertexResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(VertexData) * 6);
 	indexResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(uint32_t) * 6);
+
+	
 
 	// リソースの先頭のアドレスから使う
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-
-	// 使用するリソースのサイズは頂点のサイズ
-	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData_.vertices.size());
-
-	// 1頂点あたりのサイズ
+	// 使用するリソースのサイズは頂点6つ分のサイズ
+	vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
+	// 1頂点当たりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
 	// リソースの先頭のアドレスから使う
@@ -131,14 +143,14 @@ void Sprite::CreateVertexData()
 
 void Sprite::CreateMaterialData()
 {
-	materialResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(Material) * 3);
+	materialResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(Material));
 
-	// 書き込むためのアドレスを取得
+	// ...Mapしてデータを書き込む。色は白を設定しておくといい
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 
-	// RGBA
 	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
+	// SpriteはLightingしないのでfalseを設定する
 	materialData->enableLighting = false;
 
 	// 単位行列で初期化

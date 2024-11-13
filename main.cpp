@@ -923,8 +923,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	bool useMonsterBall = true;
 
-	Sprite* sprite = new Sprite();
-	sprite->Initialize(spriteCommon, dxCommon);
+	/*Sprite* sprite = new Sprite();
+	sprite->Initialize(spriteCommon, dxCommon);*/
+
+	std::vector<Sprite*> sprites;
+	for (uint32_t i = 0; i < 5; ++i) {
+		Sprite* sprite = new Sprite();
+		sprite->Initialize(spriteCommon, dxCommon);
+		sprites.push_back(sprite);
+	}
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
 	while (true) {
@@ -952,8 +959,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 		ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);*/
 
-		ImGui::ShowDemoWindow();
-		ImGui::Render();
+		
 		// ゲームの処理
 		// 入力の更新
 		input->Update();
@@ -965,18 +971,44 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			cameraTransform.translate.x += 0.01f;
 		}
 		//transform.rotate.y += 0.01f;
+		for (uint32_t i = 0; i < sprites.size();++i) {
 
-		sprite->Update();
-		
+			sprites[i]->Update();
 
-		
+			// 現在の座標を変数で受ける
+			Vector2 position = sprites[i]->GetPosition();
 
+			// 座標を変更する
+			ImGui::DragFloat2("sprite.translate", &position.x);
+			// 変更を反映する
+			sprites[i]->SetPosition({200.0f * i});
+
+			// 角度を変更させるテスト
+			float rotation = sprites[i]->GetRotation();
+
+			ImGui::DragFloat("sprites.rotation", &rotation, 0.01f);
+
+			sprites[i]->SetRotation(rotation);
+
+			// 色を変化させるテスト
+			Vector4 color = sprites[i]->GetColor();
+
+			ImGui::ColorEdit3("sprites.color", &color.x);
+
+			sprites[i]->SetColor(color);
+
+			// サイズを変化させるテスト
+			Vector2 size = sprites[i]->GetSize();
+			ImGui::DragFloat2("sprites.scale", &size.x);
+
+			sprites[i]->SetSize({100.0f,100.0f});
+		}
 		Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
 		uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
 		uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
 		materialDataSprite->uvTransform = uvTransformMatrix;
 
-
+		ImGui::Render();
 		/////////////////////
 		//// コマンドをキック
 		/////////////////////
@@ -1039,8 +1071,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 		//// 描画
 		//dxCommon->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0,0);
-		sprite->Draw(textureSrvHandleGPU);
-
+		for (auto& sprite : sprites) {
+			sprite->Draw(textureSrvHandleGPU);
+		}
 		dxCommon->PostDraw();
 		
 
@@ -1052,7 +1085,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 入力解放
 	delete input;
 	delete spriteCommon;
-	delete sprite;
+	for (auto& sprite : sprites) {
+		delete sprite;
+	}
 	// WindowsAPIの終了処理
 	winApp->Finalize();
 	delete winApp;

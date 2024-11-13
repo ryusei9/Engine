@@ -37,7 +37,23 @@ public:
 
 	void Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
 
-	
+	// getter
+	const Vector2& GetPosition() const { return position; }
+
+	float GetRotation()const { return rotation; }
+
+	const Vector4& GetColor()const { return materialData->color; }
+
+	const Vector2& GetSize() const { return size; }
+
+	// setter
+	void SetPosition(const Vector2& position) { this->position = position; }
+
+	void SetRotation(float rotation) { this->rotation = rotation; }
+
+	void SetColor(const Vector4& color) { materialData->color = color; }
+
+	void SetSize(const Vector2& size) { this->size = size; }
 private:
 	// BufferResourceの作成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes);
@@ -65,6 +81,15 @@ private:
 	DirectXCommon* dxCommon_ = nullptr;
 
 	Material* materialData = nullptr;
+
+	// スプライト個々の座標
+	Vector2 position = { 0.0f,0.0f };
+
+	// スプライト個々の回転角
+	float rotation = 0.0f;
+
+	// スプライト個々のサイズ
+	Vector2 size = { 640.0f,360.0f };
 
 };
 

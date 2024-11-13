@@ -107,6 +107,13 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MakeAffineMatrix.cpp" />
+    <ClCompile Include="MakeIdentity4x4.cpp" />
+    <ClCompile Include="MakePerspectiveFovMatrix.cpp" />
+    <ClCompile Include="MakeRotateXMatrix.cpp" />
+    <ClCompile Include="MakeRotateYMatrix.cpp" />
+    <ClCompile Include="MakeRotateZMatrix.cpp" />
+    <ClCompile Include="Multiply.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="SpriteCommon.cpp" />
     <ClCompile Include="StringUtility.cpp" />
@@ -125,9 +132,25 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Logger.h" />
+    <ClInclude Include="MakeAffineMatrix.h" />
+    <ClInclude Include="MakeIdentity4x4.h" />
+    <ClInclude Include="MakePerspectiveFovMatrix.h" />
+    <ClInclude Include="MakeRotateXMatrix.h" />
+    <ClInclude Include="MakeRotateYMatrix.h" />
+    <ClInclude Include="MakeRotateZMatrix.h" />
+    <ClInclude Include="MaterialData.h" />
+    <ClInclude Include="Matrix3x3.h" />
+    <ClInclude Include="Matrix4x4.h" />
+    <ClInclude Include="ModelData.h" />
+    <ClInclude Include="Multiply.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="SpriteCommon.h" />
     <ClInclude Include="StringUtility.h" />
+    <ClInclude Include="Transform.h" />
+    <ClInclude Include="Vector2.h" />
+    <ClInclude Include="Vector3.h" />
+    <ClInclude Include="Vector4.h" />
+    <ClInclude Include="VertexData.h" />
     <ClInclude Include="WinApp.h" />
   </ItemGroup>
   <ItemGroup>

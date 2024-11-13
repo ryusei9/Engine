@@ -22,6 +22,15 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #include "D3DresourceLeakChecker.h"
 #include "Sprite.h"
 #include "SpriteCommon.h"
+#include "Vector2.h"
+#include "Vector3.h"
+#include "Vector4.h"
+#include "Matrix3x3.h"
+#include "Matrix4x4.h"
+#include "Transform.h"
+#include "VertexData.h"
+#include "MaterialData.h"
+#include "ModelData.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -47,43 +56,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
 	// 標準のメッセージ処理を行う
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
-struct Vector2 {
-	float x;
-	float y;
-};
-
-struct Vector3 {
-	float x;
-	float y;
-	float z;
-};
-
-struct Vector4 {
-	float x;
-	float y;
-	float z;
-	float w;
-};
-
-struct Matrix3x3 {
-	float m[3][3];
-};
-
-struct Matrix4x4 {
-	float m[4][4];
-};
-
-struct Transform {
-	Vector3 scale;
-	Vector3 rotate;
-	Vector3 translate;
-};
-
-struct VertexData {
-	Vector4 position;
-	Vector2 texcoord;
-	Vector3 normal;
-};
 
 struct Sphere {
 	Vector3 center;
@@ -106,15 +78,6 @@ struct DirectionalLight {
 	Vector4 color; // ライトの色
 	Vector3 direction; // ライトの向き
 	float intensity; // 輝度
-};
-
-struct MaterialData {
-	std::string textureFilePath;
-};
-
-struct ModelData {
-	std::vector<VertexData> vertices;
-	MaterialData material;
 };
 
 struct D3DResourceLeakChecker {
@@ -780,8 +743,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	spriteCommon = new SpriteCommon;
 	spriteCommon->Initialize(dxCommon);
 
-	Sprite* sprite = new Sprite();
-	sprite->Initialize();
+	
 
 
 	//////////////////////////
@@ -1256,7 +1218,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	bool useMonsterBall = true;
 
-
+	Sprite* sprite = new Sprite();
+	sprite->Initialize(spriteCommon, dxCommon,modelData);
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
 	while (true) {
@@ -1298,6 +1261,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			cameraTransform.translate.x += 0.01f;
 		}
 		//transform.rotate.y += 0.01f;
+
+		sprite->Update();
 		Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 
 

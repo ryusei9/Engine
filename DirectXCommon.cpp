@@ -14,6 +14,8 @@
 #pragma comment(lib,"dxgi.lib")
 
 using namespace Microsoft::WRL;
+
+const uint32_t DirectXCommon::kMaxSRVCount = 512;
 void DirectXCommon::Initialize(WinApp* winApp)
 {
 	// FPS固定初期化
@@ -236,7 +238,7 @@ void DirectXCommon::DescriptorHeap()
 	rtvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
 
 	// ディスクリプタの数は128。SRVはshader内で触るものなので、shaderVisibleはtrue
-	srvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
+	srvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
 
 	// DSV用のヒープでディスクリプタの数は1。DSVはShader内で触るものではないので、ShaderVisibleはfalse
 	dsvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
@@ -680,7 +682,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateBufferResource(size_
 	return resource;
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, const DirectX::TexMetadata& metadata)
+Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateTextureResource(const DirectX::TexMetadata& metadata)
 {
 	// metadataを基にResourceの設定
 	D3D12_RESOURCE_DESC resourceDesc{};
@@ -704,9 +706,11 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateTextureResource(Micr
 	// 細かい設定を行う
 	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 	// WriteBackポリシーでCPUアクセス可能
-	heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
+	// UNKNOWNを設定
+	heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 	// プロセッサの近くに配置
-	heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
+	// UNKNOWNを設定
+	heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 
 	// Resourceを生成する
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
@@ -816,4 +820,47 @@ DirectX::ScratchImage DirectXCommon::LoadTexture(const std::string& filePath)
 
 	// ミップマップ付きのデータを渡す
 	return mipImages;
+}
+
+void DirectXCommon::SyncCPUWithGPU()
+{
+	HRESULT hr;
+	hr = commandList->Close();
+	assert(SUCCEEDED(hr));
+
+
+
+		//GPUにコマンドリストの実行行わせる
+		ID3D12CommandList * commandLists[] = { commandList.Get() };
+	commandQueue->ExecuteCommandLists(1, commandLists);
+
+
+
+		fenceValue++;
+
+
+
+		//GPUがここまでたどり着いた時に、Fenceの値を指定した値に代入するようにSignalをおくる
+		commandQueue->Signal(fence.Get(), fenceValue);
+
+
+
+		if (fence->GetCompletedValue() < fenceValue) {
+			//
+			fence->SetEventOnCompletion(fenceValue, fenceEvent);
+			//イベント待つ
+			WaitForSingleObject(fenceEvent, INFINITE);
+		}
+
+	//FPS固定更新
+	//UpdateFixFPS();
+
+		//次のフレーム用のコマンドリストを準備
+		hr = commandAllocator->Reset();
+	assert(SUCCEEDED(hr));
+
+
+		hr = commandList->Reset(commandAllocator.Get(), nullptr);
+	assert(SUCCEEDED(hr));
+
 }

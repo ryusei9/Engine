@@ -87,7 +87,7 @@ public: // メンバ関数
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
 
 	// DirectX12のTextureResourceを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, const DirectX::TexMetadata& metadata);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(const DirectX::TexMetadata& metadata);
 
 	// TextureResourceにデータを転送する
 	Microsoft::WRL::ComPtr <ID3D12Resource> UploadTextureData(const Microsoft::WRL::ComPtr<ID3D12Resource>& texture, const DirectX::ScratchImage& mipImages);
@@ -99,6 +99,8 @@ public: // メンバ関数
 	void initializeFixFPS();
 	// FPS固定更新
 	void UpdateFixFPS();
+	// CPUとGPUの同期を待つ
+	void SyncCPUWithGPU();
 
 	// 記録時間
 	std::chrono::steady_clock::time_point reference_;
@@ -129,6 +131,9 @@ public: // メンバ関数
 	D3D12_CPU_DESCRIPTOR_HANDLE(&GetRtvHandles())[2] {return rtvHandles; }
 
 	UINT GetBackBufferIndex() { return backBufferIndex; }
+
+	// 最大SRV数(最大テクスチャ枚数)
+	static const uint32_t kMaxSRVCount;
 
 private:
 	// 関数
@@ -211,5 +216,6 @@ private:
 
 	UINT backBufferIndex;
 
+	
 };
 

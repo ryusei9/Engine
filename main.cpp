@@ -31,6 +31,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #include "VertexData.h"
 #include "MaterialData.h"
 #include "ModelData.h"
+#include "TextureManager.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -710,7 +711,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dxCommon = new DirectXCommon();
 	dxCommon->Initialize(winApp);
 
-	
+	// テクスチャマネージャの初期化
+	TextureManager::GetInstance()->Initialize(dxCommon);
+
+	// テクスチャを事前にロード
+	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
+	TextureManager::GetInstance()->LoadTexture("resources/monsterBall.png");
 	////////////////////////
 	// input
 	////////////////////////
@@ -853,53 +859,53 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// Textureを読む
 	//////////////////////////
 	// Textureを読んで転送する
-	DirectX::ScratchImage mipImages[2];
-	mipImages[0] = LoadTexture("resources/uvChecker.png");
-	const DirectX::TexMetadata& metadata = mipImages[0].GetMetadata();
-	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = CreateTextureResource(dxCommon->GetDevice(), metadata);
-	UploadTextureData(textureResource.Get(), mipImages[0]);
+	//DirectX::ScratchImage mipImages[2];
+	//mipImages[0] = LoadTexture("resources/uvChecker.png");
+	//const DirectX::TexMetadata& metadata = mipImages[0].GetMetadata();
+	//Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = CreateTextureResource(dxCommon->GetDevice(), metadata);
+	//UploadTextureData(textureResource.Get(), mipImages[0]);
 
-	// 2枚目のTextureを読んで転送する
-	mipImages[1] = LoadTexture(modelData.material.textureFilePath);
-	const DirectX::TexMetadata& metadata2 = mipImages[1].GetMetadata();
-	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource2 = CreateTextureResource(dxCommon->GetDevice(), metadata2);
-	UploadTextureData(textureResource2.Get(), mipImages[1]);
+	//// 2枚目のTextureを読んで転送する
+	//mipImages[1] = LoadTexture(modelData.material.textureFilePath);
+	//const DirectX::TexMetadata& metadata2 = mipImages[1].GetMetadata();
+	//Microsoft::WRL::ComPtr<ID3D12Resource> textureResource2 = CreateTextureResource(dxCommon->GetDevice(), metadata2);
+	//UploadTextureData(textureResource2.Get(), mipImages[1]);
 
-	//////////////////////////////////
-	// ShaderResourceViewを作る
-	//////////////////////////////////
-	// metadataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = metadata.format;
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	// 2Dテクスチャ
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
+	////////////////////////////////////
+	//// ShaderResourceViewを作る
+	////////////////////////////////////
+	//// metadataを基にSRVの設定
+	//D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	//srvDesc.Format = metadata.format;
+	//srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	//// 2Dテクスチャ
+	//srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	//srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
 
-	// SRVを作成するDescriptorHeapの場所を決める
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(dxCommon->GetSRVDescriptorHeap().Get(), dxCommon->GetDescriptorSizeSRV(), 1);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(dxCommon->GetSRVDescriptorHeap().Get(), dxCommon->GetDescriptorSizeSRV(), 1);
-	// 先頭はImGuiが使っているのでその次を使う
-	/*textureSrvHandleCPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	textureSrvHandleGPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);*/
+	//// SRVを作成するDescriptorHeapの場所を決める
+	//D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = GetCPUDescriptorHandle(dxCommon->GetSRVDescriptorHeap().Get(), dxCommon->GetDescriptorSizeSRV(), 1);
+	//D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = GetGPUDescriptorHandle(dxCommon->GetSRVDescriptorHeap().Get(), dxCommon->GetDescriptorSizeSRV(), 1);
+	//// 先頭はImGuiが使っているのでその次を使う
+	///*textureSrvHandleCPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	//textureSrvHandleGPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);*/
 
-	// SRVの生成
-	dxCommon->GetDevice()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
+	//// SRVの生成
+	//dxCommon->GetDevice()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
 
-	// metadata2を基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
-	srvDesc2.Format = metadata2.format;
-	srvDesc2.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	// 2Dテクスチャ
-	srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc2.Texture2D.MipLevels = UINT(metadata2.mipLevels);
+	//// metadata2を基にSRVの設定
+	//D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
+	//srvDesc2.Format = metadata2.format;
+	//srvDesc2.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	//// 2Dテクスチャ
+	//srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	//srvDesc2.Texture2D.MipLevels = UINT(metadata2.mipLevels);
 
-	// SRVを作成するDescriptorHeapの場所を決める
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = GetCPUDescriptorHandle(dxCommon->GetSRVDescriptorHeap().Get(), dxCommon->GetDescriptorSizeSRV(), 2);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = GetGPUDescriptorHandle(dxCommon->GetSRVDescriptorHeap().Get(), dxCommon->GetDescriptorSizeSRV(), 2);
+	//// SRVを作成するDescriptorHeapの場所を決める
+	//D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = GetCPUDescriptorHandle(dxCommon->GetSRVDescriptorHeap().Get(), dxCommon->GetDescriptorSizeSRV(), 2);
+	//D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = GetGPUDescriptorHandle(dxCommon->GetSRVDescriptorHeap().Get(), dxCommon->GetDescriptorSizeSRV(), 2);
 
-	// SRVの生成
-	dxCommon->GetDevice()->CreateShaderResourceView(textureResource2.Get(), &srvDesc2, textureSrvHandleCPU2);
+	//// SRVの生成
+	//dxCommon->GetDevice()->CreateShaderResourceView(textureResource2.Get(), &srvDesc2, textureSrvHandleCPU2);
 
 	// Transform変数を作る
 	Transform transform{
@@ -928,9 +934,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	std::vector<Sprite*> sprites;
 	for (uint32_t i = 0; i < 5; ++i) {
-		Sprite* sprite = new Sprite();
-		sprite->Initialize(spriteCommon, dxCommon);
-		sprites.push_back(sprite);
+		if (i < 4) {
+			Sprite* sprite = new Sprite();
+			sprite->Initialize(spriteCommon, dxCommon, "resources/uvChecker.png");
+			sprites.push_back(sprite);
+		} else {
+			Sprite* sprite = new Sprite();
+			sprite->Initialize(spriteCommon, dxCommon, "resources/monsterBall.png");
+			sprites.push_back(sprite);
+		}
 	}
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
@@ -1072,7 +1084,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//// 描画
 		//dxCommon->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0,0);
 		for (auto& sprite : sprites) {
-			sprite->Draw(textureSrvHandleGPU);
+			sprite->Draw();
 		}
 		dxCommon->PostDraw();
 		
@@ -1094,6 +1106,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	CloseHandle(dxCommon->GetFenceEvent());
 	delete dxCommon;
+
+	// テクスチャマネージャの終了
+	TextureManager::GetInstance()->Finalize();
 
 	// ImGuiの終了処理
 	ImGui_ImplDX12_Shutdown();

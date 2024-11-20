@@ -6,6 +6,7 @@
 #include "ModelData.h"
 #include "Matrix4x4.h"
 #include "MakeIdentity4x4.h"
+#include "TextureManager.h"
 // 前方宣言
 class SpriteCommon;
 
@@ -30,12 +31,12 @@ class Sprite
 {
 public:
 	// 初期化
-	void Initialize(SpriteCommon* spriteCommon,DirectXCommon* dxCommon);
+	void Initialize(SpriteCommon* spriteCommon,DirectXCommon* dxCommon,std::string textureFilePath);
 
 	// 更新
 	void Update();
 
-	void Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU);
+	void Draw();
 
 	// getter
 	const Vector2& GetPosition() const { return position; }
@@ -91,6 +92,8 @@ private:
 	// スプライト個々のサイズ
 	Vector2 size = { 640.0f,360.0f };
 
+	// テクスチャ番号
+	uint32_t textureIndex = 0;
 };
 
 

@@ -6,10 +6,11 @@
 #include "Multiply.h"
 #include "MakeOrthographicMatrix.h"
 
-void Sprite::Initialize(SpriteCommon* spriteCommon, DirectXCommon* dxCommon)
+void Sprite::Initialize(SpriteCommon* spriteCommon, DirectXCommon* dxCommon, std::string textureFilePath)
 {
 	spriteCommon_ = spriteCommon;
 	dxCommon_ = dxCommon;
+	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
 	CreateVertexData();
 	CreateMaterialData();
 	CreateWVPData();
@@ -51,7 +52,7 @@ void Sprite::Update()
 	transformationMatrixData->World = worldMatrix;
 }
 
-void Sprite::Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
+void Sprite::Draw()
 {
 	// VBVを設定
 	dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
@@ -64,7 +65,7 @@ void Sprite::Draw(D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU)
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
 	// Spriteを常にuvCheckerにする
-	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex));
 	// 描画
 	dxCommon_->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }

@@ -68,6 +68,15 @@ void TextureManager::LoadTexture(const std::string& filePath)
 	dxCommon_->SyncCPUWithGPU();
 }
 
+const DirectX::TexMetadata& TextureManager::GetMetaData(uint32_t textureIndex)
+{
+	// 範囲外指定違反チェック
+	assert(textureIndex < textureDatas.size());
+
+	TextureData& textureData = textureDatas[textureIndex];
+	return textureData.metadata;
+}
+
 uint32_t TextureManager::GetTextureIndexByFilePath(const std::string& filePath)
 {
 	// 読み込み済みテクスチャを検索

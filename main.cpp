@@ -1014,6 +1014,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat2("sprites.scale", &size.x);
 
 			sprites[i]->SetSize({100.0f,100.0f});
+
+			// 反転X
+			bool isFlipX = sprites[i]->GetIsFlipX();
+			ImGui::Checkbox("sprites.isFlipX", &isFlipX);
+
+			sprites[i]->SetIsFlipX(isFlipX);
+
+			bool isFlipY = sprites[i]->GetIsFlipY();
+			ImGui::Checkbox("sprites.isFlipY", &isFlipY);
+
+			sprites[i]->SetIsFlipY(isFlipY);
 		}
 		Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
 		uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));

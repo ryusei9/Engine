@@ -738,7 +738,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Object3dCommon* object3dCommon = nullptr;
 	// 3Dオブジェクト共通部の初期化
 	object3dCommon = new Object3dCommon;
-	object3dCommon->Initialize();
+	object3dCommon->Initialize(dxCommon);
 
 
 
@@ -1047,6 +1047,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// 描画前処理
 		dxCommon->PreDraw();
 
+		// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
+		object3dCommon->DrawSettings();
+		// 全てのobject3d個々の描画
+		
 		// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
 		spriteCommon->DrawSettings();
 		// RootSignatureを設定

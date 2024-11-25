@@ -32,6 +32,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #include "MaterialData.h"
 #include "ModelData.h"
 #include "TextureManager.h"
+#include "Object3dCommon.h"
+#include "Object3d.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -733,7 +735,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	spriteCommon = new SpriteCommon;
 	spriteCommon->Initialize(dxCommon);
 
-	
+	Object3dCommon* object3dCommon = nullptr;
+	// 3Dオブジェクト共通部の初期化
+	object3dCommon = new Object3dCommon;
+	object3dCommon->Initialize();
 
 
 
@@ -944,6 +949,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			sprites.push_back(sprite);
 		}
 	}
+
+	Object3d* object3d = new Object3d();
+	object3d->Initialize();
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
 	while (true) {
@@ -1106,11 +1114,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 解放処理
 	////////////////////
 	// 入力解放
+	delete object3d;
 	delete input;
 	delete spriteCommon;
 	for (auto& sprite : sprites) {
 		delete sprite;
 	}
+	delete object3dCommon;
 	// WindowsAPIの終了処理
 	winApp->Finalize();
 	delete winApp;

@@ -57,6 +57,7 @@ public:
 
 	const Vector2& GetTextureSize()const { return textureSize; }
 
+
 	// setter
 	void SetPosition(const Vector2& position) { this->position = position; }
 

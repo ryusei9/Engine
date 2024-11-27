@@ -115,6 +115,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="MakeRotateXMatrix.cpp" />
     <ClCompile Include="MakeRotateYMatrix.cpp" />
     <ClCompile Include="MakeRotateZMatrix.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="ModelCommon.cpp" />
     <ClCompile Include="Multiply.cpp" />
     <ClCompile Include="Normalize.cpp" />
     <ClCompile Include="Object3d.cpp" />
@@ -151,6 +153,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MaterialData.h" />
     <ClInclude Include="Matrix3x3.h" />
     <ClInclude Include="Matrix4x4.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="ModelCommon.h" />
     <ClInclude Include="ModelData.h" />
     <ClInclude Include="Multiply.h" />
     <ClInclude Include="Normalize.h" />

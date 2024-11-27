@@ -34,6 +34,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #include "TextureManager.h"
 #include "Object3dCommon.h"
 #include "Object3d.h"
+#include "ModelCommon.h"
+#include "Model.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -590,7 +592,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 変数から型を推論してくれる
 	Log(std::format("str0:{},str1:{}\n", str0, str1));
 
-	
+
 
 	// ポインタ
 	DirectXCommon* dxCommon = nullptr;
@@ -626,6 +628,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3dCommon = new Object3dCommon;
 	object3dCommon->Initialize(dxCommon);
 
+	ModelCommon* modelCommon = nullptr;
+	// 3Dモデル共通部の初期化
+	modelCommon = new ModelCommon;
+	modelCommon->Initialzie(dxCommon);
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
@@ -657,7 +663,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 #endif
 
-	
+
 	// Transform変数を作る
 	Transform transform{
 		{1.0f,1.0f,1.0f},
@@ -671,7 +677,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{0.0f,0.0f,-10.0f}
 	};
 
-	
+
 	Transform uvTransformSprite{
 		{1.0f,1.0f,1.0f},
 		{0.0f,0.0f,0.0f},
@@ -680,7 +686,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	bool useMonsterBall = true;
 
-	
+
 
 	std::vector<Sprite*> sprites;
 	for (uint32_t i = 0; i < 5; ++i) {
@@ -688,15 +694,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Sprite* sprite = new Sprite();
 			sprite->Initialize(spriteCommon, dxCommon, "resources/uvChecker.png");
 			sprites.push_back(sprite);
-		} else {
+		}
+		else {
 			Sprite* sprite = new Sprite();
 			sprite->Initialize(spriteCommon, dxCommon, "resources/monsterBall.png");
 			sprites.push_back(sprite);
 		}
 	}
 
-	Object3d* object3d = new Object3d();
-	object3d->Initialize(object3dCommon);
+	
+	
+	/*Model* model = new Model();
+	model->Initialize(modelCommon);*/
+	std::vector<Object3d*> object3ds;
+	std::vector<Model*> models;
+	for (uint32_t i = 0; i < 2; ++i) {
+		Object3d* object3d = new Object3d();
+		object3d->Initialize(object3dCommon);
+		object3ds.push_back(object3d);
+		Model* model = new Model();
+		model->Initialize(modelCommon);
+		models.push_back(model);
+		object3d->SetModel(model);
+	}
+
+	
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
 	while (true) {
@@ -724,7 +746,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 		ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);*/
 
-		
+
 		// ゲームの処理
 		// 入力の更新
 		input->Update();
@@ -746,7 +768,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// 座標を変更する
 			ImGui::DragFloat2("sprite.translate", &position.x);
 			// 変更を反映する
-			sprites[i]->SetPosition({200.0f * i});
+			sprites[i]->SetPosition({ 200.0f * i });
 
 			// 角度を変更させるテスト
 			float rotation = sprites[i]->GetRotation();
@@ -766,7 +788,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Vector2 size = sprites[i]->GetSize();
 			ImGui::DragFloat2("sprites.scale", &size.x);
 
-			sprites[i]->SetSize({100.0f,100.0f});
+			sprites[i]->SetSize({ 100.0f,100.0f });
 
 			// 反転X
 			bool isFlipX = sprites[i]->GetIsFlipX();
@@ -779,7 +801,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			sprites[i]->SetIsFlipY(isFlipY);
 		}
-		object3d->Update();
+		
+		for (uint32_t i = 0; i < object3ds.size();++i) {
+			object3ds[i]->Update();
+			// 現在の座標を変数で受ける
+			Vector3 position = object3ds[i]->GetTranslate();
+
+			// 座標を変更する
+			ImGui::DragFloat3("models.translate", &position.x);
+			// 変更を反映する
+			object3ds[i]->SetTranslate({  3.0f * i });
+
+			// 角度を変更させるテスト
+			Vector3 rotation = object3ds[i]->GetRotate();
+
+			ImGui::DragFloat3("models.rotation", &rotation.x, 0.01f);
+
+			object3ds[i]->SetRotate(rotation);
+
+			// 拡縮を変更するテスト
+			Vector3 scale = object3ds[i]->GetScale();
+
+			ImGui::DragFloat3("models.scale", &scale.x);
+
+			object3ds[i]->SetScale(scale);
+		}
 
 		ImGui::Render();
 		/////////////////////
@@ -792,29 +838,37 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
 		object3dCommon->DrawSettings();
 		// 全てのobject3d個々の描画
-		object3d->Draw();
+		for (auto& object3d : object3ds) {
+			object3d->Draw();
+		}
 		// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
 		spriteCommon->DrawSettings();
-		
+
 		for (auto& sprite : sprites) {
 			//sprite->Draw();
 		}
 		dxCommon->PostDraw();
-		
+
 
 	}
-	
+
 	////////////////////
 	// 解放処理
 	////////////////////
 	// 入力解放
-	delete object3d;
+	for (auto& model : models) {
+		delete model;
+	}
+	for (auto& object3d : object3ds) {
+		delete object3d;
+	}
 	delete input;
 	delete spriteCommon;
 	for (auto& sprite : sprites) {
 		delete sprite;
 	}
 	delete object3dCommon;
+	delete modelCommon;
 	// WindowsAPIの終了処理
 	winApp->Finalize();
 	delete winApp;

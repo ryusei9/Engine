@@ -36,6 +36,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #include "Object3d.h"
 #include "ModelCommon.h"
 #include "Model.h"
+#include "ModelManager.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -628,10 +629,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3dCommon = new Object3dCommon;
 	object3dCommon->Initialize(dxCommon);
 
-	ModelCommon* modelCommon = nullptr;
+	//ModelCommon* modelCommon = nullptr;
 	// 3Dモデル共通部の初期化
-	modelCommon = new ModelCommon;
-	modelCommon->Initialzie(dxCommon);
+	//modelCommon = new ModelCommon;
+	//modelCommon->Initialzie(dxCommon);
+
+	// 3Dモデルマネージャの初期化
+	ModelManager::GetInstance()->Initialize(dxCommon);
+
+	// .objファイルからモデルを読み込む
+	ModelManager::GetInstance()->LoadModel("plane.obj");
+	ModelManager::GetInstance()->LoadModel("axis.obj");
+	
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
@@ -707,17 +716,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	/*Model* model = new Model();
 	model->Initialize(modelCommon);*/
 	std::vector<Object3d*> object3ds;
-	std::vector<Model*> models;
+	//std::vector<Model*> models;
 	for (uint32_t i = 0; i < 2; ++i) {
 		Object3d* object3d = new Object3d();
 		object3d->Initialize(object3dCommon);
 		object3ds.push_back(object3d);
-		Model* model = new Model();
-		model->Initialize(modelCommon);
-		models.push_back(model);
-		object3d->SetModel(model);
+		//Model* model = new Model();
+		//model->Initialize(modelCommon);
+		/*models.push_back(model);
+		object3d->SetModel(model);*/
 	}
-
+	// 初期化済みの3Dオブジェクトにモデルを紐づける
+	object3ds[0]->SetModel("plane.obj");
+	object3ds[1]->SetModel("axis.obj");
 	
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
@@ -803,28 +814,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		
 		for (uint32_t i = 0; i < object3ds.size();++i) {
-			object3ds[i]->Update();
+		object3ds[i]->Update();
 			// 現在の座標を変数で受ける
-			Vector3 position = object3ds[i]->GetTranslate();
-
+			Vector3 position[2];
+			position[i] = object3ds[i]->GetTranslate();
 			// 座標を変更する
-			ImGui::DragFloat3("models.translate", &position.x);
+			ImGui::DragFloat3("planeModel.translate", &position[0].x,0.01f);
+			ImGui::DragFloat3("axisModel.translate", &position[1].x, 0.01f);
 			// 変更を反映する
-			object3ds[i]->SetTranslate({  3.0f * i });
+			position[0].x = -2.0f;
+			position[1].x = 2.0f;
+			object3ds[i]->SetTranslate(position[i]);
 
 			// 角度を変更させるテスト
-			Vector3 rotation = object3ds[i]->GetRotate();
+			Vector3 rotation[2];
+			rotation[i] = object3ds[i]->GetRotate();
 
-			ImGui::DragFloat3("models.rotation", &rotation.x, 0.01f);
-
-			object3ds[i]->SetRotate(rotation);
-
+			ImGui::DragFloat3("planeModel.rotation", &rotation[0].x, 0.01f);
+			ImGui::DragFloat3("axisModel.rotation", &rotation[1].x, 0.01f);
+			rotation[0].y += 0.01f;
+			rotation[1].z += 0.01f;
+			object3ds[i]->SetRotate(rotation[i]);
+			
 			// 拡縮を変更するテスト
-			Vector3 scale = object3ds[i]->GetScale();
-
-			ImGui::DragFloat3("models.scale", &scale.x);
-
-			object3ds[i]->SetScale(scale);
+			Vector3 scale[2];
+			scale[i] = object3ds[i]->GetScale();
+			ImGui::DragFloat3("planeModel.scale", &scale[0].x, 0.01f);
+			ImGui::DragFloat3("axisModel.scale", &scale[1].x, 0.01f);
+			object3ds[i]->SetScale(scale[i]);
 		}
 
 		ImGui::Render();
@@ -856,9 +873,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 解放処理
 	////////////////////
 	// 入力解放
-	for (auto& model : models) {
+	/*for (auto& model : models) {
 		delete model;
-	}
+	}*/
 	for (auto& object3d : object3ds) {
 		delete object3d;
 	}
@@ -868,7 +885,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		delete sprite;
 	}
 	delete object3dCommon;
-	delete modelCommon;
+	//delete modelCommon;
 	// WindowsAPIの終了処理
 	winApp->Finalize();
 	delete winApp;
@@ -878,6 +895,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// テクスチャマネージャの終了
 	TextureManager::GetInstance()->Finalize();
+	// 3Dモデルマネージャの終了
+	ModelManager::GetInstance()->Finalize();
 
 	// ImGuiの終了処理
 	ImGui_ImplDX12_Shutdown();

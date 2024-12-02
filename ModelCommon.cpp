@@ -1,6 +1,6 @@
 #include "ModelCommon.h"
 
-void ModelCommon::Initialzie(DirectXCommon* dxCommon)
+void ModelCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;
 }

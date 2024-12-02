@@ -77,6 +77,7 @@ public:
 
 	// セッター
 	void SetModel(Model* model) { this->model = model; }
+	void SetModel(const std::string& filePath);
 	void SetScale(const Vector3& scale) { transform.scale = scale; }
 	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
 	void SetTranslate(const Vector3& translate) { transform.translate = translate; }

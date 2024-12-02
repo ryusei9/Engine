@@ -2,11 +2,11 @@
 #include "MakeIdentity4x4.h"
 #include "TextureManager.h"
 
-void Model::Initialize(ModelCommon* modelCommon)
+void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename)
 {
 	modelCommon_ = modelCommon;
 	// モデル読み込み
-	modelData = LoadObjFile("resources", "plane.obj");
+	modelData = LoadObjFile(directorypath,filename);
 
 	CreateVertexData();
 	CreateMaterialData();
@@ -191,12 +191,12 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Model::CreateBufferResource(Microsoft::WR
 
 void Model::CreateVertexData()
 {
-	vertexResource = CreateBufferResource(modelCommon_->GetDxCommon()->GetDevice(), sizeof(VertexData) * 6);
+	vertexResource = CreateBufferResource(modelCommon_->GetDxCommon()->GetDevice(), sizeof(VertexData) * static_cast<UINT>(modelData.vertices.size()));
 
 	// リソースの先頭のアドレスから使う
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 	// 使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
+	vertexBufferView.SizeInBytes = sizeof(VertexData) * static_cast<UINT>(modelData.vertices.size());
 	// 1頂点当たりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 

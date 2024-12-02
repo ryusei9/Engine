@@ -4,7 +4,7 @@ class ModelCommon
 {
 public:
 	// 初期化
-	void Initialzie(DirectXCommon* dxCommon);
+	void Initialize(DirectXCommon* dxCommon);
 
 	/// <summary>
 	/// ゲッター

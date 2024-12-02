@@ -8,6 +8,7 @@
 #include "Multiply.h"
 #include "Inverse.h"
 #include "MakePerspectiveFovMatrix.h"
+#include "ModelManager.h"
 
 void Object3d::Initialize(Object3dCommon* object3dCommon)
 {
@@ -178,6 +179,12 @@ Object3d::ModelData Object3d::LoadObjFile(const std::string& directoryPath, cons
 		}
 	}
 	return modelData;
+}
+
+void Object3d::SetModel(const std::string& filePath)
+{
+	// モデルを検索してセットする
+	model = ModelManager::GetInstance()->FindModel(filePath);
 }
 
 Microsoft::WRL::ComPtr<ID3D12Resource> Object3d::CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes)

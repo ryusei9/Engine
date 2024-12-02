@@ -44,6 +44,14 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -55,6 +63,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -81,6 +90,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -95,6 +105,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DierctXGame\engine\base\D3DresourceLeakChecker.cpp" />
+    <ClCompile Include="DierctXGame\engine\base\DirectXCommon.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
     <ClCompile Include="externals\imgui\imgui_draw.cpp" />
@@ -102,9 +114,34 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="DierctXGame\engine\base\Input.cpp" />
+    <ClCompile Include="DierctXGame\engine\io\Inverse.cpp" />
+    <ClCompile Include="DierctXGame\engine\base\Logger.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="DierctXGame\engine\io\MakeAffineMatrix.cpp" />
+    <ClCompile Include="DierctXGame\engine\io\MakeIdentity4x4.cpp" />
+    <ClCompile Include="DierctXGame\engine\io\MakeOrthographicMatrix.cpp" />
+    <ClCompile Include="DierctXGame\engine\io\MakePerspectiveFovMatrix.cpp" />
+    <ClCompile Include="DierctXGame\engine\io\MakeRotateXMatrix.cpp" />
+    <ClCompile Include="DierctXGame\engine\io\MakeRotateYMatrix.cpp" />
+    <ClCompile Include="DierctXGame\engine\io\MakeRotateZMatrix.cpp" />
+    <ClCompile Include="DierctXGame\engine\3d\Model.cpp" />
+    <ClCompile Include="DierctXGame\engine\3d\ModelCommon.cpp" />
+    <ClCompile Include="DierctXGame\engine\3d\ModelManager.cpp" />
+    <ClCompile Include="DierctXGame\engine\io\Multiply.cpp" />
+    <ClCompile Include="DierctXGame\engine\io\Normalize.cpp" />
+    <ClCompile Include="DierctXGame\engine\3d\Object3d.cpp" />
+    <ClCompile Include="DierctXGame\engine\3d\Object3dCommon.cpp" />
+    <ClCompile Include="DierctXGame\engine\2d\Sprite.cpp" />
+    <ClCompile Include="DierctXGame\engine\2d\SpriteCommon.cpp" />
+    <ClCompile Include="DierctXGame\engine\base\StringUtility.cpp" />
+    <ClCompile Include="DierctXGame\engine\base\TextureManager.cpp" />
+    <ClCompile Include="DierctXGame\engine\base\WinApp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DierctXGame\engine\base\D3DresourceLeakChecker.h" />
+    <ClInclude Include="DierctXGame\engine\io\DirectionalLight.h" />
+    <ClInclude Include="DierctXGame\engine\base\DirectXCommon.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
@@ -113,6 +150,39 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_rectpack.h" />
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
+    <ClInclude Include="DierctXGame\engine\base\Input.h" />
+    <ClInclude Include="DierctXGame\engine\io\Inverse.h" />
+    <ClInclude Include="DierctXGame\engine\base\Logger.h" />
+    <ClInclude Include="DierctXGame\engine\io\MakeAffineMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\io\MakeIdentity4x4.h" />
+    <ClInclude Include="DierctXGame\engine\io\MakeOrthographicMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\io\MakePerspectiveFovMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\io\MakeRotateXMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\io\MakeRotateYMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\io\MakeRotateZMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\io\Material.h" />
+    <ClInclude Include="DierctXGame\engine\io\MaterialData.h" />
+    <ClInclude Include="DierctXGame\engine\io\Matrix3x3.h" />
+    <ClInclude Include="DierctXGame\engine\io\Matrix4x4.h" />
+    <ClInclude Include="DierctXGame\engine\3d\Model.h" />
+    <ClInclude Include="DierctXGame\engine\3d\ModelCommon.h" />
+    <ClInclude Include="DierctXGame\engine\io\ModelData.h" />
+    <ClInclude Include="DierctXGame\engine\3d\ModelManager.h" />
+    <ClInclude Include="DierctXGame\engine\io\Multiply.h" />
+    <ClInclude Include="DierctXGame\engine\io\Normalize.h" />
+    <ClInclude Include="DierctXGame\engine\3d\Object3d.h" />
+    <ClInclude Include="DierctXGame\engine\3d\Object3dCommon.h" />
+    <ClInclude Include="DierctXGame\engine\2d\Sprite.h" />
+    <ClInclude Include="DierctXGame\engine\2d\SpriteCommon.h" />
+    <ClInclude Include="DierctXGame\engine\base\StringUtility.h" />
+    <ClInclude Include="DierctXGame\engine\base\TextureManager.h" />
+    <ClInclude Include="DierctXGame\engine\io\Transform.h" />
+    <ClInclude Include="DierctXGame\engine\io\TransformationMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\io\Vector2.h" />
+    <ClInclude Include="DierctXGame\engine\io\Vector3.h" />
+    <ClInclude Include="DierctXGame\engine\io\Vector4.h" />
+    <ClInclude Include="DierctXGame\engine\io\VertexData.h" />
+    <ClInclude Include="DierctXGame\engine\base\WinApp.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

@@ -12,7 +12,7 @@ env:
 
 jobs:
     build:
-        rus-on: windows-2022
+        runs-on: windows-2022
         
         steps:
             - name: Checkout

@@ -37,6 +37,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #include "ModelCommon.h"
 #include "Model.h"
 #include "ModelManager.h"
+#include "Camera.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -110,14 +111,14 @@ private:
 Matrix4x4 MakeRotateXMatrix(float radian);
 Matrix4x4 MakeRotateYMatrix(float radian);
 Matrix4x4 MakeRotateZMatrix(float radian);
-Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
+//Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3 translate);
 
 
 // アフィン変換
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3 translate) {
 	Matrix4x4 resultAffineMatrix = {};
-	Matrix4x4 resultRotateXYZMatrix = Multiply(MakeRotateXMatrix(rotate.x), Multiply(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
+	Matrix4x4 resultRotateXYZMatrix = Multiply::Multiply(MakeRotateXMatrix(rotate.x), Multiply::Multiply(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
 	resultAffineMatrix.m[0][0] = scale.x * resultRotateXYZMatrix.m[0][0];
 	resultAffineMatrix.m[0][1] = scale.x * resultRotateXYZMatrix.m[0][1];
 	resultAffineMatrix.m[0][2] = scale.x * resultRotateXYZMatrix.m[0][2];
@@ -170,27 +171,6 @@ Matrix4x4 MakeRotateZMatrix(float radian) {
 	return resultRotateZMatrix;
 }
 
-// 行列の積
-Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2) {
-	Matrix4x4 resultMultiply = {};
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			resultMultiply.m[i][j] = m1.m[i][0] * m2.m[0][j] + m1.m[i][1] * m2.m[1][j] + m1.m[i][2] * m2.m[2][j] + m1.m[i][3] * m2.m[3][j];
-		}
-	}
-	return resultMultiply;
-}
-
-// 透視投影行列
-Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip) {
-	Matrix4x4 resultPerspectiveFovMatrix = {};
-	resultPerspectiveFovMatrix.m[0][0] = (1 / aspectRatio) * (1 / std::tan(fovY / 2));
-	resultPerspectiveFovMatrix.m[1][1] = 1 / std::tan(fovY / 2);
-	resultPerspectiveFovMatrix.m[2][2] = farClip / (farClip - nearClip);
-	resultPerspectiveFovMatrix.m[2][3] = 1;
-	resultPerspectiveFovMatrix.m[3][2] = -nearClip * farClip / (farClip - nearClip);
-	return resultPerspectiveFovMatrix;
-}
 
 // 逆行列
 Matrix4x4 Inverse(const Matrix4x4& m) {
@@ -629,10 +609,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3dCommon = new Object3dCommon;
 	object3dCommon->Initialize(dxCommon);
 
-	//ModelCommon* modelCommon = nullptr;
-	// 3Dモデル共通部の初期化
-	//modelCommon = new ModelCommon;
-	//modelCommon->Initialzie(dxCommon);
 
 	// 3Dモデルマネージャの初期化
 	ModelManager::GetInstance()->Initialize(dxCommon);
@@ -641,6 +617,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
 	
+	Camera* camera = new Camera();
+	camera->SetRotate({ 0.0f,0.0f,0.0f });
+	camera->SetTranslate({ 0.0f,0.0f,-10.0f });
+	object3dCommon->SetDefaultCamera(camera);
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
@@ -762,12 +742,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// 入力の更新
 		input->Update();
 		// 操作
-		if (input->TriggerKey(DIK_RIGHTARROW)) {
-			cameraTransform.translate.x -= 1.0f;
+		if (input->PushKey(DIK_RIGHTARROW)) {
+			cameraTransform.translate.x -= 0.1f;
+			
 		}
 		if (input->PushKey(DIK_LEFTARROW)) {
-			cameraTransform.translate.x += 0.01f;
+			cameraTransform.translate.x += 0.1f;
 		}
+		camera->SetTranslate(cameraTransform.translate);
+		camera->Update();
 		//transform.rotate.y += 0.01f;
 		for (uint32_t i = 0; i < sprites.size();++i) {
 
@@ -844,6 +827,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			object3ds[i]->SetScale(scale[i]);
 		}
 
+		
+
 		ImGui::Render();
 		/////////////////////
 		//// コマンドをキック
@@ -862,7 +847,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		spriteCommon->DrawSettings();
 
 		for (auto& sprite : sprites) {
-			//sprite->Draw();
+			sprite->Draw();
 		}
 		dxCommon->PostDraw();
 

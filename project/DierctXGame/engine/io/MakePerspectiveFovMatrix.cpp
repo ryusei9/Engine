@@ -1,6 +1,7 @@
 #include "MakePerspectiveFovMatrix.h"
 #include <cmath>
-Matrix4x4 MakePerspectiveFovMatrix::MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip)
+
+Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip)
 {
 	Matrix4x4 resultPerspectiveFovMatrix = {};
 	resultPerspectiveFovMatrix.m[0][0] = (1 / aspectRatio) * (1 / std::tan(fovY / 2));

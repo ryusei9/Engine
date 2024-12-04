@@ -147,7 +147,7 @@
     <ClCompile Include="main.cpp">
       <Filter>ソース ファイル\application</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
+    <ClCompile Include="DierctXGame\engine\base\Camera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -284,7 +284,7 @@
     <ClInclude Include="DierctXGame\engine\io\TransformationMatrix.h">
       <Filter>ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
+    <ClInclude Include="DierctXGame\engine\base\Camera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

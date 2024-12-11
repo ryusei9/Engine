@@ -38,6 +38,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #include "Model.h"
 #include "ModelManager.h"
 #include "Camera.h"
+#include <DierctXGame/application/scene/GameScene.h>
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -550,9 +551,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// COMの初期化
 	CoInitializeEx(0, COINIT_MULTITHREADED);
 
-	// COMの初期化
-	//HRESULT hr;
-
 	// ポインタ
 	WinApp* winApp = nullptr;
 
@@ -579,7 +577,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	DirectXCommon* dxCommon = nullptr;
 
 	// DirectXの初期化
-	dxCommon = new DirectXCommon();
+	dxCommon = DirectXCommon::GetInstance();
 	dxCommon->Initialize(winApp);
 
 	// テクスチャマネージャの初期化
@@ -595,19 +593,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Input* input = nullptr;
 
 	// 入力の初期化
-	input = new Input();
+	input = Input::GetInstance();
 	input->Initialize(winApp);
-
-
-	SpriteCommon* spriteCommon = nullptr;
-	// スプライト共通部の初期化
-	spriteCommon = new SpriteCommon;
-	spriteCommon->Initialize(dxCommon);
-
-	Object3dCommon* object3dCommon = nullptr;
-	// 3Dオブジェクト共通部の初期化
-	object3dCommon = new Object3dCommon;
-	object3dCommon->Initialize(dxCommon);
 
 
 	// 3Dモデルマネージャの初期化
@@ -617,10 +604,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
 	
-	Camera* camera = new Camera();
-	camera->SetRotate({ 0.0f,0.0f,0.0f });
-	camera->SetTranslate({ 0.0f,0.0f,-10.0f });
-	object3dCommon->SetDefaultCamera(camera);
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
@@ -651,7 +634,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		infoQueue->Release();
 	}
 #endif
-
+	std::unique_ptr<GameScene> gameScene_ = std::make_unique<GameScene>();
+	gameScene_->Initialize();
 
 	// Transform変数を作る
 	Transform transform{
@@ -660,11 +644,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{0.0f,0.0f,0.0f}
 	};
 
-	Transform cameraTransform{
-		{1.0f,1.0f,1.0f},
-		{0.0f,0.0f,0.0f},
-		{0.0f,0.0f,-10.0f}
-	};
+
 
 
 	Transform uvTransformSprite{
@@ -673,42 +653,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{0.0f,0.0f,0.0f}
 	};
 
-	bool useMonsterBall = true;
-
-
-
-	std::vector<Sprite*> sprites;
-	for (uint32_t i = 0; i < 5; ++i) {
-		if (i < 4) {
-			Sprite* sprite = new Sprite();
-			sprite->Initialize(spriteCommon, dxCommon, "resources/uvChecker.png");
-			sprites.push_back(sprite);
-		}
-		else {
-			Sprite* sprite = new Sprite();
-			sprite->Initialize(spriteCommon, dxCommon, "resources/monsterBall.png");
-			sprites.push_back(sprite);
-		}
-	}
-
 	
-	
-	/*Model* model = new Model();
-	model->Initialize(modelCommon);*/
-	std::vector<Object3d*> object3ds;
-	//std::vector<Model*> models;
-	for (uint32_t i = 0; i < 2; ++i) {
-		Object3d* object3d = new Object3d();
-		object3d->Initialize(object3dCommon);
-		object3ds.push_back(object3d);
-		//Model* model = new Model();
-		//model->Initialize(modelCommon);
-		/*models.push_back(model);
-		object3d->SetModel(model);*/
-	}
-	// 初期化済みの3Dオブジェクトにモデルを紐づける
-	object3ds[0]->SetModel("plane.obj");
-	object3ds[1]->SetModel("axis.obj");
 	
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
@@ -737,118 +682,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 		ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);*/
 
-
-		// ゲームの処理
-		// 入力の更新
-		input->Update();
-		// 操作
-		if (input->PushKey(DIK_RIGHTARROW)) {
-			cameraTransform.translate.x -= 0.1f;
-			
-		}
-		if (input->PushKey(DIK_LEFTARROW)) {
-			cameraTransform.translate.x += 0.1f;
-		}
-		camera->SetTranslate(cameraTransform.translate);
-		camera->Update();
-		//transform.rotate.y += 0.01f;
-		for (uint32_t i = 0; i < sprites.size();++i) {
-
-			sprites[i]->Update();
-
-			// 現在の座標を変数で受ける
-			Vector2 position = sprites[i]->GetPosition();
-
-			// 座標を変更する
-			ImGui::DragFloat2("sprite.translate", &position.x);
-			// 変更を反映する
-			sprites[i]->SetPosition({ 200.0f * i });
-
-			// 角度を変更させるテスト
-			float rotation = sprites[i]->GetRotation();
-
-			ImGui::DragFloat("sprites.rotation", &rotation, 0.01f);
-
-			sprites[i]->SetRotation(rotation);
-
-			// 色を変化させるテスト
-			Vector4 color = sprites[i]->GetColor();
-
-			ImGui::ColorEdit3("sprites.color", &color.x);
-
-			sprites[i]->SetColor(color);
-
-			// サイズを変化させるテスト
-			Vector2 size = sprites[i]->GetSize();
-			ImGui::DragFloat2("sprites.scale", &size.x);
-
-			sprites[i]->SetSize({ 100.0f,100.0f });
-
-			// 反転X
-			bool isFlipX = sprites[i]->GetIsFlipX();
-			ImGui::Checkbox("sprites.isFlipX", &isFlipX);
-
-			sprites[i]->SetIsFlipX(isFlipX);
-
-			bool isFlipY = sprites[i]->GetIsFlipY();
-			ImGui::Checkbox("sprites.isFlipY", &isFlipY);
-
-			sprites[i]->SetIsFlipY(isFlipY);
-		}
-		
-		for (uint32_t i = 0; i < object3ds.size();++i) {
-		object3ds[i]->Update();
-			// 現在の座標を変数で受ける
-			Vector3 position[2];
-			position[i] = object3ds[i]->GetTranslate();
-			// 座標を変更する
-			ImGui::DragFloat3("planeModel.translate", &position[0].x,0.01f);
-			ImGui::DragFloat3("axisModel.translate", &position[1].x, 0.01f);
-			// 変更を反映する
-			position[0].x = -2.0f;
-			position[1].x = 2.0f;
-			object3ds[i]->SetTranslate(position[i]);
-
-			// 角度を変更させるテスト
-			Vector3 rotation[2];
-			rotation[i] = object3ds[i]->GetRotate();
-
-			ImGui::DragFloat3("planeModel.rotation", &rotation[0].x, 0.01f);
-			ImGui::DragFloat3("axisModel.rotation", &rotation[1].x, 0.01f);
-			rotation[0].y += 0.01f;
-			rotation[1].z += 0.01f;
-			object3ds[i]->SetRotate(rotation[i]);
-			
-			// 拡縮を変更するテスト
-			Vector3 scale[2];
-			scale[i] = object3ds[i]->GetScale();
-			ImGui::DragFloat3("planeModel.scale", &scale[0].x, 0.01f);
-			ImGui::DragFloat3("axisModel.scale", &scale[1].x, 0.01f);
-			object3ds[i]->SetScale(scale[i]);
-		}
-
-		
+		gameScene_->Update();
 
 		ImGui::Render();
 		/////////////////////
 		//// コマンドをキック
 		/////////////////////
-
+		
 		// 描画前処理
 		dxCommon->PreDraw();
 
-		// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
-		object3dCommon->DrawSettings();
-		// 全てのobject3d個々の描画
-		for (auto& object3d : object3ds) {
-			object3d->Draw();
-		}
-		// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
-		spriteCommon->DrawSettings();
-
-		for (auto& sprite : sprites) {
-			sprite->Draw();
-		}
+		gameScene_->Draw();
+		
 		dxCommon->PostDraw();
 
 
@@ -857,26 +702,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	////////////////////
 	// 解放処理
 	////////////////////
-	// 入力解放
-	/*for (auto& model : models) {
-		delete model;
-	}*/
-	for (auto& object3d : object3ds) {
-		delete object3d;
-	}
-	delete input;
-	delete spriteCommon;
-	for (auto& sprite : sprites) {
-		delete sprite;
-	}
-	delete object3dCommon;
-	//delete modelCommon;
+	
+	
 	// WindowsAPIの終了処理
 	winApp->Finalize();
 	delete winApp;
 
 	CloseHandle(dxCommon->GetFenceEvent());
-	delete dxCommon;
+	
 
 	// テクスチャマネージャの終了
 	TextureManager::GetInstance()->Finalize();

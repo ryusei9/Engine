@@ -38,6 +38,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #include "Model.h"
 #include "ModelManager.h"
 #include "Camera.h"
+#include <SrvManager.h>
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -582,8 +583,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dxCommon = new DirectXCommon();
 	dxCommon->Initialize(winApp);
 
+	// SRVマネージャの初期化
+	SrvManager* srvManager = nullptr;
+
+	srvManager = new SrvManager();
+	srvManager->Initialize(dxCommon);
+
 	// テクスチャマネージャの初期化
-	TextureManager::GetInstance()->Initialize(dxCommon);
+	TextureManager::GetInstance()->Initialize(dxCommon,srvManager);
 
 	// テクスチャを事前にロード
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
@@ -621,6 +628,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	camera->SetRotate({ 0.0f,0.0f,0.0f });
 	camera->SetTranslate({ 0.0f,0.0f,-10.0f });
 	object3dCommon->SetDefaultCamera(camera);
+
+	
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
@@ -760,38 +769,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Vector2 position = sprites[i]->GetPosition();
 
 			// 座標を変更する
-			ImGui::DragFloat2("sprite.translate", &position.x);
+			//ImGui::DragFloat2("sprite.translate", &position.x);
 			// 変更を反映する
 			sprites[i]->SetPosition({ 200.0f * i });
 
 			// 角度を変更させるテスト
 			float rotation = sprites[i]->GetRotation();
 
-			ImGui::DragFloat("sprites.rotation", &rotation, 0.01f);
+			//ImGui::DragFloat("sprites.rotation", &rotation, 0.01f);
 
 			sprites[i]->SetRotation(rotation);
 
 			// 色を変化させるテスト
 			Vector4 color = sprites[i]->GetColor();
 
-			ImGui::ColorEdit3("sprites.color", &color.x);
+			//ImGui::ColorEdit3("sprites.color", &color.x);
 
 			sprites[i]->SetColor(color);
 
 			// サイズを変化させるテスト
 			Vector2 size = sprites[i]->GetSize();
-			ImGui::DragFloat2("sprites.scale", &size.x);
+			//ImGui::DragFloat2("sprites.scale", &size.x);
 
 			sprites[i]->SetSize({ 100.0f,100.0f });
 
 			// 反転X
 			bool isFlipX = sprites[i]->GetIsFlipX();
-			ImGui::Checkbox("sprites.isFlipX", &isFlipX);
+			//ImGui::Checkbox("sprites.isFlipX", &isFlipX);
 
 			sprites[i]->SetIsFlipX(isFlipX);
 
 			bool isFlipY = sprites[i]->GetIsFlipY();
-			ImGui::Checkbox("sprites.isFlipY", &isFlipY);
+			//ImGui::Checkbox("sprites.isFlipY", &isFlipY);
 
 			sprites[i]->SetIsFlipY(isFlipY);
 		}
@@ -802,8 +811,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Vector3 position[2];
 			position[i] = object3ds[i]->GetTranslate();
 			// 座標を変更する
-			ImGui::DragFloat3("planeModel.translate", &position[0].x,0.01f);
-			ImGui::DragFloat3("axisModel.translate", &position[1].x, 0.01f);
+			//ImGui::DragFloat3("planeModel.translate", &position[0].x,0.01f);
+			//ImGui::DragFloat3("axisModel.translate", &position[1].x, 0.01f);
 			// 変更を反映する
 			position[0].x = -2.0f;
 			position[1].x = 2.0f;
@@ -813,8 +822,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Vector3 rotation[2];
 			rotation[i] = object3ds[i]->GetRotate();
 
-			ImGui::DragFloat3("planeModel.rotation", &rotation[0].x, 0.01f);
-			ImGui::DragFloat3("axisModel.rotation", &rotation[1].x, 0.01f);
+			//ImGui::DragFloat3("planeModel.rotation", &rotation[0].x, 0.01f);
+			//ImGui::DragFloat3("axisModel.rotation", &rotation[1].x, 0.01f);
 			rotation[0].y += 0.01f;
 			rotation[1].z += 0.01f;
 			object3ds[i]->SetRotate(rotation[i]);
@@ -822,8 +831,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// 拡縮を変更するテスト
 			Vector3 scale[2];
 			scale[i] = object3ds[i]->GetScale();
-			ImGui::DragFloat3("planeModel.scale", &scale[0].x, 0.01f);
-			ImGui::DragFloat3("axisModel.scale", &scale[1].x, 0.01f);
+			//ImGui::DragFloat3("planeModel.scale", &scale[0].x, 0.01f);
+			//ImGui::DragFloat3("axisModel.scale", &scale[1].x, 0.01f);
 			object3ds[i]->SetScale(scale[i]);
 		}
 
@@ -836,7 +845,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		// 描画前処理
 		dxCommon->PreDraw();
-
+		srvManager->PreDraw();
 		// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
 		object3dCommon->DrawSettings();
 		// 全てのobject3d個々の描画
@@ -864,6 +873,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	for (auto& object3d : object3ds) {
 		delete object3d;
 	}
+	delete srvManager;
 	delete input;
 	delete spriteCommon;
 	for (auto& sprite : sprites) {

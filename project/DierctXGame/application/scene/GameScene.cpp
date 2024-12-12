@@ -2,7 +2,15 @@
 
 GameScene::~GameScene()
 {
-
+	delete object3dCommon_;
+	delete spriteCommon_;
+	delete camera_;
+	for (auto& object3d : object3ds) {
+		delete object3d;
+	}
+	for (auto& sprite : sprites) {
+		delete sprite;
+	}
 }
 
 void GameScene::Initialize()

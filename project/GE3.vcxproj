@@ -139,6 +139,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\base\StringUtility.cpp" />
     <ClCompile Include="DierctXGame\engine\base\TextureManager.cpp" />
     <ClCompile Include="DierctXGame\engine\base\WinApp.cpp" />
+    <ClCompile Include="DierctXGame\application\object\Player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DierctXGame\engine\base\Camera.h" />
@@ -187,6 +188,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\io\VertexData.h" />
     <ClInclude Include="DierctXGame\engine\base\WinApp.h" />
     <ClInclude Include="DierctXGame\application\scene\GameScene.h" />
+    <ClInclude Include="DierctXGame\application\object\Player.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

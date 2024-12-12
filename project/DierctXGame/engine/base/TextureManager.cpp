@@ -1,6 +1,7 @@
 #include "TextureManager.h"
 #include "StringUtility.h"
 #include <cassert>
+
 TextureManager* TextureManager::instance = nullptr;
 
 // ImGuiで0番を使用するため、1番から使用

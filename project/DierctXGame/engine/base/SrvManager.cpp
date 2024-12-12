@@ -13,20 +13,33 @@ void SrvManager::Initialize(DirectXCommon* dxCommon)
 
 	// デスクリプタ1個分のサイズを取得して記録
 	descriptorSize = this->directXCommon->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+	// 空きインデックスリストを初期化
+	for (uint32_t i = 0; i < kMaxSRVCount; ++i) {
+		freeIndices.push(i);
+	}
 }
 
 uint32_t SrvManager::Allocate()
 {
-	// 上限に達していないかチェックしてassert
-	assert(useIndex < kMaxSRVCount);
+	// 空きインデックスがあるかをチェック
+	assert(!freeIndices.empty() && "No available SRV slots!");
 
-	// returnする番号をいったん記録しておく
-	int index = useIndex;
-	// 次回のために番号を1進める
-	useIndex++;
-	// 上で記録した番号をreturn
+	// 空きインデックスリストから番号を取得
+	uint32_t index = freeIndices.front();
+	freeIndices.pop();
+
 	return index;
 
+}
+
+void SrvManager::Free(uint32_t srvIndex)
+{
+	// インデックスが範囲内であることを確認
+	assert(srvIndex < kMaxSRVCount && "Invalid SRV index to free!");
+
+	// 空きインデックスリストに戻す
+	freeIndices.push(srvIndex);
 }
 
 void SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DXGI_FORMAT Format, UINT MipLevels)

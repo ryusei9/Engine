@@ -150,7 +150,7 @@
     <ClCompile Include="DierctXGame\engine\base\Camera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="SrvManager.cpp">
+    <ClCompile Include="DierctXGame\engine\base\SrvManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -290,7 +290,7 @@
     <ClInclude Include="DierctXGame\engine\base\Camera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="SrvManager.h">
+    <ClInclude Include="DierctXGame\engine\base\SrvManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

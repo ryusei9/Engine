@@ -1,6 +1,7 @@
 #pragma once
 #include <DirectXCommon.h>
 #include <wrl.h>
+#include <queue>
 
 // SRV管理
 class SrvManager
@@ -12,6 +13,8 @@ public:
 	void Initialize(DirectXCommon* dxCommon);
 
 	uint32_t Allocate();
+
+	void Free(uint32_t srvIndex);
 
 	// SRV生成(texture用)
 	void CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DXGI_FORMAT Format, UINT MipLevels);
@@ -42,12 +45,14 @@ public:
 	{
 		return srvIndex < kMaxSRVCount;
 	}
+
+	// 最大SRV数(最大テクスチャ枚数)
+	static const uint32_t kMaxSRVCount;
 private:
 	// メンバ変数
 	DirectXCommon* directXCommon = nullptr;
 
-	// 最大SRV数(最大テクスチャ枚数)
-	static const uint32_t kMaxSRVCount;
+	
 
 	// SRV用のデスクリプタサイズ
 	uint32_t descriptorSize;
@@ -58,6 +63,7 @@ private:
 	// 次に使用するSRVインデックス
 	uint32_t useIndex = 0;
 
-
+	// 空いているSRVインデックスリスト
+	std::queue<uint32_t> freeIndices;
 };
 

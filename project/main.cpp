@@ -873,6 +873,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	for (auto& object3d : object3ds) {
 		delete object3d;
 	}
+	for (uint32_t i = 0; i < SrvManager::kMaxSRVCount; i++) {
+		// 使われているSRVインデックスを解放
+		srvManager->Free(i);
+	}
 	delete srvManager;
 	delete input;
 	delete spriteCommon;

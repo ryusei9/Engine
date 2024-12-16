@@ -9,12 +9,24 @@ public:
 	/// 初期化
 	void Initialize(WinApp* winApp_,DirectXCommon* dxCommon,SrvManager* srvManager);
 
+	/// ImGui受付開始
+	void Begin();
+
+	/// ImGui受付終了
+	void End();
+
+	/// 描画
+	void Draw();
+
+	/// <summary>
+	/// 終了
+	/// </summary>
+	void Finalize();
 private:
 	WinApp* winApp_;
 
 	DirectXCommon* dxCommon_;
-	// SRV用デスクリプタヒープ
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap_;
 	
+	SrvManager* srvManager_;
 };
 

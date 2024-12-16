@@ -132,7 +132,7 @@ public: // メンバ関数
 
 	UINT GetBackBufferIndex() { return backBufferIndex; }
 
-	size_t GetBackBufferCount() const { return backBufferCount; }
+	UINT GetBackBufferCount() const { return backBufferCount; }
 
 	// 最大SRV数(最大テクスチャ枚数)
 	static const uint32_t kMaxSRVCount;
@@ -219,6 +219,6 @@ private:
 
 	UINT backBufferIndex;
 
-	size_t backBufferCount = 2;
+	UINT backBufferCount = 2;
 };
 

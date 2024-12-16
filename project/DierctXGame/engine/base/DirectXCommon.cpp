@@ -463,7 +463,7 @@ void DirectXCommon::ImGuiInitialize()
 	/////////////////////
 	// ImGuiの初期化
 	/////////////////////
-	IMGUI_CHECKVERSION();
+	/*IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 	ImGui_ImplWin32_Init(winApp_->GetHwnd());
@@ -472,7 +472,7 @@ void DirectXCommon::ImGuiInitialize()
 		rtvDesc.Format,
 		srvDescriptorHeap.Get(),
 		GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0),
-		GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0));
+		GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0));*/
 }
 
 void DirectXCommon::PreDraw()

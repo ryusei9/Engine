@@ -39,6 +39,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #include "ModelManager.h"
 #include "Camera.h"
 #include <SrvManager.h>
+#include "ImGuiManager.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -629,7 +630,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	camera->SetTranslate({ 0.0f,0.0f,-10.0f });
 	object3dCommon->SetDefaultCamera(camera);
 
-	
+	ImGuiManager* imGuiManager = new ImGuiManager();
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
@@ -727,6 +728,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// ゲームループを抜ける
 			break;
 		}
+		imGuiManager->Initialize(winApp);
 		// ImGuiにここからフレームが始まる旨を伝える
 		/*ImGui_ImplDX12_NewFrame();
 		ImGui_ImplWin32_NewFrame();
@@ -859,7 +861,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			sprite->Draw();
 		}
 		dxCommon->PostDraw();
-
+		
 
 	}
 
@@ -884,6 +886,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		delete sprite;
 	}
 	delete object3dCommon;
+	delete imGuiManager;
 	//delete modelCommon;
 	// WindowsAPIの終了処理
 	winApp->Finalize();

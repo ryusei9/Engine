@@ -168,7 +168,7 @@ void DirectXCommon::SwapChain()
 	// 描画のターゲットとして利用する
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	// ダブルバッファ
-	swapChainDesc.BufferCount = 2;
+	swapChainDesc.BufferCount = backBufferCount;
 	// モニタにうつしたら、中身を破棄
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	// コマンドキュー、ウィンドウハンドル、設定を渡して生成する

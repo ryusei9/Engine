@@ -168,7 +168,7 @@ void DirectXCommon::SwapChain()
 	// 描画のターゲットとして利用する
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	// ダブルバッファ
-	swapChainDesc.BufferCount = 2;
+	swapChainDesc.BufferCount = backBufferCount;
 	// モニタにうつしたら、中身を破棄
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	// コマンドキュー、ウィンドウハンドル、設定を渡して生成する
@@ -463,7 +463,7 @@ void DirectXCommon::ImGuiInitialize()
 	/////////////////////
 	// ImGuiの初期化
 	/////////////////////
-	IMGUI_CHECKVERSION();
+	/*IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 	ImGui_ImplWin32_Init(winApp_->GetHwnd());
@@ -472,7 +472,7 @@ void DirectXCommon::ImGuiInitialize()
 		rtvDesc.Format,
 		srvDescriptorHeap.Get(),
 		GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0),
-		GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0));
+		GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0));*/
 }
 
 void DirectXCommon::PreDraw()

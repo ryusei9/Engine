@@ -36,6 +36,9 @@ public:
 	/// </summary>
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(uint32_t index);
 
+	// ディスクリプタヒープの取得
+	ID3D12DescriptorHeap* GetDescriptorHeap() { return descriptorHeap.Get(); }
+
 	/// <summary>
 /// 指定されたSRVインデックスが最大SRV数を超えているか確認する
 /// </summary>

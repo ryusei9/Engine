@@ -7,10 +7,7 @@
 #include <cassert>
 #include <dxgidebug.h>
 #include <dxcapi.h>
-#include "externals/imgui/imgui.h"
-#include "externals/imgui/imgui_impl_dx12.h"
-#include "externals/imgui/imgui_impl_win32.h"
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 #include "externals/DirectXTex/DirectXTex.h"
 #include <numbers>
 #include <fstream>
@@ -39,6 +36,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #include "ModelManager.h"
 #include "Camera.h"
 #include <SrvManager.h>
+#include "ImGuiManager.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -46,24 +44,24 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #pragma comment(lib,"dxcompiler.lib")
 
 // ウィンドウプロシーシャ
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
-	WPARAM wparam, LPARAM lparam) {
-	// ImGuiにメッセージを渡す
-	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
-		return true;
-	}
-	// メッセージに応じてゲーム固有の処理を行う
-	switch (msg) {
-		// ウィンドウが破棄された
-	case WM_DESTROY:
-		// OSに対して、アプリの終了を伝える
-		PostQuitMessage(0);
-		return 0;
-	}
-
-	// 標準のメッセージ処理を行う
-	return DefWindowProc(hwnd, msg, wparam, lparam);
-}
+//LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
+//	WPARAM wparam, LPARAM lparam) {
+//	// ImGuiにメッセージを渡す
+//	/*if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
+//		return true;
+//	}*/
+//	// メッセージに応じてゲーム固有の処理を行う
+//	switch (msg) {
+//		// ウィンドウが破棄された
+//	case WM_DESTROY:
+//		// OSに対して、アプリの終了を伝える
+//		PostQuitMessage(0);
+//		return 0;
+//	}
+//
+//	// 標準のメッセージ処理を行う
+//	return DefWindowProc(hwnd, msg, wparam, lparam);
+//}
 
 struct Sphere {
 	Vector3 center;
@@ -629,7 +627,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	camera->SetTranslate({ 0.0f,0.0f,-10.0f });
 	object3dCommon->SetDefaultCamera(camera);
 
-	
+	ImGuiManager* imGuiManager = new ImGuiManager();
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
@@ -719,6 +717,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3ds[0]->SetModel("plane.obj");
 	object3ds[1]->SetModel("axis.obj");
 	
+	imGuiManager->Initialize(winApp, dxCommon, srvManager);
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
 	while (true) {
@@ -727,6 +726,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// ゲームループを抜ける
 			break;
 		}
+		
+		imGuiManager->Begin();
 		// ImGuiにここからフレームが始まる旨を伝える
 		/*ImGui_ImplDX12_NewFrame();
 		ImGui_ImplWin32_NewFrame();
@@ -837,12 +838,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 
 		
-
+		imGuiManager->End();
 		/*ImGui::Render();*/
 		/////////////////////
 		//// コマンドをキック
 		/////////////////////
-
+		imGuiManager->Draw();
 		// 描画前処理
 		dxCommon->PreDraw();
 		srvManager->PreDraw();
@@ -859,7 +860,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			sprite->Draw();
 		}
 		dxCommon->PostDraw();
-
+		
 
 	}
 
@@ -884,6 +885,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		delete sprite;
 	}
 	delete object3dCommon;
+	
 	//delete modelCommon;
 	// WindowsAPIの終了処理
 	winApp->Finalize();
@@ -897,6 +899,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 3Dモデルマネージャの終了
 	ModelManager::GetInstance()->Finalize();
 
+	imGuiManager->Finalize();
+	delete imGuiManager;
 	// ImGuiの終了処理
 	/*ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();

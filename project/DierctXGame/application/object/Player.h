@@ -1,5 +1,7 @@
 #pragma once
 #include "Vector3.h"
+#include "Input.h"
+#include "Object3d.h"
 class Player
 {
 public:
@@ -7,7 +9,7 @@ public:
 	/// <summary>
 	///  初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(Object3d* model);
 
 	/// <summary>
 	///  更新
@@ -23,8 +25,12 @@ private:
 	struct WorldTransform {
 		Vector3 scale;
 		Vector3 rotate;
-		Vector3 transform;
+		Vector3 translate;
 	};
 	WorldTransform worldTranform;
+
+	Input* input_;
+
+	Object3d* model_;
 };
 

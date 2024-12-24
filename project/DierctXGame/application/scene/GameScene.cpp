@@ -57,6 +57,13 @@ void GameScene::Initialize()
 	// 初期化済みの3Dオブジェクトにモデルを紐づける
 	object3ds[0]->SetModel("plane.obj");
 	object3ds[1]->SetModel("axis.obj");
+
+	// プレイヤーの初期化
+	Object3d* playerModel = new Object3d();
+	playerModel->Initialize(object3dCommon_);
+	playerModel->SetModel("plane.obj");
+
+	
 }
 
 void GameScene::Update()
@@ -152,13 +159,13 @@ void GameScene::Draw()
 	// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
 	object3dCommon_->DrawSettings();
 	// 全てのobject3d個々の描画
-	for (auto& object3d : object3ds) {
+	/*for (auto& object3d : object3ds) {
 		object3d->Draw();
-	}
+	}*/
 	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
 	spriteCommon_->DrawSettings();
 
-	for (auto& sprite : sprites) {
+	/*for (auto& sprite : sprites) {
 		sprite->Draw();
-	}
+	}*/
 }

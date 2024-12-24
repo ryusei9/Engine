@@ -6,6 +6,9 @@
 #include <SpriteCommon.h>
 #include <Object3d.h>
 #include <Sprite.h>
+#include <Player.h>
+
+
 class GameScene
 {
 public:
@@ -42,4 +45,3 @@ private:
 		{0.0f,0.0f,-10.0f}
 	};
 };
-

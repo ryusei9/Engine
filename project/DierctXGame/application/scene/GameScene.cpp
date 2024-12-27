@@ -59,11 +59,16 @@ void GameScene::Initialize()
 	object3ds[1]->SetModel("axis.obj");
 
 	// プレイヤーの初期化
-	Object3d* playerModel = new Object3d();
+	playerModel = new Object3d();
 	playerModel->Initialize(object3dCommon_);
 	playerModel->SetModel("plane.obj");
 
-	
+	bulletModel = new Object3d();
+	bulletModel->Initialize(object3dCommon_);
+	bulletModel->SetModel("axis.obj");
+
+	player_ = new Player();
+	player_->Initialize(playerModel,bulletModel);
 }
 
 void GameScene::Update()
@@ -71,13 +76,13 @@ void GameScene::Update()
 	// 入力の更新
 	input_->Update();
 	// 操作
-	if (input_->PushKey(DIK_RIGHTARROW)) {
+	/*if (input_->PushKey(DIK_RIGHTARROW)) {
 		cameraTransform.translate.x -= 0.1f;
 
 	}
 	if (input_->PushKey(DIK_LEFTARROW)) {
 		cameraTransform.translate.x += 0.1f;
-	}
+	}*/
 	camera_->SetTranslate(cameraTransform.translate);
 	camera_->Update();
 
@@ -151,7 +156,7 @@ void GameScene::Update()
 		
 		object3ds[i]->SetScale(scale[i]);
 	}
-
+	player_->Update();
 }
 
 void GameScene::Draw()
@@ -162,6 +167,7 @@ void GameScene::Draw()
 	/*for (auto& object3d : object3ds) {
 		object3d->Draw();
 	}*/
+	player_->Draw();
 	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
 	spriteCommon_->DrawSettings();
 

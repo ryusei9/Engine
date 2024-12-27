@@ -6,6 +6,9 @@
 #include <SpriteCommon.h>
 #include <Object3d.h>
 #include <Sprite.h>
+#include <DierctXGame/application/object/Player.h>
+
+
 class GameScene
 {
 public:
@@ -41,5 +44,11 @@ private:
 		{0.0f,0.0f,0.0f},
 		{0.0f,0.0f,-10.0f}
 	};
-};
 
+	Player* player_;
+
+	Object3d* playerModel;
+
+	// 弾丸のモデルを生成
+	Object3d* bulletModel;
+};

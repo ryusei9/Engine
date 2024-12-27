@@ -2,7 +2,15 @@
 
 GameScene::~GameScene()
 {
-
+	delete object3dCommon_;
+	delete spriteCommon_;
+	delete camera_;
+	for (auto& object3d : object3ds) {
+		delete object3d;
+	}
+	for (auto& sprite : sprites) {
+		delete sprite;
+	}
 }
 
 void GameScene::Initialize()
@@ -49,6 +57,18 @@ void GameScene::Initialize()
 	// 初期化済みの3Dオブジェクトにモデルを紐づける
 	object3ds[0]->SetModel("plane.obj");
 	object3ds[1]->SetModel("axis.obj");
+
+	// プレイヤーの初期化
+	playerModel = new Object3d();
+	playerModel->Initialize(object3dCommon_);
+	playerModel->SetModel("plane.obj");
+
+	bulletModel = new Object3d();
+	bulletModel->Initialize(object3dCommon_);
+	bulletModel->SetModel("axis.obj");
+
+	player_ = new Player();
+	player_->Initialize(playerModel,bulletModel);
 }
 
 void GameScene::Update()
@@ -56,13 +76,13 @@ void GameScene::Update()
 	// 入力の更新
 	input_->Update();
 	// 操作
-	if (input_->PushKey(DIK_RIGHTARROW)) {
+	/*if (input_->PushKey(DIK_RIGHTARROW)) {
 		cameraTransform.translate.x -= 0.1f;
 
 	}
 	if (input_->PushKey(DIK_LEFTARROW)) {
 		cameraTransform.translate.x += 0.1f;
-	}
+	}*/
 	camera_->SetTranslate(cameraTransform.translate);
 	camera_->Update();
 
@@ -136,7 +156,7 @@ void GameScene::Update()
 		
 		object3ds[i]->SetScale(scale[i]);
 	}
-
+	player_->Update();
 }
 
 void GameScene::Draw()
@@ -144,13 +164,14 @@ void GameScene::Draw()
 	// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
 	object3dCommon_->DrawSettings();
 	// 全てのobject3d個々の描画
-	for (auto& object3d : object3ds) {
+	/*for (auto& object3d : object3ds) {
 		object3d->Draw();
-	}
+	}*/
+	player_->Draw();
 	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
 	spriteCommon_->DrawSettings();
 
-	for (auto& sprite : sprites) {
+	/*for (auto& sprite : sprites) {
 		sprite->Draw();
-	}
+	}*/
 }

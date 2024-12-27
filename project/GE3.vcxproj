@@ -105,6 +105,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Add.cpp" />
     <ClCompile Include="DierctXGame\engine\base\Camera.cpp" />
     <ClCompile Include="DierctXGame\engine\base\D3DresourceLeakChecker.cpp" />
     <ClCompile Include="DierctXGame\engine\base\DirectXCommon.cpp" />
@@ -118,6 +119,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\base\Input.cpp" />
     <ClCompile Include="DierctXGame\engine\io\Inverse.cpp" />
     <ClCompile Include="DierctXGame\engine\base\Logger.cpp" />
+    <ClCompile Include="DierctXGame\application\scene\GameScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="DierctXGame\engine\io\MakeAffineMatrix.cpp" />
     <ClCompile Include="DierctXGame\engine\io\MakeIdentity4x4.cpp" />
@@ -138,8 +140,11 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\base\StringUtility.cpp" />
     <ClCompile Include="DierctXGame\engine\base\TextureManager.cpp" />
     <ClCompile Include="DierctXGame\engine\base\WinApp.cpp" />
+    <ClCompile Include="DierctXGame\application\object\Player.cpp" />
+    <ClCompile Include="PlayerBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Add.h" />
     <ClInclude Include="DierctXGame\engine\base\Camera.h" />
     <ClInclude Include="DierctXGame\engine\base\D3DresourceLeakChecker.h" />
     <ClInclude Include="DierctXGame\engine\io\DirectionalLight.h" />
@@ -185,6 +190,9 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\io\Vector4.h" />
     <ClInclude Include="DierctXGame\engine\io\VertexData.h" />
     <ClInclude Include="DierctXGame\engine\base\WinApp.h" />
+    <ClInclude Include="DierctXGame\application\scene\GameScene.h" />
+    <ClInclude Include="DierctXGame\application\object\Player.h" />
+    <ClInclude Include="PlayerBullet.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

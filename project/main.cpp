@@ -39,6 +39,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg
 #include "ModelManager.h"
 #include "Camera.h"
 #include <DierctXGame/application/scene/GameScene.h>
+#include <Normalize.h>
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -119,7 +120,7 @@ Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Ve
 // アフィン変換
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3 translate) {
 	Matrix4x4 resultAffineMatrix = {};
-	Matrix4x4 resultRotateXYZMatrix = Multiply::Multiply(MakeRotateXMatrix(rotate.x), Multiply::Multiply(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
+	Matrix4x4 resultRotateXYZMatrix = Multiply(MakeRotateXMatrix(rotate.x), Multiply(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
 	resultAffineMatrix.m[0][0] = scale.x * resultRotateXYZMatrix.m[0][0];
 	resultAffineMatrix.m[0][1] = scale.x * resultRotateXYZMatrix.m[0][1];
 	resultAffineMatrix.m[0][2] = scale.x * resultRotateXYZMatrix.m[0][2];
@@ -263,16 +264,7 @@ Vector3 TransformMatrix(const Vector3& vector, const Matrix4x4& matrix) {
 	return resultTransform;
 }
 
-// 正規化
-Vector3 Normalize(const Vector3& v) {
-	Vector3 NormalizeResult = {};
-	float LengthResult = {};
-	LengthResult = sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
-	NormalizeResult.x = v.x / LengthResult;
-	NormalizeResult.y = v.y / LengthResult;
-	NormalizeResult.z = v.z / LengthResult;
-	return NormalizeResult;
-}
+
 
 Matrix4x4 MakeScaleMatrix(const Vector3& scale) {
 	Matrix4x4 resultScale = {};

@@ -1,8 +1,8 @@
 #include "Normalize.h"
 #include <corecrt_math.h>
 
-namespace Normalize {
-    Vector3 Normalize::Normalize(const Vector3& v)
+
+    Vector3 Normalize(const Vector3& v)
     {
 		Vector3 NormalizeResult = {};
 		float LengthResult = {};
@@ -12,4 +12,3 @@ namespace Normalize {
 		NormalizeResult.z = v.z / LengthResult;
 		return NormalizeResult;
     }
-}

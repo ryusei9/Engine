@@ -20,8 +20,9 @@ void Player::Initialize(Object3d* model, Object3d* bulletModel)
 	transform.translate = model_->GetTranslate();
 	transform.scale = model_->GetScale();
 	transform.rotate = model_->GetRotate();
-	transform.translate = { 0.0f,0.0f,0.0f };
-	transform.scale = { 0.5f,0.5f,0.5f };
+	transform.translate = { -3.0f,0.0f,0.0f };
+	transform.scale = { 0.2f,0.2f,0.2f };
+	transform.rotate = { 0.0f,-90.0f,0.0f };
 }
 
 void Player::Update()

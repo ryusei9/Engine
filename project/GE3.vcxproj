@@ -146,6 +146,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\base\WinApp.cpp" />
     <ClCompile Include="DierctXGame\application\object\Player.cpp" />
     <ClCompile Include="PlayerBullet.cpp" />
+    <ClCompile Include="SkySphere.cpp" />
     <ClCompile Include="Subtract.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -202,6 +203,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Length.h" />
     <ClInclude Include="Lerp.h" />
     <ClInclude Include="PlayerBullet.h" />
+    <ClInclude Include="SkySphere.h" />
     <ClInclude Include="Subtract.h" />
   </ItemGroup>
   <ItemGroup>

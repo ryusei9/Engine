@@ -71,7 +71,7 @@ void Sprite::Update()
 	Matrix4x4 projectionMatrix = MakeOrthographicMatrix::MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
 
 
-	transformationMatrixData->WVP = Multiply::Multiply(worldMatrix, Multiply::Multiply(viewMatrix, projectionMatrix));
+	transformationMatrixData->WVP = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 	transformationMatrixData->World = worldMatrix;
 }
 

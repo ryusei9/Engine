@@ -37,7 +37,7 @@ void Object3d::Update()
 	Matrix4x4 worldViewProjectionMatrix;
 	if (camera) {
 		const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
-		worldViewProjectionMatrix = Multiply::Multiply(worldMatrix, viewProjectionMatrix);
+		worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 	}else {
 		worldViewProjectionMatrix = worldMatrix;
 	}
@@ -291,5 +291,5 @@ void Object3d::CreateDirectionalLightData()
 	directionalLightData->intensity = 1.0f;
 
 	// 正規化
-	Normalize::Normalize(directionalLightData->direction);
+	Normalize(directionalLightData->direction);
 }

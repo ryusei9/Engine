@@ -76,6 +76,12 @@ private:
 		{0.0f,0.0f,-10.0f}
 	};
 
+	Transform moveCameraTransform{
+		{1.0f,1.0f,1.0f},
+		{0.0f,0.0f,0.0f},
+		{2.0f,0.0f,0.0f}
+	};
+
 	Player* player_;
 
 	Object3d* playerModel;
@@ -88,7 +94,7 @@ private:
 
 	Object3d* enemyModel;
 
-	Vector3 enemyPosition_ = { 5.0f, 3.0f, 50.0f };
+	Vector3 enemyPosition_ = { 5.0f, 0.0f, 0.0f };
 
 	// 敵リスト
 	std::list<Enemy*> enemies_;
@@ -96,7 +102,7 @@ private:
 	// 敵弾リストの取得
 	std::list<EnemyBullet*> enemyBullets_;
 
-
+	Object3d* enemyBulletModel;
 	// 敵発生
 	std::stringstream enemyPopCommands;
 
@@ -113,4 +119,8 @@ private:
 	float enemyRadius_ = 1.0f;
 
 	float enemyBulletRadius_ = 1.0f;
+
+	// タイマー用のメンバ変数
+	float timer_;
+	const float waitTime_ = 3.0f; // 3秒
 };

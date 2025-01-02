@@ -2,6 +2,7 @@
 #include <Length.h>
 #include <Subtract.h>
 #include <Add.h>
+#include <Lerp.h>
 
 GameScene::~GameScene()
 {
@@ -14,6 +15,17 @@ GameScene::~GameScene()
 	for (auto& sprite : sprites) {
 		delete sprite;
 	}
+	/*delete playerModel;
+	delete bulletModel;
+	delete player_;
+	delete enemyModel;*/
+	for (auto& enemy : enemies_) {
+		delete enemy;
+	}
+	
+	/*for (auto& bullet : enemyBullets_) {
+		delete bullet;
+	}*/
 }
 
 void GameScene::Initialize()
@@ -32,6 +44,8 @@ void GameScene::Initialize()
 
 	// 3Dモデルマネージャの初期化
 	ModelManager::GetInstance()->Initialize(dxCommon_);
+
+	
 
 	camera_ = new Camera;
 	camera_->SetRotate({ 0.0f,0.0f,0.0f });
@@ -64,105 +78,177 @@ void GameScene::Initialize()
 	// プレイヤーの初期化
 	playerModel = new Object3d();
 	playerModel->Initialize(object3dCommon_);
-	playerModel->SetModel("plane.obj");
+	playerModel->SetModel("player.obj");
 
 	bulletModel = new Object3d();
 	bulletModel->Initialize(object3dCommon_);
-	bulletModel->SetModel("axis.obj");
+	bulletModel->SetModel("player_bullet.obj");
 
 	player_ = new Player();
 	player_->Initialize(playerModel,bulletModel);
 
+	enemyModel = new Object3d();
+	enemyModel->Initialize(object3dCommon_);
+	enemyModel->SetModel("mori.obj");
+
+	enemyBulletModel = new Object3d();
+	enemyBulletModel->Initialize(object3dCommon_);
+	enemyBulletModel->SetModel("enemy_bullet.obj");
+
+	enemy_ = new Enemy();
+	enemy_->Initialize(enemyModel, enemyBulletModel, enemyPosition_);
+	enemy_->SetGameScene(this);
+	enemy_->SetPlayer(player_);
+	//enemies_.push_back(enemy);
+	//moveCameraTransform.translate = enemy_->GetWorldPosition();
+	moveCameraTransform.translate.y = -10.0f;
+	moveCameraTransform.rotate.y = 1.5f;
+	moveCameraTransform.rotate.x = -1.5f;
 	// 敵発生データの読み込み
-	LoadEnemyPopData();
+	//LoadEnemyPopData();
+	timer_ = 0.0f;
 }
 
 void GameScene::Update()
 {
+	//// デスフラグの立った弾を削除
+	//enemyBullets_.remove_if([](EnemyBullet* bullet) {
+	//	if (bullet->IsDead()) {
+	//		delete bullet;
+	//		return true;
+	//	}
+	//	return false;
+	//	});
+	// デスフラグの立った敵を削除
+	enemies_.remove_if([](Enemy* enemy) {
+		if (enemy->IsDead()) {
+			delete enemy;
+			return true;
+		}
+		return false;
+		});
 	// 入力の更新
 	input_->Update();
 	// 操作
+	if (input_->PushKey(DIK_A)) {
+		cameraTransform.rotate.y -= 0.001f;
+
+	}
+	if (input_->PushKey(DIK_D)) {
+		cameraTransform.rotate.y += 0.001f;
+	}
+	if (input_->PushKey(DIK_W)) {
+		cameraTransform.rotate.x -= 0.01f;
+
+	}
+	if (input_->PushKey(DIK_S)) {
+		cameraTransform.rotate.x += 0.001f;
+	}
 	/*if (input_->PushKey(DIK_RIGHTARROW)) {
 		cameraTransform.translate.x -= 0.1f;
-
 	}
 	if (input_->PushKey(DIK_LEFTARROW)) {
 		cameraTransform.translate.x += 0.1f;
 	}*/
-	camera_->SetTranslate(cameraTransform.translate);
+	
+	if (input_->PushKey(DIK_UPARROW)) {
+		
+	}
+
+	// タイマーを更新
+	timer_ += 1.0f / 60.0f; // フレームレートが60FPSの場合
+
+	// 3秒待ってから線形補間を実行
+	if (timer_ >= waitTime_) {
+		moveCameraTransform.translate = Lerp(moveCameraTransform.translate, cameraTransform.translate, 0.01f);
+		moveCameraTransform.rotate = Lerp(moveCameraTransform.rotate, cameraTransform.rotate, 0.01f);
+	}
+	camera_->SetTranslate(moveCameraTransform.translate);
+	camera_->SetRotate(moveCameraTransform.rotate);
 	camera_->Update();
+	
 
-	for (uint32_t i = 0; i < sprites.size();++i) {
+	//for (uint32_t i = 0; i < sprites.size();++i) {
 
-		sprites[i]->Update();
+	//	sprites[i]->Update();
 
-		// 現在の座標を変数で受ける
-		Vector2 position = sprites[i]->GetPosition();
+	//	// 現在の座標を変数で受ける
+	//	Vector2 position = sprites[i]->GetPosition();
 
-		// 座標を変更する
-		
-		// 変更を反映する
-		sprites[i]->SetPosition({ 200.0f * i });
+	//	// 座標を変更する
+	//	
+	//	// 変更を反映する
+	//	sprites[i]->SetPosition({ 200.0f * i });
 
-		// 角度を変更させるテスト
-		float rotation = sprites[i]->GetRotation();
+	//	// 角度を変更させるテスト
+	//	float rotation = sprites[i]->GetRotation();
 
-		
+	//	
 
-		sprites[i]->SetRotation(rotation);
+	//	sprites[i]->SetRotation(rotation);
 
-		// 色を変化させるテスト
-		Vector4 color = sprites[i]->GetColor();
+	//	// 色を変化させるテスト
+	//	Vector4 color = sprites[i]->GetColor();
 
-		
+	//	
 
-		sprites[i]->SetColor(color);
+	//	sprites[i]->SetColor(color);
 
-		// サイズを変化させるテスト
-		Vector2 size = sprites[i]->GetSize();
-		
+	//	// サイズを変化させるテスト
+	//	Vector2 size = sprites[i]->GetSize();
+	//	
 
-		sprites[i]->SetSize({ 100.0f,100.0f });
+	//	sprites[i]->SetSize({ 100.0f,100.0f });
 
-		// 反転X
-		bool isFlipX = sprites[i]->GetIsFlipX();
-		
+	//	// 反転X
+	//	bool isFlipX = sprites[i]->GetIsFlipX();
+	//	
 
-		sprites[i]->SetIsFlipX(isFlipX);
+	//	sprites[i]->SetIsFlipX(isFlipX);
 
-		bool isFlipY = sprites[i]->GetIsFlipY();
-		
+	//	bool isFlipY = sprites[i]->GetIsFlipY();
+	//	
 
-		sprites[i]->SetIsFlipY(isFlipY);
-	}
+	//	sprites[i]->SetIsFlipY(isFlipY);
+	//}
 
-	for (uint32_t i = 0; i < object3ds.size();++i) {
-		object3ds[i]->Update();
-		// 現在の座標を変数で受ける
-		Vector3 position[2];
-		position[i] = object3ds[i]->GetTranslate();
-		// 座標を変更する
-		
-		position[0].x = -2.0f;
-		position[1].x = 2.0f;
-		object3ds[i]->SetTranslate(position[i]);
+	//for (uint32_t i = 0; i < object3ds.size();++i) {
+	//	object3ds[i]->Update();
+	//	// 現在の座標を変数で受ける
+	//	Vector3 position[2];
+	//	position[i] = object3ds[i]->GetTranslate();
+	//	// 座標を変更する
+	//	
+	//	position[0].x = -2.0f;
+	//	position[1].x = 2.0f;
+	//	object3ds[i]->SetTranslate(position[i]);
 
-		// 角度を変更させるテスト
-		Vector3 rotation[2];
-		rotation[i] = object3ds[i]->GetRotate();
+	//	// 角度を変更させるテスト
+	//	Vector3 rotation[2];
+	//	rotation[i] = object3ds[i]->GetRotate();
 
-		
-		rotation[0].y += 0.01f;
-		rotation[1].z += 0.01f;
-		object3ds[i]->SetRotate(rotation[i]);
+	//	
+	//	rotation[0].y += 0.01f;
+	//	rotation[1].z += 0.01f;
+	//	object3ds[i]->SetRotate(rotation[i]);
 
-		// 拡縮を変更するテスト
-		Vector3 scale[2];
-		scale[i] = object3ds[i]->GetScale();
-		
-		object3ds[i]->SetScale(scale[i]);
-	}
+	//	// 拡縮を変更するテスト
+	//	Vector3 scale[2];
+	//	scale[i] = object3ds[i]->GetScale();
+	//	
+	//	object3ds[i]->SetScale(scale[i]);
+	//}
 	player_->Update();
+	// 敵キャラの更新
+	UpdateEnemyPopCommands();
+	for (Enemy* enemy : enemies_) {
+		enemy->Update();
+	}
+	enemy_->Update();
+	// 弾更新
+	/*for (EnemyBullet* bullet : enemyBullets_) {
+		bullet->Update();
+	}*/
 }
 
 void GameScene::Draw()
@@ -174,6 +260,13 @@ void GameScene::Draw()
 		object3d->Draw();
 	}*/
 	player_->Draw();
+	// 敵キャラの描画
+	for (Enemy* enemy : enemies_) {
+		enemy->Draw();
+	}
+	enemy_->Draw();
+	
+
 	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
 	spriteCommon_->DrawSettings();
 
@@ -204,9 +297,9 @@ void GameScene::CheckAllCollisions()
 		float length = Length(Subtract(posB, posA));
 		if (length <= (playerRadius_ + enemyBulletRadius_)) {
 			// 自キャラの衝突時コールバックを呼び出す
-			player_->OnCollision();
-			// 敵弾の衝突時コールバックを呼び出す
-			bullet->OnCollision();
+			//player_->OnCollision();
+			//// 敵弾の衝突時コールバックを呼び出す
+			//bullet->OnCollision();
 		}
 	}
 #pragma endregion
@@ -224,9 +317,9 @@ void GameScene::CheckAllCollisions()
 			float length = Length(Subtract(posB, posA));
 			if (length <= (playerBulletRadius_ + enemyRadius_)) {
 				// 敵キャラの衝突時コールバックを呼び出す
-				enemy->OnCollision();
-				// 自弾の衝突時コールバックを呼び出す
-				bullet->OnCollision();
+				//enemy->OnCollision();
+				//// 自弾の衝突時コールバックを呼び出す
+				//bullet->OnCollision();
 			}
 		}
 	}
@@ -244,9 +337,9 @@ void GameScene::CheckAllCollisions()
 			float length = Length(Subtract(posB, posA));
 			if (length <= (playerBulletRadius_ + enemyBulletRadius_)) {
 				// 敵弾の衝突時コールバックを呼び出す
-				bulletA->OnCollision();
-				// 自弾の衝突時コールバックを呼び出す
-				bulletB->OnCollision();
+				//bulletA->OnCollision();
+				//// 自弾の衝突時コールバックを呼び出す
+				//bulletB->OnCollision();
 			}
 		}
 	}
@@ -263,7 +356,7 @@ void GameScene::LoadEnemyPopData()
 {
 	// ファイルを開く
 	std::ifstream file;
-	file.open("Resources/enemyPop.csv");
+	file.open("resources/enemyPop.csv");
 	assert(file.is_open());
 
 	// ファイルの内容を文字列ストリームにコピー
@@ -340,7 +433,7 @@ void GameScene::enemyPop(Vector3 translation)
 	// 敵キャラの生成
 	enemy_ = new Enemy();
 	// 敵キャラの初期化
-	enemy_->Initialize(enemyModel, translation);
+	enemy_->Initialize(enemyModel,enemyBulletModel, translation);
 	// 敵キャラにゲームシーンを渡す
 	enemy_->SetGameScene(this);
 

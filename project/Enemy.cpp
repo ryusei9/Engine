@@ -6,16 +6,20 @@
 #include <Subtract.h>
 #include <Normalize.h>
 #include <EnemyBullet.h>
-
+#include <Lerp.h>
 Enemy::~Enemy()
 {
+	for (EnemyBullet* bullet : bullets_) {
+		delete bullet;
+	}
 }
 
-void Enemy::Initialize(Object3d* model, const Vector3& position)
+void Enemy::Initialize(Object3d* model,Object3d* bulletModel, const Vector3& position)
 {
 	// NULLポインタチェック
 	assert(model);
 	model_ = model;
+	bulletModel_ = bulletModel;
 	// テクスチャ読み込み
 	//textureHandle_ = TextureManager::Load("enemy.png");
 	
@@ -25,13 +29,23 @@ void Enemy::Initialize(Object3d* model, const Vector3& position)
 	transform_.rotate = model_->GetRotate();
 	// 引数で受け取った初期座標をセット
 	transform_.translate = position;
-
-	
+	transform_.scale = { 3.0f,3.0f,3.0f };
+	transform_.rotate = { 0.0f,-0.0f,0.0f };
 	ApproachPheseInitialize();
 }
 
 void Enemy::Update()
 {
+	bullets_.remove_if([](EnemyBullet* bullet) {
+		if (bullet->IsDead()) {
+			delete bullet;
+			return true;
+		}
+		return false;
+		});
+	for(EnemyBullet* bullet : bullets_) {
+		bullet->Update();
+	}
 	// 敵の行動パターン
 	switch (phese_) {
 		// 接近フェーズ
@@ -40,11 +54,12 @@ void Enemy::Update()
 		ApproachPheseUpdate();
 		break;
 		// 離脱フェーズ
-	case Phese::Leave:
-		LeavePheseUpdate();
+	case Phese::Battle:
+		BattlePheseUpdate();
 		break;
 	}
 	//ImGui::End();
+	
 
 	model_->SetTranslate(transform_.translate);
 	model_->SetScale(transform_.scale);
@@ -57,19 +72,35 @@ void Enemy::Update()
 void Enemy::Draw()
 {
 	model_->Draw();
+	for (EnemyBullet* bullet : bullets_) {
+		bullet->Draw();
+	}
 }
 
 void Enemy::ApproachPheseUpdate()
 {
 	// 速度
-	const float kEnemyApproachSpeed = -0.1f;
-	Vector3 velocity_ = { 0, 0, kEnemyApproachSpeed };
+	const float kEnemyApproachSpeed = -0.01f;
+	Vector3 velocity_ = { kEnemyApproachSpeed, 0, 0 };
 	// 移動(ベクトルを加算)
 	transform_.translate = Add(transform_.translate, velocity_);
 	// 既定の位置に到達したら離脱
-	if (transform_.translate.x < 0.0f) {
-		phese_ = Phese::Leave;
+	if (transform_.translate.x < 2.0f) {
+		
+		phese_ = Phese::Battle;
 	}
+	
+}
+
+void Enemy::BattlePheseUpdate()
+{
+	transform_.rotate.y = Lerp(transform_.rotate.y, -0.8f, 0.01f);
+	//ImGui::Text("Phese : Leave");
+	// 速度
+	//const float kEnemyLeaveSpeed = 0.1f;
+	//Vector3 velocity_ = { kEnemyLeaveSpeed, 0, 0 };
+	//// 移動(ベクトルを加算)
+	//transform_.translate = Add(transform_.translate, velocity_);
 	// 発射タイマーカウントダウン
 	fireTimer--;
 	// 指定時間に達した
@@ -81,21 +112,11 @@ void Enemy::ApproachPheseUpdate()
 	}
 }
 
-void Enemy::LeavePheseUpdate()
-{
-	//ImGui::Text("Phese : Leave");
-	// 速度
-	const float kEnemyLeaveSpeed = 0.1f;
-	Vector3 velocity_ = { 0, 0, kEnemyLeaveSpeed };
-	// 移動(ベクトルを加算)
-	transform_.translate = Add(transform_.translate, velocity_);
-}
-
 void Enemy::Fire()
 {
 	assert(player_);
 	// 弾の速度
-	const float kBulletSpeed = 1.2f;
+	const float kBulletSpeed = 0.2f;
 
 	// 自キャラのワールド座標を取得する
 	Vector3 playerPos = player_->GetWorldPosition();
@@ -114,10 +135,10 @@ void Enemy::Fire()
 
 	// 弾を生成し、初期化
 	EnemyBullet* newBullet = new EnemyBullet();
-	newBullet->Initialize(model_, transform_.translate, diff);
+	newBullet->Initialize(bulletModel_, transform_.translate, diff);
 
 	// 弾を登録する
-	//bullets_.push_back(newBullet);
+	bullets_.push_back(newBullet);
 	gameScene_->AddEnemyBullet(newBullet);
 }
 

@@ -18,13 +18,12 @@ void PlayerBullet::Initialize(Object3d* model, const Vector3& position, const Ve
 	//textureHandle_ = TextureManager::GetInstance()->Load("white.png");
 	// ワールドトランスフォームの初期化
 	transform_ = {
-		{1.0f,1.0f,1.0f},
+		{0.5f,0.5f,0.5f},
 		{0.0f,0.0f,0.0f},
 		position
 	};
 
-	// 引数で受け取った初期座標をセット
-	transform_.translate = position;
+	
 	// 引数で受け取った速度をメンバ変数に代入
 	velocity_ = velocity;
 	

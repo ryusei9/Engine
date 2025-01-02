@@ -1,6 +1,7 @@
 #pragma once
 #include "Object3d.h"
 #include <Transform.h>
+#include <EnemyBullet.h>
 
 class Player;
 
@@ -16,7 +17,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(Object3d* model, const Vector3& position);
+	void Initialize(Object3d* model,Object3d* bulletModel, const Vector3& position);
 	/// <summary>
 	/// 更新
 	/// </summary>
@@ -34,7 +35,7 @@ public:
 	/// <summary>
 	/// 離脱フェーズの更新
 	/// </summary>
-	void LeavePheseUpdate();
+	void BattlePheseUpdate();
 
 	/// <summary>
 	/// 弾発射
@@ -56,7 +57,7 @@ public:
 	void OnCollision();
 
 	// 弾リストを取得
-	//const std::list<EnemyBullet*>& GetBullets() const { return bullets_; }
+	const std::list<EnemyBullet*>& GetBullets() const { return bullets_; }
 
 	void SetGameScene(GameScene* gameScene) { gameScene_ = gameScene; }
 
@@ -76,14 +77,16 @@ private:
 	// 行動フェーズ
 	enum class Phese {
 		Approach,	// 接近する
-		Leave,		// 離脱する
+		Battle,		// 離脱する
 	};
 
 	// フェーズ
 	Phese phese_ = Phese::Approach;
 
 	// 弾
-	//std::list<EnemyBullet*> bullets_;
+	std::list<EnemyBullet*> bullets_;
+
+	Object3d* bulletModel_ = nullptr;
 
 	// 発射タイマー
 	int32_t fireTimer = 0;
@@ -92,6 +95,9 @@ private:
 	Player* player_ = nullptr;
 
 	GameScene* gameScene_ = nullptr;
+
+	// 体力
+	int32_t hp_ = 100;
 
 	// デスフラグ
 	bool isDead_ = false;

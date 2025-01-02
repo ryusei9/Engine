@@ -595,7 +595,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// .objファイルからモデルを読み込む
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
-	
+	ModelManager::GetInstance()->LoadModel("mori.obj");
+	ModelManager::GetInstance()->LoadModel("player.obj");
+	ModelManager::GetInstance()->LoadModel("player_bullet.obj");
+	ModelManager::GetInstance()->LoadModel("enemy_bullet.obj");
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;

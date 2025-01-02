@@ -123,6 +123,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\base\Logger.cpp" />
     <ClCompile Include="DierctXGame\application\scene\GameScene.cpp" />
     <ClCompile Include="Length.cpp" />
+    <ClCompile Include="Lerp.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="DierctXGame\engine\io\MakeAffineMatrix.cpp" />
     <ClCompile Include="DierctXGame\engine\io\MakeIdentity4x4.cpp" />
@@ -199,6 +200,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\application\scene\GameScene.h" />
     <ClInclude Include="DierctXGame\application\object\Player.h" />
     <ClInclude Include="Length.h" />
+    <ClInclude Include="Lerp.h" />
     <ClInclude Include="PlayerBullet.h" />
     <ClInclude Include="Subtract.h" />
   </ItemGroup>

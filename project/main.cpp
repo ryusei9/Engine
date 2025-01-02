@@ -599,6 +599,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ModelManager::GetInstance()->LoadModel("player.obj");
 	ModelManager::GetInstance()->LoadModel("player_bullet.obj");
 	ModelManager::GetInstance()->LoadModel("enemy_bullet.obj");
+	ModelManager::GetInstance()->LoadModel("sky_sphere.obj");
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;

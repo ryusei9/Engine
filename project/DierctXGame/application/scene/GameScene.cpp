@@ -22,7 +22,7 @@ GameScene::~GameScene()
 	for (auto& enemy : enemies_) {
 		delete enemy;
 	}
-	
+	delete skySphere_;
 	/*for (auto& bullet : enemyBullets_) {
 		delete bullet;
 	}*/
@@ -95,10 +95,18 @@ void GameScene::Initialize()
 	enemyBulletModel->Initialize(object3dCommon_);
 	enemyBulletModel->SetModel("enemy_bullet.obj");
 
+	skySphereModel = new Object3d();
+	skySphereModel->Initialize(object3dCommon_);
+	skySphereModel->SetModel("sky_sphere.obj");
+
 	enemy_ = new Enemy();
 	enemy_->Initialize(enemyModel, enemyBulletModel, enemyPosition_);
 	enemy_->SetGameScene(this);
 	enemy_->SetPlayer(player_);
+
+	skySphere_ = new SkySphere();
+	skySphere_->Initialize(skySphereModel);
+
 	//enemies_.push_back(enemy);
 	//moveCameraTransform.translate = enemy_->GetWorldPosition();
 	moveCameraTransform.translate.y = -10.0f;
@@ -167,7 +175,7 @@ void GameScene::Update()
 	camera_->SetRotate(moveCameraTransform.rotate);
 	camera_->Update();
 	
-
+	skySphere_->Update();
 	//for (uint32_t i = 0; i < sprites.size();++i) {
 
 	//	sprites[i]->Update();
@@ -256,6 +264,7 @@ void GameScene::Draw()
 	// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
 	object3dCommon_->DrawSettings();
 	// 全てのobject3d個々の描画
+	skySphere_->Draw();
 	/*for (auto& object3d : object3ds) {
 		object3d->Draw();
 	}*/

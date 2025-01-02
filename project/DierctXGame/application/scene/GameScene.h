@@ -9,7 +9,7 @@
 #include <DierctXGame/application/object/Player.h>
 #include <Enemy.h>
 #include <EnemyBullet.h>
-
+#include <SkySphere.h>
 
 class GameScene
 {
@@ -123,4 +123,8 @@ private:
 	// タイマー用のメンバ変数
 	float timer_;
 	const float waitTime_ = 3.0f; // 3秒
+
+	Object3d* skySphereModel;
+
+	SkySphere* skySphere_;
 };

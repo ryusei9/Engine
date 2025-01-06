@@ -7,6 +7,7 @@
 #include <Normalize.h>
 #include <EnemyBullet.h>
 #include <Lerp.h>
+#include <thread>
 Enemy::~Enemy()
 {
 	for (EnemyBullet* bullet : bullets_) {
@@ -23,10 +24,7 @@ void Enemy::Initialize(Object3d* model,Object3d* bulletModel, const Vector3& pos
 	// テクスチャ読み込み
 	//textureHandle_ = TextureManager::Load("enemy.png");
 	
-	// ワールドトランスフォームの初期化
-	transform_.translate = model_->GetTranslate();
-	transform_.scale = model_->GetScale();
-	transform_.rotate = model_->GetRotate();
+	
 	// 引数で受け取った初期座標をセット
 	transform_.translate = position;
 	transform_.scale = { 3.0f,3.0f,3.0f };
@@ -87,6 +85,7 @@ void Enemy::ApproachPheseUpdate()
 	// 既定の位置に到達したら離脱
 	if (transform_.translate.x < 2.0f) {
 		
+		fireTimer = 300;
 		phese_ = Phese::Battle;
 	}
 	
@@ -95,6 +94,7 @@ void Enemy::ApproachPheseUpdate()
 void Enemy::BattlePheseUpdate()
 {
 	transform_.rotate.y = Lerp(transform_.rotate.y, -0.8f, 0.01f);
+
 	//ImGui::Text("Phese : Leave");
 	// 速度
 	//const float kEnemyLeaveSpeed = 0.1f;

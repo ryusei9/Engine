@@ -17,9 +17,10 @@ void Player::Initialize(Object3d* model, Object3d* bulletModel)
 	// 弾のモデルを設定
 	bulletModel_ = bulletModel;
 
-	transform.translate = model_->GetTranslate();
+	fireCoolTime = 0.0f;
+	/*transform.translate = model_->GetTranslate();
 	transform.scale = model_->GetScale();
-	transform.rotate = model_->GetRotate();
+	transform.rotate = model_->GetRotate();*/
 	transform.translate = { -3.0f,0.0f,0.0f };
 	transform.scale = { 0.2f,0.2f,0.2f };
 	transform.rotate = { 0.0f,-90.0f,0.0f };
@@ -62,6 +63,18 @@ void Player::Update()
 	if (input_->PushKey(DIK_UPARROW)) {
 		transform.translate.y += 0.05f;
 	}
+	if (transform.translate.x <= -4.0f) {
+		transform.translate.x = -4.0f;
+	}
+	else if (transform.translate.x >= 4.0f) {
+		transform.translate.x = 4.0f;
+	}
+	if (transform.translate.y <= -2.2f) {
+		transform.translate.y = -2.2f;
+	}
+	else if (transform.translate.y >= 2.2f) {
+		transform.translate.y = 2.2f;
+	}
 	model_->SetTranslate(transform.translate);
 	model_->SetScale(transform.scale);
 	model_->SetRotate(transform.rotate);
@@ -86,7 +99,7 @@ void Player::Attack()
 	if (input_->GetInstance()->PushKey(DIK_SPACE) && fireCoolTime >= kCoolDownTime) {
 		fireCoolTime = 0;
 		// 弾の速度
-		const float kBulletSpeed = 1.0f;
+		const float kBulletSpeed = 0.25f;
 		Vector3 velocity(kBulletSpeed, 0, 0);
 
 		// 速度ベクトルを自機の向きに合わせて回転させる

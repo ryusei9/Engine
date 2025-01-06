@@ -37,6 +37,7 @@
 #include "Camera.h"
 #include <SrvManager.h>
 #include "ImGuiManager.h"
+#include "imgui.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -717,7 +718,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3ds[0]->SetModel("plane.obj");
 	object3ds[1]->SetModel("axis.obj");
 	
-	imGuiManager->Initialize(winApp, dxCommon, srvManager);
+	imGuiManager->Initialize(winApp, dxCommon);
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
 	while (true) {
@@ -728,25 +729,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		
 		imGuiManager->Begin();
-		// ImGuiにここからフレームが始まる旨を伝える
-		/*ImGui_ImplDX12_NewFrame();
-		ImGui_ImplWin32_NewFrame();
-		ImGui::NewFrame();*/
-
-		// 開発用の処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
-		//ImGui::ShowDemoWindow();
-		/*ImGui::DragFloat3("cameraPosition", &cameraTransform.translate.x, 0.01f);
-		ImGui::SliderAngle("modelRotate.x", &transform.rotate.x);
-		ImGui::SliderAngle("modelRotate.y", &transform.rotate.y);
-		ImGui::SliderAngle("modelRotate.z", &transform.rotate.z);*/
-		//ImGui::ColorEdit3("modelColor", &materialDataSprite->color.x);
-		/*ImGui::Checkbox("useMonsterBall", &useMonsterBall);
-		ImGui::ColorEdit3("lightColor", &directionalLightData->color.x);
-		ImGui::DragFloat3("lightDirection", &directionalLightData->direction.x, 0.01f);
-		ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
-		ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
-		ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);*/
-
+		// デモウィンドウの表示
+		//ImGui::Begin("DemoWindow");
+		ImGui::ShowDemoWindow();
+		//ImGui::End();
 
 		// ゲームの処理
 		// 入力の更新
@@ -843,10 +829,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/////////////////////
 		//// コマンドをキック
 		/////////////////////
-		imGuiManager->Draw();
+		
 		// 描画前処理
 		dxCommon->PreDraw();
+		imGuiManager->Draw();
+
 		srvManager->PreDraw();
+
 		// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
 		object3dCommon->DrawSettings();
 		// 全てのobject3d個々の描画

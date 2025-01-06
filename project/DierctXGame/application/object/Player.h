@@ -49,6 +49,15 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	float GetRadius()const { return radius_; }
+
+	void SetInitialize() {
+		fireCoolTime = 0.0f;
+		transform.translate = { -3.0f,0.0f,0.0f };
+		transform.scale = { 0.2f,0.2f,0.2f };
+		transform.rotate = { 0.0f,-90.0f,0.0f };
+		isDead_ = false;
+		hp_ = 5;
+	}
 private:
 	
 	Transform transform;
@@ -78,5 +87,9 @@ private:
 
 	// 当たり判定の大きさ（半径）
 	float radius_ = 1.0f;
+
+	int32_t hp_;
+
+	float beginTime = 400.0f;
 };
 

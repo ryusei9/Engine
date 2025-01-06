@@ -17,13 +17,7 @@ void Player::Initialize(Object3d* model, Object3d* bulletModel)
 	// 弾のモデルを設定
 	bulletModel_ = bulletModel;
 
-	fireCoolTime = 0.0f;
-	/*transform.translate = model_->GetTranslate();
-	transform.scale = model_->GetScale();
-	transform.rotate = model_->GetRotate();*/
-	transform.translate = { -3.0f,0.0f,0.0f };
-	transform.scale = { 0.2f,0.2f,0.2f };
-	transform.rotate = { 0.0f,-90.0f,0.0f };
+	SetInitialize();
 }
 
 void Player::Update()
@@ -36,13 +30,19 @@ void Player::Update()
 		}
 		return false;
 		});
+	if (hp_ <= 0) {
+		isDead_ = true;
+	}
 
 	// 弾丸の更新
 	for (PlayerBullet* bullet : bullets_) {
 
 		bullet->Update();
 	}
-	Attack();
+	beginTime--;
+	if (beginTime <= 0) {
+		Attack();
+	}
 	// 入力の更新
 	input_->Update();
 
@@ -116,7 +116,7 @@ void Player::Attack()
 
 void Player::OnCollision()
 {
-	isDead_ = true;
+	hp_ -= 1;
 }
 
 Vector3 Player::GetWorldPosition()

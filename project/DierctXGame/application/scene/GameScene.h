@@ -136,4 +136,11 @@ private:
 	SkySphere* skySphere_;
 
 	Object3d* titleModel;
+
+	Object3d* titleGuideModel;
+
+	Object3d* gameOverModel;
+
+	Object3d* clearModel;
+
 };

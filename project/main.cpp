@@ -333,6 +333,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// テクスチャを事前にロード
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
 	TextureManager::GetInstance()->LoadTexture("resources/monsterBall.png");
+	TextureManager::GetInstance()->LoadTexture("resources/title.png");
 	////////////////////////
 	// input
 	////////////////////////
@@ -356,6 +357,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ModelManager::GetInstance()->LoadModel("enemy_bullet.obj");
 	ModelManager::GetInstance()->LoadModel("sky_sphere.obj");
 	ModelManager::GetInstance()->LoadModel("title.obj");
+	ModelManager::GetInstance()->LoadModel("titleGuide.obj");
+	ModelManager::GetInstance()->LoadModel("GAMEOVER.obj");
+	ModelManager::GetInstance()->LoadModel("GAMECLEAR.obj");
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;

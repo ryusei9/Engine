@@ -23,13 +23,7 @@ void Enemy::Initialize(Object3d* model,Object3d* bulletModel, const Vector3& pos
 	bulletModel_ = bulletModel;
 	// テクスチャ読み込み
 	//textureHandle_ = TextureManager::Load("enemy.png");
-	
-	
-	// 引数で受け取った初期座標をセット
-	transform_.translate = position;
-	transform_.scale = { 3.0f,3.0f,3.0f };
-	transform_.rotate = { 0.0f,-0.0f,0.0f };
-	ApproachPheseInitialize();
+	SetInitialize(position);
 }
 
 void Enemy::Update()
@@ -43,6 +37,9 @@ void Enemy::Update()
 		});
 	for(EnemyBullet* bullet : bullets_) {
 		bullet->Update();
+	}
+	if (hp_ <= 0) {
+		isDead_ = true;
 	}
 	// 敵の行動パターン
 	switch (phese_) {
@@ -155,5 +152,5 @@ Vector3 Enemy::GetWorldPosition()
 
 void Enemy::OnCollision()
 {
-	isDead_ = true;
+	hp_ -= 1;
 }

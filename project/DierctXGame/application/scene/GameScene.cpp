@@ -102,9 +102,30 @@ void GameScene::Initialize()
 	titleModel = new Object3d();
 	titleModel->Initialize(object3dCommon_);
 	titleModel->SetModel("title.obj");
-	titleModel->SetTranslate({ 0.0f,1.0f,0.0f });
+	titleModel->SetTranslate({ 0.0f,1.0f,-3.0f });
 	titleModel->SetScale({ 0.5f,0.5f,0.5f });
-	titleModel->SetRotate({ 0.0f,0.0f,0.0f });
+	titleModel->SetRotate({ -0.2f,0.0f,0.0f });
+
+	titleGuideModel = new Object3d();
+	titleGuideModel->Initialize(object3dCommon_);
+	titleGuideModel->SetModel("titleGuide.obj");
+	titleGuideModel->SetTranslate({ 0.0f,-1.0f,-0.0f });
+	titleGuideModel->SetScale({ 0.5f,0.5f,0.5f });
+	titleGuideModel->SetRotate({ 0.1f,0.0f,0.0f });
+
+	gameOverModel = new Object3d();
+	gameOverModel->Initialize(object3dCommon_);
+	gameOverModel->SetModel("GAMEOVER.obj");
+	gameOverModel->SetTranslate({ 0.0f,1.0f,-3.0f });
+	gameOverModel->SetScale({ 0.5f,0.5f,0.5f });
+	gameOverModel->SetRotate({ -0.2f,0.0f,0.0f });
+
+	clearModel = new Object3d();
+	clearModel->Initialize(object3dCommon_);
+	clearModel->SetModel("GAMECLEAR.obj");
+	clearModel->SetTranslate({ 0.0f,1.0f,-3.0f });
+	clearModel->SetScale({ 0.5f,0.5f,0.5f });
+	clearModel->SetRotate({ -0.2f,0.0f,0.0f });
 
 	enemy_ = new Enemy();
 	enemy_->Initialize(enemyModel, enemyBulletModel, enemyPosition_);
@@ -135,37 +156,28 @@ void GameScene::Update()
 		}
 		return false;
 		});
+
 	// 入力の更新
 	input_->Update();
-	// 操作
-	if (input_->PushKey(DIK_A)) {
-		cameraTransform.rotate.y -= 0.001f;
 
-	}
-	if (input_->PushKey(DIK_D)) {
-		cameraTransform.rotate.y += 0.001f;
-	}
-	if (input_->PushKey(DIK_W)) {
-		cameraTransform.rotate.x -= 0.01f;
-
-	}
-	if (input_->PushKey(DIK_S)) {
-		cameraTransform.rotate.x += 0.001f;
-	}
-	/*if (input_->PushKey(DIK_RIGHTARROW)) {
-		cameraTransform.translate.x -= 0.1f;
-	}
-	if (input_->PushKey(DIK_LEFTARROW)) {
-		cameraTransform.translate.x += 0.1f;
-	}*/
-
-	if (input_->PushKey(DIK_UPARROW)) {
-
-	}
+	skySphere_->Update();
+	camera_->Update();
 	switch (scene) {
 	case TITLE:
 		titleModel->Update();
-		if (input_->PushKey(DIK_SPACE)) {
+		titleGuideModel->Update();
+		moveCameraTransform = {
+		{1.0f,1.0f,1.0f},
+		{-1.5f,1.5f,0.0f},
+		{2.0f,-10.0f,0.0f}
+		};
+		player_->SetInitialize();
+		enemy_->SetInitialize(enemyPosition_);
+		timer_ = 0.0f;
+		camera_->SetTranslate(cameraTransform.translate);
+		camera_->SetRotate(cameraTransform.rotate);
+		//camera_->Update();
+		if (input_->TriggerKey(DIK_SPACE)) {
 			scene = GAME;
 		}
 		break;
@@ -180,16 +192,22 @@ void GameScene::Update()
 		}
 		camera_->SetTranslate(moveCameraTransform.translate);
 		camera_->SetRotate(moveCameraTransform.rotate);
-		camera_->Update();
-
-		skySphere_->Update();
+		//camera_->Update();
+		
+		if (enemy_->IsDead()) {
+			scene = CLEAR;
+		}
 
 		player_->Update();
-		// 敵キャラの更新
-		UpdateEnemyPopCommands();
-		for (Enemy* enemy : enemies_) {
-			enemy->Update();
+
+		if (player_->IsDead()) {
+			scene = GAMEOVER;
 		}
+		// 敵キャラの更新
+		//UpdateEnemyPopCommands();
+		/*for (Enemy* enemy : enemies_) {
+			enemy->Update();
+		}*/
 		enemy_->Update();
 		// 弾更新
 		/*for (EnemyBullet* bullet : enemyBullets_) {
@@ -199,12 +217,19 @@ void GameScene::Update()
 		CheckAllCollisions();
 		break;
 	case GAMEOVER:
-		if (input_->PushKey(DIK_SPACE)) {
+		gameOverModel->Update();
+		camera_->SetTranslate(cameraTransform.translate);
+		camera_->SetRotate(cameraTransform.rotate);
+		if (input_->TriggerKey(DIK_SPACE)) {
 			scene = TITLE;
 		}
 		break;
 	case CLEAR:
-		if (input_->PushKey(DIK_SPACE)) {
+		clearModel->Update();
+		camera_->SetTranslate(cameraTransform.translate);
+		camera_->SetRotate(cameraTransform.rotate);
+		//camera_->Update();
+		if (input_->TriggerKey(DIK_SPACE)) {
 			scene = TITLE;
 		}
 		break;
@@ -220,18 +245,21 @@ void GameScene::Draw()
 	switch (scene) {
 	case TITLE:
 		titleModel->Draw();
+		titleGuideModel->Draw();
 		break;
 	case GAME:
 		
-
+		
 		player_->Draw();
 		// 敵キャラの描画
 
 		enemy_->Draw();
 		break;
 	case GAMEOVER:
+		gameOverModel->Draw();
 		break;
 	case CLEAR:
+		clearModel->Draw();
 		break;
 	}
 	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む

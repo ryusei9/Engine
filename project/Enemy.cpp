@@ -13,6 +13,7 @@ Enemy::~Enemy()
 	for (EnemyBullet* bullet : bullets_) {
 		delete bullet;
 	}
+	bullets_.clear();
 }
 
 void Enemy::Initialize(Object3d* model,Object3d* bulletModel, const Vector3& position)
@@ -113,7 +114,7 @@ void Enemy::Fire()
 {
 	assert(player_);
 	// 弾の速度
-	const float kBulletSpeed = 0.2f;
+	const float kBulletSpeed = 0.1f;
 
 	// 自キャラのワールド座標を取得する
 	Vector3 playerPos = player_->GetWorldPosition();

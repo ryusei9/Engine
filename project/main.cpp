@@ -292,7 +292,6 @@ void Log(const std::string& message) {
 	OutputDebugStringA(message.c_str());
 }
 
-
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// COMの初期化
@@ -334,6 +333,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
 	TextureManager::GetInstance()->LoadTexture("resources/monsterBall.png");
 	TextureManager::GetInstance()->LoadTexture("resources/title.png");
+	TextureManager::GetInstance()->LoadTexture("resources/tutorial.png");
 	////////////////////////
 	// input
 	////////////////////////
@@ -344,7 +344,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	input = Input::GetInstance();
 	input->Initialize(winApp);
 
-
+	
 	// 3Dモデルマネージャの初期化
 	ModelManager::GetInstance()->Initialize(dxCommon);
 
@@ -360,6 +360,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ModelManager::GetInstance()->LoadModel("titleGuide.obj");
 	ModelManager::GetInstance()->LoadModel("GAMEOVER.obj");
 	ModelManager::GetInstance()->LoadModel("GAMECLEAR.obj");
+	ModelManager::GetInstance()->LoadModel("tutorial.obj");
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
@@ -444,6 +445,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+
 
 	return 0;
 }

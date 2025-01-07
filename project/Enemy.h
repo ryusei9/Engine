@@ -72,6 +72,13 @@ public:
 		transform_.scale = { 3.0f,3.0f,3.0f };
 		transform_.rotate = { 0.0f,-0.0f,0.0f };
 		fireTimer = 300;
+		for (EnemyBullet* bullet : bullets_) {
+			bullet->OnCollision();
+			delete bullet;
+
+		}
+		
+		bullets_.clear();
 		phese_ = Phese::Approach;
 		ApproachPheseInitialize();
 	}

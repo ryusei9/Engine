@@ -127,6 +127,16 @@ void GameScene::Initialize()
 	clearModel->SetScale({ 0.5f,0.5f,0.5f });
 	clearModel->SetRotate({ -0.2f,0.0f,0.0f });
 
+	/*tutorialModel = new Object3d();
+	tutorialModel->Initialize(object3dCommon_);
+	tutorialModel->SetModel("tutorial.obj");
+	tutorialModel->SetTranslate({ 2.0f,-2.0f,1.0f });
+	tutorialModel->SetScale({ 0.5f,0.5f,0.5f });
+	tutorialModel->SetRotate({ 0.2f,0.0f,0.0f });*/
+	tutorialSprite = new Sprite();
+	tutorialSprite->Initialize(spriteCommon_, dxCommon_, "resources/tutorial.png");
+	tutorialSprite->SetPosition({ 760.0f,600.0f });
+
 	enemy_ = new Enemy();
 	enemy_->Initialize(enemyModel, enemyBulletModel, enemyPosition_);
 	enemy_->SetGameScene(this);
@@ -203,21 +213,17 @@ void GameScene::Update()
 		if (player_->IsDead()) {
 			scene = GAMEOVER;
 		}
-		// 敵キャラの更新
-		//UpdateEnemyPopCommands();
-		/*for (Enemy* enemy : enemies_) {
-			enemy->Update();
-		}*/
+		
 		enemy_->Update();
-		// 弾更新
-		/*for (EnemyBullet* bullet : enemyBullets_) {
-			bullet->Update();
-		}*/
+		
+		tutorialSprite->Update();
+		///tutorialModel->Update();
 		// 衝突判定
 		CheckAllCollisions();
 		break;
 	case GAMEOVER:
 		gameOverModel->Update();
+		titleGuideModel->Update();
 		camera_->SetTranslate(cameraTransform.translate);
 		camera_->SetRotate(cameraTransform.rotate);
 		if (input_->TriggerKey(DIK_SPACE)) {
@@ -226,6 +232,7 @@ void GameScene::Update()
 		break;
 	case CLEAR:
 		clearModel->Update();
+		titleGuideModel->Update();
 		camera_->SetTranslate(cameraTransform.translate);
 		camera_->SetRotate(cameraTransform.rotate);
 		//camera_->Update();
@@ -254,12 +261,16 @@ void GameScene::Draw()
 		// 敵キャラの描画
 
 		enemy_->Draw();
+		
+		//tutorialModel->Draw();
 		break;
 	case GAMEOVER:
 		gameOverModel->Draw();
+		titleGuideModel->Draw();
 		break;
 	case CLEAR:
 		clearModel->Draw();
+		titleGuideModel->Draw();
 		break;
 	}
 	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
@@ -268,6 +279,7 @@ void GameScene::Draw()
 	case TITLE:
 		break;
 	case GAME:
+		tutorialSprite->Draw();
 		break;
 	case GAMEOVER:
 		break;

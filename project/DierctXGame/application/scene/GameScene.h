@@ -121,11 +121,11 @@ private:
 
 	float playerRadius_ = 0.001f;
 
-	float playerBulletRadius_ = 0.001f;
+	float playerBulletRadius_ = 0.01f;
 
 	float enemyRadius_ = 1.0f;
 
-	float enemyBulletRadius_ = 1.0f;
+	float enemyBulletRadius_ = 0.1f;
 
 	// タイマー用のメンバ変数
 	float timer_;
@@ -143,4 +143,6 @@ private:
 
 	Object3d* clearModel;
 
+	//Object3d* tutorialModel;
+	Sprite* tutorialSprite;
 };

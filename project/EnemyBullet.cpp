@@ -14,7 +14,7 @@ void EnemyBullet::Initialize(Object3d* model, const Vector3& position, const Vec
 	// ワールドトランスフォームの初期化
 
 	transform_ = {
-		{0.25f,0.25f,0.25f},
+		{1.0,1.0f,1.0f},
 		{0.0f,0.0f,0.0f},
 		position
 	};
@@ -35,8 +35,8 @@ void EnemyBullet::Update() {
 		isDead_ = true;
 	}
 	model_->SetTranslate(transform_.translate);
-	model_->SetScale(transform_.scale);
-	model_->SetRotate(transform_.rotate);
+	/*model_->SetScale(transform_.scale);
+	model_->SetRotate(transform_.rotate);*/
 
 	// モデルの更新
 	model_->Update();
@@ -58,6 +58,8 @@ Vector3 EnemyBullet::GetWorldPosition() {
 }
 
 void EnemyBullet::OnCollision() {
-	isDead_ = true;
+	transform_.translate = { 0.0f,1000.0f,0.0f };
+	//model_->SetTranslate(transform_.translate);
+	//isDead_ = true;
 
 }

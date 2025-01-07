@@ -6,6 +6,7 @@ Player::~Player()
 		delete bullet;
 	}
 	delete bulletModel_;
+	bullets_.clear();
 }
 
 void Player::Initialize(Object3d* model, Object3d* bulletModel)
@@ -96,6 +97,10 @@ void Player::Draw()
 void Player::Attack()
 {
 	fireCoolTime++;
+	// 無敵時間が経過したかどうかを確認
+	if (invincible_ && std::chrono::steady_clock::now() >= invincibleEndTime_) {
+		invincible_ = false;
+	}
 	if (input_->GetInstance()->PushKey(DIK_SPACE) && fireCoolTime >= kCoolDownTime) {
 		fireCoolTime = 0;
 		// 弾の速度
@@ -116,10 +121,21 @@ void Player::Attack()
 
 void Player::OnCollision()
 {
-	hp_ -= 1;
+	// 無敵状態でない場合のみ処理を行う
+	if (!invincible_) {
+		hp_ -= 1;
+		// 無敵状態を開始
+		invincible_ = true;
+		invincibleEndTime_ = std::chrono::steady_clock::now() + invincibleDuration_;
+	}
 }
 
 Vector3 Player::GetWorldPosition()
 {
 	return transform.translate;
+}
+
+bool Player::IsInvincible() const
+{
+	return invincible_;
 }

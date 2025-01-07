@@ -22,8 +22,8 @@ void PlayerBullet::Initialize(Object3d* model, const Vector3& position, const Ve
 		{0.0f,0.0f,0.0f},
 		position
 	};
-
-	
+	isDead_ = false;
+	deathTimer_ = kLifeTime;
 	// 引数で受け取った速度をメンバ変数に代入
 	velocity_ = velocity;
 	
@@ -55,7 +55,7 @@ void PlayerBullet::Draw()
 
 void PlayerBullet::OnCollision()
 {
-	isDead_ = true;
+	transform_.translate = { 0.0f,-1000.0f,0.0f };
 }
 
 Vector3 PlayerBullet::GetWorldPosition()

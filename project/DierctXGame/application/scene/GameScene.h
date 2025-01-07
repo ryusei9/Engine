@@ -7,9 +7,9 @@
 #include <Object3d.h>
 #include <Sprite.h>
 #include <DierctXGame/application/object/Player.h>
-#include <Enemy.h>
-#include <EnemyBullet.h>
-#include <SkySphere.h>
+#include <DierctXGame/application/object/Enemy.h>
+#include <DierctXGame/application/object/EnemyBullet.h>
+#include <DierctXGame/application/object/SkySphere.h>
 
 class GameScene
 {

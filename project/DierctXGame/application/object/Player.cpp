@@ -34,7 +34,10 @@ void Player::Update()
 	if (hp_ <= 0) {
 		isDead_ = true;
 	}
-
+	// 無敵時間が経過したかどうかを確認
+	if (invincible_ && std::chrono::steady_clock::now() >= invincibleEndTime_) {
+		invincible_ = false;
+	}
 	// 弾丸の更新
 	for (PlayerBullet* bullet : bullets_) {
 
@@ -51,18 +54,18 @@ void Player::Update()
 	bulletEmitter.translate = transform.translate;
 	// 操作
 	if (input_->PushKey(DIK_RIGHTARROW)) {
-		transform.translate.x += 0.05f;
+		transform.translate.x += 0.08f;
 
 	}
 	if (input_->PushKey(DIK_LEFTARROW)) {
-		transform.translate.x -= 0.05f;
+		transform.translate.x -= 0.08f;
 	}
 	if (input_->PushKey(DIK_DOWNARROW)) {
-		transform.translate.y -= 0.05f;
+		transform.translate.y -= 0.08f;
 
 	}
 	if (input_->PushKey(DIK_UPARROW)) {
-		transform.translate.y += 0.05f;
+		transform.translate.y += 0.08f;
 	}
 	if (transform.translate.x <= -4.0f) {
 		transform.translate.x = -4.0f;
@@ -97,10 +100,7 @@ void Player::Draw()
 void Player::Attack()
 {
 	fireCoolTime++;
-	// 無敵時間が経過したかどうかを確認
-	if (invincible_ && std::chrono::steady_clock::now() >= invincibleEndTime_) {
-		invincible_ = false;
-	}
+	
 	if (input_->GetInstance()->PushKey(DIK_SPACE) && fireCoolTime >= kCoolDownTime) {
 		fireCoolTime = 0;
 		// 弾の速度

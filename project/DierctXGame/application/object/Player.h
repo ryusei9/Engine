@@ -2,7 +2,7 @@
 #include "Vector3.h"
 #include "Input.h"
 #include "Object3d.h"
-#include <PlayerBullet.h>
+#include "PlayerBullet.h"
 #include <Transform.h>
 class Player
 {
@@ -57,6 +57,7 @@ public:
 		transform.rotate = { 0.0f,-90.0f,0.0f };
 		isDead_ = false;
 		for (PlayerBullet* bullet : bullets_) {
+			bullet->OnCollision();
 			delete bullet;
 		}
 		bullets_.clear();
@@ -86,7 +87,7 @@ private:
 
 
 	// クールタイム（秒）
-	const float kCoolDownTime = 15.0f;
+	const float kCoolDownTime = 10.0f;
 
 	float fireCoolTime = 0.0f;
 

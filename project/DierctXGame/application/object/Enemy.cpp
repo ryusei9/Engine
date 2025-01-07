@@ -5,9 +5,10 @@
 #include <Add.h>
 #include <Subtract.h>
 #include <Normalize.h>
-#include <EnemyBullet.h>
+#include <DierctXGame/application/object/EnemyBullet.h>
 #include <Lerp.h>
 #include <thread>
+#include <Lerp.h>
 Enemy::~Enemy()
 {
 	for (EnemyBullet* bullet : bullets_) {
@@ -53,6 +54,10 @@ void Enemy::Update()
 	case Phese::Battle:
 		BattlePheseUpdate();
 		break;
+		// 攻撃フェーズ
+	case Phese::Attack:
+		AttackPheseUpdate();
+		break;
 	}
 	//ImGui::End();
 	
@@ -85,14 +90,19 @@ void Enemy::ApproachPheseUpdate()
 		
 		fireTimer = 300;
 		phese_ = Phese::Battle;
+		battleStartTime_ = std::chrono::steady_clock::now(); // 戦闘フェーズの開始時間を記録
+	
 	}
 	
 }
 
 void Enemy::BattlePheseUpdate()
 {
+	transform_.translate.x = Lerp(transform_.translate.x, 2.0f, 0.01f);
+	transform_.translate.y = Lerp(transform_.translate.y, 0.0f, 0.01f);
+	transform_.translate.z = Lerp(transform_.translate.z, 0.0f, 0.01f);
 	transform_.rotate.y = Lerp(transform_.rotate.y, -0.8f, 0.01f);
-
+	transform_.rotate.z = Lerp(transform_.rotate.z, 0.0f, 0.01f);
 	//ImGui::Text("Phese : Leave");
 	// 速度
 	//const float kEnemyLeaveSpeed = 0.1f;
@@ -108,13 +118,59 @@ void Enemy::BattlePheseUpdate()
 		// 発射タイマーを初期化
 		fireTimer = kFireInterval;
 	}
+	// 戦闘フェーズが終了したら攻撃フェーズに移行
+	if (std::chrono::steady_clock::now() >= battleStartTime_ + battleDuration_) {
+		phese_ = Phese::Attack;
+		attackEndTime_ = std::chrono::steady_clock::now() + attackDuration_;
+	}
+}
+
+void Enemy::AttackPheseUpdate()
+{
+	transform_.translate.x = Lerp(transform_.translate.x, 0.0f, 0.01f);
+	transform_.translate.y = Lerp(transform_.translate.y, 0.0f, 0.01f);
+	transform_.translate.z = Lerp(transform_.translate.z, 10.0f, 0.01f);
+	transform_.rotate.y = Lerp(transform_.rotate.y, -1.5f, 0.01f);
+	transform_.rotate.z = Lerp(transform_.rotate.z, 6.3f, 0.01f);
+	// 発射タイマーカウントダウン
+	fireTimer--;
+	// 指定時間に達した
+	if (fireTimer <= 0) {
+		// 弾を発射
+		Fire();
+		switch (phese_) {
+		case Phese::Battle:
+			// 発射タイマーを初期化
+			fireTimer = kFireInterval;
+			break;
+		case Phese::Attack:
+			// 発射タイマーを初期化
+			fireTimer = kFireInterval2;
+			break;
+		}
+	}
+
+	// 攻撃フェーズが終了したかどうかを確認
+	if (std::chrono::steady_clock::now() >= attackEndTime_) {
+		phese_ = Phese::Battle; // 次のフェーズに移行
+		battleStartTime_ = std::chrono::steady_clock::now(); // 戦闘フェーズの開始時間を再度記録
+	}
+	
 }
 
 void Enemy::Fire()
 {
 	assert(player_);
 	// 弾の速度
-	const float kBulletSpeed = 0.1f;
+	
+	switch (phese_) {
+	case Phese::Battle:
+		kBulletSpeed = 0.1f;
+		break;
+	case Phese::Attack:
+		kBulletSpeed = 0.6f;
+		break;
+	}
 
 	// 自キャラのワールド座標を取得する
 	Vector3 playerPos = player_->GetWorldPosition();

@@ -63,7 +63,7 @@ public:
 		bullets_.clear();
 		hp_ = 5;
 		beginTime = 400.0f;
-		
+		fireCoolTime = 0.0f;
 	}
 
 	bool IsInvincible() const; // 無敵

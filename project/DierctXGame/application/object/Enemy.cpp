@@ -168,7 +168,7 @@ void Enemy::Fire()
 		kBulletSpeed = 0.1f;
 		break;
 	case Phese::Attack:
-		kBulletSpeed = 0.6f;
+		kBulletSpeed = 0.5f;
 		break;
 	}
 

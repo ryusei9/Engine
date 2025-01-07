@@ -6,6 +6,7 @@ Player::~Player()
 		delete bullet;
 	}
 	delete bulletModel_;
+	bullets_.clear();
 }
 
 void Player::Initialize(Object3d* model, Object3d* bulletModel)
@@ -17,12 +18,7 @@ void Player::Initialize(Object3d* model, Object3d* bulletModel)
 	// 弾のモデルを設定
 	bulletModel_ = bulletModel;
 
-	transform.translate = model_->GetTranslate();
-	transform.scale = model_->GetScale();
-	transform.rotate = model_->GetRotate();
-	transform.translate = { -3.0f,0.0f,0.0f };
-	transform.scale = { 0.2f,0.2f,0.2f };
-	transform.rotate = { 0.0f,-90.0f,0.0f };
+	SetInitialize();
 }
 
 void Player::Update()
@@ -35,13 +31,19 @@ void Player::Update()
 		}
 		return false;
 		});
+	if (hp_ <= 0) {
+		isDead_ = true;
+	}
 
 	// 弾丸の更新
 	for (PlayerBullet* bullet : bullets_) {
 
 		bullet->Update();
 	}
-	Attack();
+	beginTime--;
+	if (beginTime <= 0) {
+		Attack();
+	}
 	// 入力の更新
 	input_->Update();
 
@@ -61,6 +63,18 @@ void Player::Update()
 	}
 	if (input_->PushKey(DIK_UPARROW)) {
 		transform.translate.y += 0.05f;
+	}
+	if (transform.translate.x <= -4.0f) {
+		transform.translate.x = -4.0f;
+	}
+	else if (transform.translate.x >= 4.0f) {
+		transform.translate.x = 4.0f;
+	}
+	if (transform.translate.y <= -2.2f) {
+		transform.translate.y = -2.2f;
+	}
+	else if (transform.translate.y >= 2.2f) {
+		transform.translate.y = 2.2f;
 	}
 	model_->SetTranslate(transform.translate);
 	model_->SetScale(transform.scale);
@@ -83,10 +97,14 @@ void Player::Draw()
 void Player::Attack()
 {
 	fireCoolTime++;
+	// 無敵時間が経過したかどうかを確認
+	if (invincible_ && std::chrono::steady_clock::now() >= invincibleEndTime_) {
+		invincible_ = false;
+	}
 	if (input_->GetInstance()->PushKey(DIK_SPACE) && fireCoolTime >= kCoolDownTime) {
 		fireCoolTime = 0;
 		// 弾の速度
-		const float kBulletSpeed = 1.0f;
+		const float kBulletSpeed = 0.25f;
 		Vector3 velocity(kBulletSpeed, 0, 0);
 
 		// 速度ベクトルを自機の向きに合わせて回転させる
@@ -103,10 +121,21 @@ void Player::Attack()
 
 void Player::OnCollision()
 {
-	isDead_ = true;
+	// 無敵状態でない場合のみ処理を行う
+	if (!invincible_) {
+		hp_ -= 1;
+		// 無敵状態を開始
+		invincible_ = true;
+		invincibleEndTime_ = std::chrono::steady_clock::now() + invincibleDuration_;
+	}
 }
 
 Vector3 Player::GetWorldPosition()
 {
 	return transform.translate;
+}
+
+bool Player::IsInvincible() const
+{
+	return invincible_;
 }

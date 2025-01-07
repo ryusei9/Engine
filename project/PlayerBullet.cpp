@@ -18,7 +18,7 @@ void PlayerBullet::Initialize(Object3d* model, const Vector3& position, const Ve
 	//textureHandle_ = TextureManager::GetInstance()->Load("white.png");
 	// ワールドトランスフォームの初期化
 	transform_ = {
-		{0.5f,0.5f,0.5f},
+		{0.5f,0.1f,0.1f},
 		{0.0f,0.0f,0.0f},
 		position
 	};

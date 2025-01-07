@@ -53,6 +53,13 @@ public:
 	/// </summary>
 	void enemyPop(Vector3 translation);
 private:
+	enum SCENE {
+		TITLE,
+		GAME,
+		GAMEOVER,
+		CLEAR
+	};
+	SCENE scene = TITLE;
 	// 基盤
 	DirectXCommon* dxCommon_;
 
@@ -112,13 +119,13 @@ private:
 	// 待機タイマー
 	int32_t kWaitTimer_ = 0;
 
-	float playerRadius_ = 1.0f;
+	float playerRadius_ = 0.001f;
 
-	float playerBulletRadius_ = 1.0f;
+	float playerBulletRadius_ = 0.01f;
 
 	float enemyRadius_ = 1.0f;
 
-	float enemyBulletRadius_ = 1.0f;
+	float enemyBulletRadius_ = 0.1f;
 
 	// タイマー用のメンバ変数
 	float timer_;
@@ -127,4 +134,15 @@ private:
 	Object3d* skySphereModel;
 
 	SkySphere* skySphere_;
+
+	Object3d* titleModel;
+
+	Object3d* titleGuideModel;
+
+	Object3d* gameOverModel;
+
+	Object3d* clearModel;
+
+	//Object3d* tutorialModel;
+	Sprite* tutorialSprite;
 };

@@ -49,6 +49,23 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	float GetRadius()const { return radius_; }
+
+	void SetInitialize() {
+		fireCoolTime = 0.0f;
+		transform.translate = { -3.0f,0.0f,0.0f };
+		transform.scale = { 0.2f,0.2f,0.2f };
+		transform.rotate = { 0.0f,-90.0f,0.0f };
+		isDead_ = false;
+		for (PlayerBullet* bullet : bullets_) {
+			delete bullet;
+		}
+		bullets_.clear();
+		hp_ = 5;
+		beginTime = 400.0f;
+		
+	}
+
+	bool IsInvincible() const; // 無敵
 private:
 	
 	Transform transform;
@@ -78,5 +95,14 @@ private:
 
 	// 当たり判定の大きさ（半径）
 	float radius_ = 1.0f;
+
+	int32_t hp_;
+
+	float beginTime = 400.0f;
+
+	bool invincible_; // 無敵状態かどうかを示すフラグ
+	std::chrono::steady_clock::time_point invincibleEndTime_; // 無敵状態の終了時間
+	const std::chrono::seconds invincibleDuration_ = std::chrono::seconds(2); // 無敵時間の長さ
+
 };
 

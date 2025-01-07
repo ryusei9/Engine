@@ -1,7 +1,7 @@
 #pragma once
 #include "Object3d.h"
 #include <Transform.h>
-#include <EnemyBullet.h>
+#include "EnemyBullet.h"
 
 class Player;
 
@@ -33,9 +33,15 @@ public:
 	void ApproachPheseUpdate();
 
 	/// <summary>
-	/// 離脱フェーズの更新
+	/// 戦闘フェーズの更新
 	/// </summary>
 	void BattlePheseUpdate();
+
+	/// <summary>
+   /// 攻撃フェーズの更新
+   /// </summary>
+	void AttackPheseUpdate();
+
 
 	/// <summary>
 	/// 弾発射
@@ -44,6 +50,8 @@ public:
 
 	// 発射間隔
 	static const int kFireInterval = 60;
+
+	static const int kFireInterval2 = 20;
 
 	// 接近フェーズ初期化
 	void ApproachPheseInitialize();
@@ -67,7 +75,7 @@ public:
 
 	void SetInitialize(const Vector3& position) {
 		isDead_ = false;
-		hp_ = 30;
+		hp_ = 50;
 		transform_.translate = position;
 		transform_.scale = { 3.0f,3.0f,3.0f };
 		transform_.rotate = { 0.0f,-0.0f,0.0f };
@@ -79,6 +87,7 @@ public:
 		}
 		
 		bullets_.clear();
+		isMoveStart = false;
 		phese_ = Phese::Approach;
 		ApproachPheseInitialize();
 	}
@@ -98,6 +107,7 @@ private:
 	enum class Phese {
 		Approach,	// 接近する
 		Battle,		// 離脱する
+		Attack       // 攻撃する
 	};
 
 	// フェーズ
@@ -117,9 +127,21 @@ private:
 	GameScene* gameScene_ = nullptr;
 
 	// 体力
-	int32_t hp_ = 10;
+	int32_t hp_ = 50;
 
 	// デスフラグ
 	bool isDead_ = false;
+
+	// 攻撃フェーズの終了時間
+	std::chrono::steady_clock::time_point attackEndTime_;
+	const std::chrono::seconds attackDuration_ = std::chrono::seconds(10); // 攻撃フェーズの長さ
+
+	// 戦闘フェーズの開始時間
+	std::chrono::steady_clock::time_point battleStartTime_;
+	const std::chrono::seconds battleDuration_ = std::chrono::seconds(10); // 戦闘フェーズの長さ
+
+	bool isMoveStart = false;
+
+	float kBulletSpeed;
 };
 

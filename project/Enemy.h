@@ -63,6 +63,26 @@ public:
 
 	bool IsDead() const { return isDead_; }
 
+	
+
+	void SetInitialize(const Vector3& position) {
+		isDead_ = false;
+		hp_ = 30;
+		transform_.translate = position;
+		transform_.scale = { 3.0f,3.0f,3.0f };
+		transform_.rotate = { 0.0f,-0.0f,0.0f };
+		fireTimer = 300;
+		for (EnemyBullet* bullet : bullets_) {
+			bullet->OnCollision();
+			delete bullet;
+
+		}
+		
+		bullets_.clear();
+		phese_ = Phese::Approach;
+		ApproachPheseInitialize();
+	}
+
 private:
 	// ワールド変換データ
 	Transform transform_;
@@ -97,7 +117,7 @@ private:
 	GameScene* gameScene_ = nullptr;
 
 	// 体力
-	int32_t hp_ = 100;
+	int32_t hp_ = 10;
 
 	// デスフラグ
 	bool isDead_ = false;

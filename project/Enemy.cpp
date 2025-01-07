@@ -7,11 +7,13 @@
 #include <Normalize.h>
 #include <EnemyBullet.h>
 #include <Lerp.h>
+#include <thread>
 Enemy::~Enemy()
 {
 	for (EnemyBullet* bullet : bullets_) {
 		delete bullet;
 	}
+	bullets_.clear();
 }
 
 void Enemy::Initialize(Object3d* model,Object3d* bulletModel, const Vector3& position)
@@ -22,16 +24,7 @@ void Enemy::Initialize(Object3d* model,Object3d* bulletModel, const Vector3& pos
 	bulletModel_ = bulletModel;
 	// テクスチャ読み込み
 	//textureHandle_ = TextureManager::Load("enemy.png");
-	
-	// ワールドトランスフォームの初期化
-	transform_.translate = model_->GetTranslate();
-	transform_.scale = model_->GetScale();
-	transform_.rotate = model_->GetRotate();
-	// 引数で受け取った初期座標をセット
-	transform_.translate = position;
-	transform_.scale = { 3.0f,3.0f,3.0f };
-	transform_.rotate = { 0.0f,-0.0f,0.0f };
-	ApproachPheseInitialize();
+	SetInitialize(position);
 }
 
 void Enemy::Update()
@@ -45,6 +38,9 @@ void Enemy::Update()
 		});
 	for(EnemyBullet* bullet : bullets_) {
 		bullet->Update();
+	}
+	if (hp_ <= 0) {
+		isDead_ = true;
 	}
 	// 敵の行動パターン
 	switch (phese_) {
@@ -87,6 +83,7 @@ void Enemy::ApproachPheseUpdate()
 	// 既定の位置に到達したら離脱
 	if (transform_.translate.x < 2.0f) {
 		
+		fireTimer = 300;
 		phese_ = Phese::Battle;
 	}
 	
@@ -95,6 +92,7 @@ void Enemy::ApproachPheseUpdate()
 void Enemy::BattlePheseUpdate()
 {
 	transform_.rotate.y = Lerp(transform_.rotate.y, -0.8f, 0.01f);
+
 	//ImGui::Text("Phese : Leave");
 	// 速度
 	//const float kEnemyLeaveSpeed = 0.1f;
@@ -116,7 +114,7 @@ void Enemy::Fire()
 {
 	assert(player_);
 	// 弾の速度
-	const float kBulletSpeed = 0.2f;
+	const float kBulletSpeed = 0.1f;
 
 	// 自キャラのワールド座標を取得する
 	Vector3 playerPos = player_->GetWorldPosition();
@@ -155,5 +153,5 @@ Vector3 Enemy::GetWorldPosition()
 
 void Enemy::OnCollision()
 {
-	isDead_ = true;
+	hp_ -= 1;
 }

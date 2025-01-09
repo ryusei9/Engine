@@ -37,6 +37,7 @@
 #include "Camera.h"
 #include <SrvManager.h>
 #include "ImGuiManager.h"
+#include "imgui.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -593,6 +594,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// テクスチャを事前にロード
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
 	TextureManager::GetInstance()->LoadTexture("resources/monsterBall.png");
+	TextureManager::GetInstance()->LoadTexture("resources/mori.png");
 	////////////////////////
 	// input
 	////////////////////////
@@ -682,9 +684,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	bool useMonsterBall = true;
 
+	Vector2 spritePosition = { 100.0f,100.0f };
 
-
-	std::vector<Sprite*> sprites;
+	/*std::vector<Sprite*> sprites;
 	for (uint32_t i = 0; i < 5; ++i) {
 		if (i < 4) {
 			Sprite* sprite = new Sprite();
@@ -696,28 +698,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			sprite->Initialize(spriteCommon, dxCommon, "resources/monsterBall.png");
 			sprites.push_back(sprite);
 		}
-	}
+	}*/
+
+	Sprite* sprite = new Sprite();
+	sprite->Initialize(spriteCommon, dxCommon, "resources/mori.png");
 
 	
 	
 	/*Model* model = new Model();
 	model->Initialize(modelCommon);*/
-	std::vector<Object3d*> object3ds;
-	//std::vector<Model*> models;
-	for (uint32_t i = 0; i < 2; ++i) {
-		Object3d* object3d = new Object3d();
-		object3d->Initialize(object3dCommon);
-		object3ds.push_back(object3d);
-		//Model* model = new Model();
-		//model->Initialize(modelCommon);
-		/*models.push_back(model);
-		object3d->SetModel(model);*/
-	}
-	// 初期化済みの3Dオブジェクトにモデルを紐づける
-	object3ds[0]->SetModel("plane.obj");
-	object3ds[1]->SetModel("axis.obj");
+	//std::vector<Object3d*> object3ds;
+	////std::vector<Model*> models;
+	//for (uint32_t i = 0; i < 2; ++i) {
+	//	Object3d* object3d = new Object3d();
+	//	object3d->Initialize(object3dCommon);
+	//	object3ds.push_back(object3d);
+	//	//Model* model = new Model();
+	//	//model->Initialize(modelCommon);
+	//	/*models.push_back(model);
+	//	object3d->SetModel(model);*/
+	//}
+	//// 初期化済みの3Dオブジェクトにモデルを紐づける
+	//object3ds[0]->SetModel("plane.obj");
+	//object3ds[1]->SetModel("axis.obj");
 	
-	imGuiManager->Initialize(winApp, dxCommon, srvManager);
+	imGuiManager->Initialize(winApp, dxCommon);
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
 	while (true) {
@@ -728,25 +733,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		
 		imGuiManager->Begin();
-		// ImGuiにここからフレームが始まる旨を伝える
-		/*ImGui_ImplDX12_NewFrame();
-		ImGui_ImplWin32_NewFrame();
-		ImGui::NewFrame();*/
-
-		// 開発用の処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
+		// デモウィンドウの表示
+		//ImGui::Begin("DemoWindow");
 		//ImGui::ShowDemoWindow();
-		/*ImGui::DragFloat3("cameraPosition", &cameraTransform.translate.x, 0.01f);
-		ImGui::SliderAngle("modelRotate.x", &transform.rotate.x);
-		ImGui::SliderAngle("modelRotate.y", &transform.rotate.y);
-		ImGui::SliderAngle("modelRotate.z", &transform.rotate.z);*/
-		//ImGui::ColorEdit3("modelColor", &materialDataSprite->color.x);
-		/*ImGui::Checkbox("useMonsterBall", &useMonsterBall);
-		ImGui::ColorEdit3("lightColor", &directionalLightData->color.x);
-		ImGui::DragFloat3("lightDirection", &directionalLightData->direction.x, 0.01f);
-		ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
-		ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
-		ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);*/
+		 // 次に作成されるウィンドウのサイズを設定
+		ImGui::SetNextWindowSize(ImVec2(500, 100), ImGuiCond_FirstUseEver);
 
+		ImGui::Begin("sprite");
+		ImGui::SliderFloat2("sprite.translate", &spritePosition.x,0.0f,1200.0f,"%0.1f");
+		ImGui::End();
 
 		// ゲームの処理
 		// 入力の更新
@@ -762,80 +757,81 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		camera->SetTranslate(cameraTransform.translate);
 		camera->Update();
 		//transform.rotate.y += 0.01f;
-		for (uint32_t i = 0; i < sprites.size();++i) {
+		//for (uint32_t i = 0; i < sprites.size();++i) {
 
-			sprites[i]->Update();
+		//	sprites[i]->Update();
+		sprite->Update();
+		sprite->SetPosition(spritePosition);
+		//	// 現在の座標を変数で受ける
+		//	Vector2 position = sprites[i]->GetPosition();
 
-			// 現在の座標を変数で受ける
-			Vector2 position = sprites[i]->GetPosition();
+		//	// 座標を変更する
+		//	//ImGui::DragFloat2("sprite.translate", &position.x);
+		//	// 変更を反映する
+		//	sprites[i]->SetPosition({ 200.0f * i });
 
-			// 座標を変更する
-			//ImGui::DragFloat2("sprite.translate", &position.x);
-			// 変更を反映する
-			sprites[i]->SetPosition({ 200.0f * i });
+		//	// 角度を変更させるテスト
+		//	float rotation = sprites[i]->GetRotation();
 
-			// 角度を変更させるテスト
-			float rotation = sprites[i]->GetRotation();
+		//	//ImGui::DragFloat("sprites.rotation", &rotation, 0.01f);
 
-			//ImGui::DragFloat("sprites.rotation", &rotation, 0.01f);
+		//	sprites[i]->SetRotation(rotation);
 
-			sprites[i]->SetRotation(rotation);
+		//	// 色を変化させるテスト
+		//	Vector4 color = sprites[i]->GetColor();
 
-			// 色を変化させるテスト
-			Vector4 color = sprites[i]->GetColor();
+		//	//ImGui::ColorEdit3("sprites.color", &color.x);
 
-			//ImGui::ColorEdit3("sprites.color", &color.x);
+		//	sprites[i]->SetColor(color);
 
-			sprites[i]->SetColor(color);
+		//	// サイズを変化させるテスト
+		//	Vector2 size = sprites[i]->GetSize();
+		//	//ImGui::DragFloat2("sprites.scale", &size.x);
 
-			// サイズを変化させるテスト
-			Vector2 size = sprites[i]->GetSize();
-			//ImGui::DragFloat2("sprites.scale", &size.x);
+		//	sprites[i]->SetSize({ 100.0f,100.0f });
 
-			sprites[i]->SetSize({ 100.0f,100.0f });
+		//	// 反転X
+		//	bool isFlipX = sprites[i]->GetIsFlipX();
+		//	//ImGui::Checkbox("sprites.isFlipX", &isFlipX);
 
-			// 反転X
-			bool isFlipX = sprites[i]->GetIsFlipX();
-			//ImGui::Checkbox("sprites.isFlipX", &isFlipX);
+		//	sprites[i]->SetIsFlipX(isFlipX);
 
-			sprites[i]->SetIsFlipX(isFlipX);
+		//	bool isFlipY = sprites[i]->GetIsFlipY();
+		//	//ImGui::Checkbox("sprites.isFlipY", &isFlipY);
 
-			bool isFlipY = sprites[i]->GetIsFlipY();
-			//ImGui::Checkbox("sprites.isFlipY", &isFlipY);
-
-			sprites[i]->SetIsFlipY(isFlipY);
-		}
+		//	sprites[i]->SetIsFlipY(isFlipY);
+		//}
 		
-		for (uint32_t i = 0; i < object3ds.size();++i) {
-		object3ds[i]->Update();
-			// 現在の座標を変数で受ける
-			Vector3 position[2];
-			position[i] = object3ds[i]->GetTranslate();
-			// 座標を変更する
-			//ImGui::DragFloat3("planeModel.translate", &position[0].x,0.01f);
-			//ImGui::DragFloat3("axisModel.translate", &position[1].x, 0.01f);
-			// 変更を反映する
-			position[0].x = -2.0f;
-			position[1].x = 2.0f;
-			object3ds[i]->SetTranslate(position[i]);
+		//for (uint32_t i = 0; i < object3ds.size();++i) {
+		//object3ds[i]->Update();
+		//	// 現在の座標を変数で受ける
+		//	Vector3 position[2];
+		//	position[i] = object3ds[i]->GetTranslate();
+		//	// 座標を変更する
+		//	//ImGui::DragFloat3("planeModel.translate", &position[0].x,0.01f);
+		//	//ImGui::DragFloat3("axisModel.translate", &position[1].x, 0.01f);
+		//	// 変更を反映する
+		//	position[0].x = -2.0f;
+		//	position[1].x = 2.0f;
+		//	object3ds[i]->SetTranslate(position[i]);
 
-			// 角度を変更させるテスト
-			Vector3 rotation[2];
-			rotation[i] = object3ds[i]->GetRotate();
+		//	// 角度を変更させるテスト
+		//	Vector3 rotation[2];
+		//	rotation[i] = object3ds[i]->GetRotate();
 
-			//ImGui::DragFloat3("planeModel.rotation", &rotation[0].x, 0.01f);
-			//ImGui::DragFloat3("axisModel.rotation", &rotation[1].x, 0.01f);
-			rotation[0].y += 0.01f;
-			rotation[1].z += 0.01f;
-			object3ds[i]->SetRotate(rotation[i]);
-			
-			// 拡縮を変更するテスト
-			Vector3 scale[2];
-			scale[i] = object3ds[i]->GetScale();
-			//ImGui::DragFloat3("planeModel.scale", &scale[0].x, 0.01f);
-			//ImGui::DragFloat3("axisModel.scale", &scale[1].x, 0.01f);
-			object3ds[i]->SetScale(scale[i]);
-		}
+		//	//ImGui::DragFloat3("planeModel.rotation", &rotation[0].x, 0.01f);
+		//	//ImGui::DragFloat3("axisModel.rotation", &rotation[1].x, 0.01f);
+		//	rotation[0].y += 0.01f;
+		//	rotation[1].z += 0.01f;
+		//	object3ds[i]->SetRotate(rotation[i]);
+		//	
+		//	// 拡縮を変更するテスト
+		//	Vector3 scale[2];
+		//	scale[i] = object3ds[i]->GetScale();
+		//	//ImGui::DragFloat3("planeModel.scale", &scale[0].x, 0.01f);
+		//	//ImGui::DragFloat3("axisModel.scale", &scale[1].x, 0.01f);
+		//	object3ds[i]->SetScale(scale[i]);
+		//}
 
 		
 		imGuiManager->End();
@@ -843,22 +839,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/////////////////////
 		//// コマンドをキック
 		/////////////////////
-		imGuiManager->Draw();
+		
 		// 描画前処理
 		dxCommon->PreDraw();
+		
+
 		srvManager->PreDraw();
+
 		// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
 		object3dCommon->DrawSettings();
 		// 全てのobject3d個々の描画
-		for (auto& object3d : object3ds) {
+		/*for (auto& object3d : object3ds) {
 			object3d->Draw();
-		}
+		}*/
 		// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
 		spriteCommon->DrawSettings();
 
-		for (auto& sprite : sprites) {
+		/*for (auto& sprite : sprites) {
 			sprite->Draw();
-		}
+		}*/
+		sprite->Draw();
+
+		imGuiManager->Draw();
+
 		dxCommon->PostDraw();
 		
 
@@ -871,9 +874,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	/*for (auto& model : models) {
 		delete model;
 	}*/
-	for (auto& object3d : object3ds) {
+	/*for (auto& object3d : object3ds) {
 		delete object3d;
-	}
+	}*/
 	for (uint32_t i = 0; i < SrvManager::kMaxSRVCount; i++) {
 		// 使われているSRVインデックスを解放
 		srvManager->Free(i);
@@ -881,9 +884,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete srvManager;
 	delete input;
 	delete spriteCommon;
-	for (auto& sprite : sprites) {
+	/*for (auto& sprite : sprites) {
 		delete sprite;
-	}
+	}*/
 	delete object3dCommon;
 	
 	//delete modelCommon;

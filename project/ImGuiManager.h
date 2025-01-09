@@ -1,13 +1,12 @@
 #pragma once
 #include "WinApp.h"
 #include "DirectXCommon.h"
-#include <SrvManager.h>
 // ImGuiの管理
 class ImGuiManager
 {
 public:
 	/// 初期化
-	void Initialize(WinApp* winApp_,DirectXCommon* dxCommon,SrvManager* srvManager);
+	void Initialize(WinApp* winApp_,DirectXCommon* dxCommon);
 
 	/// ImGui受付開始
 	void Begin();
@@ -26,7 +25,7 @@ private:
 	WinApp* winApp_;
 
 	DirectXCommon* dxCommon_;
-	
-	SrvManager* srvManager_;
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap_;
 };
 

@@ -126,7 +126,7 @@ public: // メンバ関数
 	//std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> GetSwapChainResources(){return swapChainResources[0] }
 	HANDLE GetFenceEvent() { return fenceEvent; }
 
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() const { return commandList.Get(); }
+	ID3D12GraphicsCommandList* GetCommandList() const { return commandList.Get(); }
 
 	D3D12_CPU_DESCRIPTOR_HANDLE(&GetRtvHandles())[2] {return rtvHandles; }
 

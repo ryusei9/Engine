@@ -589,7 +589,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	srvManager->Initialize(dxCommon);
 
 	// テクスチャマネージャの初期化
-	TextureManager::GetInstance()->Initialize(dxCommon,srvManager);
+	TextureManager::GetInstance()->Initialize(dxCommon, srvManager);
 
 	// テクスチャを事前にロード
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
@@ -623,7 +623,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// .objファイルからモデルを読み込む
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
-	
+
 	Camera* camera = new Camera();
 	camera->SetRotate({ 0.0f,0.0f,0.0f });
 	camera->SetTranslate({ 0.0f,0.0f,-10.0f });
@@ -703,8 +703,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Sprite* sprite = new Sprite();
 	sprite->Initialize(spriteCommon, dxCommon, "resources/mori.png");
 
-	
-	
+
+
 	/*Model* model = new Model();
 	model->Initialize(modelCommon);*/
 	//std::vector<Object3d*> object3ds;
@@ -721,7 +721,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//// 初期化済みの3Dオブジェクトにモデルを紐づける
 	//object3ds[0]->SetModel("plane.obj");
 	//object3ds[1]->SetModel("axis.obj");
-	
+
 	imGuiManager->Initialize(winApp, dxCommon);
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
@@ -731,25 +731,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// ゲームループを抜ける
 			break;
 		}
-		
+
 		imGuiManager->Begin();
 		// デモウィンドウの表示
 		//ImGui::Begin("DemoWindow");
 		//ImGui::ShowDemoWindow();
 		 // 次に作成されるウィンドウのサイズを設定
+#ifdef _DEBUG
 		ImGui::SetNextWindowSize(ImVec2(500, 100), ImGuiCond_FirstUseEver);
 
 		ImGui::Begin("sprite");
-		ImGui::SliderFloat2("sprite.translate", &spritePosition.x,0.0f,1200.0f,"%0.1f");
+		ImGui::SliderFloat2("sprite.translate", &spritePosition.x, 0.0f, 1200.0f, "%0.1f");
 		ImGui::End();
-
+#endif
 		// ゲームの処理
 		// 入力の更新
 		input->Update();
 		// 操作
 		if (input->PushKey(DIK_RIGHTARROW)) {
 			cameraTransform.translate.x -= 0.1f;
-			
+
 		}
 		if (input->PushKey(DIK_LEFTARROW)) {
 			cameraTransform.translate.x += 0.1f;
@@ -801,7 +802,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//	sprites[i]->SetIsFlipY(isFlipY);
 		//}
-		
+
 		//for (uint32_t i = 0; i < object3ds.size();++i) {
 		//object3ds[i]->Update();
 		//	// 現在の座標を変数で受ける
@@ -833,16 +834,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//	object3ds[i]->SetScale(scale[i]);
 		//}
 
-		
+
 		imGuiManager->End();
 		/*ImGui::Render();*/
 		/////////////////////
 		//// コマンドをキック
 		/////////////////////
-		
+
 		// 描画前処理
 		dxCommon->PreDraw();
-		
+
 
 		srvManager->PreDraw();
 
@@ -863,7 +864,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		imGuiManager->Draw();
 
 		dxCommon->PostDraw();
-		
+
 
 	}
 
@@ -888,7 +889,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		delete sprite;
 	}*/
 	delete object3dCommon;
-	
+
 	//delete modelCommon;
 	// WindowsAPIの終了処理
 	winApp->Finalize();

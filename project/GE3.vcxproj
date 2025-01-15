@@ -47,10 +47,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <IncludePath>$(SolutionDir)DirectXTex;$(SolutionDir)imgui;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <IncludePath>$(SolutionDir)DirectXTex;$(SolutionDir)imgui;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -105,6 +107,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Audio.cpp" />
     <ClCompile Include="DierctXGame\engine\io\Add.cpp" />
     <ClCompile Include="DierctXGame\engine\base\Camera.cpp" />
     <ClCompile Include="DierctXGame\engine\base\D3DresourceLeakChecker.cpp" />
@@ -121,6 +124,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\base\Input.cpp" />
     <ClCompile Include="DierctXGame\engine\io\Inverse.cpp" />
     <ClCompile Include="DierctXGame\engine\base\Logger.cpp" />
+    <ClCompile Include="ImGuiManager.cpp" />
     <ClCompile Include="DierctXGame\application\scene\GameScene.cpp" />
     <ClCompile Include="DierctXGame\engine\io\Length.cpp" />
     <ClCompile Include="DierctXGame\engine\io\Lerp.cpp" />
@@ -144,6 +148,10 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\base\StringUtility.cpp" />
     <ClCompile Include="DierctXGame\engine\base\TextureManager.cpp" />
     <ClCompile Include="DierctXGame\engine\base\WinApp.cpp" />
+    <ClCompile Include="DierctXGame\engine\base\SrvManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Audio.h" />
     <ClCompile Include="DierctXGame\application\object\Player.cpp" />
     <ClCompile Include="DierctXGame\application\object\PlayerBullet.cpp" />
     <ClCompile Include="DierctXGame\application\object\SkySphere.cpp" />
@@ -198,6 +206,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\io\Vector4.h" />
     <ClInclude Include="DierctXGame\engine\io\VertexData.h" />
     <ClInclude Include="DierctXGame\engine\base\WinApp.h" />
+    <ClInclude Include="DierctXGame\engine\base\SrvManager.h" />
+    <ClInclude Include="ImGuiManager.h" />
     <ClInclude Include="DierctXGame\application\scene\GameScene.h" />
     <ClInclude Include="DierctXGame\application\object\Player.h" />
     <ClInclude Include="DierctXGame\engine\io\Length.h" />
@@ -212,6 +222,9 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
       <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
+    </ProjectReference>
+    <ProjectReference Include="ImGui\ImGui.vcxproj">
+      <Project>{f65a3899-9d89-405c-b3e8-af6f0c6c8139}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

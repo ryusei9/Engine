@@ -77,20 +77,10 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource_;
 };
 
-
-
-// std::stringを受け取る関数
-void Log(const std::string& message) {
-	OutputDebugStringA(message.c_str());
-}
-
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// COMの初期化
 	CoInitializeEx(0, COINIT_MULTITHREADED);
-
-	// COMの初期化
-	//HRESULT hr;
 
 	// ポインタ
 	WinApp* winApp = nullptr;
@@ -98,21 +88,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// WindowsAPIの初期化
 	winApp = new WinApp();
 	winApp->Initialize();
-
-
-	// 出力ウィンドウへの文字出力
-	OutputDebugStringA("Hello,DirectX!\n");
-
-	// 文字列を格納する
-	std::string str0{ "STRING!!!" };
-
-	// 整数を文字列にする
-	std::string str1{ std::to_string(10) };
-
-	// 変数から型を推論してくれる
-	Log(std::format("str0:{},str1:{}\n", str0, str1));
-
-
 
 	// ポインタ
 	DirectXCommon* dxCommon = nullptr;
@@ -170,14 +145,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	ImGuiManager* imGuiManager = new ImGuiManager();
 
-	//// XAudio2の初期化
-	//IXAudio2* xAudio2 = nullptr;
-	//IXAudio2MasteringVoice* masterVoice = nullptr;
-
-	//HRESULT result = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
-
-	//// マスターボイスの作成
-	//result = xAudio2->CreateMasteringVoice(&masterVoice);
 	Audio::GetInstance()->Initialize();
 
 	// サウンドデータの読み込み
@@ -243,11 +210,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 
 		imGuiManager->Begin();
-		// デモウィンドウの表示
-		//ImGui::Begin("DemoWindow");
-		//ImGui::ShowDemoWindow();
-		 // 次に作成されるウィンドウのサイズを設定
 #ifdef _DEBUG
+		// 次に作成されるウィンドウのサイズを設定
 		ImGui::SetNextWindowSize(ImVec2(500, 100), ImGuiCond_FirstUseEver);
 
 		ImGui::Begin("sprite");
@@ -273,7 +237,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 
 		imGuiManager->End();
-		/*ImGui::Render();*/
+		
 		/////////////////////
 		//// コマンドをキック
 		/////////////////////
@@ -286,16 +250,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
 		object3dCommon->DrawSettings();
-		// 全てのobject3d個々の描画
-		/*for (auto& object3d : object3ds) {
-			object3d->Draw();
-		}*/
+		
 		// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
 		spriteCommon->DrawSettings();
 
-		/*for (auto& sprite : sprites) {
-			sprite->Draw();
-		}*/
 		sprite->Draw();
 
 		imGuiManager->Draw();

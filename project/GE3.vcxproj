@@ -108,9 +108,12 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Audio.cpp" />
+    <ClCompile Include="DierctXGame\engine\io\Add.cpp" />
     <ClCompile Include="DierctXGame\engine\base\Camera.cpp" />
     <ClCompile Include="DierctXGame\engine\base\D3DresourceLeakChecker.cpp" />
     <ClCompile Include="DierctXGame\engine\base\DirectXCommon.cpp" />
+    <ClCompile Include="DierctXGame\application\object\Enemy.cpp" />
+    <ClCompile Include="DierctXGame\application\object\EnemyBullet.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
     <ClCompile Include="externals\imgui\imgui_draw.cpp" />
@@ -122,6 +125,9 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\io\Inverse.cpp" />
     <ClCompile Include="DierctXGame\engine\base\Logger.cpp" />
     <ClCompile Include="ImGuiManager.cpp" />
+    <ClCompile Include="DierctXGame\application\scene\GameScene.cpp" />
+    <ClCompile Include="DierctXGame\engine\io\Length.cpp" />
+    <ClCompile Include="DierctXGame\engine\io\Lerp.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="DierctXGame\engine\io\MakeAffineMatrix.cpp" />
     <ClCompile Include="DierctXGame\engine\io\MakeIdentity4x4.cpp" />
@@ -146,10 +152,19 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Audio.h" />
+    <ClCompile Include="DierctXGame\application\object\Player.cpp" />
+    <ClCompile Include="DierctXGame\application\object\PlayerBullet.cpp" />
+    <ClCompile Include="DierctXGame\application\object\SkySphere.cpp" />
+    <ClCompile Include="DierctXGame\engine\io\Subtract.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DierctXGame\engine\io\Add.h" />
     <ClInclude Include="DierctXGame\engine\base\Camera.h" />
     <ClInclude Include="DierctXGame\engine\base\D3DresourceLeakChecker.h" />
     <ClInclude Include="DierctXGame\engine\io\DirectionalLight.h" />
     <ClInclude Include="DierctXGame\engine\base\DirectXCommon.h" />
+    <ClInclude Include="DierctXGame\application\object\Enemy.h" />
+    <ClInclude Include="DierctXGame\application\object\EnemyBullet.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
@@ -193,6 +208,13 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\base\WinApp.h" />
     <ClInclude Include="DierctXGame\engine\base\SrvManager.h" />
     <ClInclude Include="ImGuiManager.h" />
+    <ClInclude Include="DierctXGame\application\scene\GameScene.h" />
+    <ClInclude Include="DierctXGame\application\object\Player.h" />
+    <ClInclude Include="DierctXGame\engine\io\Length.h" />
+    <ClInclude Include="DierctXGame\engine\io\Lerp.h" />
+    <ClInclude Include="DierctXGame\application\object\PlayerBullet.h" />
+    <ClInclude Include="DierctXGame\application\object\SkySphere.h" />
+    <ClInclude Include="DierctXGame\engine\io\Subtract.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

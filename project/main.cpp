@@ -42,6 +42,8 @@
 #include "Audio.h"
 
 #pragma comment(lib,"xaudio2.lib")
+#include <DierctXGame/application/scene/GameScene.h>
+#include <Normalize.h>
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -78,7 +80,6 @@ private:
 };
 
 
-
 // std::stringを受け取る関数
 void Log(const std::string& message) {
 	OutputDebugStringA(message.c_str());
@@ -88,9 +89,6 @@ void Log(const std::string& message) {
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// COMの初期化
 	CoInitializeEx(0, COINIT_MULTITHREADED);
-
-	// COMの初期化
-	//HRESULT hr;
 
 	// ポインタ
 	WinApp* winApp = nullptr;
@@ -118,7 +116,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	DirectXCommon* dxCommon = nullptr;
 
 	// DirectXの初期化
-	dxCommon = new DirectXCommon();
+	dxCommon = DirectXCommon::GetInstance();
 	dxCommon->Initialize(winApp);
 
 	// SRVマネージャの初期化
@@ -134,6 +132,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
 	TextureManager::GetInstance()->LoadTexture("resources/monsterBall.png");
 	TextureManager::GetInstance()->LoadTexture("resources/mori.png");
+	TextureManager::GetInstance()->LoadTexture("resources/title.png");
+	TextureManager::GetInstance()->LoadTexture("resources/tutorial.png");
+
 	////////////////////////
 	// input
 	////////////////////////
@@ -141,32 +142,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Input* input = nullptr;
 
 	// 入力の初期化
-	input = new Input();
+	input = Input::GetInstance();
 	input->Initialize(winApp);
 
-
-	SpriteCommon* spriteCommon = nullptr;
-	// スプライト共通部の初期化
-	spriteCommon = new SpriteCommon;
-	spriteCommon->Initialize(dxCommon);
-
-	Object3dCommon* object3dCommon = nullptr;
-	// 3Dオブジェクト共通部の初期化
-	object3dCommon = new Object3dCommon;
-	object3dCommon->Initialize(dxCommon);
-
-
+	
 	// 3Dモデルマネージャの初期化
 	ModelManager::GetInstance()->Initialize(dxCommon);
 
 	// .objファイルからモデルを読み込む
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
-
-	Camera* camera = new Camera();
-	camera->SetRotate({ 0.0f,0.0f,0.0f });
-	camera->SetTranslate({ 0.0f,0.0f,-10.0f });
-	object3dCommon->SetDefaultCamera(camera);
+	ModelManager::GetInstance()->LoadModel("mori.obj");
+	ModelManager::GetInstance()->LoadModel("player.obj");
+	ModelManager::GetInstance()->LoadModel("player_bullet.obj");
+	ModelManager::GetInstance()->LoadModel("enemy_bullet.obj");
+	ModelManager::GetInstance()->LoadModel("sky_sphere.obj");
+	ModelManager::GetInstance()->LoadModel("title.obj");
+	ModelManager::GetInstance()->LoadModel("titleGuide.obj");
+	ModelManager::GetInstance()->LoadModel("GAMEOVER.obj");
+	ModelManager::GetInstance()->LoadModel("GAMECLEAR.obj");
+	ModelManager::GetInstance()->LoadModel("tutorial.obj");
 
 	ImGuiManager* imGuiManager = new ImGuiManager();
 
@@ -211,21 +206,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		infoQueue->Release();
 	}
 #endif
+	std::unique_ptr<GameScene> gameScene_ = std::make_unique<GameScene>();
+	gameScene_->Initialize();
 
-	Transform cameraTransform{
-		{1.0f,1.0f,1.0f},
-		{0.0f,0.0f,0.0f},
-		{0.0f,0.0f,-10.0f}
-	};
-
-	bool useMonsterBall = true;
-
-	Vector2 spritePosition = { 100.0f,100.0f };
-
-	
-
-	Sprite* sprite = new Sprite();
-	sprite->Initialize(spriteCommon, dxCommon, "resources/mori.png");
 
 
 	// 音声再生
@@ -233,6 +216,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 
 	imGuiManager->Initialize(winApp, dxCommon);
+
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
 	while (true) {
@@ -242,64 +226,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			break;
 		}
 
-		imGuiManager->Begin();
-		// デモウィンドウの表示
-		//ImGui::Begin("DemoWindow");
-		//ImGui::ShowDemoWindow();
-		 // 次に作成されるウィンドウのサイズを設定
-#ifdef _DEBUG
-		ImGui::SetNextWindowSize(ImVec2(500, 100), ImGuiCond_FirstUseEver);
-
-		ImGui::Begin("sprite");
-		ImGui::SliderFloat2("sprite.translate", &spritePosition.x, 0.0f, 1200.0f, "%0.1f");
-		ImGui::End();
-#endif
-		// ゲームの処理
-		// 入力の更新
-		input->Update();
-		// 操作
-		if (input->PushKey(DIK_RIGHTARROW)) {
-			cameraTransform.translate.x -= 0.1f;
-
-		}
-		if (input->PushKey(DIK_LEFTARROW)) {
-			cameraTransform.translate.x += 0.1f;
-		}
-		camera->SetTranslate(cameraTransform.translate);
-		camera->Update();
-		
-		sprite->Update();
-		sprite->SetPosition(spritePosition);
-		
-
+		gameScene_->Update();
+    
 		imGuiManager->End();
 		/*ImGui::Render();*/
 		/////////////////////
 		//// コマンドをキック
 		/////////////////////
-
+		
 		// 描画前処理
 		dxCommon->PreDraw();
 
 
 		srvManager->PreDraw();
 
-		// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
-		object3dCommon->DrawSettings();
-		// 全てのobject3d個々の描画
-		/*for (auto& object3d : object3ds) {
-			object3d->Draw();
-		}*/
-		// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
-		spriteCommon->DrawSettings();
-
-		/*for (auto& sprite : sprites) {
-			sprite->Draw();
-		}*/
-		sprite->Draw();
-
-		imGuiManager->Draw();
-
+		gameScene_->Draw();
+		
 		dxCommon->PostDraw();
 
 
@@ -309,25 +251,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 解放処理
 	////////////////////
 
+
 	for (uint32_t i = 0; i < SrvManager::kMaxSRVCount; i++) {
 		// 使われているSRVインデックスを解放
 		srvManager->Free(i);
 	}
 	delete srvManager;
-	delete input;
-	delete spriteCommon;
-	
-	delete object3dCommon;
 	
 	Audio::GetInstance()->SoundUnload(&soundData1);
 	Audio::GetInstance()->Finalize();
+
 	
 	// WindowsAPIの終了処理
 	winApp->Finalize();
 	delete winApp;
-
+	
 	CloseHandle(dxCommon->GetFenceEvent());
-	delete dxCommon;
+	
 
 	// テクスチャマネージャの終了
 	TextureManager::GetInstance()->Finalize();
@@ -337,6 +277,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	imGuiManager->Finalize();
 	delete imGuiManager;
 	
+
 
 	return 0;
 }

@@ -65,7 +65,7 @@ void WinApp::Initialize()
 		// 利用するクラス名
 		wc.lpszClassName,
 		// タイトルバーの文字
-		L"GE3",
+		L"LE2B_13_サトウ_リュウセイ_可視光線",
 		// ウィンドウスタイル
 		WS_OVERLAPPEDWINDOW,
 		// 表示X座標

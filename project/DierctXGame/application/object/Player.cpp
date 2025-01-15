@@ -112,7 +112,13 @@ void Player::Attack()
 
 		// 弾を生成し、初期化
 		PlayerBullet* newBullet = new PlayerBullet();
-		newBullet->Initialize(bulletModel_, bulletEmitter.translate, velocity);
+		Object3d* model = new Object3d();
+		model = bulletModel_;
+		bulletModels.push_back(model);
+		for (auto& bulletModel : bulletModels) {
+			newBullet->Initialize(bulletModel, bulletEmitter.translate, velocity);
+		}
+		
 
 		// 弾を登録する
 		bullets_.push_back(newBullet);

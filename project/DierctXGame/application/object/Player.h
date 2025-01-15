@@ -79,6 +79,8 @@ private:
 	// 弾丸のモデルを生成
 	Object3d* bulletModel_;
 
+	std::vector<Object3d*> bulletModels;
+
 	// 弾
 	std::list<PlayerBullet*> bullets_;
 

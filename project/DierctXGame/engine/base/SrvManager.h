@@ -9,6 +9,9 @@ class SrvManager
 
 public:
 	// メンバ関数
+	// シングルトンインスタンスの取得
+	static SrvManager* GetInstance();
+	
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
@@ -52,6 +55,13 @@ public:
 	// 最大SRV数(最大テクスチャ枚数)
 	static const uint32_t kMaxSRVCount;
 private:
+
+	static SrvManager* instance;
+	/*SrvManager() = default;
+	~SrvManager() = default;
+	SrvManager(SrvManager&) = delete;
+	SrvManager& operator=(SrvManager&) = delete;*/
+
 	// メンバ変数
 	DirectXCommon* directXCommon = nullptr;
 

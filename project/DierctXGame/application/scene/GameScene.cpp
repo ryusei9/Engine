@@ -39,8 +39,12 @@ void GameScene::Initialize()
 	spriteCommon_ = new SpriteCommon;
 	spriteCommon_->Initialize(dxCommon_);
 
+	// SRVマネージャの初期化
+	/*srvManager_ = SrvManager::GetInstance();
+	srvManager_->Initialize(dxCommon_);*/
+
 	// テクスチャマネージャの初期化
-	TextureManager::GetInstance()->Initialize(dxCommon_);
+	TextureManager::GetInstance()->Initialize(dxCommon_, srvManager_->GetInstance());
 
 	// 3Dモデルマネージャの初期化
 	ModelManager::GetInstance()->Initialize(dxCommon_);
@@ -245,6 +249,7 @@ void GameScene::Update()
 
 void GameScene::Draw()
 {
+	//srvManager_->PreDraw();
 	// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
 	object3dCommon_->DrawSettings();
 	// 全てのobject3d個々の描画

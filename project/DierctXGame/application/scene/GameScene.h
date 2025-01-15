@@ -10,6 +10,7 @@
 #include <DierctXGame/application/object/Enemy.h>
 #include <DierctXGame/application/object/EnemyBullet.h>
 #include <DierctXGame/application/object/SkySphere.h>
+#include <SrvManager.h>
 
 class GameScene
 {
@@ -68,6 +69,8 @@ private:
 	Object3dCommon* object3dCommon_;
 
 	SpriteCommon* spriteCommon_;
+
+	SrvManager* srvManager_;
 
 	Camera* camera_;
 

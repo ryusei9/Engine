@@ -163,7 +163,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ModelManager::GetInstance()->LoadModel("GAMECLEAR.obj");
 	ModelManager::GetInstance()->LoadModel("tutorial.obj");
 
-	ImGuiManager* imGuiManager = new ImGuiManager();
+	//ImGuiManager* imGuiManager = new ImGuiManager();
 
 	//// XAudio2の初期化
 	//IXAudio2* xAudio2 = nullptr;
@@ -215,7 +215,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Audio::GetInstance()->SoundPlayWave(soundData1);
 	
 
-	imGuiManager->Initialize(winApp, dxCommon);
+	//imGuiManager->Initialize(winApp, dxCommon);
 
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
@@ -228,7 +228,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		gameScene_->Update();
     
-		imGuiManager->End();
+		//imGuiManager->End();
 		/*ImGui::Render();*/
 		/////////////////////
 		//// コマンドをキック
@@ -274,8 +274,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 3Dモデルマネージャの終了
 	ModelManager::GetInstance()->Finalize();
 
-	imGuiManager->Finalize();
-	delete imGuiManager;
+	/*imGuiManager->Finalize();
+	delete imGuiManager;*/
 	
 
 

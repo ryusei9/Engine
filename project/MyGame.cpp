@@ -6,19 +6,19 @@ void MyGame::Initialize()
 	// COMの初期化
 	CoInitializeEx(0, COINIT_MULTITHREADED);
 
-	
+
 
 	// WindowsAPIの初期化
 	winApp = new WinApp();
 	winApp->Initialize();
 
-	
+
 
 	// DirectXの初期化
 	dxCommon = new DirectXCommon();
 	dxCommon->Initialize(winApp);
 
-	
+
 	// SRVマネージャの初期化
 	srvManager = new SrvManager();
 	srvManager->Initialize(dxCommon);
@@ -33,19 +33,19 @@ void MyGame::Initialize()
 	////////////////////////
 	// input
 	////////////////////////
-	
+
 
 	// 入力の初期化
 	input = new Input();
 	input->Initialize(winApp);
 
 
-	
+
 	// スプライト共通部の初期化
 	spriteCommon = new SpriteCommon;
 	spriteCommon->Initialize(dxCommon);
 
-	
+
 	// 3Dオブジェクト共通部の初期化
 	object3dCommon = new Object3dCommon;
 	object3dCommon->Initialize(dxCommon);
@@ -58,17 +58,17 @@ void MyGame::Initialize()
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
 
-	
+
 	camera->SetRotate({ 0.0f,0.0f,0.0f });
 	camera->SetTranslate({ 0.0f,0.0f,-10.0f });
 	object3dCommon->SetDefaultCamera(camera);
 
-	
+
 
 	Audio::GetInstance()->Initialize();
 
 	// サウンドデータの読み込み
-	SoundData soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
+	soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
@@ -100,19 +100,13 @@ void MyGame::Initialize()
 	}
 #endif
 
-	Transform cameraTransform{
-		{1.0f,1.0f,1.0f},
-		{0.0f,0.0f,0.0f},
-		{0.0f,0.0f,-10.0f}
-	};
-
-	bool useMonsterBall = true;
-
-	Vector2 spritePosition = { 100.0f,100.0f };
 
 
 
-	
+
+
+
+
 	sprite->Initialize(spriteCommon, dxCommon, "resources/mori.png");
 
 
@@ -125,12 +119,94 @@ void MyGame::Initialize()
 
 void MyGame::Finelize()
 {
+	for (uint32_t i = 0; i < SrvManager::kMaxSRVCount; i++) {
+		// 使われているSRVインデックスを解放
+		srvManager->Free(i);
+	}
+	delete srvManager;
+	delete input;
+	delete spriteCommon;
+
+	delete object3dCommon;
+
+	Audio::GetInstance()->SoundUnload(&soundData1);
+	Audio::GetInstance()->Finalize();
+
+	// WindowsAPIの終了処理
+	winApp->Finalize();
+	delete winApp;
+
+	CloseHandle(dxCommon->GetFenceEvent());
+	delete dxCommon;
+
+	// テクスチャマネージャの終了
+	TextureManager::GetInstance()->Finalize();
+	// 3Dモデルマネージャの終了
+	ModelManager::GetInstance()->Finalize();
+
+	imGuiManager->Finalize();
+	delete imGuiManager;
 }
 
 void MyGame::Update()
 {
+	MSG msg{};
+	// ウィンドウの×ボタンが押されるまでループ
+
+	// Windowsのメッセージ処理
+	if (winApp->ProcessMessage()) {
+		// ゲームループを抜ける
+		endRequest_ = true;
+	}
+
+	imGuiManager->Begin();
+#ifdef _DEBUG
+	// 次に作成されるウィンドウのサイズを設定
+	ImGui::SetNextWindowSize(ImVec2(500, 100), ImGuiCond_FirstUseEver);
+
+	ImGui::Begin("sprite");
+	ImGui::SliderFloat2("sprite.translate", &spritePosition.x, 0.0f, 1200.0f, "%0.1f");
+	ImGui::End();
+#endif
+	// ゲームの処理
+	// 入力の更新
+	input->Update();
+	// 操作
+	if (input->PushKey(DIK_RIGHTARROW)) {
+		cameraTransform.translate.x -= 0.1f;
+
+	}
+	if (input->PushKey(DIK_LEFTARROW)) {
+		cameraTransform.translate.x += 0.1f;
+	}
+	camera->SetTranslate(cameraTransform.translate);
+	camera->Update();
+
+	sprite->Update();
+	sprite->SetPosition(spritePosition);
+
+
+	imGuiManager->End();
+
 }
 
 void MyGame::Draw()
 {
+	// 描画前処理
+	dxCommon->PreDraw();
+
+
+	srvManager->PreDraw();
+
+	// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
+	object3dCommon->DrawSettings();
+
+	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
+	spriteCommon->DrawSettings();
+
+	sprite->Draw();
+
+	imGuiManager->Draw();
+
+	dxCommon->PostDraw();
 }

@@ -67,7 +67,11 @@ public:
 	// 描画
 	void Draw();
 
+	// 終了リクエスト
+	bool IsEndRequest() const { return endRequest_; }
+
 private:
+	// メンバ変数
 	// ポインタ
 	WinApp* winApp = nullptr;
 
@@ -86,5 +90,22 @@ private:
 	ImGuiManager* imGuiManager = new ImGuiManager();
 
 	Sprite* sprite = new Sprite();
+
+
+
+	Transform cameraTransform{
+		{1.0f,1.0f,1.0f},
+		{0.0f,0.0f,0.0f},
+		{0.0f,0.0f,-10.0f}
+	};
+
+	bool useMonsterBall = true;
+
+	Vector2 spritePosition = { 100.0f,100.0f };
+
+	SoundData soundData1;
+
+	// ゲーム終了フラグ
+	bool endRequest_ = false;
 };
 

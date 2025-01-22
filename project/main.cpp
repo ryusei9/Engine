@@ -1,24 +1,12 @@
 #include "MyGame.h"
-
+#include "SRFramework.h"
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-	MyGame game;
+	SRFramework* game = new MyGame();
 
-	// ゲームの初期化
-	game.Initialize();
+	game->Run();
 
-	while (true) {
-		// メインループ
-		game.Update();
-		// ゲームループを抜ける
-		if (game.IsEndRequest()) {
-			break;
-		}
-		// 描画
-		game.Draw();
-	}
-	// ゲームの終了
-	game.Finelize();
+	delete game;
 
 	return 0;
 }

@@ -1,11 +1,12 @@
 #include "Player.h"
+#include <imGui.h>
 
 Player::~Player()
 {
 	for (PlayerBullet* bullet : bullets_) {
 		delete bullet;
 	}
-	delete bulletModel_;
+	
 	bullets_.clear();
 }
 
@@ -39,7 +40,7 @@ void Player::Update()
 		invincible_ = false;
 	}
 	// 弾丸の更新
-	for (PlayerBullet* bullet : bullets_) {
+	for (auto& bullet : bullets_) {
 
 		bullet->Update();
 	}
@@ -92,7 +93,7 @@ void Player::Draw()
 	// 描画処理
 	model_->Draw();
 	// 弾描画
-	for (PlayerBullet* bullet : bullets_) {
+	for (auto& bullet : bullets_) {
 		bullet->Draw();
 	}
 }
@@ -112,12 +113,8 @@ void Player::Attack()
 
 		// 弾を生成し、初期化
 		PlayerBullet* newBullet = new PlayerBullet();
-		Object3d* model = new Object3d();
-		model = bulletModel_;
-		bulletModels.push_back(model);
-		for (auto& bulletModel : bulletModels) {
-			newBullet->Initialize(bulletModel, bulletEmitter.translate, velocity);
-		}
+		
+		newBullet->Initialize(bulletModel_, bulletEmitter.translate, velocity);
 		
 
 		// 弾を登録する
@@ -129,7 +126,7 @@ void Player::OnCollision()
 {
 	// 無敵状態でない場合のみ処理を行う
 	if (!invincible_) {
-		hp_ -= 1;
+		//hp_ -= 1;
 		// 無敵状態を開始
 		invincible_ = true;
 		invincibleEndTime_ = std::chrono::steady_clock::now() + invincibleDuration_;
@@ -144,4 +141,21 @@ Vector3 Player::GetWorldPosition()
 bool Player::IsInvincible() const
 {
 	return invincible_;
+}
+
+void Player::ImGuiDraw()
+{
+	ImGui::Begin("Player");
+	ImGui::Text("Player");
+	ImGui::Text("HP: %d", hp_);
+	ImGui::Text("Position: (%.2f, %.2f, %.2f)", transform.translate.x, transform.translate.y, transform.translate.z);
+	ImGui::Text("Invincible: %s", invincible_ ? "true" : "false");
+	ImGui::Text("BeginTime: %f", beginTime);
+	ImGui::Text("FireCoolTime: %f", fireCoolTime);
+	ImGui::Text("Dead: %s", isDead_ ? "true" : "false");
+	ImGui::Separator();
+	for (auto& bullet : bullets_) {
+		bullet->DrawImGui();
+	}
+	ImGui::End();
 }

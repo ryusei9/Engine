@@ -3,6 +3,7 @@
 #include <Subtract.h>
 #include <Add.h>
 #include <Lerp.h>
+#include <imgui.h>
 
 GameScene::~GameScene()
 {
@@ -49,7 +50,7 @@ void GameScene::Initialize()
 	// 3Dモデルマネージャの初期化
 	ModelManager::GetInstance()->Initialize(dxCommon_);
 
-
+	ModelManager::GetInstance()->LoadModel("title.obj");
 
 	camera_ = new Camera;
 	camera_->SetRotate({ 0.0f,0.0f,0.0f });
@@ -84,12 +85,12 @@ void GameScene::Initialize()
 	playerModel->Initialize(object3dCommon_);
 	playerModel->SetModel("player.obj");
 
-	bulletModel = new Object3d();
+	bulletModel = std::make_unique<Object3d>();
 	bulletModel->Initialize(object3dCommon_);
 	bulletModel->SetModel("player_bullet.obj");
 
 	player_ = new Player();
-	player_->Initialize(playerModel, bulletModel);
+	player_->Initialize(playerModel, bulletModel.get());
 
 	enemyModel = new Object3d();
 	enemyModel->Initialize(object3dCommon_);
@@ -148,6 +149,8 @@ void GameScene::Initialize()
 
 	skySphere_ = new SkySphere();
 	skySphere_->Initialize(skySphereModel);
+
+
 
 	//enemies_.push_back(enemy);
 	//moveCameraTransform.translate = enemy_->GetWorldPosition();
@@ -462,4 +465,17 @@ void GameScene::enemyPop(Vector3 translation)
 
 	enemies_.push_back(enemy_);
 
+}
+
+void GameScene::DrawImGui()
+{
+	ImGui::Begin("GameScene");
+
+	ImGui::Text("GameScene");
+
+	player_->ImGuiDraw();
+
+	enemy_->ImGuiDraw();
+
+	ImGui::End();
 }

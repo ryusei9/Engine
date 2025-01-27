@@ -11,6 +11,7 @@
 #include <DierctXGame/application/object/EnemyBullet.h>
 #include <DierctXGame/application/object/SkySphere.h>
 #include <SrvManager.h>
+#include <ImGuiManager.h>
 
 class GameScene
 {
@@ -53,6 +54,11 @@ public:
 	/// 敵発生
 	/// </summary>
 	void enemyPop(Vector3 translation);
+
+	/// <summary>
+	/// ImGUi描画
+	/// </summary>
+	void DrawImGui();
 private:
 	enum SCENE {
 		TITLE,
@@ -97,7 +103,7 @@ private:
 	Object3d* playerModel;
 
 	// 弾丸のモデルを生成
-	Object3d* bulletModel;
+	std::unique_ptr<Object3d> bulletModel;
 
 	// 敵
 	Enemy* enemy_ = nullptr;
@@ -148,4 +154,5 @@ private:
 
 	//Object3d* tutorialModel;
 	Sprite* tutorialSprite;
+
 };

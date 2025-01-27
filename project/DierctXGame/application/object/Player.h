@@ -4,6 +4,8 @@
 #include "Object3d.h"
 #include "PlayerBullet.h"
 #include <Transform.h>
+#include <ModelManager.h>
+#include <DirectXCommon.h>
 class Player
 {
 public:
@@ -67,7 +69,15 @@ public:
 	}
 
 	bool IsInvincible() const; // 無敵
+
+	/// <summary>
+	/// ImGui描画
+	/// </summary>
+	void ImGuiDraw();
 private:
+	DirectXCommon* dxCommon_;
+
+	ModelManager* modelManager_;
 	
 	Transform transform;
 

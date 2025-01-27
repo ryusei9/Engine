@@ -9,6 +9,7 @@
 #include <Lerp.h>
 #include <thread>
 #include <Lerp.h>
+#include <imGui.h>
 Enemy::~Enemy()
 {
 	for (EnemyBullet* bullet : bullets_) {
@@ -210,4 +211,31 @@ Vector3 Enemy::GetWorldPosition()
 void Enemy::OnCollision()
 {
 	hp_ -= 1;
+}
+
+void Enemy::ImGuiDraw()
+{
+	ImGui::Begin("Enemy");
+	ImGui::Text("HP : %d", hp_);
+	ImGui::Text("Position : (%.2f,%.2f,%.2f)", transform_.translate.x, transform_.translate.y, transform_.translate.z);
+	ImGui::Text("Phese : %d", static_cast<int>(phese_));
+	ImGui::Text("FireTimer : %d", fireTimer);
+	ImGui::Text("Dead : %s", isDead_ ? "true" : "false");
+	ImGui::Text("BulletCount : %d", bullets_.size());
+	ImGui::Text("AttackEndTime : %d", attackEndTime_);
+	ImGui::Text("BattleStartTime : %d", battleStartTime_);
+	ImGui::Text("BattleDuration : %d", battleDuration_);
+	ImGui::Text("AttackDuration : %d", attackDuration_);
+	ImGui::Text("BulletSpeed : %f", kBulletSpeed);
+	ImGui::Text("FireInterval : %d", kFireInterval);
+	ImGui::Text("FireInterval2 : %d", kFireInterval2);
+	ImGui::Text("Player : %p", player_);
+	ImGui::Text("GameScene : %p", gameScene_);
+	ImGui::Text("Model : %p", model_);
+	ImGui::Text("BulletModel : %p", bulletModel_);
+	ImGui::Text("TextureHandle : %d", textureHandle_);
+	ImGui::Text("Transform : ");
+	ImGui::Text("Translate : (%.2f,%.2f,%.2f)", transform_.translate.x, transform_.translate.y, transform_.translate.z);
+	ImGui::Text("Scale : (%.2f,%.2f,%.2f)", transform_.scale.x, transform_.scale.y, transform_.scale.z);
+	ImGui::End();
 }

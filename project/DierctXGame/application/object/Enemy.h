@@ -92,6 +92,11 @@ public:
 		ApproachPheseInitialize();
 	}
 
+	/// <summary>
+	/// ImGui描画
+	/// </summary>
+	void ImGuiDraw();
+
 private:
 	// ワールド変換データ
 	Transform transform_;

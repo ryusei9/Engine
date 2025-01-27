@@ -67,11 +67,24 @@ public:
 	// 描画
 	virtual void Draw() = 0;
 
+	// 描画前処理
+	virtual void PreDraw();
+
+	// 描画後処理
+	virtual void PostDraw();
+
 	// 終了リクエスト
 	virtual bool IsEndRequest() const { return endRequest_; }
 
 	// 実行
 	void Run();
+
+	// ゲッター
+	DirectXCommon* GetDirectXCommon() const { return dxCommon; }
+
+	SpriteCommon* GetSpriteCommon() const { return spriteCommon; }
+
+	WinApp* GetWinApp() const { return winApp; }
 private:
 	// メンバ変数
 	// ポインタ
@@ -91,7 +104,7 @@ private:
 
 	ImGuiManager* imGuiManager = new ImGuiManager();
 
-	Sprite* sprite = new Sprite();
+	//Sprite* sprite = new Sprite();
 
 	bool endRequest_ = false;
 

@@ -22,22 +22,19 @@ public:
 
 private:
 	
+	Sprite* sprite = new Sprite();
 
+	// 入力の初期化
+	Input* input = new Input();
+	
+	
+	bool useMonsterBall = true;
 
+	Vector2 spritePosition = { 100.0f,100.0f };
 
-	//Transform cameraTransform{
-	//	{1.0f,1.0f,1.0f},
-	//	{0.0f,0.0f,0.0f},
-	//	{0.0f,0.0f,-10.0f}
-	//};
+	SoundData soundData1;
 
-	//bool useMonsterBall = true;
-
-	//Vector2 spritePosition = { 100.0f,100.0f };
-
-	//SoundData soundData1;
-
-	//// ゲーム終了フラグ
+	// ゲーム終了フラグ
 	//bool endRequest_ = false;
 };
 

@@ -29,17 +29,7 @@ void SRFramework::Initialize()
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
 	TextureManager::GetInstance()->LoadTexture("resources/monsterBall.png");
 	TextureManager::GetInstance()->LoadTexture("resources/mori.png");
-	////////////////////////
-	// input
-	////////////////////////
-
-
-	// 入力の初期化
-	/*input = new Input();
-	input->Initialize(winApp);*/
-
-
-
+	
 	// スプライト共通部の初期化
 	spriteCommon = new SpriteCommon;
 	spriteCommon->Initialize(dxCommon);
@@ -61,13 +51,6 @@ void SRFramework::Initialize()
 	camera->SetRotate({ 0.0f,0.0f,0.0f });
 	camera->SetTranslate({ 0.0f,0.0f,-10.0f });
 	object3dCommon->SetDefaultCamera(camera);
-
-
-
-	Audio::GetInstance()->Initialize();
-
-	// サウンドデータの読み込み
-	//soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
@@ -99,13 +82,6 @@ void SRFramework::Initialize()
 	}
 #endif
 
-	//sprite->Initialize(spriteCommon, dxCommon, "resources/mori.png");
-
-
-	// 音声再生
-	//Audio::GetInstance()->SoundPlayWave(soundData1);
-
-
 	imGuiManager->Initialize(winApp, dxCommon);
 }
 
@@ -116,14 +92,11 @@ void SRFramework::Finelize()
 		srvManager->Free(i);
 	}
 	delete srvManager;
-	//delete input;
+	
 	delete spriteCommon;
 
 	delete object3dCommon;
-
-	/*Audio::GetInstance()->SoundUnload(&soundData1);*/
-	Audio::GetInstance()->Finalize();
-
+	
 	// WindowsAPIの終了処理
 	winApp->Finalize();
 	delete winApp;
@@ -142,34 +115,19 @@ void SRFramework::Finelize()
 
 void SRFramework::Update()
 {
-	//MSG msg{};
-	//// ウィンドウの×ボタンが押されるまでループ
+	MSG msg{};
+	// ウィンドウの×ボタンが押されるまでループ
 
-	//// Windowsのメッセージ処理
-	//if (winApp->ProcessMessage()) {
-	//	// ゲームループを抜ける
-	//	endRequest_ = true;
-	//}
-	// ゲームの処理
-	// 
-	// 入力の更新
-	//input->Update();
-	// 操作
-	/*if (input->PushKey(DIK_RIGHTARROW)) {
-		cameraTransform.translate.x -= 0.1f;
-
+	// Windowsのメッセージ処理
+	if (winApp->ProcessMessage()) {
+		// ゲームループを抜ける
+		endRequest_ = true;
 	}
-	if (input->PushKey(DIK_LEFTARROW)) {
-		cameraTransform.translate.x += 0.1f;
-	}
-	camera->SetTranslate(cameraTransform.translate);
-	camera->Update();
-
-	sprite->Update();
-	sprite->SetPosition(spritePosition);*/
+	
 }
 
-void SRFramework::Draw() {
+void SRFramework::PreDraw()
+{
 	// 描画前処理
 	dxCommon->PreDraw();
 
@@ -182,10 +140,15 @@ void SRFramework::Draw() {
 	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
 	spriteCommon->DrawSettings();
 
-	sprite->Draw();
+	//sprite->Draw();
 
-	imGuiManager->Draw();
+	//imGuiManager->Draw();
 
+	
+}
+
+void SRFramework::PostDraw()
+{
 	dxCommon->PostDraw();
 }
 

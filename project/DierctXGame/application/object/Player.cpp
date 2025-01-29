@@ -3,7 +3,7 @@
 
 Player::~Player()
 {
-	for (PlayerBullet* bullet : bullets_) {
+	for (auto& bullet : bullets_) {
 		delete bullet;
 	}
 	
@@ -15,7 +15,7 @@ void Player::Initialize(Object3d* model, Object3d* bulletModel)
 	// 入力の初期化
 	input_ = Input::GetInstance();
 	model_ = model;
-
+	worldTransform_.Initialize();
 	// 弾のモデルを設定
 	bulletModel_ = bulletModel;
 
@@ -52,37 +52,38 @@ void Player::Update()
 	input_->Update();
 
 	// 弾の発射位置を設定
-	bulletEmitter.translate = transform.translate;
+	bulletEmitter.translate = worldTransform_.translate_;
 	// 操作
 	if (input_->PushKey(DIK_RIGHTARROW)) {
-		transform.translate.x += 0.08f;
+		worldTransform_.translate_.x += 0.08f;
 
 	}
 	if (input_->PushKey(DIK_LEFTARROW)) {
-		transform.translate.x -= 0.08f;
+		worldTransform_.translate_.x -= 0.08f;
 	}
 	if (input_->PushKey(DIK_DOWNARROW)) {
-		transform.translate.y -= 0.08f;
+		worldTransform_.translate_.y -= 0.08f;
 
 	}
 	if (input_->PushKey(DIK_UPARROW)) {
-		transform.translate.y += 0.08f;
+		worldTransform_.translate_.y += 0.08f;
 	}
-	if (transform.translate.x <= -4.0f) {
-		transform.translate.x = -4.0f;
+	if (worldTransform_.translate_.x <= -4.0f) {
+		worldTransform_.translate_.x = -4.0f;
 	}
-	else if (transform.translate.x >= 4.0f) {
-		transform.translate.x = 4.0f;
+	else if (worldTransform_.translate_.x >= 4.0f) {
+		worldTransform_.translate_.x = 4.0f;
 	}
-	if (transform.translate.y <= -2.2f) {
-		transform.translate.y = -2.2f;
+	if (worldTransform_.translate_.y <= -2.2f) {
+		worldTransform_.translate_.y = -2.2f;
 	}
-	else if (transform.translate.y >= 2.2f) {
-		transform.translate.y = 2.2f;
+	else if (worldTransform_.translate_.y >= 2.2f) {
+		worldTransform_.translate_.y = 2.2f;
 	}
-	model_->SetTranslate(transform.translate);
-	model_->SetScale(transform.scale);
-	model_->SetRotate(transform.rotate);
+	worldTransform_.UpdateMatrix();
+	model_->SetTranslate(worldTransform_.translate_);
+	model_->SetScale(worldTransform_.scale_);
+	model_->SetRotate(worldTransform_.rotate_);
 
 	// モデルの更新
 	model_->Update();
@@ -104,12 +105,14 @@ void Player::Attack()
 	
 	if (input_->GetInstance()->PushKey(DIK_SPACE) && fireCoolTime >= kCoolDownTime) {
 		fireCoolTime = 0;
+		// 音声再生
+		Audio::GetInstance()->SoundPlayWave(soundData1);
 		// 弾の速度
 		const float kBulletSpeed = 0.25f;
 		Vector3 velocity(kBulletSpeed, 0, 0);
 
 		// 速度ベクトルを自機の向きに合わせて回転させる
-		//velocity = mathMatrix_->TransformNormal(velocity, transform_.matWorld_);
+		//velocity = mathMatrix_->worldTransform_Normal(velocity, worldTransform__.matWorld_);
 
 		// 弾を生成し、初期化
 		PlayerBullet* newBullet = new PlayerBullet();
@@ -135,7 +138,14 @@ void Player::OnCollision()
 
 Vector3 Player::GetWorldPosition()
 {
-	return transform.translate;
+	// ワールド座標を入れる変数
+	Vector3 worldPos = {};
+	// ワールド行列の平行移動成分を取得(ワールド座標)
+	worldPos.x = worldTransform_.translate_.x;
+	worldPos.y = worldTransform_.translate_.y;
+	worldPos.z = worldTransform_.translate_.z;
+
+	return worldPos;
 }
 
 bool Player::IsInvincible() const
@@ -148,7 +158,7 @@ void Player::ImGuiDraw()
 	ImGui::Begin("Player");
 	ImGui::Text("Player");
 	ImGui::Text("HP: %d", hp_);
-	ImGui::Text("Position: (%.2f, %.2f, %.2f)", transform.translate.x, transform.translate.y, transform.translate.z);
+	ImGui::Text("Position: (%.2f, %.2f, %.2f)", worldTransform_.translate_.x, worldTransform_.translate_.y, worldTransform_.translate_.z);
 	ImGui::Text("Invincible: %s", invincible_ ? "true" : "false");
 	ImGui::Text("BeginTime: %f", beginTime);
 	ImGui::Text("FireCoolTime: %f", fireCoolTime);

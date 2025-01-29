@@ -2,7 +2,7 @@
 #include <memory>
 #include <Vector3.h>
 #include <Object3d.h>
-#include <Transform.h>
+#include <WorldTransform.h>
 class PlayerBullet
 {
 public:
@@ -35,7 +35,7 @@ public:
 private:
 	
 	// ワールド変換データ
-	Transform transform_ = {};
+	WorldTransform worldTransform_ = {};
 
 	//モデル
 	//std::shared_ptr<BaseModel> model_;

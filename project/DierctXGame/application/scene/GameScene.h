@@ -12,6 +12,7 @@
 #include <DierctXGame/application/object/SkySphere.h>
 #include <SrvManager.h>
 #include <ImGuiManager.h>
+#include <Audio.h>
 
 class GameScene
 {
@@ -59,6 +60,11 @@ public:
 	/// ImGUi描画
 	/// </summary>
 	void DrawImGui();
+
+	/// <summary>
+	/// 終了処理
+	/// <summary>
+	void Finalize();
 private:
 	enum SCENE {
 		TITLE,
@@ -155,4 +161,5 @@ private:
 	//Object3d* tutorialModel;
 	Sprite* tutorialSprite;
 
+	SoundData soundData1;
 };

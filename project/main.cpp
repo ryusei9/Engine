@@ -173,10 +173,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//// マスターボイスの作成
 	//result = xAudio2->CreateMasteringVoice(&masterVoice);
-	Audio::GetInstance()->Initialize();
+	//Audio::GetInstance()->Initialize();
 
-	// サウンドデータの読み込み
-	SoundData soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
+	//// サウンドデータの読み込み
+	//SoundData soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
 	if (SUCCEEDED(dxCommon->GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
@@ -211,8 +211,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-	// 音声再生
-	Audio::GetInstance()->SoundPlayWave(soundData1);
+	//// 音声再生
+	//Audio::GetInstance()->SoundPlayWave(soundData1);
 	
 
 	imGuiManager->Initialize(winApp, dxCommon);
@@ -262,9 +262,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 	delete srvManager;
 	
-	Audio::GetInstance()->SoundUnload(&soundData1);
-	Audio::GetInstance()->Finalize();
-
+	/*Audio::GetInstance()->SoundUnload(&soundData1);
+	Audio::GetInstance()->Finalize();*/
+	gameScene_->Finalize();
 	
 	// WindowsAPIの終了処理
 	winApp->Finalize();

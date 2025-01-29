@@ -3,9 +3,10 @@
 #include "Input.h"
 #include "Object3d.h"
 #include "PlayerBullet.h"
-#include <Transform.h>
+#include <WorldTransform.h>
 #include <ModelManager.h>
 #include <DirectXCommon.h>
+#include "Audio.h"
 class Player
 {
 public:
@@ -54,9 +55,9 @@ public:
 
 	void SetInitialize() {
 		fireCoolTime = 0.0f;
-		transform.translate = { -3.0f,0.0f,0.0f };
-		transform.scale = { 0.2f,0.2f,0.2f };
-		transform.rotate = { 0.0f,-90.0f,0.0f };
+		worldTransform_.translate_ = { -3.0f,0.0f,0.0f };
+		worldTransform_.scale_ = { 0.2f,0.2f,0.2f };
+		worldTransform_.rotate_ = { 0.0f,-90.0f,0.0f };
 		isDead_ = false;
 		for (PlayerBullet* bullet : bullets_) {
 			bullet->OnCollision();
@@ -79,7 +80,7 @@ private:
 
 	ModelManager* modelManager_;
 	
-	Transform transform;
+	WorldTransform worldTransform_;
 
 	Input* input_;
 
@@ -117,5 +118,8 @@ private:
 	std::chrono::steady_clock::time_point invincibleEndTime_; // 無敵状態の終了時間
 	const std::chrono::seconds invincibleDuration_ = std::chrono::seconds(2); // 無敵時間の長さ
 
+	Audio* audio_;
+
+	SoundData* soundData_;
 };
 

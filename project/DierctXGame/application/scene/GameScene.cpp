@@ -52,6 +52,11 @@ void GameScene::Initialize()
 
 	ModelManager::GetInstance()->LoadModel("title.obj");
 
+	Audio::GetInstance()->Initialize();
+
+	// サウンドデータの読み込み
+	soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
+
 	camera_ = new Camera;
 	camera_->SetRotate({ 0.0f,0.0f,0.0f });
 	camera_->SetTranslate({ 0.0f,0.0f,-10.0f });
@@ -194,6 +199,7 @@ void GameScene::Update()
 		camera_->SetTranslate(cameraTransform.translate);
 		camera_->SetRotate(cameraTransform.rotate);
 		//camera_->Update();
+		
 		if (input_->TriggerKey(DIK_SPACE)) {
 			scene = GAME;
 		}
@@ -321,8 +327,8 @@ void GameScene::CheckAllCollisions()
 		if (length <= (playerRadius_ + enemyBulletRadius_)) {
 			// 自キャラの衝突時コールバックを呼び出す
 			player_->OnCollision();
-			// 敵弾の衝突時コールバックを呼び出す
-			bullet->OnCollision();
+			//// 敵弾の衝突時コールバックを呼び出す
+			//bullet->OnCollision();
 		}
 	}
 #pragma endregion
@@ -349,6 +355,7 @@ void GameScene::CheckAllCollisions()
 #pragma endregion
 
 #pragma region 自弾と敵弾の当たり判定
+	// バグるので無し
 	// 自弾と敵弾全ての当たり判定
 	for (PlayerBullet* bulletA : playerBullets) {
 		for (EnemyBullet* bulletB : enemyBullets) {
@@ -360,9 +367,9 @@ void GameScene::CheckAllCollisions()
 			float length = Length(Subtract(posB, posA));
 			if (length <= (playerBulletRadius_ + enemyBulletRadius_)) {
 				// 敵弾の衝突時コールバックを呼び出す
-				bulletA->OnCollision();
+				//bulletA->OnCollision();
 				// 自弾の衝突時コールバックを呼び出す
-				bulletB->OnCollision();
+				//bulletB->OnCollision();
 			}
 		}
 	}
@@ -478,4 +485,10 @@ void GameScene::DrawImGui()
 	enemy_->ImGuiDraw();
 
 	ImGui::End();
+}
+
+void GameScene::Finalize()
+{
+	Audio::GetInstance()->SoundUnload(&soundData1);
+	Audio::GetInstance()->Finalize();
 }

@@ -149,6 +149,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\base\TextureManager.cpp" />
     <ClCompile Include="DierctXGame\engine\base\WinApp.cpp" />
     <ClCompile Include="DierctXGame\engine\base\SrvManager.cpp" />
+    <ClCompile Include="WorldTransform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Audio.h" />
@@ -156,6 +157,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\application\object\PlayerBullet.cpp" />
     <ClCompile Include="DierctXGame\application\object\SkySphere.cpp" />
     <ClCompile Include="DierctXGame\engine\io\Subtract.cpp" />
+    <ClInclude Include="WorldTransform.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DierctXGame\engine\io\Add.h" />

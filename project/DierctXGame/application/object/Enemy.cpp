@@ -12,7 +12,7 @@
 #include <imGui.h>
 Enemy::~Enemy()
 {
-	for (EnemyBullet* bullet : bullets_) {
+	for (auto& bullet : bullets_) {
 		delete bullet;
 	}
 	bullets_.clear();
@@ -38,7 +38,7 @@ void Enemy::Update()
 		}
 		return false;
 		});
-	for(EnemyBullet* bullet : bullets_) {
+	for(auto& bullet : bullets_) {
 		bullet->Update();
 	}
 	if (hp_ <= 0) {
@@ -63,9 +63,9 @@ void Enemy::Update()
 	//ImGui::End();
 	
 
-	model_->SetTranslate(transform_.translate);
-	model_->SetScale(transform_.scale);
-	model_->SetRotate(transform_.rotate);
+	model_->SetTranslate(worldTransform_.translate_);
+	model_->SetScale(worldTransform_.scale_);
+	model_->SetRotate(worldTransform_.rotate_);
 
 	// モデルの更新
 	model_->Update();
@@ -74,7 +74,7 @@ void Enemy::Update()
 void Enemy::Draw()
 {
 	model_->Draw();
-	for (EnemyBullet* bullet : bullets_) {
+	for (auto& bullet : bullets_) {
 		bullet->Draw();
 	}
 }
@@ -85,9 +85,9 @@ void Enemy::ApproachPheseUpdate()
 	const float kEnemyApproachSpeed = -0.01f;
 	Vector3 velocity_ = { kEnemyApproachSpeed, 0, 0 };
 	// 移動(ベクトルを加算)
-	transform_.translate = Add(transform_.translate, velocity_);
+	worldTransform_.translate_ = Add(worldTransform_.translate_, velocity_);
 	// 既定の位置に到達したら離脱
-	if (transform_.translate.x < 2.0f) {
+	if (worldTransform_.translate_.x < 2.0f) {
 		
 		fireTimer = 300;
 		phese_ = Phese::Battle;
@@ -99,17 +99,17 @@ void Enemy::ApproachPheseUpdate()
 
 void Enemy::BattlePheseUpdate()
 {
-	transform_.translate.x = Lerp(transform_.translate.x, 2.0f, 0.01f);
-	transform_.translate.y = Lerp(transform_.translate.y, 0.0f, 0.01f);
-	transform_.translate.z = Lerp(transform_.translate.z, 0.0f, 0.01f);
-	transform_.rotate.y = Lerp(transform_.rotate.y, -0.8f, 0.01f);
-	transform_.rotate.z = Lerp(transform_.rotate.z, 0.0f, 0.01f);
+	worldTransform_.translate_.x = Lerp(worldTransform_.translate_.x, 2.0f, 0.01f);
+	worldTransform_.translate_.y = Lerp(worldTransform_.translate_.y, 0.0f, 0.01f);
+	worldTransform_.translate_.z = Lerp(worldTransform_.translate_.z, 0.0f, 0.01f);
+	worldTransform_.rotate_.y = Lerp(worldTransform_.rotate_.y, -0.8f, 0.01f);
+	worldTransform_.rotate_.z = Lerp(worldTransform_.rotate_.z, 0.0f, 0.01f);
 	//ImGui::Text("Phese : Leave");
 	// 速度
 	//const float kEnemyLeaveSpeed = 0.1f;
 	//Vector3 velocity_ = { kEnemyLeaveSpeed, 0, 0 };
 	//// 移動(ベクトルを加算)
-	//transform_.translate = Add(transform_.translate, velocity_);
+	//worldTransform_.translate = Add(worldTransform_.translate, velocity_);
 	// 発射タイマーカウントダウン
 	fireTimer--;
 	// 指定時間に達した
@@ -128,11 +128,11 @@ void Enemy::BattlePheseUpdate()
 
 void Enemy::AttackPheseUpdate()
 {
-	transform_.translate.x = Lerp(transform_.translate.x, 0.0f, 0.01f);
-	transform_.translate.y = Lerp(transform_.translate.y, 0.0f, 0.01f);
-	transform_.translate.z = Lerp(transform_.translate.z, 10.0f, 0.01f);
-	transform_.rotate.y = Lerp(transform_.rotate.y, -1.5f, 0.01f);
-	transform_.rotate.z = Lerp(transform_.rotate.z, 6.3f, 0.01f);
+	worldTransform_.translate_.x = Lerp(worldTransform_.translate_.x, 0.0f, 0.01f);
+	worldTransform_.translate_.y = Lerp(worldTransform_.translate_.y, 0.0f, 0.01f);
+	worldTransform_.translate_.z = Lerp(worldTransform_.translate_.z, 10.0f, 0.01f);
+	worldTransform_.rotate_.y = Lerp(worldTransform_.rotate_.y, -1.5f, 0.01f);
+	worldTransform_.rotate_.z = Lerp(worldTransform_.rotate_.z, 6.3f, 0.01f);
 	// 発射タイマーカウントダウン
 	fireTimer--;
 	// 指定時間に達した
@@ -190,7 +190,7 @@ void Enemy::Fire()
 
 	// 弾を生成し、初期化
 	EnemyBullet* newBullet = new EnemyBullet();
-	newBullet->Initialize(bulletModel_, transform_.translate, diff);
+	newBullet->Initialize(bulletModel_, worldTransform_.translate_, diff);
 
 	// 弾を登録する
 	bullets_.push_back(newBullet);
@@ -205,7 +205,14 @@ void Enemy::ApproachPheseInitialize()
 
 Vector3 Enemy::GetWorldPosition()
 {
-	return transform_.translate;
+	// ワールド座標を入れる変数
+	Vector3 worldPos = {};
+	// ワールド行列の平行移動成分を取得(ワールド座標)
+	worldPos.x = worldTransform_.translate_.x;
+	worldPos.y = worldTransform_.translate_.y;
+	worldPos.z = worldTransform_.translate_.z;
+
+	return worldPos;
 }
 
 void Enemy::OnCollision()
@@ -217,7 +224,7 @@ void Enemy::ImGuiDraw()
 {
 	ImGui::Begin("Enemy");
 	ImGui::Text("HP : %d", hp_);
-	ImGui::Text("Position : (%.2f,%.2f,%.2f)", transform_.translate.x, transform_.translate.y, transform_.translate.z);
+	ImGui::Text("Position : (%.2f,%.2f,%.2f)", worldTransform_.translate_.x, worldTransform_.translate_.y, worldTransform_.translate_.z);
 	ImGui::Text("Phese : %d", static_cast<int>(phese_));
 	ImGui::Text("FireTimer : %d", fireTimer);
 	ImGui::Text("Dead : %s", isDead_ ? "true" : "false");
@@ -235,7 +242,10 @@ void Enemy::ImGuiDraw()
 	ImGui::Text("BulletModel : %p", bulletModel_);
 	ImGui::Text("TextureHandle : %d", textureHandle_);
 	ImGui::Text("Transform : ");
-	ImGui::Text("Translate : (%.2f,%.2f,%.2f)", transform_.translate.x, transform_.translate.y, transform_.translate.z);
-	ImGui::Text("Scale : (%.2f,%.2f,%.2f)", transform_.scale.x, transform_.scale.y, transform_.scale.z);
+	ImGui::Text("Translate : (%.2f,%.2f,%.2f)", worldTransform_.translate_.x, worldTransform_.translate_.y, worldTransform_.translate_.z);
+	ImGui::Text("Scale : (%.2f,%.2f,%.2f)", worldTransform_.scale_.x, worldTransform_.scale_.y, worldTransform_.scale_.z);
+	for (auto& bullet : bullets_) {
+		bullet->ImGuiDraw();
+	}
 	ImGui::End();
 }

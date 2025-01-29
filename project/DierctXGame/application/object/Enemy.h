@@ -1,6 +1,6 @@
 #pragma once
 #include "Object3d.h"
-#include <Transform.h>
+#include <WorldTransform.h>
 #include "EnemyBullet.h"
 
 class Player;
@@ -76,9 +76,9 @@ public:
 	void SetInitialize(const Vector3& position) {
 		isDead_ = false;
 		hp_ = 50;
-		transform_.translate = position;
-		transform_.scale = { 3.0f,3.0f,3.0f };
-		transform_.rotate = { 0.0f,-0.0f,0.0f };
+		worldTransform_.translate_ = position;
+		worldTransform_.scale_ = { 3.0f,3.0f,3.0f };
+		worldTransform_.rotate_ = { 0.0f,-0.0f,0.0f };
 		fireTimer = 300;
 		for (EnemyBullet* bullet : bullets_) {
 			bullet->OnCollision();
@@ -92,9 +92,14 @@ public:
 		ApproachPheseInitialize();
 	}
 
+	/// <summary>
+	/// ImGui描画
+	/// </summary>
+	void ImGuiDraw();
+
 private:
 	// ワールド変換データ
-	Transform transform_;
+	WorldTransform worldTransform_;
 
 	// モデル
 	Object3d* model_ = nullptr;

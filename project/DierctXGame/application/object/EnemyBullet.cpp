@@ -1,5 +1,6 @@
 #include "EnemyBullet.h"
 #include <Add.h>
+#include <imgui.h>
 
 EnemyBullet::~EnemyBullet() {
 
@@ -13,12 +14,7 @@ void EnemyBullet::Initialize(Object3d* model, const Vector3& position, const Vec
 	//textureHandle_ = TextureManager::Load("enemy_bullet.png");
 	// ワールドトランスフォームの初期化
 
-	transform_ = {
-		{1.0,1.0f,1.0f},
-		{0.0f,0.0f,0.0f},
-		position
-	};
-	
+	worldTransform_.Initialize();
 	// 引数で受け取った速度をメンバ変数に代入
 	velocity_ = velocity;
 	
@@ -27,16 +23,17 @@ void EnemyBullet::Initialize(Object3d* model, const Vector3& position, const Vec
 void EnemyBullet::Update() {
 
 	// 座標を移動させる(1フレーム分の移動量を差し込む)
-	transform_.translate = Add(transform_.translate, velocity_);
-	
+	worldTransform_.translate_ = Add(worldTransform_.translate_, velocity_);
+	worldTransform_.UpdateMatrix();
 	
 	// 時間経過でデス
-	if (--deathTimer_ <= 0) {
+	--deathTimer_;
+	if (deathTimer_ <= 0) {
 		isDead_ = true;
 	}
-	model_->SetTranslate(transform_.translate);
-	/*model_->SetScale(transform_.scale);
-	model_->SetRotate(transform_.rotate);*/
+	model_->SetTranslate(worldTransform_.translate_);
+	model_->SetScale(worldTransform_.scale_);
+	model_->SetRotate(worldTransform_.rotate_);
 
 	// モデルの更新
 	model_->Update();
@@ -50,16 +47,23 @@ Vector3 EnemyBullet::GetWorldPosition() {
 	// ワールド座標を入れる変数
 	Vector3 worldPos = {};
 	// ワールド行列の平行移動成分を取得(ワールド座標)
-	worldPos.x = transform_.translate.x;
-	worldPos.y = transform_.translate.y;
-	worldPos.z = transform_.translate.z;
+	worldPos.x = worldTransform_.translate_.x;
+	worldPos.y = worldTransform_.translate_.y;
+	worldPos.z = worldTransform_.translate_.z;
 
 	return worldPos;
 }
 
 void EnemyBullet::OnCollision() {
-	transform_.translate = { 0.0f,1000.0f,0.0f };
-	//model_->SetTranslate(transform_.translate);
-	//isDead_ = true;
+	//transform_.translate = { 0.0f,1000.0f,0.0f };
+	////model_->SetTranslate(transform_.translate);
+	isDead_ = true;
+
+}
+
+void EnemyBullet::ImGuiDraw()
+{
+	ImGui::Text("EnemyBullet");
+	ImGui::Text("Position: %f, %f, %f", worldTransform_.translate_.x, worldTransform_.translate_.y, worldTransform_.translate_.z);
 
 }

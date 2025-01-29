@@ -54,7 +54,7 @@ void DirectXCommon::Initialize(WinApp* winApp)
 	// DXCコンパイラの初期化
 	CreateDXCCompiler();
 	// ImGuiの初期化
-	ImGuiInitialize();
+	//ImGuiInitialize();
 }
 
 void DirectXCommon::DeviceInitialize()
@@ -173,7 +173,7 @@ void DirectXCommon::SwapChain()
 	// 描画のターゲットとして利用する
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	// ダブルバッファ
-	swapChainDesc.BufferCount = 2;
+	swapChainDesc.BufferCount = backBufferCount;
 	// モニタにうつしたら、中身を破棄
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	// コマンドキュー、ウィンドウハンドル、設定を渡して生成する
@@ -235,7 +235,7 @@ void DirectXCommon::DescriptorHeap()
 {
 	// DescriptorSizeを取得しておく
 	descriptorSizeRTV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	descriptorSizeSRV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	//descriptorSizeSRV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	descriptorSizeDSV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
 	// ディスクリプタヒープの生成
@@ -243,7 +243,7 @@ void DirectXCommon::DescriptorHeap()
 	rtvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
 
 	// ディスクリプタの数は128。SRVはshader内で触るものなので、shaderVisibleはtrue
-	srvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
+	//srvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
 
 	// DSV用のヒープでディスクリプタの数は1。DSVはShader内で触るものではないので、ShaderVisibleはfalse
 	dsvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
@@ -468,7 +468,7 @@ void DirectXCommon::ImGuiInitialize()
 	/////////////////////
 	// ImGuiの初期化
 	/////////////////////
-	IMGUI_CHECKVERSION();
+	/*IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 	ImGui_ImplWin32_Init(winApp_->GetHwnd());
@@ -477,7 +477,7 @@ void DirectXCommon::ImGuiInitialize()
 		rtvDesc.Format,
 		srvDescriptorHeap.Get(),
 		GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0),
-		GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0));
+		GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0));*/
 }
 
 void DirectXCommon::PreDraw()
@@ -521,8 +521,8 @@ void DirectXCommon::PreDraw()
 
 	
 	// 描画用のDescriptorの設定
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeaps[] = { srvDescriptorHeap.Get()};
-	commandList->SetDescriptorHeaps(1, descriptorHeaps->GetAddressOf());
+	/*Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeaps[] = { srvDescriptorHeap.Get()};
+	commandList->SetDescriptorHeaps(1, descriptorHeaps->GetAddressOf());*/
 
 	/// 三角形の描画
 	// Viewportを設定
@@ -537,7 +537,7 @@ void DirectXCommon::PostDraw()
 	// これから書き込むバックバッファのインデックスを取得する
 	UINT bbIndex = swapChain->GetCurrentBackBufferIndex();
 	// 実際のcommandListのImGuiの描画コマンドを積む
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
+	//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
 
 	// 画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;

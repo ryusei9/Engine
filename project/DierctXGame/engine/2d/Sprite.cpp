@@ -10,7 +10,8 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, DirectXCommon* dxCommon, std
 {
 	spriteCommon_ = spriteCommon;
 	dxCommon_ = dxCommon;
-	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
+	//textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
+	this->filePath = textureFilePath; // メンバー変数に値を設定
 	CreateVertexData();
 	CreateMaterialData();
 	CreateWVPData();
@@ -24,7 +25,7 @@ void Sprite::Update()
 	float top = 0.0f - anchorPoint.y;
 	float bottom = 1.0f - anchorPoint.y;
 
-	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureIndex);
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(filePath);
 	float tex_left = textureLeftTop.x / metadata.width;
 	float tex_right = (textureLeftTop.x + textureSize.x) / metadata.width;
 	float tex_top = textureLeftTop.y / metadata.height;
@@ -88,7 +89,7 @@ void Sprite::Draw()
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
 	// Spriteを常にuvCheckerにする
-	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex));
+	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(filePath));
 	// 描画
 	dxCommon_->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
@@ -196,7 +197,7 @@ void Sprite::CreateWVPData()
 void Sprite::AdjustTextureSize()
 {
 	// テクスチャメタデータを取得
-	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureIndex);
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(filePath);
 
 	textureSize.x = static_cast<float>(metadata.width);
 	textureSize.y = static_cast<float>(metadata.height);

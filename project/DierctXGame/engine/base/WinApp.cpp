@@ -1,9 +1,11 @@
 #include "WinApp.h"
 #include <wrl.h>
-#include "externals/imgui/imgui.h"
+#include "ImGui/imgui.h"
 #include <cstdint>
+#include <ImGui/imgui_impl_win32.h>
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #pragma comment(lib,"winmm.lib")
+
 
 // ウィンドウプロシージャ
 LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
@@ -63,7 +65,7 @@ void WinApp::Initialize()
 		// 利用するクラス名
 		wc.lpszClassName,
 		// タイトルバーの文字
-		L"可視光線",
+		L"LE2B_13_サトウ_リュウセイ_可視光線",
 		// ウィンドウスタイル
 		WS_OVERLAPPEDWINDOW,
 		// 表示X座標

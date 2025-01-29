@@ -128,17 +128,16 @@ public: // メンバ関数
 	//std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> GetSwapChainResources(){return swapChainResources[0] }
 	HANDLE GetFenceEvent() { return fenceEvent; }
 
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() const { return commandList.Get(); }
+	ID3D12GraphicsCommandList* GetCommandList() const { return commandList.Get(); }
 
 	D3D12_CPU_DESCRIPTOR_HANDLE(&GetRtvHandles())[2] {return rtvHandles; }
 
 	UINT GetBackBufferIndex() { return backBufferIndex; }
 
+	UINT GetBackBufferCount() const { return backBufferCount; }
+
 	// 最大SRV数(最大テクスチャ枚数)
 	static const uint32_t kMaxSRVCount;
-
-private:
-	// 関数
 
 	/// <summary>
 	/// 指定番号のCPUデスクリプタハンドルを取得する
@@ -150,6 +149,10 @@ private:
 	/// </summary>
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
+private:
+	// 関数
+
+	
 	
 	// DirectXTexを使ってTextureを読むためのLoadTexture関数
 	static DirectX::ScratchImage LoadTexture(const std::string& filePath);
@@ -218,6 +221,6 @@ private:
 
 	UINT backBufferIndex;
 
-	
+	UINT backBufferCount = 2;
 };
 

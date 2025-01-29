@@ -1,6 +1,6 @@
 #pragma once
 #include "SRFramework.h"
-
+#include "GamePlayeScene.h"
 
 // ゲーム全体
 class MyGame : public SRFramework
@@ -21,18 +21,9 @@ public:
 
 
 private:
+	// ゲームプレイシーン
+	GamePlayeScene* scene_;
 	
-	Sprite* sprite = new Sprite();
-
-	// 入力の初期化
-	Input* input = new Input();
-	
-	
-	bool useMonsterBall = true;
-
-	Vector2 spritePosition = { 100.0f,100.0f };
-
-	SoundData soundData1;
 
 	// ゲーム終了フラグ
 	//bool endRequest_ = false;

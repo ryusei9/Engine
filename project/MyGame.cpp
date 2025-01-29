@@ -5,37 +5,34 @@ void MyGame::Initialize()
 {
 	// 基底クラスの初期化処理
 	SRFramework::Initialize();
-	sprite->Initialize(SRFramework::GetSpriteCommon(), SRFramework::GetDirectXCommon(), "resources/mori.png");
-	input->Initialize(SRFramework::GetWinApp());
-	Audio::GetInstance()->Initialize();
-	soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
-	// 音声再生
-	Audio::GetInstance()->SoundPlayWave(soundData1);
+	// ゲームプレイシーンの生成
+	scene_ = new GamePlayeScene();
+	// ゲームプレイシーンの初期化
+	scene_->Initialize(SRFramework::GetSpriteCommon(), SRFramework::GetDirectXCommon(), SRFramework::GetWinApp());
 }
 
 void MyGame::Finelize()
 {
-	delete sprite;
-	delete input;
-	Audio::GetInstance()->SoundUnload(&soundData1);
-	Audio::GetInstance()->Finalize();
+	// ゲームプレイシーンの終了処理
+	scene_->Finalize();
+	// ゲームプレイシーンの破棄
+	delete scene_;
+	// 基底クラスの終了処理
 	SRFramework::Finelize();
 }
 
 void MyGame::Update()
 {
 	SRFramework::Update();
-	// 入力の更新
-	input->Update();
-	
-
-	sprite->Update();
-	sprite->SetPosition(spritePosition);
+	// ゲームプレイシーンの更新
+	scene_->Update();
 }
 
 void MyGame::Draw()
 {
 	SRFramework::PreDraw();
-	sprite->Draw();
+	// ゲームプレイシーンの描画
+	scene_->Draw();
+	
 	SRFramework::PostDraw();
 }

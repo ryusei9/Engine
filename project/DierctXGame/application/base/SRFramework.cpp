@@ -1,4 +1,5 @@
 #include "SRFramework.h"
+#include "TitleScene.h"
 
 void SRFramework::Initialize()
 {
@@ -84,6 +85,13 @@ void SRFramework::Initialize()
 #endif
 
 	imGuiManager->Initialize(winApp.get(), dxCommon.get());
+
+	// シーンマネージャの初期化
+	sceneManager_ = new SceneManager();
+	sceneManager_->Initialize(spriteCommon.get(), dxCommon.get(), winApp.get());
+
+	scene_ = new TitleScene();
+	sceneManager_->SetNextScene(scene_);
 }
 
 void SRFramework::Finelize()
@@ -108,6 +116,8 @@ void SRFramework::Finelize()
 
 	imGuiManager->Finalize();
 	
+	// シーンマネージャの終了
+	delete sceneManager_;
 }
 
 void SRFramework::Update()
@@ -120,7 +130,8 @@ void SRFramework::Update()
 		// ゲームループを抜ける
 		endRequest_ = true;
 	}
-	
+	// シーンマネージャの更新
+	sceneManager_->Update();
 }
 
 void SRFramework::PreDraw()
@@ -131,11 +142,9 @@ void SRFramework::PreDraw()
 
 	srvManager->PreDraw();
 
-	// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
-	object3dCommon->DrawSettings();
+	
 
-	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
-	spriteCommon->DrawSettings();
+	
 
 	//sprite->Draw();
 
@@ -147,6 +156,20 @@ void SRFramework::PreDraw()
 void SRFramework::PostDraw()
 {
 	dxCommon.get()->PostDraw();
+}
+
+void SRFramework::PreDrawObject3d()
+{
+	// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
+	object3dCommon->DrawSettings();
+}
+
+void SRFramework::PreDrawSprite()
+{
+	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
+	spriteCommon->DrawSettings();
+
+	sceneManager_->Draw();
 }
 
 void SRFramework::Run()

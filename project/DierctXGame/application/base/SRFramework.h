@@ -41,7 +41,7 @@
 #include "imgui.h"
 #include <xaudio2.h>
 #include "Audio.h"
-
+#include <SceneManager.h>
 
 #pragma comment(lib,"xaudio2.lib")
 
@@ -77,6 +77,12 @@ public:
 	// 終了リクエスト
 	virtual bool IsEndRequest() const { return endRequest_; }
 
+	// 3Dオブジェクト描画
+	void PreDrawObject3d();
+
+	// 2Dオブジェクト描画
+	void PreDrawSprite();
+
 	// 実行
 	void Run();
 
@@ -109,5 +115,8 @@ private:
 
 	bool endRequest_ = false;
 
+	SceneManager* sceneManager_ = nullptr;
+
+	BaseScene* scene_ = nullptr;
 };
 

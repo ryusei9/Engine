@@ -6,17 +6,17 @@ void MyGame::Initialize()
 	// 基底クラスの初期化処理
 	SRFramework::Initialize();
 	// ゲームプレイシーンの生成
-	scene_ = new GamePlayeScene();
+	titleScene_ = new TitleScene();
 	// ゲームプレイシーンの初期化
-	scene_->Initialize(SRFramework::GetSpriteCommon(), SRFramework::GetDirectXCommon(), SRFramework::GetWinApp());
+	titleScene_->Initialize(SRFramework::GetSpriteCommon(), SRFramework::GetDirectXCommon(), SRFramework::GetWinApp());
 }
 
 void MyGame::Finelize()
 {
 	// ゲームプレイシーンの終了処理
-	scene_->Finalize();
+	titleScene_->Finalize();
 	// ゲームプレイシーンの破棄
-	delete scene_;
+	delete titleScene_;
 	// 基底クラスの終了処理
 	SRFramework::Finelize();
 }
@@ -25,14 +25,14 @@ void MyGame::Update()
 {
 	SRFramework::Update();
 	// ゲームプレイシーンの更新
-	scene_->Update();
+	titleScene_->Update();
 }
 
 void MyGame::Draw()
 {
 	SRFramework::PreDraw();
 	// ゲームプレイシーンの描画
-	scene_->Draw();
+	titleScene_->Draw();
 	
 	SRFramework::PostDraw();
 }

@@ -107,6 +107,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DierctXGame\engine\scene\BaseScene.cpp" />
     <ClCompile Include="DierctXGame\engine\audio\Audio.cpp" />
     <ClCompile Include="DierctXGame\engine\base\Camera.cpp" />
     <ClCompile Include="DierctXGame\engine\base\D3DresourceLeakChecker.cpp" />
@@ -121,7 +122,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\base\Input.cpp" />
     <ClCompile Include="DierctXGame\engine\io\Inverse.cpp" />
     <ClCompile Include="DierctXGame\engine\base\Logger.cpp" />
-    <ClCompile Include="DierctXGame\engine\scene\GamePlayeScene.cpp" />
+    <ClCompile Include="DierctXGame\engine\scene\GamePlayScene.cpp" />
     <ClCompile Include="DierctXGame\application\base\SRFramework.cpp" />
     <ClCompile Include="DierctXGame\engine\base\ImGuiManager.cpp" />
     <ClCompile Include="main.cpp" />
@@ -146,8 +147,10 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\base\WinApp.cpp" />
     <ClCompile Include="DierctXGame\engine\base\SrvManager.cpp" />
     <ClCompile Include="DierctXGame\application\base\MyGame.cpp" />
+    <ClCompile Include="DierctXGame\engine\scene\TitleScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DierctXGame\engine\scene\BaseScene.h" />
     <ClInclude Include="DierctXGame\engine\audio\Audio.h" />
     <ClInclude Include="DierctXGame\engine\base\Camera.h" />
     <ClInclude Include="DierctXGame\engine\base\D3DresourceLeakChecker.h" />
@@ -195,10 +198,11 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\io\VertexData.h" />
     <ClInclude Include="DierctXGame\engine\base\WinApp.h" />
     <ClInclude Include="DierctXGame\engine\base\SrvManager.h" />
-    <ClInclude Include="DierctXGame\engine\scene\GamePlayeScene.h" />
+    <ClInclude Include="DierctXGame\engine\scene\GamePlayScene.h" />
     <ClInclude Include="DierctXGame\application\base\SRFramework.h" />
     <ClInclude Include="DierctXGame\engine\base\ImGuiManager.h" />
     <ClInclude Include="DierctXGame\application\base\MyGame.h" />
+    <ClInclude Include="DierctXGame\engine\scene\TitleScene.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

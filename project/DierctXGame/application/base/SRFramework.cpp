@@ -29,6 +29,7 @@ void SRFramework::Initialize()
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
 	TextureManager::GetInstance()->LoadTexture("resources/monsterBall.png");
 	TextureManager::GetInstance()->LoadTexture("resources/mori.png");
+	TextureManager::GetInstance()->LoadTexture("resources/mori_Red.png");
 	
 	// スプライト共通部の初期化
 	spriteCommon = make_unique<SpriteCommon>();

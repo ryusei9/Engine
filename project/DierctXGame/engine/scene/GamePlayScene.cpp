@@ -1,6 +1,6 @@
-#include "GamePlayeScene.h"
+#include "GamePlayScene.h"
 #include "SRFramework.h"
-void GamePlayeScene::Initialize(SpriteCommon* spriteCommon, DirectXCommon* directXCommon, WinApp* winApp)
+void GamePlayScene::Initialize(SpriteCommon* spriteCommon, DirectXCommon* directXCommon, WinApp* winApp)
 {
 	sprite->Initialize(spriteCommon, directXCommon, "resources/mori.png");
 	input->Initialize(winApp);
@@ -10,7 +10,7 @@ void GamePlayeScene::Initialize(SpriteCommon* spriteCommon, DirectXCommon* direc
 	Audio::GetInstance()->SoundPlayWave(soundData1);
 }
 
-void GamePlayeScene::Update()
+void GamePlayScene::Update()
 {
 	// 入力の更新
 	input->Update();
@@ -20,12 +20,12 @@ void GamePlayeScene::Update()
 	sprite->SetPosition(spritePosition);
 }
 
-void GamePlayeScene::Draw()
+void GamePlayScene::Draw()
 {
 	sprite->Draw();
 }
 
-void GamePlayeScene::Finalize()
+void GamePlayScene::Finalize()
 {
 	delete sprite;
 	delete input;

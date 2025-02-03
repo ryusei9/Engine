@@ -1,6 +1,7 @@
 #pragma once
 #include "SRFramework.h"
-#include "GamePlayeScene.h"
+#include "GamePlayScene.h"
+#include "TitleScene.h"
 
 // ゲーム全体
 class MyGame : public SRFramework
@@ -22,8 +23,9 @@ public:
 
 private:
 	// ゲームプレイシーン
-	GamePlayeScene* scene_;
-	
+	GamePlayScene* scene_;
+	// タイトルシーン
+	TitleScene* titleScene_;
 
 	// ゲーム終了フラグ
 	//bool endRequest_ = false;

@@ -6,22 +6,21 @@
 #include <Input.h>
 #include <Audio.h>
 #include <Vector2.h>
-
-// ゲームプレイシーン
-class GamePlayeScene
+#include <BaseScene.h>
+class TitleScene : public BaseScene
 {
 public:
 	// 初期化
-	void Initialize(SpriteCommon* spriteCommon, DirectXCommon* directXCommon, WinApp* winApp);
+	void Initialize(SpriteCommon* spriteCommon, DirectXCommon* directXCommon, WinApp* winApp) override;
 
 	// 更新
-	void Update();
+	void Update() override;
 
 	// 描画
-	void Draw();
+	void Draw() override;
 
 	// 終了
-	void Finalize();
+	void Finalize() override;
 
 private:
 	// スプライトコモン

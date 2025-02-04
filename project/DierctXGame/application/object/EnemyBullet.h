@@ -1,6 +1,6 @@
 #pragma once
 #include "Object3d.h"
-#include "Transform.h"
+#include "WorldTransform.h"
 class EnemyBullet
 {
 public:
@@ -29,11 +29,12 @@ public:
 	// 衝突を検出したら呼び出されるコールバック関数
 	void OnCollision();
 
-	
+	// ImGui描画
+	void ImGuiDraw();
 
 private:
 	// ワールド変換データ
-	Transform transform_;
+	WorldTransform worldTransform_;
 
 	// モデル
 	Object3d* model_ = nullptr;

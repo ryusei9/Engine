@@ -157,13 +157,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ModelManager::GetInstance()->LoadModel("player_bullet.obj");
 	ModelManager::GetInstance()->LoadModel("enemy_bullet.obj");
 	ModelManager::GetInstance()->LoadModel("sky_sphere.obj");
-	ModelManager::GetInstance()->LoadModel("title.obj");
+	//ModelManager::GetInstance()->LoadModel("title.obj");
 	ModelManager::GetInstance()->LoadModel("titleGuide.obj");
 	ModelManager::GetInstance()->LoadModel("GAMEOVER.obj");
 	ModelManager::GetInstance()->LoadModel("GAMECLEAR.obj");
 	ModelManager::GetInstance()->LoadModel("tutorial.obj");
 
-	//ImGuiManager* imGuiManager = new ImGuiManager();
+	ImGuiManager* imGuiManager = new ImGuiManager();
 
 	//// XAudio2の初期化
 	//IXAudio2* xAudio2 = nullptr;
@@ -173,10 +173,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//// マスターボイスの作成
 	//result = xAudio2->CreateMasteringVoice(&masterVoice);
-	Audio::GetInstance()->Initialize();
+	//Audio::GetInstance()->Initialize();
 
-	// サウンドデータの読み込み
-	SoundData soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
+	//// サウンドデータの読み込み
+	//SoundData soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
 	if (SUCCEEDED(dxCommon->GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
@@ -211,11 +211,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-	// 音声再生
-	Audio::GetInstance()->SoundPlayWave(soundData1);
+	//// 音声再生
+	//Audio::GetInstance()->SoundPlayWave(soundData1);
 	
 
-	//imGuiManager->Initialize(winApp, dxCommon);
+	imGuiManager->Initialize(winApp, dxCommon);
 
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
@@ -225,10 +225,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// ゲームループを抜ける
 			break;
 		}
-
 		gameScene_->Update();
+		imGuiManager->Begin();
+		
+		gameScene_->DrawImGui();
     
-		//imGuiManager->End();
+		imGuiManager->End();
 		/*ImGui::Render();*/
 		/////////////////////
 		//// コマンドをキック
@@ -241,6 +243,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		srvManager->PreDraw();
 
 		gameScene_->Draw();
+
+		imGuiManager->Draw();
 		
 		dxCommon->PostDraw();
 
@@ -258,9 +262,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 	delete srvManager;
 	
-	Audio::GetInstance()->SoundUnload(&soundData1);
-	Audio::GetInstance()->Finalize();
-
+	/*Audio::GetInstance()->SoundUnload(&soundData1);
+	Audio::GetInstance()->Finalize();*/
+	gameScene_->Finalize();
 	
 	// WindowsAPIの終了処理
 	winApp->Finalize();
@@ -274,8 +278,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 3Dモデルマネージャの終了
 	ModelManager::GetInstance()->Finalize();
 
-	/*imGuiManager->Finalize();
-	delete imGuiManager;*/
+	imGuiManager->Finalize();
+	delete imGuiManager;
 	
 
 

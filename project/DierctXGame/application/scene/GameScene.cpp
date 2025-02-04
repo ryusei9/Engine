@@ -3,6 +3,7 @@
 #include <Subtract.h>
 #include <Add.h>
 #include <Lerp.h>
+#include <imgui.h>
 
 GameScene::~GameScene()
 {
@@ -49,7 +50,12 @@ void GameScene::Initialize()
 	// 3Dモデルマネージャの初期化
 	ModelManager::GetInstance()->Initialize(dxCommon_);
 
+	ModelManager::GetInstance()->LoadModel("title.obj");
 
+	Audio::GetInstance()->Initialize();
+
+	// サウンドデータの読み込み
+	soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
 
 	camera_ = new Camera;
 	camera_->SetRotate({ 0.0f,0.0f,0.0f });
@@ -84,12 +90,12 @@ void GameScene::Initialize()
 	playerModel->Initialize(object3dCommon_);
 	playerModel->SetModel("player.obj");
 
-	bulletModel = new Object3d();
+	bulletModel = std::make_unique<Object3d>();
 	bulletModel->Initialize(object3dCommon_);
 	bulletModel->SetModel("player_bullet.obj");
 
 	player_ = new Player();
-	player_->Initialize(playerModel, bulletModel);
+	player_->Initialize(playerModel, bulletModel.get());
 
 	enemyModel = new Object3d();
 	enemyModel->Initialize(object3dCommon_);
@@ -149,6 +155,8 @@ void GameScene::Initialize()
 	skySphere_ = new SkySphere();
 	skySphere_->Initialize(skySphereModel);
 
+
+
 	//enemies_.push_back(enemy);
 	//moveCameraTransform.translate = enemy_->GetWorldPosition();
 	moveCameraTransform.translate.y = -10.0f;
@@ -191,6 +199,7 @@ void GameScene::Update()
 		camera_->SetTranslate(cameraTransform.translate);
 		camera_->SetRotate(cameraTransform.rotate);
 		//camera_->Update();
+		
 		if (input_->TriggerKey(DIK_SPACE)) {
 			scene = GAME;
 		}
@@ -318,8 +327,8 @@ void GameScene::CheckAllCollisions()
 		if (length <= (playerRadius_ + enemyBulletRadius_)) {
 			// 自キャラの衝突時コールバックを呼び出す
 			player_->OnCollision();
-			// 敵弾の衝突時コールバックを呼び出す
-			bullet->OnCollision();
+			//// 敵弾の衝突時コールバックを呼び出す
+			//bullet->OnCollision();
 		}
 	}
 #pragma endregion
@@ -346,6 +355,7 @@ void GameScene::CheckAllCollisions()
 #pragma endregion
 
 #pragma region 自弾と敵弾の当たり判定
+	// バグるので無し
 	// 自弾と敵弾全ての当たり判定
 	for (PlayerBullet* bulletA : playerBullets) {
 		for (EnemyBullet* bulletB : enemyBullets) {
@@ -357,9 +367,9 @@ void GameScene::CheckAllCollisions()
 			float length = Length(Subtract(posB, posA));
 			if (length <= (playerBulletRadius_ + enemyBulletRadius_)) {
 				// 敵弾の衝突時コールバックを呼び出す
-				bulletA->OnCollision();
+				//bulletA->OnCollision();
 				// 自弾の衝突時コールバックを呼び出す
-				bulletB->OnCollision();
+				//bulletB->OnCollision();
 			}
 		}
 	}
@@ -462,4 +472,25 @@ void GameScene::enemyPop(Vector3 translation)
 
 	enemies_.push_back(enemy_);
 
+}
+
+void GameScene::DrawImGui()
+{
+#ifdef _DEBUG
+	ImGui::Begin("GameScene");
+
+	ImGui::Text("GameScene");
+
+	player_->ImGuiDraw();
+
+	enemy_->ImGuiDraw();
+
+	ImGui::End();
+#endif
+}
+
+void GameScene::Finalize()
+{
+	Audio::GetInstance()->SoundUnload(&soundData1);
+	Audio::GetInstance()->Finalize();
 }

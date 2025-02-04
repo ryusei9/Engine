@@ -106,7 +106,7 @@ void Player::Attack()
 	if (input_->GetInstance()->PushKey(DIK_SPACE) && fireCoolTime >= kCoolDownTime) {
 		fireCoolTime = 0;
 		// 音声再生
-		Audio::GetInstance()->SoundPlayWave(soundData1);
+		//Audio::GetInstance()->SoundPlayWave(soundData1);
 		// 弾の速度
 		const float kBulletSpeed = 0.25f;
 		Vector3 velocity(kBulletSpeed, 0, 0);
@@ -129,7 +129,7 @@ void Player::OnCollision()
 {
 	// 無敵状態でない場合のみ処理を行う
 	if (!invincible_) {
-		//hp_ -= 1;
+		hp_ -= 1;
 		// 無敵状態を開始
 		invincible_ = true;
 		invincibleEndTime_ = std::chrono::steady_clock::now() + invincibleDuration_;

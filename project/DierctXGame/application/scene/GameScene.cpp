@@ -476,6 +476,7 @@ void GameScene::enemyPop(Vector3 translation)
 
 void GameScene::DrawImGui()
 {
+#ifdef _DEBUG
 	ImGui::Begin("GameScene");
 
 	ImGui::Text("GameScene");
@@ -485,6 +486,7 @@ void GameScene::DrawImGui()
 	enemy_->ImGuiDraw();
 
 	ImGui::End();
+#endif
 }
 
 void GameScene::Finalize()

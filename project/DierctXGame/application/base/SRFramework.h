@@ -41,7 +41,7 @@
 #include "imgui.h"
 #include <xaudio2.h>
 #include "Audio.h"
-#include "SRFramework.h"
+#include <SceneManager.h>
 
 #pragma comment(lib,"xaudio2.lib")
 
@@ -49,6 +49,7 @@
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"dxcompiler.lib")
+using namespace std;
 // ゲーム全体
 class SRFramework
 {
@@ -76,37 +77,46 @@ public:
 	// 終了リクエスト
 	virtual bool IsEndRequest() const { return endRequest_; }
 
+	// 3Dオブジェクト描画
+	void PreDrawObject3d();
+
+	// 2Dオブジェクト描画
+	void PreDrawSprite();
+
 	// 実行
 	void Run();
 
 	// ゲッター
-	DirectXCommon* GetDirectXCommon() const { return dxCommon; }
+	DirectXCommon* GetDirectXCommon() const { return dxCommon.get(); }
 
-	SpriteCommon* GetSpriteCommon() const { return spriteCommon; }
+	SpriteCommon* GetSpriteCommon() const { return spriteCommon.get(); }
 
-	WinApp* GetWinApp() const { return winApp; }
+	WinApp* GetWinApp() const { return winApp.get(); }
 private:
 	// メンバ変数
 	// ポインタ
-	WinApp* winApp = nullptr;
+	unique_ptr<WinApp> winApp = nullptr;
 
-	DirectXCommon* dxCommon = nullptr;
+	unique_ptr<DirectXCommon> dxCommon = nullptr;
 
-	SrvManager* srvManager = nullptr;
+	unique_ptr<SrvManager> srvManager = nullptr;
 
 	//Input* input = nullptr;
 
-	SpriteCommon* spriteCommon = nullptr;
+	unique_ptr < SpriteCommon> spriteCommon = nullptr;
 
-	Object3dCommon* object3dCommon = nullptr;
+	unique_ptr < Object3dCommon> object3dCommon = nullptr;
 
-	Camera* camera = new Camera();
+	unique_ptr < Camera> camera = make_unique<Camera>();
 
-	ImGuiManager* imGuiManager = new ImGuiManager();
+	unique_ptr < ImGuiManager> imGuiManager = make_unique<ImGuiManager>();
 
 	//Sprite* sprite = new Sprite();
 
 	bool endRequest_ = false;
 
+	SceneManager* sceneManager_ = nullptr;
+
+	BaseScene* scene_ = nullptr;
 };
 

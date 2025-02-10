@@ -4,6 +4,13 @@
 class SpriteCommon
 {
 public:
+	// シングルトンインスタンスの取得
+	static SpriteCommon* GetInstance();
+	SpriteCommon() = default;
+	~SpriteCommon() = default;
+	SpriteCommon(SpriteCommon&) = delete;
+	SpriteCommon& operator=(SpriteCommon&) = delete;
+
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
@@ -14,6 +21,9 @@ public:
 	/// </summary>
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 private:	// メンバ関数
+	// シングルトンインスタンス
+	static SpriteCommon* instance;
+	
 	// ルートシグネチャの初期化
 	void RootSignatureInitialize();
 

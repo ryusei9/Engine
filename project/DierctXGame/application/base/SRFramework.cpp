@@ -1,4 +1,5 @@
 #include "SRFramework.h"
+#include "TitleScene.h"
 
 void SRFramework::Initialize()
 {
@@ -8,40 +9,41 @@ void SRFramework::Initialize()
 
 
 	// WindowsAPIの初期化
-	winApp = new WinApp();
+	winApp = make_unique< WinApp>();
 	winApp->Initialize();
 
 
 
 	// DirectXの初期化
-	dxCommon = new DirectXCommon();
-	dxCommon->Initialize(winApp);
+	dxCommon = make_unique<DirectXCommon>();
+	dxCommon->Initialize(winApp.get());
 
 
 	// SRVマネージャの初期化
-	srvManager = new SrvManager();
-	srvManager->Initialize(dxCommon);
+	srvManager = make_unique<SrvManager>();
+	srvManager->Initialize(dxCommon.get());
 
 	// テクスチャマネージャの初期化
-	TextureManager::GetInstance()->Initialize(dxCommon, srvManager);
+	TextureManager::GetInstance()->Initialize(dxCommon.get(), srvManager.get());
 
 	// テクスチャを事前にロード
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
 	TextureManager::GetInstance()->LoadTexture("resources/monsterBall.png");
 	TextureManager::GetInstance()->LoadTexture("resources/mori.png");
+	TextureManager::GetInstance()->LoadTexture("resources/mori_Red.png");
 	
 	// スプライト共通部の初期化
-	spriteCommon = new SpriteCommon;
-	spriteCommon->Initialize(dxCommon);
+	spriteCommon = make_unique<SpriteCommon>();
+	spriteCommon->Initialize(dxCommon.get());
 
 
 	// 3Dオブジェクト共通部の初期化
-	object3dCommon = new Object3dCommon;
-	object3dCommon->Initialize(dxCommon);
+	object3dCommon = make_unique<Object3dCommon>();
+	object3dCommon->Initialize(dxCommon.get());
 
 
 	// 3Dモデルマネージャの初期化
-	ModelManager::GetInstance()->Initialize(dxCommon);
+	ModelManager::GetInstance()->Initialize(dxCommon.get());
 
 	// .objファイルからモデルを読み込む
 	ModelManager::GetInstance()->LoadModel("plane.obj");
@@ -50,11 +52,11 @@ void SRFramework::Initialize()
 
 	camera->SetRotate({ 0.0f,0.0f,0.0f });
 	camera->SetTranslate({ 0.0f,0.0f,-10.0f });
-	object3dCommon->SetDefaultCamera(camera);
+	object3dCommon->SetDefaultCamera(camera.get());
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
-	if (SUCCEEDED(dxCommon->GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
+	if (SUCCEEDED(dxCommon.get()->GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
 		// ヤバいエラー時に止まる
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
 		// エラー時に止まる
@@ -82,7 +84,12 @@ void SRFramework::Initialize()
 	}
 #endif
 
-	imGuiManager->Initialize(winApp, dxCommon);
+	imGuiManager->Initialize(winApp.get(), dxCommon.get());
+
+	// シーンマネージャの初期化
+	sceneManager_ = new SceneManager();
+	sceneManager_->Initialize(spriteCommon.get(), dxCommon.get(), winApp.get());
+
 }
 
 void SRFramework::Finelize()
@@ -91,18 +98,14 @@ void SRFramework::Finelize()
 		// 使われているSRVインデックスを解放
 		srvManager->Free(i);
 	}
-	delete srvManager;
 	
-	delete spriteCommon;
-
-	delete object3dCommon;
 	
 	// WindowsAPIの終了処理
 	winApp->Finalize();
-	delete winApp;
+	
 
-	CloseHandle(dxCommon->GetFenceEvent());
-	delete dxCommon;
+	CloseHandle(dxCommon.get()->GetFenceEvent());
+	
 
 	// テクスチャマネージャの終了
 	TextureManager::GetInstance()->Finalize();
@@ -110,7 +113,9 @@ void SRFramework::Finelize()
 	ModelManager::GetInstance()->Finalize();
 
 	imGuiManager->Finalize();
-	delete imGuiManager;
+	
+	// シーンマネージャの終了
+	delete sceneManager_;
 }
 
 void SRFramework::Update()
@@ -123,22 +128,21 @@ void SRFramework::Update()
 		// ゲームループを抜ける
 		endRequest_ = true;
 	}
-	
+	// シーンマネージャの更新
+	sceneManager_->Update();
 }
 
 void SRFramework::PreDraw()
 {
 	// 描画前処理
-	dxCommon->PreDraw();
+	dxCommon.get()->PreDraw();
 
 
 	srvManager->PreDraw();
 
-	// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
-	object3dCommon->DrawSettings();
+	
 
-	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
-	spriteCommon->DrawSettings();
+	
 
 	//sprite->Draw();
 
@@ -149,7 +153,21 @@ void SRFramework::PreDraw()
 
 void SRFramework::PostDraw()
 {
-	dxCommon->PostDraw();
+	dxCommon.get()->PostDraw();
+}
+
+void SRFramework::PreDrawObject3d()
+{
+	// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
+	object3dCommon->DrawSettings();
+}
+
+void SRFramework::PreDrawSprite()
+{
+	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
+	spriteCommon->DrawSettings();
+
+	sceneManager_->Draw();
 }
 
 void SRFramework::Run()

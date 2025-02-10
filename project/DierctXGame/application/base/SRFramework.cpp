@@ -87,7 +87,7 @@ void SRFramework::Initialize()
 	imGuiManager->Initialize(winApp.get(), dxCommon.get());
 
 	// シーンマネージャの初期化
-	sceneManager_ = new SceneManager();
+	sceneManager_ = std::make_unique<SceneManager>();
 	sceneManager_->Initialize(spriteCommon.get(), dxCommon.get(), winApp.get());
 
 }
@@ -114,8 +114,6 @@ void SRFramework::Finelize()
 
 	imGuiManager->Finalize();
 	
-	// シーンマネージャの終了
-	delete sceneManager_;
 }
 
 void SRFramework::Update()

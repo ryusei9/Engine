@@ -115,8 +115,7 @@ private:
 
 	bool endRequest_ = false;
 
-	SceneManager* sceneManager_ = nullptr;
+	std::unique_ptr<SceneManager> sceneManager_ = nullptr;
 
-	BaseScene* scene_ = nullptr;
 };
 

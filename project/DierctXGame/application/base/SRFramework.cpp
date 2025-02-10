@@ -90,8 +90,6 @@ void SRFramework::Initialize()
 	sceneManager_ = new SceneManager();
 	sceneManager_->Initialize(spriteCommon.get(), dxCommon.get(), winApp.get());
 
-	scene_ = new TitleScene();
-	sceneManager_->SetNextScene(scene_);
 }
 
 void SRFramework::Finelize()

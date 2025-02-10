@@ -2,6 +2,8 @@
 #include <SpriteCommon.h>
 #include <DirectXCommon.h>
 #include <WinApp.h>
+// シーンの種類
+enum SCENE { TITLE, GAMEPLAY };
 // シーン基底クラス
 class BaseScene
 {
@@ -19,5 +21,13 @@ public:
 
 	// 終了
 	virtual void Finalize() = 0;
+
+	int GetSceneNo() { return sceneNo; }
+
+	void SetSceneNo(int sceneNo) { this->sceneNo = sceneNo; }
+
+public:
+	// シーン番号
+	static int sceneNo;
 };
 

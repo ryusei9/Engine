@@ -3,6 +3,8 @@
 #include <SpriteCommon.h>
 #include <DirectXCommon.h>
 #include <WinApp.h>
+#include <TitleScene.h>
+#include <GamePlayScene.h>
 // シーン管理
 class SceneManager
 {
@@ -19,14 +21,14 @@ public:
 	// 描画
 	void Draw();
 
-	// シーンの変更
-	void SetNextScene(BaseScene* nextScene) { nextScene_ = nextScene; }
+	
 private:
+
 	// 現在のシーン
-	BaseScene* scene_ = nullptr;
+	std::unique_ptr<BaseScene> nowScene_ = nullptr;
 
 	// 次のシーン
-	BaseScene* nextScene_ = nullptr;
+	std::unique_ptr<BaseScene> nextScene_ = nullptr;
 
 	// スプライトコモン
 	SpriteCommon* spriteCommon_ = nullptr;
@@ -36,5 +38,9 @@ private:
 
 	// WinApp
 	WinApp* winApp_ = nullptr;
+
+	// シーンの管理
+	int currentSceneNo_;
+	int prevSceneNo_;
 };
 

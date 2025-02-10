@@ -15,6 +15,11 @@ void TitleScene::Update()
 	// 入力の更新
 	input->Update();
 
+	// エンターキーでゲームシーンに切り替える
+	if (input->TriggerKey(DIK_RETURN))
+	{
+		SetSceneNo(GAMEPLAY);
+	}
 
 	sprite->Update();
 	sprite->SetPosition(spritePosition);

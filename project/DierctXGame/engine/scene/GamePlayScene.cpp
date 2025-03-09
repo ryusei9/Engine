@@ -2,6 +2,8 @@
 #include "SRFramework.h"
 void GamePlayScene::Initialize(SpriteCommon* spriteCommon, DirectXCommon* directXCommon, WinApp* winApp)
 {
+	sprite = std::make_unique<Sprite>();
+	input = std::make_unique<Input>();
 	sprite->Initialize(spriteCommon, directXCommon, "resources/mori.png");
 	input->Initialize(winApp);
 	Audio::GetInstance()->Initialize();
@@ -32,8 +34,6 @@ void GamePlayScene::Draw()
 
 void GamePlayScene::Finalize()
 {
-	delete sprite;
-	delete input;
 	Audio::GetInstance()->SoundUnload(&soundData1);
 	Audio::GetInstance()->Finalize();
 }

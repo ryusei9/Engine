@@ -9,7 +9,7 @@ class ModelManager
 private:
 	static ModelManager* instance;
 
-	ModelCommon* modelCommon = nullptr;
+	std::unique_ptr<ModelCommon> modelCommon = nullptr;
 
 	ModelManager() = default;
 	~ModelManager() = default;

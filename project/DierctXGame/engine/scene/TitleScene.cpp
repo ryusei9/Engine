@@ -2,7 +2,9 @@
 
 void TitleScene::Initialize(SpriteCommon* spriteCommon, DirectXCommon* directXCommon, WinApp* winApp)
 {
+	sprite = std::make_unique<Sprite>();
 	sprite->Initialize(spriteCommon, directXCommon, "resources/mori_Red.png");
+	input = std::make_unique<Input>();
 	input->Initialize(winApp);
 	Audio::GetInstance()->Initialize();
 	soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
@@ -32,8 +34,6 @@ void TitleScene::Draw()
 
 void TitleScene::Finalize()
 {
-	delete sprite;
-	delete input;
 	Audio::GetInstance()->SoundUnload(&soundData1);
 	Audio::GetInstance()->Finalize();
 }

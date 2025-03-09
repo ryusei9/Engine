@@ -33,10 +33,10 @@ private:
 	WinApp* winApp = nullptr;
 
 
-	Sprite* sprite = new Sprite();
+	std::unique_ptr<Sprite> sprite = nullptr;
 
 	// 入力の初期化
-	Input* input = new Input();
+	std::unique_ptr<Input> input = nullptr;
 
 	Vector2 spritePosition = { 100.0f,100.0f };
 

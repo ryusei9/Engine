@@ -10,7 +10,6 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, DirectXCommon* dxCommon, std
 {
 	spriteCommon_ = spriteCommon;
 	dxCommon_ = dxCommon;
-	//textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
 	this->filePath = textureFilePath; // メンバー変数に値を設定
 	CreateVertexData();
 	CreateMaterialData();

@@ -3,12 +3,12 @@
 #include <cassert>
 #include "Logger.h"
 
-SpriteCommon* SpriteCommon::instance = nullptr;
+std::shared_ptr<SpriteCommon> SpriteCommon::instance = nullptr;
 
-SpriteCommon* SpriteCommon::GetInstance()
+std::shared_ptr<SpriteCommon> SpriteCommon::GetInstance()
 {
 	if (instance == nullptr) {
-		instance = new SpriteCommon();
+		instance = std::make_shared<SpriteCommon>();
 	}
 	return instance;
 	

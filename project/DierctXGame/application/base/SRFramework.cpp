@@ -135,17 +135,7 @@ void SRFramework::PreDraw()
 	// 描画前処理
 	dxCommon.get()->PreDraw();
 
-
 	srvManager->PreDraw();
-
-	
-
-	
-
-	//sprite->Draw();
-
-	//imGuiManager->Draw();
-
 	
 }
 

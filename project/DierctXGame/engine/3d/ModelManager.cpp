@@ -1,6 +1,13 @@
 #include "ModelManager.h"
 
-ModelManager* ModelManager::instance = nullptr;
+std::shared_ptr<ModelManager> ModelManager::instance = nullptr;
+
+std::shared_ptr<ModelManager> ModelManager::GetInstance() {
+	if (instance == nullptr) {
+		instance = std::make_shared<ModelManager>();
+	}
+	return instance;
+}
 
 void ModelManager::Initialize(DirectXCommon* dxCommon)
 {
@@ -34,16 +41,7 @@ Model* ModelManager::FindModel(const std::string& filePath)
 	return nullptr;
 }
 
-ModelManager* ModelManager::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new ModelManager;
-	}
-	return instance;
-}
-
 void ModelManager::Finalize()
 {
-	delete instance;
-	instance = nullptr;
+	
 }

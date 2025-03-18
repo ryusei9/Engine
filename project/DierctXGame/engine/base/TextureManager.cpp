@@ -2,7 +2,7 @@
 #include "StringUtility.h"
 #include <cassert>
 
-TextureManager* TextureManager::instance = nullptr;
+std::shared_ptr<TextureManager> TextureManager::instance = nullptr;
 
 // ImGuiで0番を使用するため、1番から使用
 uint32_t TextureManager::kSRVIndexTop = 1;
@@ -99,10 +99,10 @@ void TextureManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager)
 	textureDatas.reserve(DirectXCommon::kMaxSRVCount);
 }
 
-TextureManager* TextureManager::GetInstance()
+std::shared_ptr<TextureManager> TextureManager::GetInstance()
 {
 	if (instance == nullptr) {
-		instance = new TextureManager;
+		instance = std::make_shared<TextureManager>();
 	}
 	return instance;
 }
@@ -121,6 +121,5 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(const std::string& f
 
 void TextureManager::Finalize()
 {
-	delete instance;
-	instance = nullptr;
+	
 }

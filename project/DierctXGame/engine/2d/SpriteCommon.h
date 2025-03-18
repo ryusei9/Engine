@@ -5,7 +5,7 @@ class SpriteCommon
 {
 public:
 	// シングルトンインスタンスの取得
-	static SpriteCommon* GetInstance();
+	static std::shared_ptr<SpriteCommon> GetInstance();
 	SpriteCommon() = default;
 	~SpriteCommon() = default;
 	SpriteCommon(SpriteCommon&) = delete;
@@ -22,7 +22,7 @@ public:
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 private:	// メンバ関数
 	// シングルトンインスタンス
-	static SpriteCommon* instance;
+	static std::shared_ptr<SpriteCommon> instance;
 	
 	// ルートシグネチャの初期化
 	void RootSignatureInitialize();

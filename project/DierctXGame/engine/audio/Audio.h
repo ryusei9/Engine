@@ -3,6 +3,7 @@
 #include <xaudio2.h>
 #pragma comment(lib,"xaudio2.lib")
 #include <fstream>
+#include <memory>
 
 // チャンクヘッダ
 struct ChunkHeader {
@@ -35,6 +36,16 @@ struct SoundData {
 class Audio
 {
 public:
+	Audio() = default;
+	~Audio() = default;
+	// コピーコンストラクタ
+	Audio(const Audio&) = delete;
+	// コピー代入演算子
+	Audio& operator=(const Audio&) = delete;
+
+	// シングルトンインスタンスの取得
+	static std::shared_ptr<Audio> GetInstance();
+
 	// 初期化
 	void Initialize();
 
@@ -47,22 +58,14 @@ public:
 	// 音声再生
 	void SoundPlayWave(const SoundData& soundData);
 
-	// シングルトンインスタンスの取得
-	static Audio* GetInstance();
-
 	// 終了
 	void Finalize();
 
 private:
 
-	static Audio* instance;
+	static std::shared_ptr<Audio> instance;
 
-	Audio() = default;
-	~Audio() = default;
-	// コピーコンストラクタ
-	Audio(Audio&) = default;
-	// コピー代入演算子
-	Audio& operator=(Audio&) = default;
+	
 
 	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
 

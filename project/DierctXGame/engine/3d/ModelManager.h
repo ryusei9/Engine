@@ -3,38 +3,38 @@
 #include <string>
 #include <memory>
 #include "Model.h"
+#include <unordered_map>
+#include "ModelCommon.h"
+#include "DirectXCommon.h"
 // textureマネージャー
 class ModelManager
 {
-private:
-	static ModelManager* instance;
+public:
+    // シングルトンインスタンスの取得
+    ModelManager() = default;
+    ~ModelManager() = default;
+    ModelManager(const ModelManager&) = delete;
+    ModelManager& operator=(const ModelManager&) = delete;
 
-	std::unique_ptr<ModelCommon> modelCommon = nullptr;
-
-	ModelManager() = default;
-	~ModelManager() = default;
-	// コピーコンストラクタ
-	ModelManager(ModelManager&) = default;
-
-	// コピー代入演算子
-	ModelManager& operator=(ModelManager&) = default;
+    static std::shared_ptr<ModelManager> GetInstance();
+    void Initialize(DirectXCommon* dxCommon);
+    void LoadModel(const std::string& filePath);
+   
+    void Finalize();
 
 	
-public:
-	// シングルトンインスタンスの取得
-	static ModelManager* GetInstance();
-	// 終了
-	void Finalize();
-	// 初期化
-	void Initialize(DirectXCommon* dxCommon);
-
-	/// モデルファイルの読み込み
-	void LoadModel(const std::string& filePath);
-
-	// モデルデータ
-	std::map<std::string, std::unique_ptr<Model>> models;
 
 	// モデルの検索
 	Model* FindModel(const std::string& filePath);
+private:
+   
+
+    static std::shared_ptr<ModelManager> instance;
+    std::unique_ptr<ModelCommon> modelCommon = nullptr;
+    // モデルデータ
+    std::unordered_map<std::string, std::unique_ptr<Model>> models;
 };
+
+
+
 

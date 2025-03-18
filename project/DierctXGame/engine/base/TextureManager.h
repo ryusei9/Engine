@@ -6,16 +6,12 @@
 #include "DirectXCommon.h"
 #include <SrvManager.h>
 #include <unordered_map>
+#include <memory>
 // テクスチャマネージャー
 class TextureManager
 {
 private:
-	static TextureManager* instance;
-
-	TextureManager() = default;
-	~TextureManager() = default;
-	TextureManager(TextureManager&) = delete;
-	TextureManager& operator=(TextureManager&) = delete;
+	static std::shared_ptr<TextureManager> instance;
 
 	// テクスチャ1枚分のデータ
 	struct TextureData {
@@ -44,7 +40,12 @@ public:
 	void Initialize(DirectXCommon* dxCommon,SrvManager* srvManager);
 
 	// シングルトンインスタンスの取得
-	static TextureManager* GetInstance();
+	static std::shared_ptr<TextureManager> GetInstance();
+
+	TextureManager() = default;
+	~TextureManager() = default;
+	TextureManager(TextureManager&) = delete;
+	TextureManager& operator=(TextureManager&) = delete;
 
 	// 終了
 	void Finalize();

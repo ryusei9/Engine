@@ -101,8 +101,6 @@ private:
 
 	unique_ptr<SrvManager> srvManager = nullptr;
 
-	//Input* input = nullptr;
-
 	unique_ptr < SpriteCommon> spriteCommon = nullptr;
 
 	unique_ptr < Object3dCommon> object3dCommon = nullptr;
@@ -110,8 +108,6 @@ private:
 	unique_ptr < Camera> camera = make_unique<Camera>();
 
 	unique_ptr < ImGuiManager> imGuiManager = make_unique<ImGuiManager>();
-
-	//Sprite* sprite = new Sprite();
 
 	bool endRequest_ = false;
 

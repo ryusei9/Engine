@@ -2,7 +2,7 @@
 #include <cassert>
 
 
-Audio* Audio::instance = nullptr;
+std::shared_ptr<Audio> Audio::instance = nullptr;
 void Audio::Initialize()
 {
 	result = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
@@ -109,16 +109,21 @@ void Audio::SoundPlayWave(const SoundData& soundData)
 	result = pSourceVoice->Start();
 }
 
-Audio* Audio::GetInstance()
+std::shared_ptr<Audio> Audio::GetInstance()
 {
 	if (instance == nullptr) {
-		instance = new Audio;
+		instance = std::make_shared<Audio>();
 	}
 	return instance;
 }
 
 void Audio::Finalize()
 {
-	delete instance;
-	instance = nullptr;
+	if (masterVoice) {
+		masterVoice->DestroyVoice();
+		masterVoice = nullptr;
+	}
+	if (xAudio2) {
+		xAudio2.Reset();
+	}
 }

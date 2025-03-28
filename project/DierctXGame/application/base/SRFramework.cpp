@@ -90,6 +90,8 @@ void SRFramework::Initialize()
 	sceneManager_ = std::make_unique<SceneManager>();
 	sceneManager_->Initialize(spriteCommon.get(), dxCommon.get(), winApp.get());
 
+	/*------パーティクルマネージャの初期化------*/
+	ParticleManager::GetInstance()->Initialize(dxCommon.get(), srvManager.get(),camera.get());
 }
 
 void SRFramework::Finelize()
@@ -112,6 +114,9 @@ void SRFramework::Finelize()
 	// 3Dモデルマネージャの終了
 	ModelManager::GetInstance()->Finalize();
 
+	// パーティクルマネージャの終了
+	ParticleManager::GetInstance()->Finalize();
+
 	imGuiManager->Finalize();
 	
 }
@@ -128,6 +133,9 @@ void SRFramework::Update()
 	}
 	// シーンマネージャの更新
 	sceneManager_->Update();
+
+	// パーティクルマネージャの更新
+	ParticleManager::GetInstance()->Update();
 }
 
 void SRFramework::PreDraw()

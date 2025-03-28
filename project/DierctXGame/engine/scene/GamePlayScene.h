@@ -7,6 +7,8 @@
 #include <Audio.h>
 #include <Vector2.h>
 #include <BaseScene.h>
+#include <ParticleManager.h>
+
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 
@@ -41,5 +43,7 @@ private:
 	Vector2 spritePosition = { 100.0f,100.0f };
 
 	SoundData soundData1;
+
+	std::shared_ptr<ParticleManager> particleManager = nullptr;
 };
 

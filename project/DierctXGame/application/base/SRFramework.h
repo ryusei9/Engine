@@ -92,7 +92,7 @@ public:
 	SpriteCommon* GetSpriteCommon() const { return spriteCommon.get(); }
 
 	WinApp* GetWinApp() const { return winApp.get(); }
-private:
+protected:
 	// メンバ変数
 	// ポインタ
 	unique_ptr<WinApp> winApp = nullptr;

@@ -130,8 +130,10 @@ void Object3dCommon::RootSignatureInitialize()
 
 	/*/// BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};*/
-	// すべての色要素を書きこむ
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	// ブレンドするかしないか
+	blendDesc.BlendEnable = false;
+	// すべての色要素を書き込む
+	blendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
 	/*/// RasterizerState
 	D3D12_RASTERIZER_DESC rasterizerDesc{};*/
@@ -139,6 +141,7 @@ void Object3dCommon::RootSignatureInitialize()
 	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	rasterizerDesc.FrontCounterClockwise = FALSE;	 // 時計回りの面を表面とする（カリング方向の設定）
 
 	/// VertexShader
 	// shaderをコンパイルする
@@ -170,7 +173,7 @@ void Object3dCommon::GraphicsPipelineInitialize()
 	// InputLayout
 	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;
 	// Blendstate
-	graphicsPipelineStateDesc.BlendState = blendDesc;
+	graphicsPipelineStateDesc.BlendState.RenderTarget[0] = blendDesc;	
 	// RasterizerState
 	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;
 	// VertexShader

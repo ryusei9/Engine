@@ -1,4 +1,5 @@
 #include "TitleScene.h"
+#include <imgui.h>
 
 void TitleScene::Initialize(SpriteCommon* spriteCommon, DirectXCommon* directXCommon, WinApp* winApp)
 {
@@ -36,4 +37,11 @@ void TitleScene::Finalize()
 {
 	Audio::GetInstance()->SoundUnload(&soundData1);
 	Audio::GetInstance()->Finalize();
+}
+
+void TitleScene::DrawImGui()
+{
+	ImGui::Begin("TitleScene");
+	
+	ImGui::End();
 }

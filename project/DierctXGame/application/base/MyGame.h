@@ -2,6 +2,7 @@
 #include "SRFramework.h"
 #include "GamePlayScene.h"
 #include "TitleScene.h"
+#include "ImGuiManager.h"
 
 // ゲーム全体
 class MyGame : public SRFramework
@@ -26,8 +27,5 @@ private:
 	GamePlayScene* scene_;
 	// タイトルシーン
 	TitleScene* titleScene_;
-
-	// ゲーム終了フラグ
-	//bool endRequest_ = false;
 };
 

@@ -21,6 +21,8 @@ public:
 	// 描画
 	void Draw();
 
+	// ImGui描画
+	void DrawImGui();
 	
 private:
 

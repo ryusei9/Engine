@@ -7,6 +7,8 @@
 #include <Audio.h>
 #include <Vector2.h>
 #include <BaseScene.h>
+#include <ParticleManager.h>
+#include <ParticleEmitter.h>
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 
@@ -23,6 +25,9 @@ public:
 
 	// 終了
 	void Finalize() override;
+
+	// ImGui描画
+	void DrawImGui() override;
 
 private:
 	// スプライトコモン
@@ -41,5 +46,15 @@ private:
 	Vector2 spritePosition = { 100.0f,100.0f };
 
 	SoundData soundData1;
+
+	ParticleManager* particleManager = nullptr;
+
+	std::unique_ptr<ParticleEmitter> particleEmitter1 = nullptr;
+
+	std::unique_ptr<ParticleEmitter> particleEmitter2 = nullptr;
+
+	Vector3 particlePosition1 = { -5,0,50 };
+
+	Vector3 particlePosition2 = { 5,0,50 };
 };
 

@@ -26,6 +26,9 @@ public:
 	// 終了
 	void Finalize() override;
 
+	// ImGui描画
+	void DrawImGui() override;
+
 private:
 	// スプライトコモン
 	SpriteCommon* spriteCommon = nullptr;
@@ -46,6 +49,12 @@ private:
 
 	ParticleManager* particleManager = nullptr;
 
-	std::unique_ptr<ParticleEmitter> particleEmitter = nullptr;
+	std::unique_ptr<ParticleEmitter> particleEmitter1 = nullptr;
+
+	std::unique_ptr<ParticleEmitter> particleEmitter2 = nullptr;
+
+	Vector3 particlePosition1 = { -5,0,50 };
+
+	Vector3 particlePosition2 = { 5,0,50 };
 };
 

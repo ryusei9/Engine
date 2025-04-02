@@ -8,6 +8,8 @@
 #include <MakeTranslateMatrix.h>
 #include <Material.h>
 #include <imgui.h>
+#include <MakeRotateYMatrix.h>
+#include <iostream>
 
 using namespace Logger;
 
@@ -58,19 +60,13 @@ void ParticleManager::Update()
 
 	// ビルボード行列を初期化
 	Matrix4x4 scaleMatrix{};
-	scaleMatrix.m[3][0] = 0.0f;
-	scaleMatrix.m[3][1] = 0.0f;
-	scaleMatrix.m[3][2] = 0.0f;
+	
 
 	Matrix4x4 rotateMatrix{};
-	rotateMatrix.m[3][0] = 0.0f;
-	rotateMatrix.m[3][1] = 3.14f;
-	rotateMatrix.m[3][2] = 0.0f;
+	
 
 	Matrix4x4 translateMatrix{};
-	translateMatrix.m[3][0] = 0.0f;
-	translateMatrix.m[3][1] = 0.0f;
-	translateMatrix.m[3][2] = 0.0f;
+	
 
 	Matrix4x4 billboardMatrix = Multiply::Multiply(backToFrontMatrix, cameraMatrix);
 	billboardMatrix.m[3][0] = 0.0f;
@@ -101,6 +97,7 @@ void ParticleManager::Update()
 				// スケール、回転、平行移動を利用してワールド行列を作成
 				Matrix4x4 worldMatrix = MakeAffineMatrix::MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate);
 				scaleMatrix = MakeScaleMatrix::MakeScaleMatrix((*particleIterator).transform.scale);
+				
 				translateMatrix = MakeTranslateMatrix::MakeTranslateMatrix((*particleIterator).transform.translate);
 
 				// ビルボードを使うかどうか
@@ -108,6 +105,7 @@ void ParticleManager::Update()
 				{
 					worldMatrix = scaleMatrix * billboardMatrix * translateMatrix;
 				} else {
+					rotateMatrix = MakeRotateYMatrix::MakeRotateYMatrix((*particleIterator).transform.rotate.y);
 					worldMatrix = scaleMatrix * rotateMatrix * translateMatrix;
 				}
 
@@ -197,9 +195,13 @@ void ParticleManager::Finalize()
 
 void ParticleManager::CreateParticleGroup(const std::string& name, const std::string textureFilePath)
 {
-	// 登録済みの名前かチェックしてassert
-	assert(particleGroups.find(name) == particleGroups.end() && "Particle group alread exests!");
-
+	// パーティクルグループが既に存在するか確認
+	if (particleGroups.find(name) != particleGroups.end())
+	{
+		// エラーメッセージを出力して処理を中断
+		std::cerr << "Error: Particle group '" << name << "' already exists!" << std::endl;
+		return;
+	}
 	// 新たな空のパーティクルグループを作成し、コンテナに登録
 	ParticleGroup group{};
 	group.materialData.textureFilePath = textureFilePath;
@@ -282,18 +284,14 @@ ParticleManager::Particle ParticleManager::MakeNewParticle(std::mt19937& randomE
 	Particle particle;
 
 	// 一様分布生成期を使って乱数を生成
-	std::uniform_real_distribution<float> distribution(-1.0, 1.0f);
+	std::uniform_real_distribution<float> distribution(-5.0, 5.0f);
 	std::uniform_real_distribution<float> distColor(0.0, 1.0f);
 	std::uniform_real_distribution<float> distTime(1.0, 3.0f);
 
 	// 位置と速度を[-1, 1]でランダムに初期化
 	particle.transform.scale = { 1.0f, 1.0f, 1.0f };
 	particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
-	particle.transform.translate = { distribution(randomEngine),distribution(randomEngine),distribution(randomEngine) };
-
-	// 発生場所を計算
-	Vector3 randomTranslate{ distribution(randomEngine),distribution(randomEngine),distribution(randomEngine) };
-	particle.transform.translate = translate + randomTranslate;
+	particle.transform.translate = translate;
 
 	// 色を[0, 1]でランダムに初期化
 	particle.color = { distColor(randomEngine), distColor(randomEngine), distColor(randomEngine), 1.0f };
@@ -363,10 +361,10 @@ void ParticleManager::DrawImGui()
 		useBillboard = !useBillboard;
 	}
 
-	if (ImGui::Button(isWind ? "Disable Wind" : "Enable Wind"))
+	/*if (ImGui::Button(isWind ? "Disable Wind" : "Enable Wind"))
 	{
 		isWind = !isWind;
-	}
+	}*/
 
 	ImGui::End(); // ウィンドウの終了
 }

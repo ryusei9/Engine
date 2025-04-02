@@ -59,3 +59,10 @@ void SceneManager::Draw()
 	// 実行中シーンを描画
 	nowScene_->Draw();
 }
+
+void SceneManager::DrawImGui()
+{
+	if (nowScene_) {
+		nowScene_->DrawImGui();
+	}
+}

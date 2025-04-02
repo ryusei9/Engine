@@ -22,6 +22,9 @@ public:
 	// 終了
 	virtual void Finalize() = 0;
 
+	// ImGui描画
+	virtual void DrawImGui() = 0;
+
 	int GetSceneNo() { return sceneNo; }
 
 	void SetSceneNo(int sceneNo) { this->sceneNo = sceneNo; }

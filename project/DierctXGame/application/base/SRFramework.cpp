@@ -51,7 +51,7 @@ void SRFramework::Initialize()
 
 
 	camera->SetRotate({ 0.0f,0.0f,0.0f });
-	camera->SetTranslate({ 0.0f,0.0f,-50.0f });
+	camera->SetTranslate({ 0.0f,0.0f,-10.0f });
 	object3dCommon->SetDefaultCamera(camera.get());
 
 #ifdef _DEBUG

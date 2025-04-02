@@ -22,6 +22,9 @@ public:
 	// 終了
 	void Finalize() override;
 
+	// ImGui描画
+	void DrawImGui() override;
+
 private:
 	// スプライトコモン
 	SpriteCommon* spriteCommon = nullptr;

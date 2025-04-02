@@ -153,7 +153,7 @@ private:
 
 	std::vector<ParticleManager::WindZone> windZones = {
 	{ { {-5.0f, -5.0f, -5.0f}, {5.0f, 5.0f, 5.0f} }, {0.1f, 0.0f, 0.0f} },
-	{ { {10.0f, -5.0f, -5.0f}, {15.0f, 5.0f, 5.0f} }, {0.0f, 0.0f, 0.1f} }
+	{ { {10.0f, -5.0f, -5.0f}, {15.0f, 5.0f, 5.0f} }, {5.0f, 0.0f, 0.0f} }
 	};
 	// ランダム
 	std::random_device seedGeneral;

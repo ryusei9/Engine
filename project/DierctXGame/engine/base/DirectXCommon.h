@@ -76,6 +76,9 @@ public: // メンバ関数
 	// 描画後処理
 	void PostDraw();
 
+	// バリアの設定
+	void ChengeBarrier();
+
 	// CompileShader関数
 	Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
 // compilerするshaderファイルへのパス

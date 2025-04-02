@@ -23,19 +23,28 @@ void MyGame::Finelize()
 void MyGame::Update()
 {
 	SRFramework::Update();
-	// ゲームプレイシーンの更新
-	//titleScene_->Update();
+	// ImGuiの更新
+	imGuiManager->Begin();
+#ifdef _DEBUG
+	ParticleManager::GetInstance()->DrawImGui();
+
+#endif
+	imGuiManager->End();
+	
 }
 
 void MyGame::Draw()
 {
 	SRFramework::PreDraw();
 
-	ParticleManager::GetInstance()->Draw();
+	
 
 	SRFramework::PreDrawObject3d();
-
+	ParticleManager::GetInstance()->Draw();
 	SRFramework::PreDrawSprite();
+
+	
+	imGuiManager->Draw();
 	
 	SRFramework::PostDraw();
 }

@@ -7,17 +7,16 @@
 #include <MakeScaleMatrix.h>
 #include <MakeTranslateMatrix.h>
 #include <Material.h>
+#include <imgui.h>
 
 using namespace Logger;
 
-std::shared_ptr<ParticleManager> ParticleManager::instance = nullptr;
+//ParticleManager* ParticleManager::instance = nullptr;
 
-std::shared_ptr<ParticleManager> ParticleManager::GetInstance()
+ParticleManager* ParticleManager::GetInstance()
 {
-	if (instance == nullptr) {
-		instance = std::make_shared<ParticleManager>();
-	}
-	return instance;
+	static ParticleManager instance;
+	return &instance;
 }
 
 void ParticleManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager,Camera* camera)
@@ -33,6 +32,8 @@ void ParticleManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager
 	accelerationField.acceleration = { 15.0f, 0.0f, 0.0f };
 	accelerationField.area.min = { -10.0f, -10.0f, -30.0f };
 	accelerationField.area.max = { 10.0f, 10.0f, 30.0f };
+
+
 
 	// PSOの初期化
 	CreatePSO();
@@ -60,6 +61,11 @@ void ParticleManager::Update()
 	scaleMatrix.m[3][0] = 0.0f;
 	scaleMatrix.m[3][1] = 0.0f;
 	scaleMatrix.m[3][2] = 0.0f;
+
+	Matrix4x4 rotateMatrix{};
+	rotateMatrix.m[3][0] = 0.0f;
+	rotateMatrix.m[3][1] = 3.14f;
+	rotateMatrix.m[3][2] = 0.0f;
 
 	Matrix4x4 translateMatrix{};
 	translateMatrix.m[3][0] = 0.0f;
@@ -101,6 +107,8 @@ void ParticleManager::Update()
 				if (useBillboard)
 				{
 					worldMatrix = scaleMatrix * billboardMatrix * translateMatrix;
+				} else {
+					worldMatrix = scaleMatrix * rotateMatrix * translateMatrix;
 				}
 
 				// ワールド・ビュー・プロジェクション行列を計算
@@ -328,7 +336,7 @@ void ParticleManager::CreateVertexData()
 void ParticleManager::CreateMaterialData()
 {
 	// マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
-	materialResource = CreateBufferResource(dxCommon_->GetDevice().Get(), sizeof(Material) * 3);
+	materialResource = CreateBufferResource(dxCommon_->GetDevice().Get(), sizeof(Material));
 
 	// マテリアルにデータ
 	Material* materialData = nullptr;
@@ -340,10 +348,27 @@ void ParticleManager::CreateMaterialData()
 	// RGBA
 	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	materialData->enableLighting = true;
+	materialData->enableLighting = false;
 
 	// 単位行列で初期化
 	materialData->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
+}
+
+void ParticleManager::DrawImGui()
+{
+	ImGui::Begin("ParticleManager");
+	if (ImGui::Button(useBillboard ? "Disable Billboard" : "Enable Billboard"))
+	{
+		// ボタンが押されたらuseBillboardの値を切り替える
+		useBillboard = !useBillboard;
+	}
+
+	if (ImGui::Button(isWind ? "Disable Wind" : "Enable Wind"))
+	{
+		isWind = !isWind;
+	}
+
+	ImGui::End(); // ウィンドウの終了
 }
 
 void ParticleManager::CreateRootSignature()
@@ -426,14 +451,15 @@ void ParticleManager::CreateRootSignature()
 	}
 
 	// バイナリを元に生成
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;
 	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
-		signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+		signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
 	assert(SUCCEEDED(hr));
 }
 
 void ParticleManager::CreatePSO()
 {
+
+	CreateRootSignature();
 	/// InputLayout
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
@@ -569,7 +595,6 @@ void ParticleManager::CreatePSO()
 	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
 	// 実際に生成
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
 	HRESULT hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
 	assert(SUCCEEDED(hr));
 

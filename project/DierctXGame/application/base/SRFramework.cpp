@@ -51,7 +51,7 @@ void SRFramework::Initialize()
 
 
 	camera->SetRotate({ 0.0f,0.0f,0.0f });
-	camera->SetTranslate({ 0.0f,0.0f,-10.0f });
+	camera->SetTranslate({ 0.0f,0.0f,-50.0f });
 	object3dCommon->SetDefaultCamera(camera.get());
 
 #ifdef _DEBUG
@@ -116,8 +116,6 @@ void SRFramework::Finelize()
 
 	// パーティクルマネージャの終了
 	ParticleManager::GetInstance()->Finalize();
-
-	imGuiManager->Finalize();
 	
 }
 
@@ -133,7 +131,7 @@ void SRFramework::Update()
 	}
 	// シーンマネージャの更新
 	sceneManager_->Update();
-
+	camera->Update();
 	// パーティクルマネージャの更新
 	ParticleManager::GetInstance()->Update();
 }

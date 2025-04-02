@@ -12,6 +12,7 @@
 #include <wrl.h>
 #include "Model.h"
 #include "Camera.h"
+#include <numbers>
 
 class Object3dCommon;
 
@@ -86,8 +87,8 @@ public:
 private:
 	// BufferResourceの作成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes);
-	/*void CreateVertexData();
-	void CreateMaterialData();*/
+	void CreateVertexData();
+	void CreateMaterialData();
 	void CreateWVPData();
 	void CreateDirectionalLightData();
 
@@ -95,25 +96,35 @@ private:
 
 	Model* model = nullptr;
 	//// Objファイルのデータ
-	//ModelData modelData;
+	ModelData modelData;
 
 	//// バッファリソース
-	//Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
-	//Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource;
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource;
 	//// バッファリソース内のデータを指すポインタ
-	//VertexData* vertexData = nullptr;
-	//Material* materialData = nullptr;
+	VertexData* vertexData = nullptr;
+	Material* materialData = nullptr;
 	TransformationMatrix* transformationMatrixData = nullptr;
 	DirectionalLight* directionalLightData = nullptr;
 
 	// バッファリソースの使い道を補足するバッファビュー
 	//// 頂点バッファビューを作成する
-	//D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 
 	Transform transform;
 
 	Camera* camera = nullptr;
+
+	// 分割数
+	uint32_t kSubdivision = 32;
+
+	// 緯度・経度の分割数に応じた角度の計算
+	float kLatEvery = std::numbers::pi_v<float> / float(kSubdivision);
+	float kLonEvery = 2.0f * std::numbers::pi_v<float> / float(kSubdivision);
+
+	// 球体の頂点数の計算
+	uint32_t TotalVertexCount = kSubdivision * kSubdivision * 6;
 };
 

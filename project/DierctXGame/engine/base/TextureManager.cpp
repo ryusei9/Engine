@@ -38,8 +38,8 @@ void TextureManager::LoadTexture(const std::string& filePath)
 	TextureData& textureData = textureDatas[filePath];
 
 	//textureData.filePath = filePath;
-	textureData.metadata = metadata;
-	textureData.resource = dxCommon_->CreateTextureResource(metadata);
+	textureData.metadata = mipImages.GetMetadata();
+	textureData.resource = dxCommon_->CreateTextureResource(textureData.metadata);
 
 	// ミップマップデータをリソースにアップロード
 	//dxCommon_->UploadTextureData(textureData.resource.Get(),mipImages);
@@ -53,7 +53,7 @@ void TextureManager::LoadTexture(const std::string& filePath)
 	textureData.srvHandleGPU = srvManager_->GetGPUDescriptorHandle(textureData.srvIndex);
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = metadata.format;
+	srvDesc.Format = textureData.metadata.format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
@@ -61,7 +61,7 @@ void TextureManager::LoadTexture(const std::string& filePath)
 	// SRVを作成
 	dxCommon_->GetDevice()->CreateShaderResourceView(textureData.resource.Get(), &srvDesc, textureData.srvHandleCPU);
 
-	Microsoft::WRL::ComPtr< ID3D12Resource> intermediateResource = dxCommon_->UploadTextureData(textureData.resource, mipImages);
+	Microsoft::WRL::ComPtr< ID3D12Resource> intermediateResource = dxCommon_->UploadTextureData(textureData.resource.Get(), mipImages);
 	// GPUとCPUの同期を待つ(これだと高速で処理ができないが高速にしようとすると手間なので応急処置)
 	dxCommon_->SyncCPUWithGPU();
 }

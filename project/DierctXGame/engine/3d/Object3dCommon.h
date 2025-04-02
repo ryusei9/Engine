@@ -37,7 +37,7 @@ private:
 
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
 	/// BlendStateの設定
-	D3D12_BLEND_DESC blendDesc{};
+	D3D12_RENDER_TARGET_BLEND_DESC blendDesc{};
 
 	/// RasterizerState
 	D3D12_RASTERIZER_DESC rasterizerDesc{};

@@ -11,8 +11,10 @@ void GamePlayScene::Initialize(SpriteCommon* spriteCommon, DirectXCommon* direct
 	// 音声再生
 	Audio::GetInstance()->SoundPlayWave(soundData1);
 
-	particleManager = std::make_shared<ParticleManager>();
+	particleManager = ParticleManager::GetInstance();
 	particleManager->GetInstance()->CreateParticleGroup("test", "resources/mori.png");
+
+	particleEmitter = std::make_unique<ParticleEmitter>(particleManager,"test");
 }
 
 void GamePlayScene::Update()
@@ -25,7 +27,9 @@ void GamePlayScene::Update()
 	{
 		SetSceneNo(TITLE);
 	}
-	particleManager->Emit("test", { 0.0f,0.0f,0.0f }, 10);
+	particleEmitter->SetPosition({ 100,100,0 });
+	particleEmitter->SetParticleRate(100);
+	particleEmitter->Update();
 	sprite->Update();
 	sprite->SetPosition(spritePosition);
 }

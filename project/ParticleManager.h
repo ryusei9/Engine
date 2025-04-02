@@ -68,7 +68,7 @@ public:
 	/*------メンバ関数------*/
 
 	// シングルトンインスタンス
-	static std::shared_ptr<ParticleManager> GetInstance();
+	static ParticleManager* GetInstance();
 
 	ParticleManager() = default;
 	~ParticleManager() = default;
@@ -104,8 +104,11 @@ public:
 
 	/*------マテリアルデータの作成------*/
 	void CreateMaterialData();
+
+	// ImGuiの描画
+	void DrawImGui();
 private:
-	static std::shared_ptr<ParticleManager> instance;
+	static ParticleManager* instance;
 
 	void CreateRootSignature();
 

@@ -8,7 +8,7 @@
 #include <Vector2.h>
 #include <BaseScene.h>
 #include <ParticleManager.h>
-
+#include <ParticleEmitter.h>
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 
@@ -44,6 +44,8 @@ private:
 
 	SoundData soundData1;
 
-	std::shared_ptr<ParticleManager> particleManager = nullptr;
+	ParticleManager* particleManager = nullptr;
+
+	std::unique_ptr<ParticleEmitter> particleEmitter = nullptr;
 };
 

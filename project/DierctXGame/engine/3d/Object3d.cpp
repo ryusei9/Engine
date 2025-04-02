@@ -16,15 +16,15 @@ void Object3d::Initialize(Object3dCommon* object3dCommon)
 	object3dCommon_ = object3dCommon;
 
 	//// モデル読み込み
-	//modelData = LoadObjFile("resources", "plane.obj");
-	/*CreateVertexData();
-	CreateMaterialData();*/
+	modelData = LoadObjFile("resources", "plane.obj");
+	CreateVertexData();
+	CreateMaterialData();
 	CreateWVPData();
 	CreateDirectionalLightData();
 	// .objの参照しているテクスチャファイル読み込み
-	//TextureManager::GetInstance()->LoadTexture(modelData.material.textureFilePath);
+	TextureManager::GetInstance()->LoadTexture(modelData.material.textureFilePath);
 	// 読み込んだテクスチャの番号を取得
-	//modelData.material.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(modelData.material.textureFilePath);
+	modelData.material.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(modelData.material.textureFilePath);
 	// Transform変数を作る
 	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	//cameraTransform = { {1.0f,1.0f,1.0f},{0.3f,0.0f,0.0f},{0.0f,4.0f,-10.0f} };
@@ -49,16 +49,16 @@ void Object3d::Update()
 void Object3d::Draw()
 {
 	//// VBVを設定
-	//object3dCommon_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+	object3dCommon_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
 	//// マテリアルCBufferの場所を設定
 
 	//// 第一引数の0はRootParameter配列の0番目
-	//object3dCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+	object3dCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 
 	// wvp用のCBufferの場所を設定
 	object3dCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
-	/*object3dCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureIndex));*/
+	//object3dCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureIndex));
 
 	// 平行光源
 	object3dCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
@@ -68,7 +68,7 @@ void Object3d::Draw()
 		model->Draw();
 	}
 	//// 描画 (DrawCall)。3頂点で1つのインスタンス。
-	//object3dCommon_->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
+	object3dCommon_->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 }
 
 Object3d::MaterialData Object3d::LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename)
@@ -230,41 +230,70 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Object3d::CreateBufferResource(Microsoft:
 	return resource;
 }
 
-//void Object3d::CreateVertexData()
-//{
-//	vertexResource = CreateBufferResource(object3dCommon_->GetDxCommon()->GetDevice(), sizeof(VertexData) * 6);
-//
-//	// リソースの先頭のアドレスから使う
-//	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-//	// 使用するリソースのサイズは頂点6つ分のサイズ
-//	vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
-//	// 1頂点当たりのサイズ
-//	vertexBufferView.StrideInBytes = sizeof(VertexData);
-//
-//
-//	// 書き込むためのアドレスを取得
-//	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-//
-//	// 頂点データをリソースにコピー
-//	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
-//
-//}
-//
-//void Object3d::CreateMaterialData()
-//{
-//	materialResource = CreateBufferResource(object3dCommon_->GetDxCommon()->GetDevice(), sizeof(Material));
-//
-//	// ...Mapしてデータを書き込む。色は白を設定しておくといい
-//	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
-//
-//	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-//
-//	// SpriteはLightingしないのでfalseを設定する
-//	materialData->enableLighting = false;
-//
-//	// 単位行列で初期化
-//	materialData->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
-//}
+void Object3d::CreateVertexData()
+{
+	vertexResource = CreateBufferResource(object3dCommon_->GetDxCommon()->GetDevice(), sizeof(VertexData) * (modelData.vertices.size() + TotalVertexCount));
+
+	// リソースの先頭のアドレスから使う
+	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
+	// 使用するリソースのサイズ
+	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * (modelData.vertices.size() + TotalVertexCount));
+	// 1頂点当たりのサイズ
+	vertexBufferView.StrideInBytes = sizeof(VertexData);
+
+
+	// 書き込むためのアドレスを取得
+	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+
+	// 頂点データをリソースにコピー
+	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
+
+	// アンマップ
+	vertexResource->Unmap(0, nullptr);
+	// 球体の頂点データをコピー
+	VertexData* sphereVertexData = vertexData + modelData.vertices.size();
+	auto calculateVertex = [](float lat, float lon, float u, float v) {
+		VertexData vertex;
+		vertex.position = { cos(lat) * cos(lon), sin(lat), cos(lat) * sin(lon), 1.0f };
+		vertex.texcoord = { u, v };
+		vertex.normal = { vertex.position.x, vertex.position.y, vertex.position.z };
+		return vertex;
+		};
+	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
+		float lat = -std::numbers::pi_v<float> / 2.0f + kLatEvery * latIndex; // θ
+		float nextLat = lat + kLatEvery;
+		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
+			float u = float(lonIndex) / float(kSubdivision);
+			float v = 1.0f - float(latIndex) / float(kSubdivision);
+			float lon = lonIndex * kLonEvery; // Φ
+			float nextLon = lon + kLonEvery;
+			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
+			// 6つの頂点を計算
+			sphereVertexData[start + 0] = calculateVertex(lat, lon, u, v);
+			sphereVertexData[start + 1] = calculateVertex(nextLat, lon, u, v - 1.0f / float(kSubdivision));
+			sphereVertexData[start + 2] = calculateVertex(lat, nextLon, u + 1.0f / float(kSubdivision), v);
+			sphereVertexData[start + 3] = calculateVertex(nextLat, nextLon, u + 1.0f / float(kSubdivision), v - 1.0f / float(kSubdivision));
+			sphereVertexData[start + 4] = calculateVertex(lat, nextLon, u + 1.0f / float(kSubdivision), v);
+			sphereVertexData[start + 5] = calculateVertex(nextLat, lon, u, v - 1.0f / float(kSubdivision));
+		}
+	}
+}
+
+void Object3d::CreateMaterialData()
+{
+	materialResource = CreateBufferResource(object3dCommon_->GetDxCommon()->GetDevice(), sizeof(Material));
+
+	// ...Mapしてデータを書き込む。色は白を設定しておくといい
+	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+
+	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	// SpriteはLightingしないのでfalseを設定する
+	materialData->enableLighting = false;
+
+	// 単位行列で初期化
+	materialData->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
+}
 
 void Object3d::CreateWVPData()
 {

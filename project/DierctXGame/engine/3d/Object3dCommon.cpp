@@ -3,6 +3,16 @@
 #include <cassert>
 #include "Logger.h"
 
+std::shared_ptr<Object3dCommon> Object3dCommon::instance = nullptr;
+
+std::shared_ptr<Object3dCommon> Object3dCommon::GetInstance()
+{
+	if (instance == nullptr) {
+		instance = std::make_shared<Object3dCommon>();
+	}
+	return instance;
+}
+
 void Object3dCommon::Initialize(DirectXCommon* dxCommon)
 {
 	// 引数で受け取ってメンバ変数に記録する

@@ -103,7 +103,7 @@ protected:
 
 	unique_ptr < SpriteCommon> spriteCommon = nullptr;
 
-	unique_ptr < Object3dCommon> object3dCommon = nullptr;
+	//unique_ptr < Object3dCommon> object3dCommon = nullptr;
 
 	unique_ptr < Camera> camera = make_unique<Camera>();
 

@@ -38,8 +38,7 @@ void SRFramework::Initialize()
 
 
 	// 3Dオブジェクト共通部の初期化
-	object3dCommon = make_unique<Object3dCommon>();
-	object3dCommon->Initialize(dxCommon.get());
+	Object3dCommon::GetInstance()->Initialize(dxCommon.get());
 
 
 	// 3Dモデルマネージャの初期化
@@ -52,7 +51,7 @@ void SRFramework::Initialize()
 
 	camera->SetRotate({ 0.0f,0.0f,0.0f });
 	camera->SetTranslate({ 0.0f,0.0f,-10.0f });
-	object3dCommon->SetDefaultCamera(camera.get());
+	Object3dCommon::GetInstance()->SetDefaultCamera(camera.get());
 
 #ifdef _DEBUG
 	ID3D12InfoQueue* infoQueue = nullptr;
@@ -153,7 +152,7 @@ void SRFramework::PostDraw()
 void SRFramework::PreDrawObject3d()
 {
 	// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
-	object3dCommon->DrawSettings();
+	Object3dCommon::GetInstance()->DrawSettings();
 }
 
 void SRFramework::PreDrawSprite()

@@ -13,6 +13,8 @@
 #include "Model.h"
 #include "Camera.h"
 #include <numbers>
+#include <MaterialData.h>
+#include <Material.h>
 
 class Object3dCommon;
 
@@ -29,12 +31,12 @@ public:
 		Vector3 normal;
 	};
 
-	struct Material {
+	/*struct Material {
 		Vector4 color;
 		int32_t enableLighting;
 		float padding[3];
 		Matrix4x4 uvTransform;
-	};
+	};*/
 
 	// 座標変換行列データ
 	struct TransformationMatrix {
@@ -48,17 +50,18 @@ public:
 		float intensity; // 輝度
 	};
 
-	struct MaterialData {
-		std::string textureFilePath;
-		uint32_t textureIndex = 0;
-	};
+	
 	struct ModelData {
 		std::vector<VertexData> vertices;
 		MaterialData material;
 	};
 
+	struct CameraForGPU {
+		Vector3 worldPosition; // カメラのワールド座標
+	};
+
 	// 初期化
-	void Initialize(Object3dCommon* object3dCommon);
+	void Initialize(const std::string& fileName);
 
 	// 更新
 	void Update();
@@ -83,6 +86,7 @@ public:
 	void SetScale(const Vector3& scale) { transform.scale = scale; }
 	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
 	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
+	void SetTransform(const Transform& transform) { this->transform = transform; }
 	void SetCamera(Camera* camera) { this->camera = camera; }
 private:
 	// BufferResourceの作成
@@ -91,8 +95,6 @@ private:
 	void CreateMaterialData();
 	void CreateWVPData();
 	void CreateDirectionalLightData();
-
-	Object3dCommon* object3dCommon_ = nullptr;
 
 	Model* model = nullptr;
 	//// Objファイルのデータ

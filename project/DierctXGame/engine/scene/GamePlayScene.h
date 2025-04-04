@@ -9,6 +9,7 @@
 #include <BaseScene.h>
 #include <ParticleManager.h>
 #include <ParticleEmitter.h>
+#include <Object3d.h>
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 
@@ -56,5 +57,11 @@ private:
 	Vector3 particlePosition1 = { -5,0,50 };
 
 	Vector3 particlePosition2 = { 5,0,50 };
+
+	// ボール
+	std::unique_ptr<Object3d> ball = nullptr;
+
+	// ボールの座標
+	Transform ballTransform;
 };
 

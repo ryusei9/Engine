@@ -60,8 +60,9 @@ private:
 
 	// ボール
 	std::unique_ptr<Object3d> ball = nullptr;
-
+	std::unique_ptr<Object3d> ground = nullptr;
 	// ボールの座標
 	Transform ballTransform;
+	Transform groundTransform;
 };
 

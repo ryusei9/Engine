@@ -32,6 +32,17 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 		{0.0f,0.0f,5.0f}  // 座標
 	};
 	ball->SetTransform(ballTransform);
+
+	// ボールの初期化
+	ground = std::make_unique<Object3d>();
+	ground->Initialize("plane.obj");
+
+	groundTransform = {
+		{1.0f,1.0f,1.0f}, // スケール
+		{0.0f,0.0f,0.0f}, // 回転
+		{0.0f,0.0f,5.0f}  // 座標
+	};
+	ground->SetTransform(groundTransform);
 }
 
 void GamePlayScene::Update()
@@ -65,6 +76,8 @@ void GamePlayScene::Update()
 	// ボールの更新
 	ball->Update();
 	ball->SetTransform(ballTransform);
+	ground->Update();
+	ground->SetTransform(groundTransform);
 }
 
 void GamePlayScene::Draw()
@@ -77,6 +90,7 @@ void GamePlayScene::Draw()
 	Object3dCommon::GetInstance()->DrawSettings();
 	// ボールの描画
 	ball->Draw();
+	ground->Draw();
 }
 
 void GamePlayScene::Finalize()
@@ -98,6 +112,14 @@ void GamePlayScene::DrawImGui()
 	// ボールの回転
 	ImGui::SliderFloat3("Ball Rotate", &ballTransform.rotate.x, 0.0f, 360.0f);
 
+	// ボールの座標
+	ImGui::SliderFloat3("Ball Position", &groundTransform.translate.x, -10.0f, 50.0f);
+	// ボールのスケール
+	ImGui::SliderFloat3("Ball Scale", &groundTransform.scale.x, 0.0f, 10.0f);
+	// ボールの回転
+	ImGui::SliderFloat3("Ball Rotate", &groundTransform.rotate.x, 0.0f, 360.0f);
+
 	ball->DrawImGui();
+	ground->DrawImGui();
 	ImGui::End();
 }

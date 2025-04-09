@@ -39,7 +39,7 @@ void Object3dCommon::RootSignatureInitialize()
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	// Rootparameter作成。複数設定できるので配列。今回は結果1つだけなので長さ1の配列
-	D3D12_ROOT_PARAMETER rootParameters[5] = {};
+	D3D12_ROOT_PARAMETER rootParameters[7] = {};
 
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	// 0から始まる
@@ -87,6 +87,18 @@ void Object3dCommon::RootSignatureInitialize()
 	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // 新しいCBVの可視性を設定
 	// レジスタ番号2を使う
 	rootParameters[4].Descriptor.ShaderRegister = 2; // 新しいCBVのレジスタ番号を設定
+
+	/*------ポイントライト用------*/
+	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 新しいCBVを追加
+	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // 新しいCBVの可視性を設定
+	// レジスタ番号2を使う
+	rootParameters[5].Descriptor.ShaderRegister = 3; // 新しいCBVのレジスタ番号を設定
+
+	/*------スポットライト用------*/
+	rootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 新しいCBVを追加
+	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // 新しいCBVの可視性を設定
+	// レジスタ番号2を使う
+	rootParameters[6].Descriptor.ShaderRegister = 4; // 新しいCBVのレジスタ番号を設定
 
 	//////////////////////////
 	// Samplerの設定

@@ -33,6 +33,10 @@ void Object3d::Initialize(const std::string& fileName)
 
 	// カメラリソースの作成
 	CreateCameraResource();
+	// ポイントライトの作成
+	CreatePointLightResource();
+	// スポットライトの作成
+	CreateSpotLightResource();
 }
 
 void Object3d::Update()
@@ -71,6 +75,12 @@ void Object3d::Draw()
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(4, cameraResource->GetGPUVirtualAddress());
+
+	// ポイントライト
+	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
+
+	// スポットライト
+	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
 	// 3Dモデルが割り当てられていれば描画する
 	if (model) {
 		model->Draw();
@@ -202,6 +212,37 @@ void Object3d::CreateCameraResource()
 	cameraData->worldPosition = camera->GetTranslate();
 }
 
+void Object3d::CreatePointLightResource()
+{
+	// ポイントライトのリソースを作成
+	pointLightResource = CreateBufferResource(Object3dCommon::GetInstance()->GetDxCommon()->GetDevice(), sizeof(PointLight));
+	pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
+	// ポイントライトの初期位置
+	pointLightData->position = { 0.0f, 2.0f, 0.0f };
+	pointLightData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	pointLightData->intensity = 1.0f;
+	pointLightData->radius = 10.0f;					 // ポイントライトの有効範囲
+	pointLightData->decay = 1.0f;						 // ポイントライトの減衰率
+	pointLightResource->Unmap(0, nullptr);
+}
+
+void Object3d::CreateSpotLightResource()
+{
+	// スポットライトのリソースを作成
+	spotLightResource = CreateBufferResource(Object3dCommon::GetInstance()->GetDxCommon()->GetDevice(), sizeof(SpotLight));
+	spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));
+	// スポットライトの初期位置
+	spotLightData->position = { 0.0f, 2.0f, 0.0f };
+	spotLightData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	spotLightData->intensity = 4.0f;
+	spotLightData->direction = { 0.0f, -1.0f, 0.0f };
+	spotLightData->cosAngle = std::cos(std::numbers::pi_v<float> / 3.0f);	 // スポットライトの角度
+	spotLightData->cosFalloffStart = std::cos(std::numbers::pi_v<float> / 6.0f); // スポットライトの開始角度の余弦値
+	spotLightData->distance = 7.0f;					 // スポットライトの有効範囲
+	spotLightData->decay = 2.0f;						 // スポットライトの減衰率
+	spotLightResource->Unmap(0, nullptr);
+}
+
 void Object3d::DrawImGui()
 {
 	// ImGuiのウィンドウを作成
@@ -210,6 +251,23 @@ void Object3d::DrawImGui()
 	ImGui::ColorEdit4("lightColor", &directionalLightData->color.x);
 	ImGui::DragFloat3("lightDirection", &directionalLightData->direction.x, 0.01f);
 	ImGui::DragFloat("intensity", &directionalLightData->intensity, 0.01f);
+
+	/*------ポイントライト------*/
+	ImGui::ColorEdit4("pointLightColor", &pointLightData->color.x);
+	ImGui::DragFloat3("pointLightPosition", &pointLightData->position.x, 0.01f);
+	ImGui::DragFloat("pointLightIntensity", &pointLightData->intensity, 0.01f);
+
+	/*------スポットライト------*/
+	ImGui::ColorEdit4("spotLightColor", &spotLightData->color.x);
+	ImGui::DragFloat3("spotLightPosition", &spotLightData->position.x, 0.01f);
+	ImGui::DragFloat3("spotLightDirection", &spotLightData->direction.x, 0.01f);
+	ImGui::DragFloat("spotLightIntensity", &spotLightData->intensity, 0.01f);
+	ImGui::DragFloat("spotLightDistance", &spotLightData->distance, 0.01f);
+	ImGui::DragFloat("spotLightDecay", &spotLightData->decay, 0.01f);
+	ImGui::DragFloat("spotLightCosAngle", &spotLightData->cosAngle, 0.01f);
+	ImGui::DragFloat("spotLightCosFalloffStart", &spotLightData->cosFalloffStart, 0.01f);
+
+
 	// ウィンドウを閉じる
 	ImGui::End();
 }
@@ -349,6 +407,7 @@ void Object3d::CreateDirectionalLightData()
 	directionalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
 	directionalLightData->direction = { 0.0f,-1.0f,0.0f };
 	directionalLightData->intensity = 1.0f;
+
 
 	// 正規化
 	Normalize::Normalize(directionalLightData->direction);

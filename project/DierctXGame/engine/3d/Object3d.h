@@ -61,6 +61,26 @@ public:
 		Vector3 worldPosition; // カメラのワールド座標
 	};
 
+	struct PointLight {
+		Vector4 color; // ライトの色
+		Vector3 position; // ライトの位置
+		float intensity; // 輝度
+		float radius; // ライトの届く最大距離
+		float decay; // 減衰率
+	};
+
+	struct SpotLight {
+		Vector4 color; // ライトの色
+		Vector3 position; // ライトの位置
+		float intensity; // 輝度
+		Vector3 direction; // ライトの向き
+		float cosAngle; // スポットライトの角度
+		float cosFalloffStart; // スポットライトの開始角度の余弦値
+		float distance; // ライトの届く最大距離
+		float decay; // 減衰率
+		float padding[2]; // パディング
+	};;
+
 	// 初期化
 	void Initialize(const std::string& fileName);
 
@@ -78,6 +98,12 @@ public:
 
 	// カメラリソースの作成
 	void CreateCameraResource();
+
+	// ポイントライトの作成
+	void CreatePointLightResource();
+
+	// スポットライトの作成
+	void CreateSpotLightResource();
 
 	void DrawImGui();
 
@@ -112,6 +138,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource;
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource;
 	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource;
+	Microsoft::WRL::ComPtr<ID3D12Resource> pointLightResource;
+	Microsoft::WRL::ComPtr<ID3D12Resource> spotLightResource;
 
 	//// バッファリソース内のデータを指すポインタ
 	VertexData* vertexData = nullptr;
@@ -120,6 +148,8 @@ private:
 	DirectionalLight* directionalLightData = nullptr;
 	// カメラにデータを書き込む
 	CameraForGPU* cameraData = nullptr;
+	PointLight* pointLightData = nullptr;
+	SpotLight* spotLightData = nullptr;
 
 	// バッファリソースの使い道を補足するバッファビュー
 	//// 頂点バッファビューを作成する

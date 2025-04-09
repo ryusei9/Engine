@@ -5,6 +5,14 @@
 class Object3dCommon
 {
 public:
+	// シングルトンインスタンスの取得
+	static std::shared_ptr<Object3dCommon> GetInstance();
+
+	Object3dCommon() = default;
+	~Object3dCommon() = default;
+	Object3dCommon(Object3dCommon&) = delete;
+	Object3dCommon& operator=(Object3dCommon&) = delete;
+
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
@@ -22,6 +30,9 @@ public:
 
 	Camera* GetDefaultCamera()const { return defaultCamera; }
 private:
+	static std::shared_ptr<Object3dCommon> instance;
+
+	
 	// ルートシグネチャの初期化
 	void RootSignatureInitialize();
 

@@ -9,13 +9,14 @@
 #include <BaseScene.h>
 #include <ParticleManager.h>
 #include <ParticleEmitter.h>
+#include <Object3d.h>
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 
 {
 public:
 	// 初期化
-	void Initialize(SpriteCommon* spriteCommon, DirectXCommon* directXCommon, WinApp* winApp) override;
+	void Initialize(DirectXCommon* directXCommon, WinApp* winApp) override;
 
 	// 更新
 	void Update() override;
@@ -56,5 +57,12 @@ private:
 	Vector3 particlePosition1 = { -5,0,50 };
 
 	Vector3 particlePosition2 = { 5,0,50 };
+
+	// ボール
+	std::unique_ptr<Object3d> ball = nullptr;
+	std::unique_ptr<Object3d> ground = nullptr;
+	// ボールの座標
+	Transform ballTransform;
+	Transform groundTransform;
 };
 

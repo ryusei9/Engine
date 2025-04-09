@@ -7,19 +7,11 @@
 #include "Matrix4x4.h"
 #include "MakeIdentity4x4.h"
 #include "TextureManager.h"
+#include "Material.h"
 // 前方宣言
 class SpriteCommon;
 
 // 頂点データ
-
-
-// マテリアルデータ
-struct Material {
-	Vector4 color;
-	int32_t enableLighting;
-	float padding[3];
-	Matrix4x4 uvTransform;
-};
 
 // 座標変換データ
 struct TransformationMatrix {
@@ -31,7 +23,7 @@ class Sprite
 {
 public:
 	// 初期化
-	void Initialize(SpriteCommon* spriteCommon,DirectXCommon* dxCommon,std::string textureFilePath);
+	void Initialize(DirectXCommon* dxCommon,std::string textureFilePath);
 
 	// 更新
 	void Update();

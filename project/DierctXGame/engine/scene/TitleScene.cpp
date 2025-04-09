@@ -1,10 +1,10 @@
 #include "TitleScene.h"
 #include <imgui.h>
 
-void TitleScene::Initialize(SpriteCommon* spriteCommon, DirectXCommon* directXCommon, WinApp* winApp)
+void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
 	sprite = std::make_unique<Sprite>();
-	sprite->Initialize(spriteCommon, directXCommon, "resources/mori_Red.png");
+	sprite->Initialize(directXCommon, "resources/mori_Red.png");
 	input = std::make_unique<Input>();
 	input->Initialize(winApp);
 	Audio::GetInstance()->Initialize();

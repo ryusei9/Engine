@@ -13,7 +13,7 @@ public:
 	~SceneManager();
 
 	// 初期化
-	void Initialize(SpriteCommon* spriteCommon, DirectXCommon* directXCommon, WinApp* winApp);
+	void Initialize(DirectXCommon* directXCommon, WinApp* winApp);
 
 	// 更新
 	void Update();
@@ -31,9 +31,6 @@ private:
 
 	// 次のシーン
 	std::unique_ptr<BaseScene> nextScene_ = nullptr;
-
-	// スプライトコモン
-	SpriteCommon* spriteCommon_ = nullptr;
 
 	// ダイレクトXコモン
 	DirectXCommon* directXCommon_ = nullptr;

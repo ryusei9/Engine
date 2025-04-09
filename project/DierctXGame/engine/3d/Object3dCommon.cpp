@@ -3,6 +3,16 @@
 #include <cassert>
 #include "Logger.h"
 
+std::shared_ptr<Object3dCommon> Object3dCommon::instance = nullptr;
+
+std::shared_ptr<Object3dCommon> Object3dCommon::GetInstance()
+{
+	if (instance == nullptr) {
+		instance = std::make_shared<Object3dCommon>();
+	}
+	return instance;
+}
+
 void Object3dCommon::Initialize(DirectXCommon* dxCommon)
 {
 	// 引数で受け取ってメンバ変数に記録する
@@ -29,7 +39,7 @@ void Object3dCommon::RootSignatureInitialize()
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	// Rootparameter作成。複数設定できるので配列。今回は結果1つだけなので長さ1の配列
-	D3D12_ROOT_PARAMETER rootParameters[4] = {};
+	D3D12_ROOT_PARAMETER rootParameters[7] = {};
 
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	// 0から始まる
@@ -41,31 +51,54 @@ void Object3dCommon::RootSignatureInitialize()
 	// Offsetを自動計算
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
+	/*------マテリアル用------*/
 	// CBVを使う
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;// b0のbと一致
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	// DescriptorTableを使う
-	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	// CBVを使う
-	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-
-	// PixelShaderを使う
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	// vertexShaderで使う
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	// PixelShaderで使う
-	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-
 	// レジスタ番号0とバインド
 	rootParameters[0].Descriptor.ShaderRegister = 0;// b0の0と一致
+	// PixelShaderを使う
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	/*------transformationMatrix用------*/
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	// vertexShaderで使う
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	rootParameters[1].Descriptor.ShaderRegister = 0;
+
+	/*------テクスチャ用------*/
+	// DescriptorTableを使う
+	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	// PixelShaderで使う
+	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	// Tableの中身の配列を指定
 	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;
 	// Tableで利用する数
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
+
+	/*------平行光源用------*/
+	// CBVを使う
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	// レジスタ番号1を使う
 	rootParameters[3].Descriptor.ShaderRegister = 1;
+
+	/*------カメラ用------*/
+	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 新しいCBVを追加
+	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // 新しいCBVの可視性を設定
+	// レジスタ番号2を使う
+	rootParameters[4].Descriptor.ShaderRegister = 2; // 新しいCBVのレジスタ番号を設定
+
+	/*------ポイントライト用------*/
+	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 新しいCBVを追加
+	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // 新しいCBVの可視性を設定
+	// レジスタ番号2を使う
+	rootParameters[5].Descriptor.ShaderRegister = 3; // 新しいCBVのレジスタ番号を設定
+
+	/*------スポットライト用------*/
+	rootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 新しいCBVを追加
+	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // 新しいCBVの可視性を設定
+	// レジスタ番号2を使う
+	rootParameters[6].Descriptor.ShaderRegister = 4; // 新しいCBVのレジスタ番号を設定
 
 	//////////////////////////
 	// Samplerの設定
@@ -173,13 +206,13 @@ void Object3dCommon::GraphicsPipelineInitialize()
 	// InputLayout
 	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;
 	// Blendstate
-	graphicsPipelineStateDesc.BlendState.RenderTarget[0] = blendDesc;	
+	graphicsPipelineStateDesc.BlendState.RenderTarget[0] = blendDesc;
 	// RasterizerState
 	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;
 	// VertexShader
-	graphicsPipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),vertexShaderBlob->GetBufferSize() };
+	graphicsPipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize() };
 	// PixelShader
-	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),pixelShaderBlob->GetBufferSize() };
+	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize() };
 	// DepthStencilの設定
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -196,7 +229,6 @@ void Object3dCommon::GraphicsPipelineInitialize()
 	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
 	// 実際に生成
-	//graphicsPipelineState = nullptr;
 	hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
 	assert(SUCCEEDED(hr));
 }

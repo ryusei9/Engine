@@ -38,7 +38,7 @@ private:	// メンバ変数
 
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
 	/// BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};
 
@@ -56,6 +56,6 @@ private:	// メンバ変数
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
 
 	// グラフィックスパイプライン
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState;
 };
 

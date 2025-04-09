@@ -42,9 +42,12 @@ void MyGame::Draw()
 	
 
 	SRFramework::PreDrawObject3d();
-	ParticleManager::GetInstance()->Draw();
+
+	
 	SRFramework::PreDrawSprite();
 
+	ParticleManager::GetInstance()->Draw();
+	sceneManager_->Draw();
 	
 	imGuiManager->Draw();
 	

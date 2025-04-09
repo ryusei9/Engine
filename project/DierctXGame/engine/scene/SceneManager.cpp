@@ -9,15 +9,14 @@ SceneManager::~SceneManager()
 	}
 }
 
-void SceneManager::Initialize(SpriteCommon* spriteCommon, DirectXCommon* directXCommon, WinApp* winApp)
+void SceneManager::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
-	spriteCommon_ = spriteCommon;
 	directXCommon_ = directXCommon;
 	winApp_ = winApp;
 
 	// 初期シーンを設定（例としてDebugSceneを設定）
 	nowScene_ = std::make_unique<TitleScene>();
-	nowScene_->Initialize(spriteCommon_, directXCommon_, winApp_);
+	nowScene_->Initialize(directXCommon_, winApp_);
 
 	// シーンの初期設定
 	currentSceneNo_ = 0;
@@ -44,7 +43,7 @@ void SceneManager::Update()
 			nowScene_ = std::make_unique<TitleScene>();
 		}
 		// シーンの初期化
-		nowScene_->Initialize(spriteCommon_, directXCommon_, winApp_);
+		nowScene_->Initialize(directXCommon_, winApp_);
 	}
 
 	//========================================

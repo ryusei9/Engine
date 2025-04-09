@@ -11,7 +11,7 @@ class TitleScene : public BaseScene
 {
 public:
 	// 初期化
-	void Initialize(SpriteCommon* spriteCommon, DirectXCommon* directXCommon, WinApp* winApp) override;
+	void Initialize(DirectXCommon* directXCommon, WinApp* winApp) override;
 
 	// 更新
 	void Update() override;

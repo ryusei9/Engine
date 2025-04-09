@@ -23,7 +23,7 @@ class Sprite
 {
 public:
 	// 初期化
-	void Initialize(SpriteCommon* spriteCommon,DirectXCommon* dxCommon,std::string textureFilePath);
+	void Initialize(DirectXCommon* dxCommon,std::string textureFilePath);
 
 	// 更新
 	void Update();

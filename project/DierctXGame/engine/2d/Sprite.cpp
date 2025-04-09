@@ -6,9 +6,8 @@
 #include "Multiply.h"
 #include "MakeOrthographicMatrix.h"
 
-void Sprite::Initialize(SpriteCommon* spriteCommon, DirectXCommon* dxCommon, std::string textureFilePath)
+void Sprite::Initialize(DirectXCommon* dxCommon, std::string textureFilePath)
 {
-	spriteCommon_ = spriteCommon;
 	dxCommon_ = dxCommon;
 	this->filePath = textureFilePath; // メンバー変数に値を設定
 	CreateVertexData();

@@ -33,8 +33,8 @@ void SRFramework::Initialize()
 	TextureManager::GetInstance()->LoadTexture("resources/mori_Red.png");
 	
 	// スプライト共通部の初期化
-	spriteCommon = make_unique<SpriteCommon>();
-	spriteCommon->Initialize(dxCommon.get());
+	
+	SpriteCommon::GetInstance()->Initialize(dxCommon.get());
 
 
 	// 3Dオブジェクト共通部の初期化
@@ -87,7 +87,7 @@ void SRFramework::Initialize()
 
 	// シーンマネージャの初期化
 	sceneManager_ = std::make_unique<SceneManager>();
-	sceneManager_->Initialize(spriteCommon.get(), dxCommon.get(), winApp.get());
+	sceneManager_->Initialize(dxCommon.get(), winApp.get());
 
 	/*------パーティクルマネージャの初期化------*/
 	ParticleManager::GetInstance()->Initialize(dxCommon.get(), srvManager.get(),camera.get());
@@ -152,15 +152,15 @@ void SRFramework::PostDraw()
 void SRFramework::PreDrawObject3d()
 {
 	// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
-	Object3dCommon::GetInstance()->DrawSettings();
+	//Object3dCommon::GetInstance()->DrawSettings();
 }
 
 void SRFramework::PreDrawSprite()
 {
 	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
-	spriteCommon->DrawSettings();
+	//spriteCommon->DrawSettings();
 
-	sceneManager_->Draw();
+	
 }
 
 void SRFramework::Run()

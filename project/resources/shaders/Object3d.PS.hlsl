@@ -50,6 +50,12 @@ PixelShaderOutput main(VertexShaderOutput input){
     float RdotE = dot(reflectLight, toEye);
     float specularPow = pow(saturate(RdotE), gMaterial.shininess);
     
+     // BlinnPhong
+    float32_t3 halfVector = normalize(-gDirectionalLight.direction + toEye);
+    float NdotH = dot(input.normal, halfVector);
+    specularPow = pow(saturate(NdotH), gMaterial.shininess);
+    
+    
     if (gMaterial.enableLighting != 0)
     { // Lightingする場合
          // half lambert

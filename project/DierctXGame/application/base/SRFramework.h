@@ -89,7 +89,7 @@ public:
 	// ゲッター
 	DirectXCommon* GetDirectXCommon() const { return dxCommon.get(); }
 
-	SpriteCommon* GetSpriteCommon() const { return spriteCommon.get(); }
+	//SpriteCommon* GetSpriteCommon() const { return spriteCommon.get(); }
 
 	WinApp* GetWinApp() const { return winApp.get(); }
 protected:
@@ -100,10 +100,6 @@ protected:
 	unique_ptr<DirectXCommon> dxCommon = nullptr;
 
 	unique_ptr<SrvManager> srvManager = nullptr;
-
-	unique_ptr < SpriteCommon> spriteCommon = nullptr;
-
-	//unique_ptr < Object3dCommon> object3dCommon = nullptr;
 
 	unique_ptr < Camera> camera = make_unique<Camera>();
 

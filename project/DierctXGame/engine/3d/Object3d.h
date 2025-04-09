@@ -42,6 +42,7 @@ public:
 	struct TransformationMatrix {
 		Matrix4x4 WVP;
 		Matrix4x4 World;
+		Matrix4x4 WorldInverseTranspose;
 	};
 
 	struct DirectionalLight {
@@ -75,6 +76,11 @@ public:
 	// .objファイルの読み取り
 	static ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
 
+	// カメラリソースの作成
+	void CreateCameraResource();
+
+	void DrawImGui();
+
 	// ゲッター
 	const Vector3& GetScale() const { return transform.scale; }
 	const Vector3& GetRotate() const { return transform.rotate; }
@@ -105,11 +111,15 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource;
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource;
+	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource;
+
 	//// バッファリソース内のデータを指すポインタ
 	VertexData* vertexData = nullptr;
 	Material* materialData = nullptr;
 	TransformationMatrix* transformationMatrixData = nullptr;
 	DirectionalLight* directionalLightData = nullptr;
+	// カメラにデータを書き込む
+	CameraForGPU* cameraData = nullptr;
 
 	// バッファリソースの使い道を補足するバッファビュー
 	//// 頂点バッファビューを作成する

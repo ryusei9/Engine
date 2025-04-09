@@ -9,6 +9,7 @@
 #include "Inverse.h"
 #include "MakePerspectiveFovMatrix.h"
 #include "ModelManager.h"
+#include <imgui.h>
 
 void Object3d::Initialize(const std::string& fileName)
 {
@@ -29,6 +30,9 @@ void Object3d::Initialize(const std::string& fileName)
 	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	//cameraTransform = { {1.0f,1.0f,1.0f},{0.3f,0.0f,0.0f},{0.0f,4.0f,-10.0f} };
 	this->camera = Object3dCommon::GetInstance()->GetDefaultCamera();
+
+	// カメラリソースの作成
+	CreateCameraResource();
 }
 
 void Object3d::Update()
@@ -44,10 +48,13 @@ void Object3d::Update()
 
 	transformationMatrixData->WVP = worldViewProjectionMatrix;
 	transformationMatrixData->World = worldMatrix;
+	// 非均一スケール用にワールド行列の逆行列を求める
+	transformationMatrixData->WorldInverseTranspose = Inverse::Inverse(worldMatrix);
 }
 
 void Object3d::Draw()
 {
+
 	//// VBVを設定
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
 	//// マテリアルCBufferの場所を設定
@@ -63,6 +70,7 @@ void Object3d::Draw()
 	// 平行光源
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
+	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(4, cameraResource->GetGPUVirtualAddress());
 	// 3Dモデルが割り当てられていれば描画する
 	if (model) {
 		model->Draw();
@@ -185,6 +193,27 @@ Object3d::ModelData Object3d::LoadObjFile(const std::string& directoryPath, cons
 	return modelData;
 }
 
+void Object3d::CreateCameraResource()
+{
+	// カメラのリソースを作成
+	cameraResource = CreateBufferResource(Object3dCommon::GetInstance()->GetDxCommon()->GetDevice(), sizeof(CameraForGPU));
+	cameraResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraData));
+	// カメラの初期位置
+	cameraData->worldPosition = camera->GetTranslate();
+}
+
+void Object3d::DrawImGui()
+{
+	// ImGuiのウィンドウを作成
+	ImGui::Begin("Object3d");
+	ImGui::ColorEdit4("color", &materialData->color.x);
+	ImGui::ColorEdit4("lightColor", &directionalLightData->color.x);
+	ImGui::DragFloat3("lightDirection", &directionalLightData->direction.x, 0.01f);
+	ImGui::DragFloat("intensity", &directionalLightData->intensity, 0.01f);
+	// ウィンドウを閉じる
+	ImGui::End();
+}
+
 void Object3d::SetModel(const std::string& filePath)
 {
 	// モデルを検索してセットする
@@ -290,6 +319,8 @@ void Object3d::CreateMaterialData()
 
 	// Lightingはtrueを設定する
 	materialData->enableLighting = true;
+
+	materialData->shininess = 50.0f;
 
 	// 単位行列で初期化
 	materialData->uvTransform = MakeIdentity4x4::MakeIdentity4x4();

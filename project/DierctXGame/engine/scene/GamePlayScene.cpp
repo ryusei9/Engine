@@ -1,11 +1,11 @@
 #include "GamePlayScene.h"
 #include "SRFramework.h"
-void GamePlayScene::Initialize(SpriteCommon* spriteCommon, DirectXCommon* directXCommon, WinApp* winApp)
+void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
 	sprite = std::make_unique<Sprite>();
 	input = std::make_unique<Input>();
 	// テクスチャ"モリ"を使用
-	sprite->Initialize(spriteCommon, directXCommon, "resources/mori.png");
+	sprite->Initialize(directXCommon, "resources/mori.png");
 	input->Initialize(winApp);
 	Audio::GetInstance()->Initialize();
 	soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
@@ -70,9 +70,11 @@ void GamePlayScene::Update()
 void GamePlayScene::Draw()
 {
 	/*------スプライトの更新------*/
+	SpriteCommon::GetInstance()->DrawSettings();
 	//sprite->Draw();
 
 	/*------オブジェクトの描画------*/
+	Object3dCommon::GetInstance()->DrawSettings();
 	// ボールの描画
 	ball->Draw();
 }
@@ -95,5 +97,7 @@ void GamePlayScene::DrawImGui()
 	ImGui::SliderFloat3("Ball Scale", &ballTransform.scale.x, 0.0f, 10.0f);
 	// ボールの回転
 	ImGui::SliderFloat3("Ball Rotate", &ballTransform.rotate.x, 0.0f, 360.0f);
+
+	ball->DrawImGui();
 	ImGui::End();
 }

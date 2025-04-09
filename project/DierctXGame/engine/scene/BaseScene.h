@@ -11,7 +11,7 @@ public:
 	virtual ~BaseScene() = default;
 
 	// 初期化
-	virtual void Initialize(SpriteCommon* spriteCommon, DirectXCommon* directXCommon, WinApp* winApp) = 0;
+	virtual void Initialize(DirectXCommon* directXCommon, WinApp* winApp) = 0;
 
 	// 更新
 	virtual void Update() = 0;

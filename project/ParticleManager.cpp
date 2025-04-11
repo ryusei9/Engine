@@ -8,8 +8,9 @@
 #include <MakeTranslateMatrix.h>
 #include <Material.h>
 #include <imgui.h>
-#include <MakeRotateYMatrix.h>
+#include <MakeRotateXYZMatrix.h>
 #include <iostream>
+#include <numbers>
 
 using namespace Logger;
 
@@ -105,7 +106,7 @@ void ParticleManager::Update()
 				{
 					worldMatrix = scaleMatrix * billboardMatrix * translateMatrix;
 				} else {
-					rotateMatrix = MakeRotateYMatrix::MakeRotateYMatrix((*particleIterator).transform.rotate.y);
+					rotateMatrix = MakeRotateXYZMatrix::MakeRotateXYZMatrix((*particleIterator).transform.rotate);
 					worldMatrix = scaleMatrix * rotateMatrix * translateMatrix;
 				}
 
@@ -275,7 +276,7 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
 	for (uint32_t index = 0; index < count; ++index)
 	{
 		// パーティクルの生成と追加
-		particleGroup.particles.push_back(MakeNewParticle(randomEngine, position));
+		particleGroup.particles.push_back(MakeNewPlaneParticle(randomEngine, position));
 	}
 }
 
@@ -300,6 +301,29 @@ ParticleManager::Particle ParticleManager::MakeNewParticle(std::mt19937& randomE
 	particle.lifeTime = distTime(randomEngine);
 	particle.currentTime = 0;
 	particle.velocity = { distribution(randomEngine),distribution(randomEngine),distribution(randomEngine) };
+
+	return particle;
+}
+
+ParticleManager::Particle ParticleManager::MakeNewPlaneParticle(std::mt19937& randomEngine, const Vector3& translate)
+{
+	Particle particle;
+
+	// 一様分布生成期を使って乱数を生成
+	std::uniform_real_distribution<float> distRotate(-std::numbers::pi_v<float>, std::numbers::pi_v<float>);
+	std::uniform_real_distribution<float> distScale(0.4f, 1.5f);
+	// 位置と速度を[-1, 1]でランダムに初期化
+	particle.transform.scale = { 0.05f, distScale(randomEngine), 1.0f};
+	particle.transform.rotate = { 0.0f, 0.0f, distRotate(randomEngine)};
+	particle.transform.translate = translate;
+
+	
+	particle.color = { 1.0f,1.0f,1.0f, 1.0f };
+
+	// パーティクル生成時にランダムに1秒～3秒の間生存
+	particle.lifeTime = 1.0f;
+	particle.currentTime = 0;
+	particle.velocity = { 0,0,0 };
 
 	return particle;
 }

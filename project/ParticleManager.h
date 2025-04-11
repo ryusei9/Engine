@@ -99,6 +99,9 @@ public:
 	// パーティクルの生成
 	Particle MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate);
 
+	// プレーンパーティクルの生成
+	Particle MakeNewPlaneParticle(std::mt19937& randomEngine, const Vector3& translate);
+
 	/*------頂点データの作成------*/
 	void CreateVertexData();
 

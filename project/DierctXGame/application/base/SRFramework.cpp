@@ -149,18 +149,9 @@ void SRFramework::PostDraw()
 	dxCommon.get()->PostDraw();
 }
 
-void SRFramework::PreDrawObject3d()
+void SRFramework::PrePostEffect()
 {
-	// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
-	//Object3dCommon::GetInstance()->DrawSettings();
-}
-
-void SRFramework::PreDrawSprite()
-{
-	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
-	//spriteCommon->DrawSettings();
-
-	
+	dxCommon.get()->PreRenderScene();
 }
 
 void SRFramework::Run()

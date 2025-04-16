@@ -37,18 +37,15 @@ void MyGame::Update()
 
 void MyGame::Draw()
 {
-	SRFramework::PreDraw();
-
+	SRFramework::PrePostEffect();
 	
 
-	SRFramework::PreDrawObject3d();
-
-	
-	SRFramework::PreDrawSprite();
 
 	ParticleManager::GetInstance()->Draw();
 	sceneManager_->Draw();
-	
+
+	SRFramework::PreDraw();
+
 	imGuiManager->Draw();
 	
 	SRFramework::PostDraw();

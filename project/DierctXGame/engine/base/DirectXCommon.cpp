@@ -36,6 +36,7 @@ void DirectXCommon::Initialize(WinApp* winApp)
 	CreateBuffer(WinApp::kClientWidth, WinApp::kClientHeight);
 	// 各種デスクリプタヒープの生成
 	DescriptorHeap();
+	CreateRenderTexture();
 	// レンダーターゲットビュー
 	RenderTargetView();
 	// 深度ステンシルビューの初期化
@@ -230,7 +231,7 @@ void DirectXCommon::DescriptorHeap()
 {
 	// DescriptorSizeを取得しておく
 	descriptorSizeRTV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	//descriptorSizeSRV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	descriptorSizeSRV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	descriptorSizeDSV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
 	// ディスクリプタヒープの生成
@@ -238,11 +239,20 @@ void DirectXCommon::DescriptorHeap()
 	rtvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
 
 	// ディスクリプタの数は128。SRVはshader内で触るものなので、shaderVisibleはtrue
-	//srvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
+	srvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
 
 	// DSV用のヒープでディスクリプタの数は1。DSVはShader内で触るものではないので、ShaderVisibleはfalse
 	dsvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 
+	// SRVディスクリプタヒープの設定
+	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+	srvHeapDesc.NumDescriptors = 1; // 必要なディスクリプタの数
+	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+
+	// SRVディスクリプタヒープの作成
+	HRESULT hr = device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvDescriptorHeap));
+	assert(SUCCEEDED(hr));
 
 
 	//// DSVの設定
@@ -399,9 +409,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateDepthStencilTextureR
 void DirectXCommon::FenceInitialize()
 {
 	HRESULT hr;
-	// 初期値0でFenceを作る
-	/*Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;*/
-	/*uint64_t fenceValue = 0;*/
+	
 	hr = device->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 	assert(SUCCEEDED(hr));
 
@@ -475,6 +483,33 @@ void DirectXCommon::ImGuiInitialize()
 		GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0));*/
 }
 
+void DirectXCommon::PreRenderScene()
+{
+	//CreateRenderTexture();
+	// TransitionBarrierの設定
+	ChengeBarrier();
+
+	// RenderTargetViewのハンドルを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	// DepthStencilViewのハンドルを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+
+	// 描画先をRenderTextureに変更
+	commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+
+	// RenderTextureをクリア
+	commandList->ClearRenderTargetView(rtvHandle, reinterpret_cast<const FLOAT*>(&clearColor), 0, nullptr);
+
+	// DepthStencilをクリア
+	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
+	// ビューポートの設定
+	commandList->RSSetViewports(1, &viewport);
+
+	// シザーレクトの設定
+	commandList->RSSetScissorRects(1, &scissorRect);
+}
+
 void DirectXCommon::PreDraw()
 {
 	// TransitionBarrierの設定
@@ -493,7 +528,7 @@ void DirectXCommon::PreDraw()
 	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
 
 	// 指定した深度で画面全体をクリアする
-	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	//commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	
 	// 描画用のDescriptorの設定
@@ -867,4 +902,81 @@ void DirectXCommon::SyncCPUWithGPU()
 		hr = commandList->Reset(commandAllocator.Get(), nullptr);
 	assert(SUCCEEDED(hr));
 
+}
+
+Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateRenderTextureResoruce(Microsoft::WRL::ComPtr<ID3D12Device> device, uint32_t width, uint32_t height, DXGI_FORMAT format, const Vector4& clearColor)
+{
+	/*------生成するResourceの設定------*/
+	D3D12_RESOURCE_DESC resourceDesc{};
+	// Textureの幅
+	resourceDesc.Width = width;
+	// Textureの高さ
+	resourceDesc.Height = height;
+	// mipmapの数
+	resourceDesc.MipLevels = 1;
+	// 奥行き or 配列Textureの配列数
+	resourceDesc.DepthOrArraySize = 1;
+	// DepthStencilとして利用可能なフォーマット
+	resourceDesc.Format = format;
+	// サンプリングカウント。1固定
+	resourceDesc.SampleDesc.Count = 1;
+	// 2次元
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	// RenderTargetとして使う通知
+	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+
+	/*------利用するHeapの設定------*/
+	D3D12_HEAP_PROPERTIES heapProperties{};
+	// VRAM上に作る
+	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+
+	/*------RenderTarget用の設定------*/
+	D3D12_CLEAR_VALUE renderTargetClearValue{};
+	// フォーマット。Resourceと合わせる
+	renderTargetClearValue.Format = format;
+	// ClearColorを設定
+	renderTargetClearValue.Color[0] = clearColor.x;
+	renderTargetClearValue.Color[1] = clearColor.y;
+	renderTargetClearValue.Color[2] = clearColor.z;
+	renderTargetClearValue.Color[3] = clearColor.w;
+	
+	/*------Resourceの生成------*/
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
+	HRESULT hr = device->CreateCommittedResource(
+		// Heapの設定
+		&heapProperties,
+		// Heapの特殊な設定。特になし
+		D3D12_HEAP_FLAG_NONE,
+		// Resourceの設定
+		&resourceDesc,
+		// 深度値を書き込む状態にしておく
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		// Clear最適値
+		&renderTargetClearValue,
+		// 作成するResourceポインタへのポインタ
+		IID_PPV_ARGS(&resource));
+	assert(SUCCEEDED(hr));
+	// RenderTarget用のResourceを作成したので、Resourceを返す
+	return resource;
+}
+
+void DirectXCommon::CreateRenderTexture()
+{
+	/*------RenderTextureのRTVを生成する------*/
+	renderTexture = CreateRenderTextureResoruce(device, WinApp::kClientWidth, WinApp::kClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, clearColor);
+	device->CreateRenderTargetView(renderTexture.Get(), &rtvDesc, rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+	/*------RenderTextureのSRVを生成する------*/
+	// SRVの設定。FormatはResourceに合わせる
+	// SRVのFormat
+	renderTextureSrvDesc.Format = renderTexture->GetDesc().Format;
+	// SRVのShader4ComponentMapping
+	renderTextureSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	// SRVのViewDimension
+	renderTextureSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	// SRVのTexture2Dの設定
+	renderTextureSrvDesc.Texture2D.MipLevels = 1;
+
+	// SRVの作成
+	device->CreateShaderResourceView(renderTexture.Get(), &renderTextureSrvDesc, srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 }

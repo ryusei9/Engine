@@ -8,6 +8,7 @@
 #include "externals/DirectXTex/DirectXTex.h"
 #include "string"
 #include "chrono"
+#include <Vector4.h>
 // DirectX基盤
 class DirectXCommon
 {
@@ -70,6 +71,9 @@ public: // メンバ関数
 	// ImGuiの初期化
 	void ImGuiInitialize();
 
+	// RenderTextureに対してのSceneの描画
+	void PreRenderScene();
+
 	// 描画前処理
 	void PreDraw();
 
@@ -105,6 +109,12 @@ public: // メンバ関数
 	// CPUとGPUの同期を待つ
 	void SyncCPUWithGPU();
 
+	// RenderTextureの生成
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateRenderTextureResoruce(Microsoft::WRL::ComPtr<ID3D12Device> device,uint32_t width,uint32_t height,DXGI_FORMAT format,const Vector4& clearColor);
+
+	// RenderTextureを生成
+	void CreateRenderTexture();
+	
 	// 記録時間
 	std::chrono::steady_clock::time_point reference_;
 	/// <summary>
@@ -223,5 +233,12 @@ private:
 	UINT backBufferIndex;
 
 	UINT backBufferCount = 2;
+
+	// 今回は赤を設定する
+	const Vector4 clearColor = { 1.0f,0.0f,0.0f,1.0f };
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> renderTexture;
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC renderTextureSrvDesc{};
 };
 

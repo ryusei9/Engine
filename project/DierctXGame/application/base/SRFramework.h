@@ -77,11 +77,8 @@ public:
 	// 終了リクエスト
 	virtual bool IsEndRequest() const { return endRequest_; }
 
-	// 3Dオブジェクト描画
-	void PreDrawObject3d();
-
-	// 2Dオブジェクト描画
-	void PreDrawSprite();
+	// PreDrawを行う前の処理
+	void PrePostEffect();
 
 	// 実行
 	void Run();

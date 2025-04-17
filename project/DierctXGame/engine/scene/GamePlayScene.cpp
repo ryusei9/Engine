@@ -5,7 +5,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	sprite = std::make_unique<Sprite>();
 	input = std::make_unique<Input>();
 	// テクスチャ"モリ"を使用
-	sprite->Initialize(directXCommon, "resources/circle2.png");
+	sprite->Initialize(directXCommon, "resources/uvChecker.png");
 	input->Initialize(winApp);
 	Audio::GetInstance()->Initialize();
 	soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
@@ -15,7 +15,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	// パーティクルマネージャの初期化
 	particleManager = ParticleManager::GetInstance();
 	// テクスチャ"モリ"を使用
-	particleManager->GetInstance()->CreateParticleGroup("mori", "resources/circle2.png");
+	particleManager->GetInstance()->CreateParticleGroup("mori", "resources/uvChecker.png");
 	// テクスチャ"UV"を使用
 	particleManager->GetInstance()->CreateParticleGroup("uv", "resources/uvChecker.png");
 

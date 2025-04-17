@@ -42,7 +42,8 @@ void ParticleManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager
 	CreatePSO();
 
 	// 頂点データの初期化
-	CreateVertexData();
+	//CreateVertexData();
+	CreateRingVertexData();
 
 	// マテリアルデータの初期化
 	CreateMaterialData();
@@ -176,6 +177,7 @@ void ParticleManager::Draw()
 		commandList->SetGraphicsRootDescriptorTable(2, group.second.materialData.gpuHandle);
 
 		// インスタンシング描画
+
 		commandList->DrawInstanced(UINT(modelData.vertices.size()), group.second.numParticles, 0, 0);
 
 		// インスタンス数をリセット
@@ -276,7 +278,7 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
 	for (uint32_t index = 0; index < count; ++index)
 	{
 		// パーティクルの生成と追加
-		particleGroup.particles.push_back(MakeNewPlaneParticle(randomEngine, position));
+		particleGroup.particles.push_back(MakeNewRingParticle(randomEngine, position));
 	}
 }
 
@@ -326,6 +328,65 @@ ParticleManager::Particle ParticleManager::MakeNewPlaneParticle(std::mt19937& ra
 	particle.velocity = { 0,0,0 };
 
 	return particle;
+}
+
+ParticleManager::Particle ParticleManager::MakeNewRingParticle(std::mt19937& randomEngine, const Vector3& translate)
+{
+	Particle particle;
+	// 位置と速度を[-1, 1]でランダムに初期化
+	particle.transform.scale = { 1.0f, 1.0f, 1.0f };
+	particle.transform.rotate = { 1.0f, 1.0f, 1.0f };
+	particle.transform.translate = translate;
+
+	particle.color = { 1.0f,1.0f,1.0f, 1.0f };
+
+	// パーティクル生成時にランダムに1秒～3秒の間生存
+	particle.lifeTime = 1.0f;
+	particle.currentTime = 0;
+	particle.velocity = { 0,0,0 };
+
+	return particle;
+}
+
+void ParticleManager::CreateRingVertexData()
+{
+	const uint32_t kRingDivide = 32;
+	const float kOuterRadius = 1.0f;
+	const float kInnerRadius = 0.2f;
+	const float radianPerDivide = 2.0f * std::numbers::pi_v<float> / float(kRingDivide);
+
+	for (uint32_t index = 0; index < kRingDivide; ++index)
+	{
+		float sin = std::sin(index * radianPerDivide);
+		float cos = std::cos(index * radianPerDivide);
+		float sinNext = std::sin((index + 1) * radianPerDivide);
+		float cosNext = std::cos((index + 1) * radianPerDivide);
+		float u = float(index) / float(kRingDivide);
+		float uNext = float(index + 1) / float(kRingDivide);
+		// 頂点データを作成
+		modelData.vertices.push_back({ .position = {-sin * kOuterRadius,cos * kOuterRadius,0.0f,1.0f},.texcoord = {u, 0.0f},.normal = {0.0f, 0.0f, 1.0f} });
+		modelData.vertices.push_back({ .position = {-sinNext * kOuterRadius,cosNext * kOuterRadius,0.0f,1.0f},.texcoord = {uNext, 0.0f},.normal = {0.0f, 0.0f, 1.0f} });
+		modelData.vertices.push_back({ .position = {-sin * kInnerRadius,cosNext * kInnerRadius,0.0f,1.0f},.texcoord = {u, 1.0f},.normal = {0.0f, 0.0f, 1.0f} });
+		modelData.vertices.push_back({ .position = {-sinNext * kInnerRadius,cosNext * kInnerRadius,0.0f,1.0f},.texcoord = {uNext, 1.0f},.normal = {0.0f, 0.0f, 1.0f} });
+	}
+
+	// リソースの作成
+	vertexResource = CreateBufferResource(dxCommon_->GetDevice().Get(), sizeof(VertexData) * modelData.vertices.size());
+
+	// リソースの先頭のアドレスから使う
+	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
+
+	// 使用するリソースのサイズは頂点のサイズ
+	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
+
+	// 1頂点あたりのサイズ
+	vertexBufferView.StrideInBytes = sizeof(VertexData);
+
+	// 書き込むためのアドレスを取得
+	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+
+	// 頂点データをリソースにコピー
+	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
 }
 
 void ParticleManager::CreateVertexData()

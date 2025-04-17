@@ -102,8 +102,15 @@ public:
 	// プレーンパーティクルの生成
 	Particle MakeNewPlaneParticle(std::mt19937& randomEngine, const Vector3& translate);
 
+	// リングパーティクルの生成
+	Particle MakeNewRingParticle(std::mt19937& randomEngine, const Vector3& translate);
+
 	/*------頂点データの作成------*/
 	void CreateVertexData();
+
+	// リング用の頂点データの作成
+	void CreateRingVertexData();
+
 
 	/*------マテリアルデータの作成------*/
 	void CreateMaterialData();

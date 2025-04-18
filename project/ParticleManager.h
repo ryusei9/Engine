@@ -117,6 +117,20 @@ public:
 
 	// ImGuiの描画
 	void DrawImGui();
+
+	/*------ゲッター------*/
+	// ビルボードの取得
+	bool GetUseBillboard() const { return useBillboard; }
+
+	// リング型の頂点を使うか
+	bool GetUseRingVertex() const { return useRingVertex; }
+
+	/*------セッター------*/
+	// ビルボードの設定
+	void SetUseBillboard(bool useBillboard) { this->useBillboard = useBillboard; }
+
+	// リング型の頂点を使うか
+	void SetUseRingVertex(bool useRingVertex) { this->useRingVertex = useRingVertex; }
 private:
 	static ParticleManager* instance;
 
@@ -170,5 +184,8 @@ private:
 	std::mt19937 randomEngine;
 
 	std::unordered_map<std::string, ParticleGroup> particleGroups;
+
+	// リング型の頂点を使うか
+	bool useRingVertex = false;
 };
 

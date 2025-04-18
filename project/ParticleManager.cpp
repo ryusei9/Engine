@@ -22,7 +22,7 @@ ParticleManager* ParticleManager::GetInstance()
 	return &instance;
 }
 
-void ParticleManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager,Camera* camera)
+void ParticleManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager, Camera* camera)
 {
 	dxCommon_ = dxCommon;
 	srvManager_ = srvManager;
@@ -62,13 +62,13 @@ void ParticleManager::Update()
 
 	// ビルボード行列を初期化
 	Matrix4x4 scaleMatrix{};
-	
+
 
 	Matrix4x4 rotateMatrix{};
-	
+
 
 	Matrix4x4 translateMatrix{};
-	
+
 
 	Matrix4x4 billboardMatrix = Multiply::Multiply(backToFrontMatrix, cameraMatrix);
 	billboardMatrix.m[3][0] = 0.0f;
@@ -99,7 +99,7 @@ void ParticleManager::Update()
 				// スケール、回転、平行移動を利用してワールド行列を作成
 				Matrix4x4 worldMatrix = MakeAffineMatrix::MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate);
 				scaleMatrix = MakeScaleMatrix::MakeScaleMatrix((*particleIterator).transform.scale);
-				
+
 				translateMatrix = MakeTranslateMatrix::MakeTranslateMatrix((*particleIterator).transform.translate);
 
 				// ビルボードを使うかどうか
@@ -315,11 +315,11 @@ ParticleManager::Particle ParticleManager::MakeNewPlaneParticle(std::mt19937& ra
 	std::uniform_real_distribution<float> distRotate(-std::numbers::pi_v<float>, std::numbers::pi_v<float>);
 	std::uniform_real_distribution<float> distScale(0.4f, 1.5f);
 	// 位置と速度を[-1, 1]でランダムに初期化
-	particle.transform.scale = { 0.05f, distScale(randomEngine), 1.0f};
-	particle.transform.rotate = { 0.0f, 0.0f, distRotate(randomEngine)};
+	particle.transform.scale = { 0.05f, distScale(randomEngine), 1.0f };
+	particle.transform.rotate = { 0.0f, 0.0f, distRotate(randomEngine) };
 	particle.transform.translate = translate;
 
-	
+
 	particle.color = { 1.0f,1.0f,1.0f, 1.0f };
 
 	// パーティクル生成時にランダムに1秒～3秒の間生存
@@ -333,9 +333,11 @@ ParticleManager::Particle ParticleManager::MakeNewPlaneParticle(std::mt19937& ra
 ParticleManager::Particle ParticleManager::MakeNewRingParticle(std::mt19937& randomEngine, const Vector3& translate)
 {
 	Particle particle;
+
+	std::uniform_real_distribution<float> distRotate(-std::numbers::pi_v<float>, std::numbers::pi_v<float>);
 	// 位置と速度を[-1, 1]でランダムに初期化
 	particle.transform.scale = { 1.0f, 1.0f, 1.0f };
-	particle.transform.rotate = { 1.0f, 1.0f, 1.0f };
+	particle.transform.rotate = { 1.0f, 1.0f, distRotate(randomEngine) };
 	particle.transform.translate = translate;
 
 	particle.color = { 1.0f,1.0f,1.0f, 1.0f };
@@ -364,10 +366,13 @@ void ParticleManager::CreateRingVertexData()
 		float u = float(index) / float(kRingDivide);
 		float uNext = float(index + 1) / float(kRingDivide);
 		// 頂点データを作成
-		modelData.vertices.push_back({ .position = {-sin * kOuterRadius,cos * kOuterRadius,0.0f,1.0f},.texcoord = {u, 0.0f},.normal = {0.0f, 0.0f, 1.0f} });
-		modelData.vertices.push_back({ .position = {-sinNext * kOuterRadius,cosNext * kOuterRadius,0.0f,1.0f},.texcoord = {uNext, 0.0f},.normal = {0.0f, 0.0f, 1.0f} });
-		modelData.vertices.push_back({ .position = {-sin * kInnerRadius,cosNext * kInnerRadius,0.0f,1.0f},.texcoord = {u, 1.0f},.normal = {0.0f, 0.0f, 1.0f} });
-		modelData.vertices.push_back({ .position = {-sinNext * kInnerRadius,cosNext * kInnerRadius,0.0f,1.0f},.texcoord = {uNext, 1.0f},.normal = {0.0f, 0.0f, 1.0f} });
+		modelData.vertices.push_back({ .position = {-sin * kInnerRadius,cos * kInnerRadius,0.0f,1.0f},.texcoord = {u, 1.0f},.normal = {0.0f, 0.0f, 1.0f} });	// 内周1
+		modelData.vertices.push_back({ .position = {-sinNext * kInnerRadius,cosNext * kInnerRadius,0.0f,1.0f},.texcoord = {uNext, 1.0f},.normal = {0.0f, 0.0f, 1.0f} });	// 内周2
+		modelData.vertices.push_back({ .position = {-sinNext * kOuterRadius,cosNext * kOuterRadius,0.0f,1.0f},.texcoord = {uNext, 0.0f},.normal = {0.0f, 0.0f, 1.0f} });	// 外周2
+		modelData.vertices.push_back({ .position = {-sin * kOuterRadius,cos * kOuterRadius,0.0f,1.0f},.texcoord = {u, 0.0f},.normal = {0.0f, 0.0f, 1.0f} });	// 外周1
+		modelData.vertices.push_back({ .position = {-sin * kInnerRadius,cos * kInnerRadius,0.0f,1.0f},.texcoord = {u, 1.0f},.normal = {0.0f, 0.0f, 1.0f} });	// 内周1
+		modelData.vertices.push_back({ .position = {-sinNext * kOuterRadius,cosNext * kOuterRadius,0.0f,1.0f},.texcoord = {uNext, 0.0f},.normal = {0.0f, 0.0f, 1.0f} });	// 外周2
+
 	}
 
 	// リソースの作成
@@ -497,7 +502,7 @@ void ParticleManager::CreateRootSignature()
 
 	descriptionRootSignature.NumParameters = _countof(rootParameters);
 	descriptionRootSignature.pParameters = rootParameters;
-	
+
 
 	//////////////////////////
 	// Samplerの設定
@@ -507,7 +512,7 @@ void ParticleManager::CreateRootSignature()
 	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	// 0~1の範囲外をリピート
 	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 	staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	// 比較しない
 	staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;

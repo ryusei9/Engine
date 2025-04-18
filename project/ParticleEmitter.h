@@ -25,6 +25,9 @@ public:
 
 	// 一秒あたりの最大発生数の取得
 	uint32_t GetParticleRate() const { return particleRate; }
+
+	// リングパーティクルを使うか
+	void SetUseRingParticle(bool use) { useRingParticle_ = use; }
 private:
 	/*------メンバ変数------*/
 	// パーティクルマネージャ
@@ -44,5 +47,8 @@ private:
 
 	// パーティクルの発生間隔
 	float interval_ = 0.0f;
+
+	// リングパーティクルを使うか
+	bool useRingParticle_ = false;
 };
 

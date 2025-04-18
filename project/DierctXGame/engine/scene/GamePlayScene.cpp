@@ -5,7 +5,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	sprite = std::make_unique<Sprite>();
 	input = std::make_unique<Input>();
 	// テクスチャ"モリ"を使用
-	sprite->Initialize(directXCommon, "resources/uvChecker.png");
+	sprite->Initialize(directXCommon, "resources/gradationLine.png");
 	input->Initialize(winApp);
 	Audio::GetInstance()->Initialize();
 	soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
@@ -14,13 +14,18 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	// パーティクルマネージャの初期化
 	particleManager = ParticleManager::GetInstance();
+
 	// テクスチャ"モリ"を使用
-	particleManager->GetInstance()->CreateParticleGroup("mori", "resources/uvChecker.png");
+	particleManager->GetInstance()->CreateParticleGroup("mori", "resources/gradationLine.png");
 	// テクスチャ"UV"を使用
 	particleManager->GetInstance()->CreateParticleGroup("uv", "resources/uvChecker.png");
 
 	particleEmitter1 = std::make_unique<ParticleEmitter>(particleManager,"mori");
+	
+
 	//particleEmitter2 = std::make_unique<ParticleEmitter>(particleManager, "uv");
+
+	//particleEmitter2->SetUseRingParticle(false);
 
 	// ボールの初期化
 	ball = std::make_unique<Object3d>();
@@ -63,9 +68,9 @@ void GamePlayScene::Update()
 	particleEmitter1->Update();
 
 	//// パーティクルグループ"UV"の更新
-	//particleEmitter2->SetPosition(particlePosition2);
-	//particleEmitter2->SetParticleRate(100);
-	//particleEmitter2->Update();
+	/*particleEmitter2->SetPosition(particlePosition2);
+	particleEmitter2->SetParticleRate(8);
+	particleEmitter2->Update();*/
 
 
 	// スプライトの更新

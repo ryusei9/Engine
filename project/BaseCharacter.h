@@ -1,5 +1,7 @@
 #pragma once
 #include <Object3d.h>
+#include <Input.h>
+#include <Camera.h>
 // キャラクターの基底クラス
 class BaseCharacter
 {
@@ -19,5 +21,13 @@ protected:
 	/*------メンバ変数------*/
 	std::unique_ptr<Object3d> object3d; // 3Dオブジェクト
 
+	// 入力
+	std::unique_ptr<Input> input_ = nullptr;
+
+	// カメラ
+	Camera* camera_ = nullptr;
+
+	// ヒットポイント
+	int hp_ = 10;
 };
 

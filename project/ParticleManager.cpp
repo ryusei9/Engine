@@ -43,7 +43,8 @@ void ParticleManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager
 
 	// 頂点データの初期化
 	//CreateVertexData();
-	CreateRingVertexData();
+	//CreateRingVertexData();
+	CreateCylinderVertexData();
 
 	// マテリアルデータの初期化
 	CreateMaterialData();
@@ -69,6 +70,12 @@ void ParticleManager::Update()
 
 	Matrix4x4 translateMatrix{};
 
+	Matrix4x4 uvTransformMatrix = MakeScaleMatrix::MakeScaleMatrix(uvTransform.scale);
+	uvTransformMatrix = Multiply::Multiply(uvTransformMatrix, MakeRotateZMatrix::MakeRotateZMatrix(uvTransform.rotate.z));
+	uvTransformMatrix = Multiply::Multiply(uvTransformMatrix, MakeTranslateMatrix::MakeTranslateMatrix(uvTransform.translate));
+	materialData_->uvTransform = uvTransformMatrix;
+
+	uvTransform.translate.x += 0.0001f;
 
 	Matrix4x4 billboardMatrix = Multiply::Multiply(backToFrontMatrix, cameraMatrix);
 	billboardMatrix.m[3][0] = 0.0f;
@@ -278,7 +285,7 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
 	for (uint32_t index = 0; index < count; ++index)
 	{
 		// パーティクルの生成と追加
-		particleGroup.particles.push_back(MakeNewRingParticle(randomEngine, position));
+		particleGroup.particles.push_back(MakeNewCylinderParticle(randomEngine, position));
 	}
 }
 
@@ -350,6 +357,27 @@ ParticleManager::Particle ParticleManager::MakeNewRingParticle(std::mt19937& ran
 	return particle;
 }
 
+ParticleManager::Particle ParticleManager::MakeNewCylinderParticle(std::mt19937& randomEngine, const Vector3& translate)
+{
+	Particle particle;
+
+	std::uniform_real_distribution<float> distRotate(-std::numbers::pi_v<float>, std::numbers::pi_v<float>);
+	// 位置と速度を[-1, 1]でランダムに初期化
+	particle.transform.scale = { 1.0f, 1.0f, 1.0f };
+	particle.transform.rotate = { -0.2f, 0.0f, 0.0f };
+	particle.transform.translate = translate;
+
+	particle.color = { 0.0f,0.0f,1.0f, 1.0f };
+
+	// パーティクル生成時にランダムに1秒～3秒の間生存
+	particle.lifeTime = 1000.0f;
+	particle.currentTime = 0;
+	particle.velocity = { 0,0,0 };
+
+
+	return particle;
+}
+
 void ParticleManager::CreateRingVertexData()
 {
 	const uint32_t kRingDivide = 32;
@@ -375,6 +403,50 @@ void ParticleManager::CreateRingVertexData()
 
 	}
 
+	// リソースの作成
+	vertexResource = CreateBufferResource(dxCommon_->GetDevice().Get(), sizeof(VertexData) * modelData.vertices.size());
+
+	// リソースの先頭のアドレスから使う
+	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
+
+	// 使用するリソースのサイズは頂点のサイズ
+	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
+
+	// 1頂点あたりのサイズ
+	vertexBufferView.StrideInBytes = sizeof(VertexData);
+
+	// 書き込むためのアドレスを取得
+	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+
+	// 頂点データをリソースにコピー
+	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
+}
+
+void ParticleManager::CreateCylinderVertexData()
+{
+	const uint32_t kCylinderDivide = 32;
+	const float kTopRadius = 1.0f;
+	const float kBottomRadius = 1.0f;
+	const float kHeight = 3.0f;
+	const float radianPerDivide = 2.0f * std::numbers::pi_v<float> / float(kCylinderDivide);
+
+	for (uint32_t index = 0; index < kCylinderDivide; ++index)
+	{
+		float sin = std::sin(index * radianPerDivide);
+		float cos = std::cos(index * radianPerDivide);
+		float sinNext = std::sin((index + 1) * radianPerDivide);
+		float cosNext = std::cos((index + 1) * radianPerDivide);
+		float u = float(index) / float(kCylinderDivide);
+		float uNext = float(index + 1) / float(kCylinderDivide);
+ 
+		// 頂点データを作成
+		modelData.vertices.push_back({ .position = {-sin * kTopRadius,kHeight,cos * kBottomRadius,1.0f},.texcoord = {u, 1.0f},.normal = {-sin, 0.0f, cos} });
+		modelData.vertices.push_back({ .position = {-sinNext * kTopRadius,kHeight,cosNext * kBottomRadius,1.0f},.texcoord = {uNext, 1.0f},.normal = {-sinNext, 0.0f, cosNext} });
+		modelData.vertices.push_back({ .position = {-sin * kBottomRadius,0.0f,cos * kBottomRadius,1.0f},.texcoord = {u, 0.0f},.normal = {-sin, 0.0f, cos} });
+		modelData.vertices.push_back({ .position = {-sin * kBottomRadius,0.0f,cos * kBottomRadius,1.0f},.texcoord = {u, 0.0f},.normal = {-sin, 0.0f, cos} });
+		modelData.vertices.push_back({ .position = {-sinNext * kTopRadius,kHeight,cosNext * kTopRadius,1.0f},.texcoord = {uNext, 1.0f},.normal = {-sinNext, 0.0f, cosNext} });
+		modelData.vertices.push_back({ .position = {-sinNext * kBottomRadius,0.0f,cosNext * kBottomRadius,1.0f},.texcoord = {uNext, 0.0f},.normal = {-sinNext, 0.0f, cosNext} });
+	}
 	// リソースの作成
 	vertexResource = CreateBufferResource(dxCommon_->GetDevice().Get(), sizeof(VertexData) * modelData.vertices.size());
 
@@ -426,20 +498,17 @@ void ParticleManager::CreateMaterialData()
 	// マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
 	materialResource = CreateBufferResource(dxCommon_->GetDevice().Get(), sizeof(Material));
 
-	// マテリアルにデータ
-	Material* materialData = nullptr;
-
 	// 書き込むためのアドレスを取得
-	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 
 	// 今回は白を書き込んでみる
 	// RGBA
-	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialData_->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	materialData->enableLighting = false;
+	materialData_->enableLighting = false;
 
 	// 単位行列で初期化
-	materialData->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
+	materialData_->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
 }
 
 void ParticleManager::DrawImGui()
@@ -450,6 +519,9 @@ void ParticleManager::DrawImGui()
 		// ボタンが押されたらuseBillboardの値を切り替える
 		useBillboard = !useBillboard;
 	}
+	ImGui::DragFloat2("UVTranslate", &uvTransform.translate.x, 0.01f, -10.0f, 10.0f);
+	ImGui::DragFloat2("UVScale", &uvTransform.scale.x, 0.01f, -10.0f, 10.0f);
+	ImGui::SliderAngle("UVRotate", &uvTransform.rotate.z);
 
 	/*if (ImGui::Button(isWind ? "Disable Wind" : "Enable Wind"))
 	{
@@ -628,7 +700,7 @@ void ParticleManager::CreatePSO()
 	/// RasterizerState
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 	// 裏面(時計回り)を表示しない
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 

@@ -6,6 +6,7 @@
 #include <Vector4.h>
 #include <ModelData.h>
 #include <random>
+#include "Material.h"
 class Camera;
 /*------パーティクルを管理するクラス------*/
 class ParticleManager
@@ -105,12 +106,17 @@ public:
 	// リングパーティクルの生成
 	Particle MakeNewRingParticle(std::mt19937& randomEngine, const Vector3& translate);
 
+	// 円柱パーティクルの生成
+	Particle MakeNewCylinderParticle(std::mt19937& randomEngine, const Vector3& translate);
+
 	/*------頂点データの作成------*/
 	void CreateVertexData();
 
 	// リング用の頂点データの作成
 	void CreateRingVertexData();
 
+	// 円柱用の頂点データの作成
+	void CreateCylinderVertexData();
 
 	/*------マテリアルデータの作成------*/
 	void CreateMaterialData();
@@ -187,5 +193,13 @@ private:
 
 	// リング型の頂点を使うか
 	bool useRingVertex = false;
+
+	Transform uvTransform{
+		{1.0f,1.0f,1.0f}, // スケール
+		{0.0f,0.0f,0.0f}, // 回転
+		{0.0f,0.0f,0.0f}  // 座標
+	};
+
+	Material* materialData_ = nullptr;
 };
 

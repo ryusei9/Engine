@@ -64,7 +64,7 @@ void GamePlayScene::Update()
 
 	// パーティクルグループ"モリ"の更新
 	particleEmitter1->SetPosition(particlePosition1);
-	particleEmitter1->SetParticleRate(8);
+	particleEmitter1->SetParticleRate(1);
 	particleEmitter1->Update();
 
 	//// パーティクルグループ"UV"の更新

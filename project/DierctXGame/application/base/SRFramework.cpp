@@ -31,6 +31,8 @@ void SRFramework::Initialize()
 	TextureManager::GetInstance()->LoadTexture("resources/monsterBall.png");
 	TextureManager::GetInstance()->LoadTexture("resources/mori.png");
 	TextureManager::GetInstance()->LoadTexture("resources/mori_Red.png");
+	TextureManager::GetInstance()->LoadTexture("resources/circle2.png");
+	TextureManager::GetInstance()->LoadTexture("resources/gradationLine.png");
 	
 	// スプライト共通部の初期化
 	

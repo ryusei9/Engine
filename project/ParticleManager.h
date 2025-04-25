@@ -6,6 +6,7 @@
 #include <Vector4.h>
 #include <ModelData.h>
 #include <random>
+#include "Material.h"
 class Camera;
 /*------パーティクルを管理するクラス------*/
 class ParticleManager
@@ -99,14 +100,43 @@ public:
 	// パーティクルの生成
 	Particle MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate);
 
+	// プレーンパーティクルの生成
+	Particle MakeNewPlaneParticle(std::mt19937& randomEngine, const Vector3& translate);
+
+	// リングパーティクルの生成
+	Particle MakeNewRingParticle(std::mt19937& randomEngine, const Vector3& translate);
+
+	// 円柱パーティクルの生成
+	Particle MakeNewCylinderParticle(std::mt19937& randomEngine, const Vector3& translate);
+
 	/*------頂点データの作成------*/
 	void CreateVertexData();
+
+	// リング用の頂点データの作成
+	void CreateRingVertexData();
+
+	// 円柱用の頂点データの作成
+	void CreateCylinderVertexData();
 
 	/*------マテリアルデータの作成------*/
 	void CreateMaterialData();
 
 	// ImGuiの描画
 	void DrawImGui();
+
+	/*------ゲッター------*/
+	// ビルボードの取得
+	bool GetUseBillboard() const { return useBillboard; }
+
+	// リング型の頂点を使うか
+	bool GetUseRingVertex() const { return useRingVertex; }
+
+	/*------セッター------*/
+	// ビルボードの設定
+	void SetUseBillboard(bool useBillboard) { this->useBillboard = useBillboard; }
+
+	// リング型の頂点を使うか
+	void SetUseRingVertex(bool useRingVertex) { this->useRingVertex = useRingVertex; }
 private:
 	static ParticleManager* instance;
 
@@ -160,5 +190,16 @@ private:
 	std::mt19937 randomEngine;
 
 	std::unordered_map<std::string, ParticleGroup> particleGroups;
+
+	// リング型の頂点を使うか
+	bool useRingVertex = false;
+
+	Transform uvTransform{
+		{1.0f,1.0f,1.0f}, // スケール
+		{0.0f,0.0f,0.0f}, // 回転
+		{0.0f,0.0f,0.0f}  // 座標
+	};
+
+	Material* materialData_ = nullptr;
 };
 

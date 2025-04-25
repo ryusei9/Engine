@@ -54,7 +54,7 @@ private:
 
 	std::unique_ptr<ParticleEmitter> particleEmitter2 = nullptr;
 
-	Vector3 particlePosition1 = { -5,0,50 };
+	Vector3 particlePosition1 = { 0,0,5 };
 
 	Vector3 particlePosition2 = { 5,0,50 };
 

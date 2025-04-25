@@ -184,6 +184,7 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="MakeRotateXYZMatrix.cpp">
+    <ClCompile Include="BaseCharacter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -363,6 +364,7 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="MakeRotateXYZMatrix.h">
+    <ClInclude Include="BaseCharacter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

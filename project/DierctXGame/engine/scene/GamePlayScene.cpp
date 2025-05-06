@@ -3,10 +3,10 @@
 void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
 	sprite = std::make_unique<Sprite>();
-	input = std::make_unique<Input>();
+	input = Input::GetInstance();
 	// テクスチャ"モリ"を使用
 	sprite->Initialize(directXCommon, "resources/gradationLine.png");
-	input->Initialize(winApp);
+	
 	Audio::GetInstance()->Initialize();
 	soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
 	// 音声再生
@@ -48,6 +48,16 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 		{0.0f,0.0f,5.0f}  // 座標
 	};
 	ground->SetTransform(groundTransform);
+
+	// プレイヤーの初期化
+	player_ = std::make_unique<Player>();
+	player_->Initialize();
+	player_->SetBullet(playerBullet_.get());
+
+	// プレイヤーの弾の初期化
+	playerBullet_ = std::make_unique<PlayerBullet>();
+	playerBullet_->Initialize();
+	playerBullet_->SetPlayer(player_.get());
 }
 
 void GamePlayScene::Update()
@@ -60,12 +70,14 @@ void GamePlayScene::Update()
 	{
 		SetSceneNo(TITLE);
 	}*/
-
+	// プレイヤーの更新
+	player_->Update();
 
 	// パーティクルグループ"モリ"の更新
 	particleEmitter1->SetPosition(particlePosition1);
 	particleEmitter1->SetParticleRate(1);
 	particleEmitter1->Update();
+
 
 	//// パーティクルグループ"UV"の更新
 	/*particleEmitter2->SetPosition(particlePosition2);
@@ -96,6 +108,8 @@ void GamePlayScene::Draw()
 	// ボールの描画
 	/*ball->Draw();
 	ground->Draw();*/
+	// プレイヤーの描画
+	player_->Draw();
 }
 
 void GamePlayScene::Finalize()

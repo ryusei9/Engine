@@ -10,6 +10,8 @@
 #include <ParticleManager.h>
 #include <ParticleEmitter.h>
 #include <Object3d.h>
+#include <Player.h>
+#include <PlayerBullet.h>
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 
@@ -42,7 +44,7 @@ private:
 	std::unique_ptr<Sprite> sprite = nullptr;
 
 	// 入力の初期化
-	std::unique_ptr<Input> input = nullptr;
+	Input* input = nullptr;
 
 	Vector2 spritePosition = { 100.0f,100.0f };
 
@@ -64,5 +66,11 @@ private:
 	// ボールの座標
 	Transform ballTransform;
 	Transform groundTransform;
+
+	// プレイヤー
+	std::unique_ptr<Player> player_ = nullptr;
+
+	// プレイヤーの弾
+	std::unique_ptr<PlayerBullet> playerBullet_ = nullptr;
 };
 

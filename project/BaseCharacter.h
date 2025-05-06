@@ -2,8 +2,10 @@
 #include <Object3d.h>
 #include <Input.h>
 #include <Camera.h>
+#include <Collider.h>
+#include <Transform.h>
 // キャラクターの基底クラス
-class BaseCharacter
+class BaseCharacter : public Collider
 {
 public:
 	virtual void Initialize();
@@ -17,17 +19,63 @@ public:
 
 	// キャラクターの攻撃
 	virtual void Attack() = 0;
+
+	// 衝突判定
+	virtual void OnCollision(Collider* other) override;
+
+	// 中心座標を取得する純粋仮想関数
+	virtual Vector3 GetCenterPosition() const override;
+
+	/*------ゲッター------*/
+
+	// ヒットポイントを取得
+	int GetHp() const { return hp_; }
+
+	// スケールを取得
+	Vector3 GetScale() const { return worldTransform_.scale; }
+
+	// 回転を取得
+	Vector3 GetRotation() const { return  worldTransform_.rotate; }
+
+	// 座標を取得
+	Vector3 GetPosition() { return  worldTransform_.translate; }
+
+	// シリアルナンバーを取得
+	uint32_t GetSerialNumber() const { return serialNumber_; }
+
+	/*------セッター------*/
+	// ヒットポイントを設定
+	void SetHp(int hp) { hp_ = hp; }
+
+	// スケールを設定
+	void SetScale(const Vector3& scale) { worldTransform_.scale = scale; }
+
+	// 回転を設定
+	void SetRotation(const Vector3& rotation) { worldTransform_.rotate = rotation; }
+
+	// 座標を設定
+	void SetPosition(const Vector3& position) { worldTransform_.translate = position; }
+
+	// シリアルナンバーを設定
+	void SetSerialNumber(uint32_t serialNumber) { serialNumber_ = serialNumber; }
+
 protected:
 	/*------メンバ変数------*/
-	std::unique_ptr<Object3d> object3d; // 3Dオブジェクト
+	std::unique_ptr<Object3d> object3d_; // 3Dオブジェクト
+
+	// ワールド変換
+	Transform worldTransform_;
 
 	// 入力
-	std::unique_ptr<Input> input_ = nullptr;
+	Input* input_ = nullptr;
 
 	// カメラ
 	Camera* camera_ = nullptr;
 
 	// ヒットポイント
 	int hp_ = 10;
+
+	uint32_t serialNumber_ = 0; // シリアルナンバー
+	static inline uint32_t nextSerialNumber_ = 0; // 次のシリアルナンバー
 };
 

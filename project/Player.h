@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseCharacter.h"
-#include <PlayerBullet.h>
+
+class PlayerBullet; // 前方宣言
 class Player : public BaseCharacter
 {
 public:
@@ -32,6 +33,8 @@ public:
 	std::list<std::unique_ptr<PlayerBullet>>& GetBullets() { return bullets_; }
 
 	//void SetBullet(PlayerBullet* bullet) { bullet_ = bullet; } // 武器の設定
+
+	void SetAttack(bool attack) { isAttack_ = attack; } // 攻撃フラグの設定
 
 private:
 	/*------メンバ変数------*/

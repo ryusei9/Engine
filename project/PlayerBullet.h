@@ -35,12 +35,6 @@ public:
 	// プレイヤーの設定
 	void SetPlayer(Player* player) { player_ = player; }
 
-	void SetTranslate(const Vector3& translate) { worldTransform_.translate = translate; } // 座標の設定
-
-	bool IsAlive() const { return isAlive_; } // 生存フラグの取得
-
-	float GetRadius() const { return radius_; } // 半径の取得
-
 private:
 	/*------メンバ変数------*/
 	Transform worldTransform_;

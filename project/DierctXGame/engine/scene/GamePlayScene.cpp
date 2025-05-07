@@ -125,9 +125,6 @@ void GamePlayScene::Draw()
 	ground->Draw();*/
 	// プレイヤーの描画
 	player_->Draw();
-
-	// 敵の描画
-	enemy_->Draw();
 }
 
 void GamePlayScene::Finalize()

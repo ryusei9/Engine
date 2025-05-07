@@ -41,6 +41,7 @@ void PlayerBullet::Update()
 	}
 	else {
 		isAlive_ = false;
+		player_->SetAttack(false);
 	}
 	objectBullet_->Update();
 	objectBullet_->SetTranslate(worldTransform_.translate);

@@ -1,6 +1,7 @@
 #include "Player.h"
 #include <Object3dCommon.h>
 #include <CollisionTypeIdDef.h>
+#include <PlayerBullet.h>
 Player::Player()
 {
 	// シリアルナンバーを振る

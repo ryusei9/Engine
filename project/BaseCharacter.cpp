@@ -7,8 +7,11 @@ void BaseCharacter::Initialize()
 
 void BaseCharacter::Update()
 {
+	object3d->SetCamera(camera_);
+	//object3d->SetScale();
 }
 
 void BaseCharacter::Draw()
 {
+
 }

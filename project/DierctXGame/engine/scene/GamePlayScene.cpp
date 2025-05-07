@@ -89,8 +89,8 @@ void GamePlayScene::Draw()
 	/*------オブジェクトの描画------*/
 	Object3dCommon::GetInstance()->DrawSettings();
 	// ボールの描画
-	ball->Draw();
-	ground->Draw();
+	//ball->Draw();
+	//ground->Draw();
 }
 
 void GamePlayScene::Finalize()

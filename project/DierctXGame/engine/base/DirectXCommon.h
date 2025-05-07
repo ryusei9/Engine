@@ -114,6 +114,9 @@ public: // メンバ関数
 
 	// RenderTextureを生成
 	void CreateRenderTexture();
+
+	// ディスクリプタヒープを作成する関数
+	void CreateCBVSRVUAVDescriptorHeap(ID3D12Device* device);
 	
 	// 記録時間
 	std::chrono::steady_clock::time_point reference_;
@@ -130,6 +133,9 @@ public: // メンバ関数
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetSRVDescriptorHeap() { return srvDescriptorHeap; }
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetDSVDescriptorHeap() { return dsvDescriptorHeap; }
+
+	// ディスクリプタヒープを取得する関数
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetCBVSRVUAVDescriptorHeap() const {return cbvSrvUavDescriptorHeap;}
 
 	uint32_t GetDescriptorSizeSRV() { return descriptorSizeSRV; }
 	uint32_t GetDescriptorSizeDSV() { return descriptorSizeDSV; }
@@ -191,6 +197,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap;
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap;
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> cbvSrvUavDescriptorHeap;
 
 	// SwapChainからResourceを引っ張ってくる
 	//Microsoft::WRL::ComPtr<ID3D12Resource> swapChainResources[2];

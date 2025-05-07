@@ -36,9 +36,11 @@ void DirectXCommon::Initialize(WinApp* winApp)
 	CreateBuffer(WinApp::kClientWidth, WinApp::kClientHeight);
 	// 各種デスクリプタヒープの生成
 	DescriptorHeap();
-	CreateRenderTexture();
+	
 	// レンダーターゲットビュー
 	RenderTargetView();
+
+	CreateRenderTexture();
 	// 深度ステンシルビューの初期化
 	DepthStencilViewInitialize();
 	// フェンスの初期化
@@ -122,6 +124,35 @@ void DirectXCommon::DeviceInitialize()
 	assert(device != nullptr);
 	// 初期化完了のログを出す
 	Logger::Log("Complete create D3D12Device!!!\n");
+#ifdef _DEBUG
+	ID3D12InfoQueue* infoQueue = nullptr;
+	if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
+		// ヤバいエラー時に止まる
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+		// エラー時に止まる
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+		// 警告時に止まる
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+
+		// 抑制するメッセージ
+		D3D12_MESSAGE_ID denyIds[] = {
+			// Windows11でのDXGIデバッグレイヤーの相互作用バグによるエラーメッセージ
+			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE
+		};
+		// 抑制するレベル
+		D3D12_MESSAGE_SEVERITY severities[] = { D3D12_MESSAGE_SEVERITY_INFO };
+		D3D12_INFO_QUEUE_FILTER filter{};
+
+		filter.DenyList.NumIDs = _countof(denyIds);
+		filter.DenyList.pIDList = denyIds;
+		filter.DenyList.NumSeverities = _countof(severities);
+		filter.DenyList.pSeverityList = severities;
+		// 指定したメッセージの表示を抑制する
+		infoQueue->PushStorageFilter(&filter);
+		// 解放
+		infoQueue->Release();
+	}
+#endif
 }
 
 void DirectXCommon::CommandInitialize()
@@ -244,6 +275,7 @@ void DirectXCommon::DescriptorHeap()
 	// DSV用のヒープでディスクリプタの数は1。DSVはShader内で触るものではないので、ShaderVisibleはfalse
 	dsvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 
+	CreateCBVSRVUAVDescriptorHeap(device.Get());
 	// SRVディスクリプタヒープの設定
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
 	srvHeapDesc.NumDescriptors = 1; // 必要なディスクリプタの数
@@ -409,13 +441,19 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateDepthStencilTextureR
 void DirectXCommon::FenceInitialize()
 {
 	HRESULT hr;
-	
+
 	hr = device->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-	assert(SUCCEEDED(hr));
+	if (FAILED(hr)) {
+		Logger::Log("Failed to create fence.");
+		throw std::runtime_error("Fence creation failed.");
+	}
 
 	//// Fenceのsignalを待つためのイベントを作成
 	fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	assert(fenceEvent != nullptr);
+	if (fenceEvent == nullptr) {
+		Logger::Log("Failed to create fence event.");
+		throw std::runtime_error("Fence event creation failed.");
+	}
 }
 
 void DirectXCommon::ViewPortInitialize()
@@ -513,8 +551,8 @@ void DirectXCommon::PreRenderScene()
 void DirectXCommon::PreDraw()
 {
 	// TransitionBarrierの設定
-	ChengeBarrier();
-	
+	//ChengeBarrier();
+
 
 	// 描画先のRTVとDSVを設定する
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = GetDSVCPUDescriptorHandle(0);
@@ -530,7 +568,7 @@ void DirectXCommon::PreDraw()
 	// 指定した深度で画面全体をクリアする
 	//commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-	
+
 	// 描画用のDescriptorの設定
 	/*Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeaps[] = { srvDescriptorHeap.Get()};
 	commandList->SetDescriptorHeaps(1, descriptorHeaps->GetAddressOf());*/
@@ -761,7 +799,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateTextureResource(cons
 		// Resourceの設定
 		&resourceDesc,
 		// 初回のResourceState。Textureは基本読むだけ
-		D3D12_RESOURCE_STATE_GENERIC_READ,
+		D3D12_RESOURCE_STATE_COPY_DEST,
 		// Clear最適値。使わないのでnullptr
 		nullptr,
 		// 作成するResourceポインタへのポインタ
@@ -869,37 +907,37 @@ void DirectXCommon::SyncCPUWithGPU()
 
 
 
-		//GPUにコマンドリストの実行行わせる
-		ID3D12CommandList * commandLists[] = { commandList.Get() };
+	//GPUにコマンドリストの実行行わせる
+	ID3D12CommandList* commandLists[] = { commandList.Get() };
 	commandQueue->ExecuteCommandLists(1, commandLists);
 
 
 
-		fenceValue++;
+	fenceValue++;
 
 
 
-		//GPUがここまでたどり着いた時に、Fenceの値を指定した値に代入するようにSignalをおくる
-		commandQueue->Signal(fence.Get(), fenceValue);
+	//GPUがここまでたどり着いた時に、Fenceの値を指定した値に代入するようにSignalをおくる
+	commandQueue->Signal(fence.Get(), fenceValue);
 
 
 
-		if (fence->GetCompletedValue() < fenceValue) {
-			//
-			fence->SetEventOnCompletion(fenceValue, fenceEvent);
-			//イベント待つ
-			WaitForSingleObject(fenceEvent, INFINITE);
-		}
+	if (fence->GetCompletedValue() < fenceValue) {
+		//
+		fence->SetEventOnCompletion(fenceValue, fenceEvent);
+		//イベント待つ
+		WaitForSingleObject(fenceEvent, INFINITE);
+	}
 
 	//FPS固定更新
 	//UpdateFixFPS();
 
 		//次のフレーム用のコマンドリストを準備
-		hr = commandAllocator->Reset();
+	hr = commandAllocator->Reset();
 	assert(SUCCEEDED(hr));
 
 
-		hr = commandList->Reset(commandAllocator.Get(), nullptr);
+	hr = commandList->Reset(commandAllocator.Get(), nullptr);
 	assert(SUCCEEDED(hr));
 
 }
@@ -939,7 +977,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateRenderTextureResoruc
 	renderTargetClearValue.Color[1] = clearColor.y;
 	renderTargetClearValue.Color[2] = clearColor.z;
 	renderTargetClearValue.Color[3] = clearColor.w;
-	
+
 	/*------Resourceの生成------*/
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
 	HRESULT hr = device->CreateCommittedResource(
@@ -979,4 +1017,20 @@ void DirectXCommon::CreateRenderTexture()
 
 	// SRVの作成
 	device->CreateShaderResourceView(renderTexture.Get(), &renderTextureSrvDesc, srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+}
+
+void DirectXCommon::CreateCBVSRVUAVDescriptorHeap(ID3D12Device* device)
+{
+	// ディスクリプタヒープの設定
+	D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
+	heapDesc.NumDescriptors = 100; // 必要なディスクリプタ数
+	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE; // シェーダーからアクセス可能にする
+	heapDesc.NodeMask = 0;
+
+	// ディスクリプタヒープを作成
+	HRESULT hr = device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&cbvSrvUavDescriptorHeap));
+	if (FAILED(hr)) {
+		throw std::runtime_error("Failed to create CBV/SRV/UAV descriptor heap.");
+	}
 }

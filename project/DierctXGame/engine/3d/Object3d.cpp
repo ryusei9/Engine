@@ -69,8 +69,22 @@ void Object3d::Draw()
 	// wvp用のCBufferの場所を設定
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
-	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2,modelData.material.gpuHandle);
+	// 必要なディスクリプタヒープを取得
+	ID3D12DescriptorHeap* descriptorHeaps[] = {
+		Object3dCommon::GetInstance()->GetDxCommon()->GetCBVSRVUAVDescriptorHeap().Get()
+	};
 
+	// ディスクリプタヒープが有効か確認
+	if (descriptorHeaps[0] != nullptr) {
+		// コマンドリストにディスクリプタヒープを設定
+		Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
+		// ディスクリプタヒープに関連付けられたハンドルを使用
+		Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, modelData.material.gpuHandle);
+	} else {
+		// エラー処理（ログ出力やデバッグ用のメッセージなど）
+		assert(false && "Descriptor heap is null!");
+	}
 	// 平行光源
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 

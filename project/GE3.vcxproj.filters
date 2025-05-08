@@ -59,6 +59,7 @@
     <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerBullet.cpp" />
+    <ClCompile Include="Enemy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseCharacter.h" />
@@ -126,6 +127,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="CollisionTypeIdDef.h" />
     <ClInclude Include="PlayerBullet.h" />
+    <ClInclude Include="Enemy.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Particle.hlsli" />

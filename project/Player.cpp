@@ -27,14 +27,35 @@ void Player::Initialize()
 
 	// プレイヤーの3Dオブジェクトを初期化
 	object3d_->Initialize("monsterBall.obj");
+
+
 }
 
 void Player::Update()
 {// プレイヤーの更新
 	BaseCharacter::Update();
 
+	// 弾の削除
+	bullets_.remove_if([](std::unique_ptr<PlayerBullet>& bullet) {
+		// 弾が死んでいる場合
+		if (!bullet->IsAlive()) {
+
+			// リセット
+			bullet.reset();
+			return true;
+		}
+
+		return false;
+		});
+
+	// 弾の更新
+	for (auto& bullet : bullets_) {
+		bullet->Update();
+	}
+
 	// プレイヤーの移動
 	Move();
+	Attack();
 	// プレイヤーのワールド変換を更新
 	object3d_->SetCamera(camera_);
 	object3d_->SetTranslate(worldTransform_.translate);
@@ -46,6 +67,12 @@ void Player::Update()
 void Player::Draw()
 {
 	BaseCharacter::Draw();
+
+	// 弾の描画
+	for (auto& bullet : bullets_) {
+		bullet->Draw();
+	}
+
 }
 
 void Player::Move()
@@ -67,8 +94,23 @@ void Player::Move()
 
 void Player::Attack()
 {// プレイヤーの攻撃
+	  // プレイヤーの攻撃
 	if (input_->TriggerKey(DIK_SPACE)) {
-		// 攻撃処理
+		isShot_ = true;
+	}
+	if (isShot_) {
+		// 弾を生成
+		auto bullet = std::make_unique<PlayerBullet>();
+
+		// 弾の初期化
+		bullet->Initialize();
+
+		// 弾の位置をプレイヤーの位置に設定
+		bullet->SetTranslate(worldTransform_.translate);
+
+		// 弾をリストに追加
+		bullets_.push_back(std::move(bullet));
+		isShot_ = false;
 	}
 }
 
@@ -82,5 +124,7 @@ void Player::OnCollision(Collider* other)
 
 Vector3 Player::GetCenterPosition() const
 {
-	return Vector3();
+	const Vector3 offset = { 0.0f, 0.0f, 0.0f }; // プレイヤーの中心を考慮
+	Vector3 worldPosition = worldTransform_.translate + offset;
+	return worldPosition;
 }

@@ -1,5 +1,6 @@
 #include "GamePlayScene.h"
 #include "SRFramework.h"
+
 void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
 	sprite = std::make_unique<Sprite>();
@@ -16,7 +17,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	particleManager = ParticleManager::GetInstance();
 
 	// テクスチャ"モリ"を使用
-	particleManager->GetInstance()->CreateParticleGroup("mori", "resources/gradationLine.png");
+	particleManager->GetInstance()->CreateParticleGroup("mori", "resources/circle2.png");
 	// テクスチャ"UV"を使用
 	particleManager->GetInstance()->CreateParticleGroup("uv", "resources/uvChecker.png");
 
@@ -52,12 +53,21 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	// プレイヤーの初期化
 	player_ = std::make_unique<Player>();
 	player_->Initialize();
-	player_->SetBullet(playerBullet_.get());
+	//player_->SetBullet(playerBullet_.get());
 
+	// 敵の初期化
+	enemy_ = std::make_unique<Enemy>();
+	enemy_->Initialize();
+
+	playerBullets_ = &player_->GetBullets();
 	// プレイヤーの弾の初期化
-	playerBullet_ = std::make_unique<PlayerBullet>();
+	/*playerBullet_ = std::make_unique<PlayerBullet>();
 	playerBullet_->Initialize();
-	playerBullet_->SetPlayer(player_.get());
+	playerBullet_->SetPlayer(player_.get());*/
+
+	// 衝突マネージャの生成
+	collisionManager_ = std::make_unique<CollisionManager>();
+	collisionManager_->Initialize();
 }
 
 void GamePlayScene::Update()
@@ -73,12 +83,17 @@ void GamePlayScene::Update()
 	// プレイヤーの更新
 	player_->Update();
 
+	// 敵の更新
+	enemy_->Update();
+
 	// パーティクルグループ"モリ"の更新
-	particleEmitter1->SetPosition(particlePosition1);
-	particleEmitter1->SetParticleRate(1);
-	particleEmitter1->Update();
+	/*particleEmitter1->SetPosition(particlePosition1);
+	particleEmitter1->SetParticleRate(8);
+	particleEmitter1->Update();*/
 
-
+	// 衝突マネージャの更新
+	collisionManager_->Update();
+	CheckAllCollisions();// 衝突判定と応答
 	//// パーティクルグループ"UV"の更新
 	/*particleEmitter2->SetPosition(particlePosition2);
 	particleEmitter2->SetParticleRate(8);
@@ -110,6 +125,9 @@ void GamePlayScene::Draw()
 	ground->Draw();*/
 	// プレイヤーの描画
 	player_->Draw();
+
+	// 敵の描画
+	enemy_->Draw();
 }
 
 void GamePlayScene::Finalize()
@@ -141,4 +159,21 @@ void GamePlayScene::DrawImGui()
 	/*ball->DrawImGui();
 	ground->DrawImGui();*/
 	ImGui::End();
+}
+
+void GamePlayScene::CheckAllCollisions()
+{
+	// 衝突マネージャのリセット
+	collisionManager_->Reset();
+
+	// コライダーをリストに登録
+	collisionManager_->AddCollider(enemy_.get());
+
+	// 複数についてコライダーをリストに登録
+	for (const auto& bullet : *playerBullets_)
+	{
+		collisionManager_->AddCollider(bullet.get());
+	}
+	// 衝突判定と応答
+	collisionManager_->CheckCollision();
 }

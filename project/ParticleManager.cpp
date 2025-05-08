@@ -42,9 +42,9 @@ void ParticleManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager
 	CreatePSO();
 
 	// 頂点データの初期化
-	//CreateVertexData();
+	CreateVertexData();
 	//CreateRingVertexData();
-	CreateCylinderVertexData();
+	//CreateCylinderVertexData();
 
 	// マテリアルデータの初期化
 	CreateMaterialData();
@@ -285,7 +285,7 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
 	for (uint32_t index = 0; index < count; ++index)
 	{
 		// パーティクルの生成と追加
-		particleGroup.particles.push_back(MakeNewCylinderParticle(randomEngine, position));
+		particleGroup.particles.push_back(MakeNewPlaneParticle(randomEngine, position));
 	}
 }
 

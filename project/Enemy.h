@@ -1,54 +1,52 @@
 #pragma once
 #include "BaseCharacter.h"
-#include <PlayerBullet.h>
-class Player : public BaseCharacter
+#include <ParticleManager.h>
+#include <ParticleEmitter.h>
+class Enemy : public BaseCharacter
 {
 public:
 	/*------メンバ関数------*/
-
-	Player();
+	Enemy();
 	// 初期化
 	void Initialize() override;
-
 	// 更新
 	void Update() override;
-
 	// 描画
 	void Draw() override;
-
 	// キャラクターの移動
 	void Move() override;
-
 	// キャラクターの攻撃
 	void Attack() override;
-
 	// 衝突判定
 	void OnCollision(Collider* other) override;
-
 	// 中心座標を取得する純粋仮想関数
 	Vector3 GetCenterPosition() const override;
 
-	/*------ゲッター------*/
-	std::list<std::unique_ptr<PlayerBullet>>& GetBullets() { return bullets_; }
-
-	//void SetBullet(PlayerBullet* bullet) { bullet_ = bullet; } // 武器の設定
+	// 敵の半径を取得
+	float GetRadius() const { return radius_; }
 
 private:
 	/*------メンバ変数------*/
-
-	std::list<std::unique_ptr<PlayerBullet>> bullets_; // 武器
-	// プレイヤーの移動速度
+	// 敵の移動速度
 	float moveSpeed_ = 0.1f;
-	
-	// プレイヤーのヒットポイント
+	// 敵のヒットポイント
 	int hp_ = 1;
-	// プレイヤーのシリアルナンバー
+	// 敵のシリアルナンバー
 	uint32_t serialNumber_ = 0;
-	// プレイヤーのワールド変換
+	// 敵のワールド変換
 	Transform worldTransform_;
-	// プレイヤーのカメラ
+	// 敵のカメラ
 	Camera* camera_ = nullptr;
 
-	bool isShot_ = false; // 発射フラグ
+	// 敵のリスポーンタイム
+	float respawnTime_ = 3.0f;
+	// 敵のリスポーンフラグ
+	bool isAlive_ = true;
+
+	float radius_ = 1.0f;
+
+	ParticleManager* particleManager = nullptr;
+
+	std::unique_ptr<ParticleEmitter> enemyDeathEmitter_; // 敵死亡時のパーティクルエミッター
 };
 

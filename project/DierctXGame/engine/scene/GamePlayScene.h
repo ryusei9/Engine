@@ -12,6 +12,9 @@
 #include <Object3d.h>
 #include <Player.h>
 #include <PlayerBullet.h>
+#include <Enemy.h>
+#include <CollisionManager.h>
+
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 
@@ -33,12 +36,19 @@ public:
 	void DrawImGui() override;
 
 private:
+
+	// 衝突判定と応答
+	void CheckAllCollisions();
+
 	// スプライトコモン
 	SpriteCommon* spriteCommon = nullptr;
 	// ダイレクトXコモン
 	DirectXCommon* directXCommon = nullptr;
 	// WinApp
 	WinApp* winApp = nullptr;
+
+	std::unique_ptr<CollisionManager> collisionManager_;
+
 
 
 	std::unique_ptr<Sprite> sprite = nullptr;
@@ -71,6 +81,9 @@ private:
 	std::unique_ptr<Player> player_ = nullptr;
 
 	// プレイヤーの弾
-	std::unique_ptr<PlayerBullet> playerBullet_ = nullptr;
+	std::list<std::unique_ptr<PlayerBullet>>* playerBullets_;
+
+	// 敵
+	std::unique_ptr<Enemy> enemy_ = nullptr;
 };
 

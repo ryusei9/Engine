@@ -1,6 +1,6 @@
 #include "PlayerBullet.h"
 #include <CollisionTypeIdDef.h>
-
+#include <Player.h>
 PlayerBullet::PlayerBullet()
 {
 	// シリアルナンバーを設定
@@ -60,10 +60,14 @@ void PlayerBullet::Move()
 }
 
 void PlayerBullet::OnCollision(Collider* other)
-{
+{// プレイヤー弾の衝突判定
+	if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
+		// 敵と衝突した場合
+		isAlive_ = false;
+	}
 }
 
 Vector3 PlayerBullet::GetCenterPosition() const
 {
-	return Vector3();
+	return worldTransform_.translate;
 }

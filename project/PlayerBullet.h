@@ -3,7 +3,8 @@
 #include <Transform.h>
 #include <memory>
 #include <Object3d.h>
-#include <Player.h>
+
+class Player; // 前方宣言
 class PlayerBullet : public Collider
 {
 public:
@@ -34,6 +35,12 @@ public:
 	// プレイヤーの設定
 	void SetPlayer(Player* player) { player_ = player; }
 
+	void SetTranslate(const Vector3& translate) { worldTransform_.translate = translate; } // 座標の設定
+
+	bool IsAlive() const { return isAlive_; } // 生存フラグの取得
+
+	float GetRadius() const { return radius_; } // 半径の取得
+
 private:
 	/*------メンバ変数------*/
 	Transform worldTransform_;
@@ -59,5 +66,7 @@ private:
 	uint32_t serialNumber_ = 0;
 	// 次のシリアルナンバー
 	uint32_t nextSerialNumber_ = 0;
+
+	float radius_ = 0.5f; // 半径
 };
 

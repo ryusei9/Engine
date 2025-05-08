@@ -43,6 +43,6 @@ private:
 	/*------メンバ変数------*/
 	uint32_t typeID_ = 0; // 識別ID
 
-	float radius_ = 0.0f; // 半径
+	float radius_ = 1.0f; // 半径
 };
 

@@ -38,10 +38,9 @@ void MyGame::Update()
 void MyGame::Draw()
 {
 	SRFramework::PrePostEffect();
-	
-
 
 	ParticleManager::GetInstance()->Draw();
+
 	sceneManager_->Draw();
 
 	SRFramework::PreDraw();

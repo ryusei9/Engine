@@ -1,6 +1,8 @@
 #pragma once
 #include "DirectXCommon.h"
 #include "Camera.h"
+
+class SrvManager;
 // 3Dオブジェクト共通部
 class Object3dCommon
 {
@@ -14,7 +16,7 @@ public:
 	Object3dCommon& operator=(Object3dCommon&) = delete;
 
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon);
+	void Initialize(DirectXCommon* dxCommon,SrvManager* srvManager);
 
 	// 共通描画設定
 	void DrawSettings();
@@ -67,5 +69,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
 
 	Camera* defaultCamera = nullptr;
+
+	// srvManagerからの借りポインタ
+	SrvManager* srvManager_ = nullptr;
 };
 

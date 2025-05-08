@@ -38,7 +38,7 @@ void SRFramework::Initialize()
 
 
 	// 3Dオブジェクト共通部の初期化
-	Object3dCommon::GetInstance()->Initialize(dxCommon.get());
+	Object3dCommon::GetInstance()->Initialize(dxCommon.get(),srvManager.get());
 
 
 	// 3Dモデルマネージャの初期化

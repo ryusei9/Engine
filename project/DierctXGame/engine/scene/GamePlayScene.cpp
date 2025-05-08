@@ -89,7 +89,7 @@ void GamePlayScene::Draw()
 	/*------オブジェクトの描画------*/
 	Object3dCommon::GetInstance()->DrawSettings();
 	// ボールの描画
-	//ball->Draw();
+	ball->Draw();
 	//ground->Draw();
 }
 

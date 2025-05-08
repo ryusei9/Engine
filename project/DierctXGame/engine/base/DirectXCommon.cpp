@@ -525,7 +525,7 @@ void DirectXCommon::PreRenderScene()
 {
 	//CreateRenderTexture();
 	// TransitionBarrierの設定
-	ChengeBarrier();
+	//ChengeBarrier();
 
 	// RenderTargetViewのハンドルを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
@@ -536,12 +536,13 @@ void DirectXCommon::PreRenderScene()
 	commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
 	// RenderTextureをクリア
-	commandList->ClearRenderTargetView(rtvHandle, reinterpret_cast<const FLOAT*>(&clearColor), 0, nullptr);
+	commandList->ClearRenderTargetView(rtvHandle, reinterpret_cast<const FLOAT*>(&kRenderTargetClearValue), 0, nullptr);
 
 	// DepthStencilをクリア
 	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	// ビューポートの設定
+	// ビューポートとシザーを新しく作ってみる
 	commandList->RSSetViewports(1, &viewport);
 
 	// シザーレクトの設定
@@ -551,7 +552,7 @@ void DirectXCommon::PreRenderScene()
 void DirectXCommon::PreDraw()
 {
 	// TransitionBarrierの設定
-	//ChengeBarrier();
+	ChengeBarrier();
 
 
 	// 描画先のRTVとDSVを設定する
@@ -563,15 +564,12 @@ void DirectXCommon::PreDraw()
 	// 指定した色で画面全体をクリアする
 	// 青っぽい色。RGBA
 	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
+	
 	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
 
 	// 指定した深度で画面全体をクリアする
-	//commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-
-	// 描画用のDescriptorの設定
-	/*Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeaps[] = { srvDescriptorHeap.Get()};
-	commandList->SetDescriptorHeaps(1, descriptorHeaps->GetAddressOf());*/
 
 	/// 三角形の描画
 	// Viewportを設定
@@ -1001,7 +999,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateRenderTextureResoruc
 void DirectXCommon::CreateRenderTexture()
 {
 	/*------RenderTextureのRTVを生成する------*/
-	renderTexture = CreateRenderTextureResoruce(device, WinApp::kClientWidth, WinApp::kClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, clearColor);
+	renderTexture = CreateRenderTextureResoruce(device, WinApp::kClientWidth, WinApp::kClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, kRenderTargetClearValue);
 	device->CreateRenderTargetView(renderTexture.Get(), &rtvDesc, rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
 	/*------RenderTextureのSRVを生成する------*/

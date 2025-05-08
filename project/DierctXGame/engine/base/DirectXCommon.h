@@ -243,7 +243,7 @@ private:
 	UINT backBufferCount = 2;
 
 	// 今回は赤を設定する
-	const Vector4 clearColor = { 1.0f,0.0f,0.0f,1.0f };
+	const Vector4 kRenderTargetClearValue = { 1.0f,0.0f,0.0f,1.0f };
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> renderTexture;
 

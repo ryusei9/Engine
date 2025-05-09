@@ -521,6 +521,7 @@ void DirectXCommon::ImGuiInitialize()
 		GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0));*/
 }
 
+/*------RenderTextureの描画------*/
 void DirectXCommon::PreRenderScene()
 {
 	//CreateRenderTexture();
@@ -528,7 +529,7 @@ void DirectXCommon::PreRenderScene()
 	//ChengeBarrier();
 
 	// RenderTargetViewのハンドルを取得
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTextureRtvHeap->GetCPUDescriptorHandleForHeapStart();
 	// DepthStencilViewのハンドルを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
@@ -549,6 +550,7 @@ void DirectXCommon::PreRenderScene()
 	commandList->RSSetScissorRects(1, &scissorRect);
 }
 
+/*------スワップチェインの描画------*/
 void DirectXCommon::PreDraw()
 {
 	// TransitionBarrierの設定
@@ -1000,7 +1002,10 @@ void DirectXCommon::CreateRenderTexture()
 {
 	/*------RenderTextureのRTVを生成する------*/
 	renderTexture = CreateRenderTextureResoruce(device, WinApp::kClientWidth, WinApp::kClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, kRenderTargetClearValue);
-	device->CreateRenderTargetView(renderTexture.Get(), &rtvDesc, rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+	renderTextureRtvHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1, false);
+	D3D12_CPU_DESCRIPTOR_HANDLE handle = renderTextureRtvHeap->GetCPUDescriptorHandleForHeapStart();
+	device->CreateRenderTargetView(renderTexture.Get(), &rtvDesc, handle);
 
 	/*------RenderTextureのSRVを生成する------*/
 	// SRVの設定。FormatはResourceに合わせる

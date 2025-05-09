@@ -248,5 +248,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> renderTexture;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC renderTextureSrvDesc{};
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> renderTextureRtvHeap;
 };
 

@@ -117,6 +117,21 @@ public: // メンバ関数
 
 	// ディスクリプタヒープを作成する関数
 	void CreateCBVSRVUAVDescriptorHeap(ID3D12Device* device);
+
+	// RootSignatureの作成
+	void CreateRootSignature();
+
+	// PSOの作成
+	void CreatePSO();
+
+	// コピーの前に張る1のバリア
+	void TransitionRenderTextureToShaderResource();
+
+	// コピーの後に張る2のバリア
+	void TransitionRenderTextureToRenderTarget();
+
+	// RenderTextureを描画
+	void DrawRenderTexture();
 	
 	// 記録時間
 	std::chrono::steady_clock::time_point reference_;
@@ -250,5 +265,31 @@ private:
 	D3D12_SHADER_RESOURCE_VIEW_DESC renderTextureSrvDesc{};
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> renderTextureRtvHeap;
+
+	// ルートシグネチャ
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;
+
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
+
+	/// BlendStateの設定
+	D3D12_RENDER_TARGET_BLEND_DESC blendDesc{};
+
+	/// RasterizerState
+	D3D12_RASTERIZER_DESC rasterizerDesc{};
+
+	// shaderをコンパイルする
+	Microsoft::WRL::ComPtr<IDxcBlob> vertexShaderBlob;
+
+	/// PixelShader
+	// shaderをコンパイルする
+	Microsoft::WRL::ComPtr<IDxcBlob> pixelShaderBlob;
+
+	// DepthStencilStateの設定
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+
+	// グラフィックスパイプライン
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
+
+	D3D12_RESOURCE_STATES renderTextureState = D3D12_RESOURCE_STATE_RENDER_TARGET;
 };
 

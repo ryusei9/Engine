@@ -124,6 +124,13 @@ void SRFramework::PrePostEffect()
 	dxCommon.get()->PreRenderScene();
 }
 
+void SRFramework::DrawPostEffect()
+{
+	dxCommon.get()->TransitionRenderTextureToShaderResource();
+	dxCommon.get()->DrawRenderTexture();
+	dxCommon.get()->TransitionRenderTextureToRenderTarget();
+}
+
 void SRFramework::Run()
 {
 	// ゲームの初期化

@@ -45,7 +45,7 @@ void Object3dCommon::RootSignatureInitialize()
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
-	// Rootparameter作成。複数設定できるので配列。今回は結果1つだけなので長さ1の配列
+	// Rootparameter作成。複数設定できるので配列。
 	D3D12_ROOT_PARAMETER rootParameters[7] = {};
 
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};

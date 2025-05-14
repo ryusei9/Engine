@@ -45,6 +45,8 @@ void MyGame::Draw()
 
 	SRFramework::PreDraw();
 
+	SRFramework::DrawPostEffect();
+
 	imGuiManager->Draw();
 	
 	SRFramework::PostDraw();

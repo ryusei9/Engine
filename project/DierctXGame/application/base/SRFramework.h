@@ -80,6 +80,8 @@ public:
 	// PreDrawを行う前の処理
 	void PrePostEffect();
 
+	void DrawPostEffect();
+
 	// 実行
 	void Run();
 

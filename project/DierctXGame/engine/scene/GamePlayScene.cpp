@@ -35,7 +35,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	// ボールの初期化
 	ground = std::make_unique<Object3d>();
-	ground->Initialize("plane.obj");
+	ground->Initialize("terrain.obj");
 
 	groundTransform = {
 		{1.0f,1.0f,1.0f}, // スケール

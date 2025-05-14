@@ -49,8 +49,8 @@ void SRFramework::Initialize()
 	ModelManager::GetInstance()->LoadModel("axis.obj");
 
 
-	camera->SetRotate({ 0.0f,0.0f,0.0f });
-	camera->SetTranslate({ 0.0f,0.0f,-10.0f });
+	camera->SetRotate({ 0.1f,0.0f,0.0f });
+	camera->SetTranslate({ 0.0f,5.0f,-30.0f });
 	Object3dCommon::GetInstance()->SetDefaultCamera(camera.get());
 
 	imGuiManager->Initialize(winApp.get(), dxCommon.get());

@@ -1162,12 +1162,12 @@ void DirectXCommon::CreateRootSignature()
 
 	/// VertexShader
 	// shaderをコンパイルする
-	vertexShaderBlob = CompileShader(L"Resources/shaders/CopyImage.VS.hlsl", L"vs_6_0");
+	vertexShaderBlob = CompileShader(L"Resources/shaders/FullScreen.VS.hlsl", L"vs_6_0");
 	assert(vertexShaderBlob != nullptr);
 
 	/// PixelShader
 	// shaderをコンパイルする
-	pixelShaderBlob = CompileShader(L"Resources/shaders/CopyImage.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = CompileShader(L"Resources/shaders/SepiaTone.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定

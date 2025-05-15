@@ -1167,7 +1167,7 @@ void DirectXCommon::CreateRootSignature()
 
 	/// PixelShader
 	// shaderをコンパイルする
-	pixelShaderBlob = CompileShader(L"Resources/shaders/SepiaTone.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = CompileShader(L"Resources/shaders/Vignette.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定

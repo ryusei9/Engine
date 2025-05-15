@@ -380,6 +380,7 @@
     <FxCompile Include="resources\shaders\FullScreen.PS.hlsl" />
     <FxCompile Include="resources\shaders\Grayscale.PS.hlsl" />
     <FxCompile Include="resources\shaders\SepiaTone.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Vignette.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Object3D.hlsli">

@@ -381,6 +381,8 @@
     <FxCompile Include="resources\shaders\Grayscale.PS.hlsl" />
     <FxCompile Include="resources\shaders\SepiaTone.PS.hlsl" />
     <FxCompile Include="resources\shaders\Vignette.PS.hlsl" />
+    <FxCompile Include="resources\shaders\3x3BoxFilter.PS.hlsl" />
+    <FxCompile Include="resources\shaders\5x5BoxFilter.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Object3D.hlsli">

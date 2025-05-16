@@ -1089,7 +1089,7 @@ void DirectXCommon::CreateRootSignature()
 	//////////////////////////
 	// Samplerの設定
 	//////////////////////////
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
+	D3D12_STATIC_SAMPLER_DESC staticSamplers[2] = {};
 	// バイリニアフィルタ
 	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	// 0~1の範囲外をリピート
@@ -1104,6 +1104,22 @@ void DirectXCommon::CreateRootSignature()
 	staticSamplers[0].ShaderRegister = 0;
 	// PixelShaderで使う
 	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	// 1つ目のSamplerの設定を終わり、2つ目のSamplerの設定を始める
+	staticSamplers[1].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+	// 0~1の範囲外をリピート
+	staticSamplers[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSamplers[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSamplers[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	// 比較しない
+	staticSamplers[1].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+	// ありったけのMipmapを使う
+	staticSamplers[1].MaxLOD = D3D12_FLOAT32_MAX;
+	// レジスタ番号1を使う
+	staticSamplers[1].ShaderRegister = 1;
+	// PixelShaderで使う
+	staticSamplers[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
 	descriptionRootSignature.pStaticSamplers = staticSamplers;
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
 
@@ -1167,7 +1183,7 @@ void DirectXCommon::CreateRootSignature()
 
 	/// PixelShader
 	// shaderをコンパイルする
-	pixelShaderBlob = CompileShader(L"Resources/shaders/GaussianFilter.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = CompileShader(L"Resources/shaders/LuminanceBasedOutline.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定
@@ -1257,6 +1273,19 @@ void DirectXCommon::DrawRenderTexture()
 	// PSOを設定
 	commandList->SetPipelineState(graphicsPipelineState.Get());
 	commandList->SetGraphicsRootDescriptorTable(2, GetSRVGPUDescriptorHandle(0));
+
+	commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 	// 頂点3つ描画
 	commandList->DrawInstanced(3, 1, 0, 0);
+}
+
+void DirectXCommon::CreateDepthSRVDescriptorHeap()
+{
+	D3D12_SHADER_RESOURCE_VIEW_DESC depthTextureSrvDesc = {};
+
+	depthTextureSrvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	depthTextureSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	depthTextureSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	depthTextureSrvDesc.Texture2D.MipLevels = 1;
+	device->CreateShaderResourceView(depthStencilResource.Get(), &depthTextureSrvDesc, GetDSVCPUDescriptorHandle(0));
 }

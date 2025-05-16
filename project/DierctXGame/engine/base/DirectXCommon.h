@@ -132,6 +132,8 @@ public: // メンバ関数
 
 	// RenderTextureを描画
 	void DrawRenderTexture();
+
+	void CreateDepthSRVDescriptorHeap();
 	
 	// 記録時間
 	std::chrono::steady_clock::time_point reference_;
@@ -291,5 +293,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
 
 	D3D12_RESOURCE_STATES renderTextureState = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthResource = nullptr;
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> depth
 };
 

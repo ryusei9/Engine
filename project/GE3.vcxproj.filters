@@ -133,6 +133,7 @@
     <None Include="Particle.hlsli" />
     <None Include="resources\shaders\Object3D.hlsli" />
     <None Include="resources\shaders\Sprite.hlsli" />
+    <None Include="tools\level_editor.py" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

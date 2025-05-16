@@ -7,7 +7,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	input = Input::GetInstance();
 	// テクスチャ"モリ"を使用
 	sprite->Initialize(directXCommon, "resources/gradationLine.png");
-	
+
 	Audio::GetInstance()->Initialize();
 	soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
 	// 音声再生
@@ -21,8 +21,8 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	// テクスチャ"UV"を使用
 	particleManager->GetInstance()->CreateParticleGroup("uv", "resources/uvChecker.png");
 
-	particleEmitter1 = std::make_unique<ParticleEmitter>(particleManager,"mori");
-	
+	particleEmitter1 = std::make_unique<ParticleEmitter>(particleManager, "mori");
+
 
 	//particleEmitter2 = std::make_unique<ParticleEmitter>(particleManager, "uv");
 
@@ -125,6 +125,9 @@ void GamePlayScene::Draw()
 	ground->Draw();*/
 	// プレイヤーの描画
 	player_->Draw();
+
+	// 敵の描画
+	enemy_->Draw();
 }
 
 void GamePlayScene::Finalize()
@@ -137,7 +140,7 @@ void GamePlayScene::DrawImGui()
 {
 	ImGui::Begin("GamePlayScene");
 	// パーティクルエミッター1の位置
-	ImGui::SliderFloat3("ParticleEmitter1 Position",&particlePosition1.x,-10.0f,50.0f);
+	ImGui::SliderFloat3("ParticleEmitter1 Position", &particlePosition1.x, -10.0f, 50.0f);
 	/*ImGui::SliderFloat3("ParticleEmitter2 Position", &particlePosition2.x, -10.0f, 50.0f);*/
 	// ボールの座標
 	//ImGui::SliderFloat3("Ball Position", &ballTransform.translate.x, -10.0f, 50.0f);

@@ -34,7 +34,7 @@ public:
 
 	//void SetBullet(PlayerBullet* bullet) { bullet_ = bullet; } // 武器の設定
 
-	void SetAttack(bool attack) { isAttack_ = attack; } // 攻撃フラグの設定
+	//void SetAttack(bool attack) { isAttack_ = attack; } // 攻撃フラグの設定
 
 private:
 	/*------メンバ変数------*/

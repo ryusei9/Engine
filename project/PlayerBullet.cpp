@@ -33,15 +33,13 @@ void PlayerBullet::Update()
 {
 	// プレイヤー弾の移動
 	Move();
-	
+
 	// プレイヤー弾の生存フレームを減少
 	// 生存フレームの更新
 	if (lifeFrame_ > 0) {
 		lifeFrame_--;
-	}
-	else {
+	} else {
 		isAlive_ = false;
-		player_->SetAttack(false);
 	}
 	objectBullet_->Update();
 	objectBullet_->SetTranslate(worldTransform_.translate);

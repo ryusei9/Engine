@@ -16,10 +16,12 @@ void Enemy::Initialize()
 	BaseCharacter::Initialize();
 	// 敵のコライダーの設定
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kEnemy));
+
+	worldTransform_.Initialize();
 	// 敵のワールド変換を初期化
-	worldTransform_.scale = { 0.5f,0.5f,0.5f };
-	worldTransform_.rotate = { 0.0f,0.0f,0.0f };
-	worldTransform_.translate = { 3.0f,0.0f,0.0f };
+	worldTransform_.scale_ = { 0.5f,0.5f,0.5f };
+	worldTransform_.rotate_ = { 0.0f,0.0f,0.0f };
+	worldTransform_.translate_ = { 3.0f,0.0f,0.0f };
 	// 敵のカメラを取得
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
 	object3d_ = std::make_unique<Object3d>();
@@ -43,11 +45,12 @@ void Enemy::Update()
 {
 	// 敵の更新
 	BaseCharacter::Update();
+	worldTransform_.Update();
 	// 敵のワールド変換を更新
 	object3d_->SetCamera(camera_);
-	object3d_->SetScale(worldTransform_.scale);
-	object3d_->SetRotate(worldTransform_.rotate);
-	object3d_->SetTranslate(worldTransform_.translate);
+	object3d_->SetScale(worldTransform_.scale_);
+	object3d_->SetRotate(worldTransform_.rotate_);
+	object3d_->SetTranslate(worldTransform_.translate_);
 	object3d_->Update();
 	// 敵の移動
 	Move();
@@ -104,7 +107,7 @@ void Enemy::PlayDeathParticleOnce()
 {
 	if (!hasPlayedDeathParticle_) {
 		if (enemyDeathEmitter_) {
-			enemyDeathEmitter_->SetPosition(worldTransform_.translate); // 位置をセット
+			enemyDeathEmitter_->SetPosition(worldTransform_.translate_); // 位置をセット
 			enemyDeathEmitter_->SetParticleRate(8); // 必要に応じて発生数を調整
 			// ここでパーティクルを即時発生させるメソッドがあれば呼ぶ
 			enemyDeathEmitter_->Update();
@@ -116,7 +119,7 @@ void Enemy::PlayDeathParticleOnce()
 Vector3 Enemy::GetCenterPosition() const
 {
 	const Vector3 offset = { 0.0f, 0.0f, 0.0f }; // エネミーの中心を考慮
-	Vector3 worldPosition = worldTransform_.translate + offset;
+	Vector3 worldPosition = worldTransform_.translate_ + offset;
 	return worldPosition;
 }
 

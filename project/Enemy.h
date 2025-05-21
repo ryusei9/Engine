@@ -38,7 +38,7 @@ private:
 	// 敵のシリアルナンバー
 	uint32_t serialNumber_ = 0;
 	// 敵のワールド変換
-	Transform worldTransform_;
+	//Transform worldTransform_;
 	// 敵のカメラ
 	Camera* camera_ = nullptr;
 

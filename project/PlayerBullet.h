@@ -1,6 +1,6 @@
 #pragma once
 #include "Collider.h"
-#include <Transform.h>
+#include <WorldTransform.h>
 #include <memory>
 #include <Object3d.h>
 
@@ -13,7 +13,7 @@ public:
 	PlayerBullet();
 
 	// 初期化
-	void Initialize();
+	void Initialize(const Vector3& position);
 
 	// 更新
 	void Update();
@@ -35,7 +35,7 @@ public:
 	// プレイヤーの設定
 	void SetPlayer(Player* player) { player_ = player; }
 
-	void SetTranslate(const Vector3& translate) { worldTransform_.translate = translate; } // 座標の設定
+	void SetTranslate(const Vector3& translate) { worldTransform_.translate_ = translate; } // 座標の設定
 
 	bool IsAlive() const { return isAlive_; } // 生存フラグの取得
 
@@ -44,7 +44,7 @@ public:
 
 private:
 	/*------メンバ変数------*/
-	Transform worldTransform_;
+	WorldTransform worldTransform_;
 
 	// プレイヤー
 	Player* player_ = nullptr;

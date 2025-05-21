@@ -16,10 +16,12 @@ void Player::Initialize()
 
 	// プレイヤーのコライダーの設定
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayer));
+
+	worldTransform_.Initialize();
 	// プレイヤーのワールド変換を初期化
-	worldTransform_.scale = { 1.0f,1.0f,1.0f };
-	worldTransform_.rotate = { 0.0f,0.0f,0.0f };
-	worldTransform_.translate = { 0.0f,0.0f,0.0f };
+	worldTransform_.scale_ = { 1.0f,1.0f,1.0f };
+	worldTransform_.rotate_ = { 0.0f,0.0f,0.0f };
+	worldTransform_.translate_ = { 0.0f,0.0f,0.0f };
 
 	// プレイヤーのカメラを取得
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
@@ -57,11 +59,12 @@ void Player::Update()
 	// プレイヤーの移動
 	Move();
 	Attack();
+	worldTransform_.Update();
 	// プレイヤーのワールド変換を更新
 	object3d_->SetCamera(camera_);
-	object3d_->SetTranslate(worldTransform_.translate);
-	object3d_->SetRotate(worldTransform_.rotate);
-	object3d_->SetScale(worldTransform_.scale);
+	object3d_->SetTranslate(worldTransform_.translate_);
+	object3d_->SetRotate(worldTransform_.rotate_);
+	object3d_->SetScale(worldTransform_.scale_);
 	object3d_->Update();
 }
 
@@ -80,16 +83,16 @@ void Player::Move()
 {
 	// プレイヤーの移動
 	if (input_->PushKey(DIK_W)) {
-		worldTransform_.translate.y += moveSpeed_;
+		worldTransform_.translate_.y += moveSpeed_;
 	}
 	if (input_->PushKey(DIK_S)) {
-		worldTransform_.translate.y -= moveSpeed_;
+		worldTransform_.translate_.y -= moveSpeed_;
 	}
 	if (input_->PushKey(DIK_A)) {
-		worldTransform_.translate.x -= moveSpeed_;
+		worldTransform_.translate_.x -= moveSpeed_;
 	}
 	if (input_->PushKey(DIK_D)) {
-		worldTransform_.translate.x += moveSpeed_;
+		worldTransform_.translate_.x += moveSpeed_;
 	}
 }
 
@@ -104,11 +107,11 @@ void Player::Attack()
 		auto bullet = std::make_unique<PlayerBullet>();
 
 		// 弾の初期化
-		bullet->Initialize();
+		bullet->Initialize(worldTransform_.translate_);
 
 		// 弾の位置をプレイヤーの位置に設定
-		bullet->SetTranslate(worldTransform_.translate);
-
+		//bullet->SetTranslate(worldTransform_.translate_);
+		bullet->Update(); // ←ここで1回Update
 		// 弾をリストに追加
 		bullets_.push_back(std::move(bullet));
 		isShot_ = false;
@@ -126,6 +129,6 @@ void Player::OnCollision(Collider* other)
 Vector3 Player::GetCenterPosition() const
 {
 	const Vector3 offset = { 0.0f, 0.0f, 0.0f }; // プレイヤーの中心を考慮
-	Vector3 worldPosition = worldTransform_.translate + offset;
+	Vector3 worldPosition = worldTransform_.translate_ + offset;
 	return worldPosition;
 }

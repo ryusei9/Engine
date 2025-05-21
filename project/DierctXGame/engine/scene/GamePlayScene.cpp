@@ -32,23 +32,19 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	ball = std::make_unique<Object3d>();
 	ball->Initialize("monsterBall.obj");
 
-	ballTransform = {
-		{1.0f,1.0f,1.0f}, // スケール
-		{0.0f,0.0f,0.0f}, // 回転
-		{0.0f,0.0f,5.0f}  // 座標
-	};
-	ball->SetTransform(ballTransform);
+	ballTransform.Initialize();
+
+	ballTransform.translate_ = { 0.0f,0.0f,5.0f };  // 座標
+	
+	ball->SetWorldTransform(ballTransform);
 
 	// ボールの初期化
 	ground = std::make_unique<Object3d>();
 	ground->Initialize("plane.obj");
 
-	groundTransform = {
-		{1.0f,1.0f,1.0f}, // スケール
-		{0.0f,0.0f,0.0f}, // 回転
-		{0.0f,0.0f,5.0f}  // 座標
-	};
-	ground->SetTransform(groundTransform);
+	groundTransform.Initialize();
+	groundTransform.translate_ = { 0.0f,0.0f,5.0f }; // 座標
+	ground->SetWorldTransform(groundTransform);
 
 	// プレイヤーの初期化
 	player_ = std::make_unique<Player>();

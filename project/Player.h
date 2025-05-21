@@ -48,7 +48,7 @@ private:
 	// プレイヤーのシリアルナンバー
 	uint32_t serialNumber_ = 0;
 	// プレイヤーのワールド変換
-	Transform worldTransform_;
+	//Transform worldTransform_;
 	// プレイヤーのカメラ
 	Camera* camera_ = nullptr;
 

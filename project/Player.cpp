@@ -16,6 +16,8 @@ void Player::Initialize()
 
 	// プレイヤーのコライダーの設定
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayer));
+
+
 	// プレイヤーのワールド変換を初期化
 	worldTransform_.scale = { 1.0f,1.0f,1.0f };
 	worldTransform_.rotate = { 0.0f,0.0f,0.0f };

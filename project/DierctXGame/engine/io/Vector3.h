@@ -1,4 +1,5 @@
 #pragma once
+#include <corecrt_math.h>
 
 struct Vector3 {
 	float x;
@@ -75,4 +76,9 @@ struct Vector3 {
 		return { -x, -y, -z };
 	}
 
+	// ベクトルの長さを計算する関数
+	static float Length(const Vector3& vec) {
+		return sqrtf(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+	}
 };
+

@@ -5,8 +5,9 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
 	sprite = std::make_unique<Sprite>();
 	sprite->Initialize(directXCommon, "resources/mori_Red.png");
-	input = std::make_unique<Input>();
-	input->Initialize(winApp);
+
+	
+	input->Input::GetInstance();
 	Audio::GetInstance()->Initialize();
 	soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
 	// 音声再生

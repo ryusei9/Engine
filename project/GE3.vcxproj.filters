@@ -56,6 +56,11 @@
     <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="ParticleManager.cpp" />
     <ClCompile Include="WorldTransform.cpp" />
+    <ClCompile Include="Collider.cpp" />
+    <ClCompile Include="CollisionManager.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="PlayerBullet.cpp" />
+    <ClCompile Include="Enemy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseCharacter.h" />
@@ -119,11 +124,22 @@
     <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="ParticleManager.h" />
     <ClInclude Include="WorldTransform.h" />
+    <ClInclude Include="Collider.h" />
+    <ClInclude Include="CollisionManager.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="CollisionTypeIdDef.h" />
+    <ClInclude Include="PlayerBullet.h" />
+    <ClInclude Include="Enemy.h" />
+    <ClInclude Include="Lerp.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Particle.hlsli" />
     <None Include="resources\shaders\Object3D.hlsli" />
     <None Include="resources\shaders\Sprite.hlsli" />
+    <None Include="tools\level_editor.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="externals\imgui\LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

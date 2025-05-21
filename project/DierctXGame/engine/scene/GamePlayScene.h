@@ -10,6 +10,11 @@
 #include <ParticleManager.h>
 #include <ParticleEmitter.h>
 #include <Object3d.h>
+#include <Player.h>
+#include <PlayerBullet.h>
+#include <Enemy.h>
+#include <CollisionManager.h>
+
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 
@@ -31,6 +36,10 @@ public:
 	void DrawImGui() override;
 
 private:
+
+	// 衝突判定と応答
+	void CheckAllCollisions();
+
 	// スプライトコモン
 	SpriteCommon* spriteCommon = nullptr;
 	// ダイレクトXコモン
@@ -38,11 +47,14 @@ private:
 	// WinApp
 	WinApp* winApp = nullptr;
 
+	std::unique_ptr<CollisionManager> collisionManager_;
+
+
 
 	std::unique_ptr<Sprite> sprite = nullptr;
 
 	// 入力の初期化
-	std::unique_ptr<Input> input = nullptr;
+	Input* input = nullptr;
 
 	Vector2 spritePosition = { 100.0f,100.0f };
 
@@ -64,5 +76,14 @@ private:
 	// ボールの座標
 	Transform ballTransform;
 	Transform groundTransform;
+
+	// プレイヤー
+	std::unique_ptr<Player> player_ = nullptr;
+
+	// プレイヤーの弾
+	std::list<std::unique_ptr<PlayerBullet>>* playerBullets_;
+
+	// 敵
+	std::unique_ptr<Enemy> enemy_ = nullptr;
 };
 

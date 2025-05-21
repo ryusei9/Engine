@@ -11,6 +11,7 @@
 #include <MakeRotateXYZMatrix.h>
 #include <iostream>
 #include <numbers>
+#include <Lerp.h>
 
 using namespace Logger;
 
@@ -42,9 +43,9 @@ void ParticleManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager
 	CreatePSO();
 
 	// 頂点データの初期化
-	//CreateVertexData();
+	CreateVertexData();
 	//CreateRingVertexData();
-	CreateCylinderVertexData();
+	//CreateCylinderVertexData();
 
 	// マテリアルデータの初期化
 	CreateMaterialData();
@@ -75,7 +76,7 @@ void ParticleManager::Update()
 	uvTransformMatrix = Multiply::Multiply(uvTransformMatrix, MakeTranslateMatrix::MakeTranslateMatrix(uvTransform.translate));
 	materialData_->uvTransform = uvTransformMatrix;
 
-	uvTransform.translate.x += 0.0001f;
+	//uvTransform.translate.x += 0.0001f;
 
 	Matrix4x4 billboardMatrix = Multiply::Multiply(backToFrontMatrix, cameraMatrix);
 	billboardMatrix.m[3][0] = 0.0f;
@@ -141,6 +142,11 @@ void ParticleManager::Update()
 							(*particleIterator).velocity.z += zone.strength.z;
 						}
 					}
+				}
+
+				// 爆発パーティクルだけ色・スケール補間
+				if ((*particleIterator).isExplosion) {
+					UpdateExplosionParticle(*particleIterator);
 				}
 
 				// 生存パーティクル数をカウント
@@ -285,7 +291,59 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
 	for (uint32_t index = 0; index < count; ++index)
 	{
 		// パーティクルの生成と追加
-		particleGroup.particles.push_back(MakeNewCylinderParticle(randomEngine, position));
+		particleGroup.particles.push_back(MakeNewParticle(randomEngine, position));
+	}
+}
+
+void ParticleManager::EmitExplosion(const std::string& name, const Vector3& position, uint32_t count)
+{
+	// グループが存在するかチェック
+	assert(particleGroups.find(name) != particleGroups.end() && "Particle Group is not found");
+
+	ParticleGroup& group = particleGroups[name];
+
+	// 1. 中心の大きなパーティクル
+	{
+		Particle particle;
+		particle.transform.scale = { 0.05f, 0.05f, 0.05f };
+		particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
+		particle.transform.translate = position;
+		particle.color = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白
+		particle.lifeTime = 1.0f;
+		particle.currentTime = 0.0f;
+		particle.velocity = { 0.0f, 0.0f, 0.0f };
+		// 爆発中心用のフラグを追加したい場合はここでセット
+		particle.isExplosion = true; // 中心のパーティクルにフラグをセット
+		particle.isSubExplosion = false;
+		group.particles.push_back(particle);
+	}
+
+	// 2. サブパーティクル
+	std::uniform_real_distribution<float> distAngle(0.0f, 2.0f * float(std::numbers::pi));
+	std::uniform_real_distribution<float> distRadius(0.5f, 1.5f); // 中心からの距離
+	std::uniform_real_distribution<float> distScale(0.15f, 0.35f); // サブパーティクルの最大スケール
+	std::uniform_real_distribution<float> distLife(1.2f, 1.8f);
+	std::uniform_real_distribution<float> distStartTime(0.0f, 0.5f); // 0～0.5秒の範囲でバラけさせる
+
+	for (uint32_t i = 0; i < count; ++i) {
+		float angle = distAngle(randomEngine);
+		float radius = distRadius(randomEngine);
+		float x = std::cos(angle) * radius;
+		float y = std::sin(angle) * radius;
+		float z = (distAngle(randomEngine) - static_cast<float>(std::numbers::pi)) * 0.2f;
+
+		Particle particle;
+		float scale = distScale(randomEngine);
+		particle.transform.scale = { scale, scale, scale };
+		particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
+		particle.transform.translate = position + Vector3{ x, y, z };
+		particle.color = { 1.0f, 0.8f, 0.2f, 1.0f };
+		particle.lifeTime = distLife(randomEngine);
+		particle.currentTime = distStartTime(randomEngine); // ここをランダムに
+		particle.velocity = { 0, 0, 0 };
+		particle.isExplosion = true;
+		particle.isSubExplosion = true; // サブ
+		group.particles.push_back(particle);
 	}
 }
 
@@ -376,6 +434,39 @@ ParticleManager::Particle ParticleManager::MakeNewCylinderParticle(std::mt19937&
 
 
 	return particle;
+}
+
+void ParticleManager::UpdateExplosionParticle(Particle& particle)
+{
+	// 進行度
+	float t = particle.currentTime / particle.lifeTime;
+
+	// 色補間
+	if (t < 0.3f) {
+		float f = t / 0.3f;
+		Vector4 colorA = { 1.0f, 1.0f, 1.0f, 1.0f };
+		Vector4 colorB = { 1.0f, 0.6f, 0.2f, 1.0f };
+		particle.color = Lerp(colorA, colorB, f);
+	} else if (t < 0.7f) {
+		float f = (t - 0.3f) / 0.4f;
+		Vector4 colorA = { 1.0f, 0.6f, 0.2f, 1.0f };
+		Vector4 colorB = { 1.0f, 1.0f, 0.2f, 1.0f };
+		particle.color = Lerp(colorA, colorB, f);
+	} else if (t < 0.9f) {
+		float f = (t - 0.7f) / 0.2f;
+		Vector4 colorA = { 1.0f, 1.0f, 0.2f, 1.0f };
+		Vector4 colorB = { 0.5f, 0.5f, 0.5f, 1.0f };
+		particle.color = Lerp(colorA, colorB, f);
+	} else {
+		float f = (t - 0.9f) / 0.1f;
+		Vector4 colorA = { 0.5f, 0.5f, 0.5f, 1.0f };
+		Vector4 colorB = { 0.5f, 0.5f, 0.5f, 0.0f };
+		particle.color = Lerp(colorA, colorB, f);
+	}
+	// スケール補間
+	float maxScale = particle.isSubExplosion ? 0.18f : 1.25f; // サブは小さく
+	float scale = Lerp(particle.transform.scale.x, maxScale, t);
+	particle.transform.scale = { scale, scale, scale };
 }
 
 void ParticleManager::CreateRingVertexData()

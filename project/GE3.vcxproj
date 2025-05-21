@@ -108,12 +108,15 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BaseCharacter.cpp" />
+    <ClCompile Include="Collider.cpp" />
+    <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="DierctXGame\engine\scene\BaseScene.cpp" />
     <ClCompile Include="DierctXGame\engine\audio\Audio.cpp" />
     <ClCompile Include="DierctXGame\engine\base\Camera.cpp" />
     <ClCompile Include="DierctXGame\engine\base\D3DresourceLeakChecker.cpp" />
     <ClCompile Include="DierctXGame\engine\base\DirectXCommon.cpp" />
     <ClCompile Include="DierctXGame\engine\scene\SceneManager.cpp" />
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
     <ClCompile Include="externals\imgui\imgui_draw.cpp" />
@@ -154,9 +157,14 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="ParticleManager.cpp" />
     <ClCompile Include="WorldTransform.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="PlayerBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseCharacter.h" />
+    <ClInclude Include="Collider.h" />
+    <ClInclude Include="CollisionManager.h" />
+    <ClInclude Include="CollisionTypeIdDef.h" />
     <ClInclude Include="DierctXGame\engine\io\MakeScaleMatrix.h" />
     <ClInclude Include="DierctXGame\engine\io\MakeTranslateMatrix.h" />
     <ClInclude Include="DierctXGame\engine\scene\BaseScene.h" />
@@ -166,6 +174,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\io\DirectionalLight.h" />
     <ClInclude Include="DierctXGame\engine\base\DirectXCommon.h" />
     <ClInclude Include="DierctXGame\engine\scene\SceneManager.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
@@ -213,10 +222,13 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\base\ImGuiManager.h" />
     <ClInclude Include="DierctXGame\application\base\MyGame.h" />
     <ClInclude Include="DierctXGame\engine\scene\TitleScene.h" />
+    <ClInclude Include="Lerp.h" />
     <ClInclude Include="MakeRotateXYZMatrix.h" />
     <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="ParticleManager.h" />
     <ClInclude Include="WorldTransform.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="PlayerBullet.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
@@ -236,6 +248,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </None>
     <None Include="resources\shaders\Object3D.hlsli" />
     <None Include="resources\shaders\Sprite.hlsli" />
+    <None Include="tools\level_editor.py" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Particle.PS.hlsl">

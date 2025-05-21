@@ -479,7 +479,7 @@ void DirectXCommon::PreDraw()
 {
 	// TransitionBarrierの設定
 	ChengeBarrier();
-	
+
 
 	// 描画先のRTVとDSVを設定する
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = GetDSVCPUDescriptorHandle(0);
@@ -495,7 +495,7 @@ void DirectXCommon::PreDraw()
 	// 指定した深度で画面全体をクリアする
 	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-	
+
 	// 描画用のDescriptorの設定
 	/*Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeaps[] = { srvDescriptorHeap.Get()};
 	commandList->SetDescriptorHeaps(1, descriptorHeaps->GetAddressOf());*/
@@ -834,37 +834,37 @@ void DirectXCommon::SyncCPUWithGPU()
 
 
 
-		//GPUにコマンドリストの実行行わせる
-		ID3D12CommandList * commandLists[] = { commandList.Get() };
+	//GPUにコマンドリストの実行行わせる
+	ID3D12CommandList* commandLists[] = { commandList.Get() };
 	commandQueue->ExecuteCommandLists(1, commandLists);
 
 
 
-		fenceValue++;
+	fenceValue++;
 
 
 
-		//GPUがここまでたどり着いた時に、Fenceの値を指定した値に代入するようにSignalをおくる
-		commandQueue->Signal(fence.Get(), fenceValue);
+	//GPUがここまでたどり着いた時に、Fenceの値を指定した値に代入するようにSignalをおくる
+	commandQueue->Signal(fence.Get(), fenceValue);
 
 
 
-		if (fence->GetCompletedValue() < fenceValue) {
-			//
-			fence->SetEventOnCompletion(fenceValue, fenceEvent);
-			//イベント待つ
-			WaitForSingleObject(fenceEvent, INFINITE);
-		}
+	if (fence->GetCompletedValue() < fenceValue) {
+		//
+		fence->SetEventOnCompletion(fenceValue, fenceEvent);
+		//イベント待つ
+		WaitForSingleObject(fenceEvent, INFINITE);
+	}
 
 	//FPS固定更新
 	//UpdateFixFPS();
 
 		//次のフレーム用のコマンドリストを準備
-		hr = commandAllocator->Reset();
+	hr = commandAllocator->Reset();
 	assert(SUCCEEDED(hr));
 
 
-		hr = commandList->Reset(commandAllocator.Get(), nullptr);
+	hr = commandList->Reset(commandAllocator.Get(), nullptr);
 	assert(SUCCEEDED(hr));
 
 }

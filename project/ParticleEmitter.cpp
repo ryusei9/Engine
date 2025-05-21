@@ -10,9 +10,13 @@ ParticleEmitter::ParticleEmitter(ParticleManager* manager, const std::string& gr
 void ParticleEmitter::Update()
 {
 	interval_ += deltaTime_;
-	int particleCount = static_cast<int>(particleRate * interval_);
-	if (interval_ >= 1.0f) {
-		manager_->Emit(groupName_, position_, particleRate);
-		interval_ -= static_cast<float>(particleCount) / particleRate;
+	//int particleCount = static_cast<int>(particleRate * interval_);
+	if (particleRate > 0.0f) {
+		if (isExplosion_) {
+			manager_->EmitExplosion(groupName_, position_, particleRate);
+		} else {
+			manager_->Emit(groupName_, position_, particleRate);
+		}
+		interval_ -= static_cast<float>(particleRate) / particleRate;
 	}
 }

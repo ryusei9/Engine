@@ -19,6 +19,10 @@ public:
 	void Attack() override;
 	// 衝突判定
 	void OnCollision(Collider* other) override;
+
+	void PlayDeathParticleOnce(); // 追加: 一度だけパーティクルを出す関数
+
+
 	// 中心座標を取得する純粋仮想関数
 	Vector3 GetCenterPosition() const override;
 
@@ -48,5 +52,7 @@ private:
 	ParticleManager* particleManager = nullptr;
 
 	std::unique_ptr<ParticleEmitter> enemyDeathEmitter_; // 敵死亡時のパーティクルエミッター
+
+	bool hasPlayedDeathParticle_ = false;
 };
 

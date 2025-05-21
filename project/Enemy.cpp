@@ -24,17 +24,19 @@ void Enemy::Initialize()
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
 	object3d_ = std::make_unique<Object3d>();
 	// 敵の3Dオブジェクトを初期化
-	object3d_->Initialize("monsterBall.obj");
+	object3d_->Initialize("Boss.obj");
 
 	// パーティクルマネージャの初期化
 	particleManager = ParticleManager::GetInstance();
 
-	// テクスチャ"モリ"を使用
-	particleManager->GetInstance()->CreateParticleGroup("mori", "resources/circle2.png");
+	// テクスチャ"circle2"を使用
+	particleManager->GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
 
 	// 敵死亡時のパーティクルエミッターを初期化
-	enemyDeathEmitter_ = std::make_unique<ParticleEmitter>(particleManager, "mori");
+	enemyDeathEmitter_ = std::make_unique<ParticleEmitter>(particleManager, "explosion");
 	enemyDeathEmitter_->SetUseRingParticle(false); // 必要に
+	enemyDeathEmitter_->SetExplosion(true); // 爆発エミッターに設定
+	SetRadius(0.4f); // コライダーの半径を設定
 }
 
 void Enemy::Update()
@@ -66,11 +68,8 @@ void Enemy::Update()
 			isAlive_ = true;
 			hp_ = 1;
 			respawnTime_ = 3.0f; // リスポーンタイムを3秒に設定
+			hasPlayedDeathParticle_ = false;
 		}
-		// パーティクルグループ"モリ"の更新
-		enemyDeathEmitter_->SetPosition(worldTransform_.translate);
-		enemyDeathEmitter_->SetParticleRate(8);
-		enemyDeathEmitter_->Update();
 	}
 }
 
@@ -97,6 +96,20 @@ void Enemy::OnCollision(Collider* other)
 	{
 		// プレイヤー弾と衝突した場合
 		hp_ -= 1;
+		PlayDeathParticleOnce(); // ここで一度だけパーティクルを出す
+	}
+}
+
+void Enemy::PlayDeathParticleOnce()
+{
+	if (!hasPlayedDeathParticle_) {
+		if (enemyDeathEmitter_) {
+			enemyDeathEmitter_->SetPosition(worldTransform_.translate); // 位置をセット
+			enemyDeathEmitter_->SetParticleRate(8); // 必要に応じて発生数を調整
+			// ここでパーティクルを即時発生させるメソッドがあれば呼ぶ
+			enemyDeathEmitter_->Update();
+		}
+		hasPlayedDeathParticle_ = true;
 	}
 }
 

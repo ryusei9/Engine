@@ -19,14 +19,15 @@ void PlayerBullet::Initialize()
 	lifeFrame_ = 180;
 
 	// 座標の設定
-	worldTransform_.scale = { 0.1f, 0.1f, 0.1f };
+	worldTransform_.scale = { 1.0f, 1.0f, 1.0f };
 	worldTransform_.rotate = { 0.0f, 0.0f, 0.0f };
 	worldTransform_.translate = { 0.0f, 0.0f, 0.0f };
 
 	// オブジェクトの生成・初期化
 	objectBullet_ = std::make_unique<Object3d>();
-	objectBullet_->Initialize("monsterBall.obj");
+	objectBullet_->Initialize("player_bullet.obj");
 	objectBullet_->SetScale(worldTransform_.scale);
+	SetRadius(0.05f);
 }
 
 void PlayerBullet::Update()

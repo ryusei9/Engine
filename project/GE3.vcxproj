@@ -221,6 +221,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\base\ImGuiManager.h" />
     <ClInclude Include="DierctXGame\application\base\MyGame.h" />
     <ClInclude Include="DierctXGame\engine\scene\TitleScene.h" />
+    <ClInclude Include="Lerp.h" />
     <ClInclude Include="MakeRotateXYZMatrix.h" />
     <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="ParticleManager.h" />

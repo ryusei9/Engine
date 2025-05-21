@@ -20,6 +20,8 @@ public:
 		Vector4 color;
 		float lifeTime;
 		float currentTime;
+		bool isExplosion = false;	// 爆発パーティクルかどうか
+		bool isSubExplosion = false; // 追加: サブパーティクル用
 	};
 
 	struct ParticleForGPU {
@@ -97,6 +99,9 @@ public:
 	// パーティクルの発生場所を設定
 	void Emit(const std::string name, const Vector3& position, uint32_t count);
 
+	// 爆発パーティクルの発生場所を設定
+	void EmitExplosion(const std::string& name, const Vector3& position, uint32_t count);
+
 	// パーティクルの生成
 	Particle MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate);
 
@@ -108,6 +113,8 @@ public:
 
 	// 円柱パーティクルの生成
 	Particle MakeNewCylinderParticle(std::mt19937& randomEngine, const Vector3& translate);
+
+	void UpdateExplosionParticle(Particle& particle);
 
 	/*------頂点データの作成------*/
 	void CreateVertexData();

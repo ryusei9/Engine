@@ -28,6 +28,9 @@ public:
 
 	// リングパーティクルを使うか
 	void SetUseRingParticle(bool use) { useRingParticle_ = use; }
+
+	void SetExplosion(bool isExplosion) { isExplosion_ = isExplosion; }
+	bool IsExplosion() const { return isExplosion_; }
 private:
 	/*------メンバ変数------*/
 	// パーティクルマネージャ
@@ -50,5 +53,7 @@ private:
 
 	// リングパーティクルを使うか
 	bool useRingParticle_ = false;
+
+	bool isExplosion_ = false; // 追加: 爆発用かどうか
 };
 

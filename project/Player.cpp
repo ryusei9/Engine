@@ -27,7 +27,7 @@ void Player::Initialize()
 	object3d_ = std::make_unique<Object3d>();
 
 	// プレイヤーの3Dオブジェクトを初期化
-	object3d_->Initialize("monsterBall.obj");
+	object3d_->Initialize("player.obj");
 
 
 }

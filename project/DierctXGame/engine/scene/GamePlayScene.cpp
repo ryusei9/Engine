@@ -37,7 +37,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 		{0.0f,0.0f,0.0f}, // 回転
 		{0.0f,0.0f,5.0f}  // 座標
 	};
-	ball->SetTransform(ballTransform);
+	ball->SetWorldTransform(ballTransform);
 
 	// ボールの初期化
 	ground = std::make_unique<Object3d>();

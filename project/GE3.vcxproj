@@ -154,6 +154,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DepthMaterial.h" />
     <ClInclude Include="DierctXGame\engine\io\MakeScaleMatrix.h" />
     <ClInclude Include="DierctXGame\engine\io\MakeTranslateMatrix.h" />
     <ClInclude Include="DierctXGame\engine\scene\BaseScene.h" />

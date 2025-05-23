@@ -59,7 +59,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         }
     }
     // 変化の長さをウェイトとして合成
-    float32_t weight = length(differrence * 6.0f);
+    float32_t weight = length(differrence);
     weight = saturate(weight);
      
     PixelShaderOutput output;

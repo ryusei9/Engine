@@ -3,6 +3,7 @@
 #include <cassert>
 #include "Logger.h"
 #include <SrvManager.h>
+#include "DirectXCommon.h"
 
 std::shared_ptr<Object3dCommon> Object3dCommon::instance = nullptr;
 

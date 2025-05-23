@@ -9,6 +9,8 @@
 #include "string"
 #include "chrono"
 #include <Vector4.h>
+#include <DepthMaterial.h>
+#include <ResourceManager.h>
 // DirectX基盤
 class DirectXCommon
 {
@@ -134,6 +136,13 @@ public: // メンバ関数
 	void DrawRenderTexture();
 
 	void CreateDepthSRVDescriptorHeap();
+
+	// depth用のリソースの作成
+	void CreateDepthResource(Camera* camera);
+
+	void TransitionDepthBufferToSRV();
+
+	void TransitionDepthBufferToWrite();
 	
 	// 記録時間
 	std::chrono::steady_clock::time_point reference_;
@@ -260,7 +269,7 @@ private:
 	UINT backBufferCount = 2;
 
 	// 今回は赤を設定する
-	const Vector4 kRenderTargetClearValue = { 1.0f,0.0f,0.0f,1.0f };
+	const Vector4 kRenderTargetClearValue = { 0.1f,0.25f,0.5f,1.0f };
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> renderTexture;
 
@@ -296,6 +305,9 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthResource = nullptr;
 
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> depth
+	DepthMaterial* depthData = nullptr;
+
+	// クラスメンバに追加
+	D3D12_RESOURCE_STATES depthBufferState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 };
 

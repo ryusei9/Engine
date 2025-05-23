@@ -1,15 +1,15 @@
 #include "FullScreen.hlsli"
 
-struct Material
+struct DepthMaterial
 {
-    float32_t4 projectionInverse;
+    float32_t4x4 projectionInverse;
 };
 
 Texture2D<float32_t4> gTexture : register(t0);
 SamplerState gSampler : register(s0);
 Texture2D<float32_t> gDepthTexture : register(t1);
 SamplerState gSamplerPoint : register(s1);
-ConstantBuffer<Material> gMaterial : register(b0);
+ConstantBuffer<DepthMaterial> gMaterial : register(b0);
 
 struct PixelShaderOutput
 {
@@ -69,7 +69,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         }
     }
     // 変化の長さをウェイトとして合成
-    float32_t weight = length(difference * 6.0f);
+    float32_t weight = length(difference);
     weight = saturate(weight);
      
     PixelShaderOutput output;

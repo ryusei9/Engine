@@ -9,6 +9,7 @@
 #include "externals/imgui/imgui_impl_win32.h"
 #include "externals/DirectXTex/d3dx12.h"
 #include <thread>
+#include <Inverse.h>
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -38,7 +39,6 @@ void DirectXCommon::Initialize(WinApp* winApp)
 	DescriptorHeap();
 	
 	
-
 	// レンダーターゲットビュー
 	RenderTargetView();
 
@@ -53,6 +53,10 @@ void DirectXCommon::Initialize(WinApp* winApp)
 	ScissorRectInitialize();
 	// DXCコンパイラの初期化
 	CreateDXCCompiler();
+
+	CreateDepthSRVDescriptorHeap();
+
+	//CreateDepthResource();
 	// ImGuiの初期化
 	//ImGuiInitialize();
 	CreatePSO();
@@ -281,7 +285,7 @@ void DirectXCommon::DescriptorHeap()
 	CreateCBVSRVUAVDescriptorHeap(device.Get());
 	// SRVディスクリプタヒープの設定
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = 1; // 必要なディスクリプタの数
+	srvHeapDesc.NumDescriptors = 2; // 必要なディスクリプタの数
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
@@ -527,6 +531,7 @@ void DirectXCommon::ImGuiInitialize()
 /*------RenderTextureの描画------*/
 void DirectXCommon::PreRenderScene()
 {
+	TransitionDepthBufferToWrite();
 	//CreateRenderTexture();
 	// TransitionBarrierの設定
 	//ChengeBarrier();
@@ -556,6 +561,8 @@ void DirectXCommon::PreRenderScene()
 /*------スワップチェインの描画------*/
 void DirectXCommon::PreDraw()
 {
+	// ここで必ず書き込み用に遷移
+	TransitionDepthBufferToWrite();
 	// TransitionBarrierの設定
 	ChengeBarrier();
 
@@ -564,7 +571,7 @@ void DirectXCommon::PreDraw()
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = GetDSVCPUDescriptorHandle(0);
 
 	// 描画先のRTVを設定
-	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
+	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
 
 	// 指定した色で画面全体をクリアする
 	// 青っぽい色。RGBA
@@ -573,7 +580,7 @@ void DirectXCommon::PreDraw()
 	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
 
 	// 指定した深度で画面全体をクリアする
-	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	//commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 
 	/// 三角形の描画
@@ -629,6 +636,8 @@ void DirectXCommon::PostDraw()
 	assert(SUCCEEDED(hr));
 	hr = commandList->Reset(commandAllocator.Get(), nullptr);
 	assert(SUCCEEDED(hr));
+	// ★ここで状態を初期化！
+	//depthBufferState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 }
 
 void DirectXCommon::ChengeBarrier()
@@ -1021,8 +1030,9 @@ void DirectXCommon::CreateRenderTexture()
 	// SRVのTexture2Dの設定
 	renderTextureSrvDesc.Texture2D.MipLevels = 1;
 
+	// 0番：カラーテクスチャ（gTexture）用SRV
 	// SRVの作成
-	device->CreateShaderResourceView(renderTexture.Get(), &renderTextureSrvDesc, srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+	device->CreateShaderResourceView(renderTexture.Get(), &renderTextureSrvDesc, GetSRVCPUDescriptorHandle(0));
 }
 
 void DirectXCommon::CreateCBVSRVUAVDescriptorHeap(ID3D12Device* device)
@@ -1055,7 +1065,7 @@ void DirectXCommon::CreateRootSignature()
 	// 0から始まる
 	descriptorRange[0].BaseShaderRegister = 0;
 	// 数は1つ
-	descriptorRange[0].NumDescriptors = 1;
+	descriptorRange[0].NumDescriptors = 2;
 	// SRVを使う
 	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	// Offsetを自動計算
@@ -1183,7 +1193,7 @@ void DirectXCommon::CreateRootSignature()
 
 	/// PixelShader
 	// shaderをコンパイルする
-	pixelShaderBlob = CompileShader(L"Resources/shaders/LuminanceBasedOutline.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = CompileShader(L"Resources/shaders/DepthBasedOutline.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定
@@ -1274,7 +1284,7 @@ void DirectXCommon::DrawRenderTexture()
 	commandList->SetPipelineState(graphicsPipelineState.Get());
 	commandList->SetGraphicsRootDescriptorTable(2, GetSRVGPUDescriptorHandle(0));
 
-	commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(0, depthResource->GetGPUVirtualAddress());
 	// 頂点3つ描画
 	commandList->DrawInstanced(3, 1, 0, 0);
 }
@@ -1287,5 +1297,52 @@ void DirectXCommon::CreateDepthSRVDescriptorHeap()
 	depthTextureSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	depthTextureSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	depthTextureSrvDesc.Texture2D.MipLevels = 1;
-	device->CreateShaderResourceView(depthStencilResource.Get(), &depthTextureSrvDesc, GetDSVCPUDescriptorHandle(0));
+	// 1番に「深度テクスチャ（gDepthTexture）」を登録
+	device->CreateShaderResourceView(depthStencilResource.Get(), &depthTextureSrvDesc, GetSRVCPUDescriptorHandle(1));
+}
+
+// depth用のリソースの作成
+void DirectXCommon::CreateDepthResource(Camera* camera)
+{
+	depthResource = ResourceManager::CreateBufferResource(device.Get(),sizeof(DepthMaterial));
+	depthResource->Map(0, nullptr, reinterpret_cast<void**>(&depthData));
+	//std::unique_ptr<Camera> camera = std::make_unique<Camera>();
+
+	Matrix4x4 proj = camera->GetProjectionMatrix();
+	Matrix4x4 projInv = Inverse::Inverse(proj); // 逆行列計算
+
+	depthData->projectionInverse = projInv;
+}
+
+// 深度バッファをSRVとして使うためのバリア
+void DirectXCommon::TransitionDepthBufferToSRV() {
+	if (depthBufferState == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+		return;
+	}
+	D3D12_RESOURCE_BARRIER barrier{};
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier.Transition.pResource = depthStencilResource.Get();
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	commandList->ResourceBarrier(1, &barrier);
+	depthBufferState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+}
+
+// 深度バッファを書き込み用に戻すバリア
+void DirectXCommon::TransitionDepthBufferToWrite() {
+	// すでに書き込み状態ならバリア不要
+	if (depthBufferState == D3D12_RESOURCE_STATE_DEPTH_WRITE) {
+		return;
+	}
+	D3D12_RESOURCE_BARRIER barrier{};
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier.Transition.pResource = depthStencilResource.Get();
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+	commandList->ResourceBarrier(1, &barrier);
+	depthBufferState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 }

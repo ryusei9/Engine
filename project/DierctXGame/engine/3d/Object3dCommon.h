@@ -1,8 +1,14 @@
 #pragma once
-#include "DirectXCommon.h"
 #include "Camera.h"
+#include <memory>
+#include <wrl.h>
+#include <d3d12.h>
+#include <dxcapi.h>
+
+
 
 class SrvManager;
+class DirectXCommon;
 // 3Dオブジェクト共通部
 class Object3dCommon
 {

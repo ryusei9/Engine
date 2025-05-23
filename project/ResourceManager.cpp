@@ -1,6 +1,7 @@
 #include "ResourceManager.h"
 #include <cassert>
-
+#include <Camera.h>
+#include <Inverse.h>
 Microsoft::WRL::ComPtr<ID3D12Resource> ResourceManager::CreateBufferResource(ID3D12Device* device, size_t sizeInBytes)
 {
 	// DXGIファクトリーの生成
@@ -39,3 +40,4 @@ Microsoft::WRL::ComPtr<ID3D12Resource> ResourceManager::CreateBufferResource(ID3
 	assert(SUCCEEDED(hr));
 	return resource;
 }
+

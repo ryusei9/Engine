@@ -53,6 +53,8 @@ void SRFramework::Initialize()
 	camera->SetTranslate({ 0.0f,5.0f,-30.0f });
 	Object3dCommon::GetInstance()->SetDefaultCamera(camera.get());
 
+	dxCommon->CreateDepthResource(camera.get());
+
 	imGuiManager->Initialize(winApp.get(), dxCommon.get());
 
 	// シーンマネージャの初期化
@@ -107,6 +109,15 @@ void SRFramework::Update()
 
 void SRFramework::PreDraw()
 {
+	// --- ここでの深度バッファ状態 ---
+   // 前フレームのポストエフェクト後なので
+   // [D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE]（SRV用）になっている
+
+	// 深度バッファを「書き込み用」に遷移
+	//dxCommon->TransitionDepthBufferToWrite();
+
+	// --- ここでの深度バッファ状態 ---
+	// [D3D12_RESOURCE_STATE_DEPTH_WRITE]（書き込み
 	// 描画前処理
 	dxCommon.get()->PreDraw();
 
@@ -121,14 +132,29 @@ void SRFramework::PostDraw()
 
 void SRFramework::PrePostEffect()
 {
+	// --- ここでの深度バッファ状態 ---
+	// [D3D12_RESOURCE_STATE_DEPTH_WRITE]（書き込み
 	dxCommon.get()->PreRenderScene();
 }
 
 void SRFramework::DrawPostEffect()
 {
+	// --- ここでの深度バッファ状態 ---
+	// [D3D12_RESOURCE_STATE_DEPTH_WRITE]（書き込み用）
+
+	// 深度バッファを「SRV用」に遷移
+	dxCommon->TransitionDepthBufferToSRV();
+
+	// --- ここでの深度バッファ状態 ---
+   // [D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE]（SRV用）
+
+
 	dxCommon.get()->TransitionRenderTextureToShaderResource();
 	dxCommon.get()->DrawRenderTexture();
 	dxCommon.get()->TransitionRenderTextureToRenderTarget();
+
+	// --- ここでの深度バッファ状態 ---
+    // [D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE]（SRV用）のまま
 }
 
 void SRFramework::Run()

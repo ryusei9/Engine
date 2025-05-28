@@ -15,9 +15,10 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	// パーティクルマネージャの初期化
 	particleManager = ParticleManager::GetInstance();
+	particleManager->GetInstance()->SetParticleType(ParticleType::Cylinder);
 
 	// テクスチャ"モリ"を使用
-	particleManager->GetInstance()->CreateParticleGroup("mori", "resources/circle2.png");
+	particleManager->GetInstance()->CreateParticleGroup("mori", "resources/gradationLine.png");
 	// テクスチャ"UV"を使用
 	particleManager->GetInstance()->CreateParticleGroup("uv", "resources/uvChecker.png");
 
@@ -77,15 +78,15 @@ void GamePlayScene::Update()
 		SetSceneNo(TITLE);
 	}*/
 	// プレイヤーの更新
-	player_->Update();
+	//player_->Update();
 
 	// 敵の更新
-	enemy_->Update();
+	//enemy_->Update();
 
 	// パーティクルグループ"モリ"の更新
-	/*particleEmitter1->SetPosition(particlePosition1);
-	particleEmitter1->SetParticleRate(8);
-	particleEmitter1->Update();*/
+	particleEmitter1->SetPosition(particlePosition1);
+	particleEmitter1->SetParticleRate(1);
+	particleEmitter1->Update();
 
 	// 衝突マネージャの更新
 	collisionManager_->Update();
@@ -120,10 +121,10 @@ void GamePlayScene::Draw()
 	/*ball->Draw();
 	ground->Draw();*/
 	// プレイヤーの描画
-	player_->Draw();
+	//player_->Draw();
 
 	// 敵の描画
-	enemy_->Draw();
+	//enemy_->Draw();
 }
 
 void GamePlayScene::Finalize()
@@ -138,7 +139,7 @@ void GamePlayScene::DrawImGui()
 	ImGui::Text("SPACE : Shot Bullet");
 	ImGui::Text("WASD : Move Player");
 	// パーティクルエミッター1の位置
-	//ImGui::SliderFloat3("ParticleEmitter1 Position", &particlePosition1.x, -10.0f, 50.0f);
+	ImGui::SliderFloat3("ParticleEmitter1 Position", &particlePosition1.x, -10.0f, 50.0f);
 	/*ImGui::SliderFloat3("ParticleEmitter2 Position", &particlePosition2.x, -10.0f, 50.0f);*/
 	// ボールの座標
 	//ImGui::SliderFloat3("Ball Position", &ballTransform.translate.x, -10.0f, 50.0f);

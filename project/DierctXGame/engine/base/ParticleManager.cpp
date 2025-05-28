@@ -43,7 +43,7 @@ void ParticleManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager
 	CreatePSO();
 
 	// 頂点データの初期化
-	CreateVertexData();
+	//CreateVertexData();
 	//CreateRingVertexData();
 	//CreateCylinderVertexData();
 
@@ -76,6 +76,7 @@ void ParticleManager::Update()
 	uvTransformMatrix = Multiply::Multiply(uvTransformMatrix, MakeTranslateMatrix::MakeTranslateMatrix(uvTransform.translate));
 	materialData_->uvTransform = uvTransformMatrix;
 
+	
 	//uvTransform.translate.x += 0.0001f;
 
 	Matrix4x4 billboardMatrix = Multiply::Multiply(backToFrontMatrix, cameraMatrix);
@@ -148,7 +149,11 @@ void ParticleManager::Update()
 				if ((*particleIterator).isExplosion) {
 					UpdateExplosionParticle(*particleIterator);
 				}
-
+				switch (particleType_) {
+				case ParticleType::Cylinder:
+					uvTransform.translate.x += 0.0001f;
+					break;
+				}
 				// 生存パーティクル数をカウント
 				++group.second.numParticles;
 			}
@@ -290,8 +295,26 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
 	// パーティクルの生成
 	for (uint32_t index = 0; index < count; ++index)
 	{
-		// パーティクルの生成と追加
-		particleGroup.particles.push_back(MakeNewParticle(randomEngine, position));
+		Particle particle;
+		switch (particleType_) {
+		case ParticleType::Normal:
+			particle = MakeNewParticle(randomEngine, position);
+			break;
+		case ParticleType::Plane:
+			particle = MakeNewPlaneParticle(randomEngine, position);
+			break;
+		case ParticleType::Ring:
+			particle = MakeNewRingParticle(randomEngine, position);
+			break;
+		case ParticleType::Cylinder:
+			particle = MakeNewCylinderParticle(randomEngine, position);
+			break;
+		case ParticleType::Explosion:
+			// 爆発はEmitExplosionでやるのでここは普通のパーティクル
+			particle = MakeNewParticle(randomEngine, position);
+			break;
+		}
+		particleGroup.particles.push_back(particle);
 	}
 }
 
@@ -620,6 +643,29 @@ void ParticleManager::DrawImGui()
 	}*/
 
 	ImGui::End(); // ウィンドウの終了
+}
+
+void ParticleManager::SetParticleType(ParticleType type)
+{
+	particleType_ = type;
+	// 頂点データを切り替え
+	switch (particleType_) {
+	case ParticleType::Normal:
+		CreateVertexData();
+		break;
+	case ParticleType::Plane:
+		CreateVertexData();
+		break;
+	case ParticleType::Ring:
+		CreateRingVertexData();
+		break;
+	case ParticleType::Cylinder:
+		CreateCylinderVertexData();
+		break;
+	case ParticleType::Explosion:
+		CreateVertexData();
+		break;
+	}
 }
 
 void ParticleManager::CreateRootSignature()

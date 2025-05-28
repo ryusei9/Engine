@@ -30,13 +30,13 @@ void Enemy::Initialize()
 
 	// パーティクルマネージャの初期化
 	particleManager = ParticleManager::GetInstance();
-
+	//particleManager->GetInstance()->SetParticleType(ParticleType::Explosion);
 	// テクスチャ"circle2"を使用
 	particleManager->GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
 
 	// 敵死亡時のパーティクルエミッターを初期化
 	enemyDeathEmitter_ = std::make_unique<ParticleEmitter>(particleManager, "explosion");
-	enemyDeathEmitter_->SetUseRingParticle(false); // 必要に
+	enemyDeathEmitter_->SetUseRingParticle(true); // 必要に
 	enemyDeathEmitter_->SetExplosion(true); // 爆発エミッターに設定
 	SetRadius(0.4f); // コライダーの半径を設定
 }

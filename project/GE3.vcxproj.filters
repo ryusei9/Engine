@@ -131,6 +131,7 @@
     <ClInclude Include="DierctXGame\application\Object\PlayerBullet.h" />
     <ClInclude Include="DierctXGame\application\Object\Enemy.h" />
     <ClInclude Include="DierctXGame\engine\io\Lerp.h" />
+    <ClInclude Include="DierctXGame\engine\io\ParticleType.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Particle.hlsli" />

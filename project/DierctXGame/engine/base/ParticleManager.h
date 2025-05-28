@@ -22,6 +22,7 @@ public:
 		float currentTime;
 		bool isExplosion = false;	// 爆発パーティクルかどうか
 		bool isSubExplosion = false; // 追加: サブパーティクル用
+		float maxScale = 1.0f; // 追加: 最大スケール
 	};
 
 	struct ParticleForGPU {

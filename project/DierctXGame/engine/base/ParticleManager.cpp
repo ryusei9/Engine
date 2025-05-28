@@ -321,7 +321,7 @@ void ParticleManager::EmitExplosion(const std::string& name, const Vector3& posi
 	// 2. サブパーティクル
 	std::uniform_real_distribution<float> distAngle(0.0f, 2.0f * float(std::numbers::pi));
 	std::uniform_real_distribution<float> distRadius(0.5f, 1.5f); // 中心からの距離
-	std::uniform_real_distribution<float> distScale(0.15f, 0.35f); // サブパーティクルの最大スケール
+	std::uniform_real_distribution<float> distScale(0.15f, 0.4f); // サブパーティクルの最大スケール
 	std::uniform_real_distribution<float> distLife(1.2f, 1.8f);
 	std::uniform_real_distribution<float> distStartTime(0.0f, 0.5f); // 0～0.5秒の範囲でバラけさせる
 
@@ -333,8 +333,8 @@ void ParticleManager::EmitExplosion(const std::string& name, const Vector3& posi
 		float z = (distAngle(randomEngine) - static_cast<float>(std::numbers::pi)) * 0.2f;
 
 		Particle particle;
-		float scale = distScale(randomEngine);
-		particle.transform.scale = { scale, scale, scale };
+		particle.maxScale = distScale(randomEngine);
+		particle.transform.scale = { 0.0f, 0.0f, 0.0f };
 		particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
 		particle.transform.translate = position + Vector3{ x, y, z };
 		particle.color = { 1.0f, 0.8f, 0.2f, 1.0f };
@@ -464,7 +464,7 @@ void ParticleManager::UpdateExplosionParticle(Particle& particle)
 		particle.color = Lerp(colorA, colorB, f);
 	}
 	// スケール補間
-	float maxScale = particle.isSubExplosion ? 0.18f : 1.25f; // サブは小さく
+	float maxScale = particle.isSubExplosion ? particle.maxScale : 1.25f; // サブは小さく
 	float scale = Lerp(particle.transform.scale.x, maxScale, t);
 	particle.transform.scale = { scale, scale, scale };
 }

@@ -167,6 +167,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\application\Object\CollisionTypeIdDef.h" />
     <ClInclude Include="DierctXGame\engine\io\MakeScaleMatrix.h" />
     <ClInclude Include="DierctXGame\engine\io\MakeTranslateMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\io\ParticleType.h" />
     <ClInclude Include="DierctXGame\engine\scene\BaseScene.h" />
     <ClInclude Include="DierctXGame\engine\audio\Audio.h" />
     <ClInclude Include="DierctXGame\engine\base\Camera.h" />

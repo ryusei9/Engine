@@ -28,7 +28,7 @@ void MyGame::Update()
 #ifdef _DEBUG
 	// ゲームプレイシーンの更新
 	sceneManager_->DrawImGui();
-	//ParticleManager::GetInstance()->DrawImGui();
+	ParticleManager::GetInstance()->DrawImGui();
 
 #endif
 	imGuiManager->End();

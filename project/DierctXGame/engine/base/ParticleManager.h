@@ -7,6 +7,7 @@
 #include <ModelData.h>
 #include <random>
 #include "Material.h"
+#include <ParticleType.h>
 class Camera;
 /*------パーティクルを管理するクラス------*/
 class ParticleManager
@@ -68,6 +69,8 @@ public:
 		// インスタンシングデータを書き込むためのポインタ
 		Microsoft::WRL::ComPtr<ID3D12Resource> instanceBuffer;
 	};
+
+	
 
 	/*------メンバ関数------*/
 
@@ -139,12 +142,16 @@ public:
 	// リング型の頂点を使うか
 	bool GetUseRingVertex() const { return useRingVertex; }
 
+	ParticleType GetParticleType() const { return particleType_; }
+
 	/*------セッター------*/
 	// ビルボードの設定
 	void SetUseBillboard(bool useBillboard) { this->useBillboard = useBillboard; }
 
 	// リング型の頂点を使うか
 	void SetUseRingVertex(bool useRingVertex) { this->useRingVertex = useRingVertex; }
+
+	void SetParticleType(ParticleType type);
 private:
 	static ParticleManager* instance;
 
@@ -155,7 +162,7 @@ private:
 	// AABBとVector3の当たり判定
 	bool IsCollision(const AABB& aabb, const Vector3& point);
 
-	
+	ParticleType particleType_ = ParticleType::Normal;
 
 	/*------メンバ変数------*/
 	DirectXCommon* dxCommon_ = nullptr;

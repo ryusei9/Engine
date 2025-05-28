@@ -135,8 +135,10 @@ void GamePlayScene::Finalize()
 void GamePlayScene::DrawImGui()
 {
 	ImGui::Begin("GamePlayScene");
+	ImGui::Text("SPACE : Shot Bullet");
+	ImGui::Text("WASD : Move Player");
 	// パーティクルエミッター1の位置
-	ImGui::SliderFloat3("ParticleEmitter1 Position", &particlePosition1.x, -10.0f, 50.0f);
+	//ImGui::SliderFloat3("ParticleEmitter1 Position", &particlePosition1.x, -10.0f, 50.0f);
 	/*ImGui::SliderFloat3("ParticleEmitter2 Position", &particlePosition2.x, -10.0f, 50.0f);*/
 	// ボールの座標
 	//ImGui::SliderFloat3("Ball Position", &ballTransform.translate.x, -10.0f, 50.0f);

@@ -65,7 +65,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\application\Object;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -92,7 +92,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\application\Object;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,16 +107,16 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BaseCharacter.cpp" />
-    <ClCompile Include="Collider.cpp" />
-    <ClCompile Include="CollisionManager.cpp" />
+    <ClCompile Include="DierctXGame\application\Object\BaseCharacter.cpp" />
+    <ClCompile Include="DierctXGame\application\Object\Collider.cpp" />
+    <ClCompile Include="DierctXGame\engine\base\CollisionManager.cpp" />
     <ClCompile Include="DierctXGame\engine\scene\BaseScene.cpp" />
     <ClCompile Include="DierctXGame\engine\audio\Audio.cpp" />
     <ClCompile Include="DierctXGame\engine\base\Camera.cpp" />
     <ClCompile Include="DierctXGame\engine\base\D3DresourceLeakChecker.cpp" />
     <ClCompile Include="DierctXGame\engine\base\DirectXCommon.cpp" />
     <ClCompile Include="DierctXGame\engine\scene\SceneManager.cpp" />
-    <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="DierctXGame\application\Object\Enemy.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
     <ClCompile Include="externals\imgui\imgui_draw.cpp" />
@@ -153,18 +153,18 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\base\SrvManager.cpp" />
     <ClCompile Include="DierctXGame\application\base\MyGame.cpp" />
     <ClCompile Include="DierctXGame\engine\scene\TitleScene.cpp" />
-    <ClCompile Include="MakeRotateXYZMatrix.cpp" />
-    <ClCompile Include="ParticleEmitter.cpp" />
-    <ClCompile Include="ParticleManager.cpp" />
-    <ClCompile Include="WorldTransform.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="PlayerBullet.cpp" />
+    <ClCompile Include="DierctXGame\engine\io\MakeRotateXYZMatrix.cpp" />
+    <ClCompile Include="DierctXGame\engine\base\ParticleEmitter.cpp" />
+    <ClCompile Include="DierctXGame\engine\base\ParticleManager.cpp" />
+    <ClCompile Include="DierctXGame\engine\base\WorldTransform.cpp" />
+    <ClCompile Include="DierctXGame\application\Object\Player.cpp" />
+    <ClCompile Include="DierctXGame\application\Object\PlayerBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BaseCharacter.h" />
-    <ClInclude Include="Collider.h" />
-    <ClInclude Include="CollisionManager.h" />
-    <ClInclude Include="CollisionTypeIdDef.h" />
+    <ClInclude Include="DierctXGame\application\Object\BaseCharacter.h" />
+    <ClInclude Include="DierctXGame\application\Object\Collider.h" />
+    <ClInclude Include="DierctXGame\engine\base\CollisionManager.h" />
+    <ClInclude Include="DierctXGame\application\Object\CollisionTypeIdDef.h" />
     <ClInclude Include="DierctXGame\engine\io\MakeScaleMatrix.h" />
     <ClInclude Include="DierctXGame\engine\io\MakeTranslateMatrix.h" />
     <ClInclude Include="DierctXGame\engine\scene\BaseScene.h" />
@@ -174,7 +174,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\io\DirectionalLight.h" />
     <ClInclude Include="DierctXGame\engine\base\DirectXCommon.h" />
     <ClInclude Include="DierctXGame\engine\scene\SceneManager.h" />
-    <ClInclude Include="Enemy.h" />
+    <ClInclude Include="DierctXGame\application\Object\Enemy.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
@@ -222,13 +222,13 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\base\ImGuiManager.h" />
     <ClInclude Include="DierctXGame\application\base\MyGame.h" />
     <ClInclude Include="DierctXGame\engine\scene\TitleScene.h" />
-    <ClInclude Include="Lerp.h" />
-    <ClInclude Include="MakeRotateXYZMatrix.h" />
-    <ClInclude Include="ParticleEmitter.h" />
-    <ClInclude Include="ParticleManager.h" />
-    <ClInclude Include="WorldTransform.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="PlayerBullet.h" />
+    <ClInclude Include="DierctXGame\engine\io\Lerp.h" />
+    <ClInclude Include="DierctXGame\engine\io\MakeRotateXYZMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\base\ParticleEmitter.h" />
+    <ClInclude Include="DierctXGame\engine\base\ParticleManager.h" />
+    <ClInclude Include="DierctXGame\engine\base\WorldTransform.h" />
+    <ClInclude Include="DierctXGame\application\Object\Player.h" />
+    <ClInclude Include="DierctXGame\application\Object\PlayerBullet.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
@@ -242,7 +242,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Particle.hlsli">
+    <None Include="resources\shaders\Particle.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
@@ -251,11 +251,11 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <None Include="tools\level_editor.py" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Particle.PS.hlsl">
+    <FxCompile Include="resources\shaders\Particle.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Particle.VS.hlsl">
+    <FxCompile Include="resources\shaders\Particle.VS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>

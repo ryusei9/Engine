@@ -30,7 +30,7 @@ void Enemy::Initialize()
 
 	// パーティクルマネージャの初期化
 	particleManager = ParticleManager::GetInstance();
-	//particleManager->GetInstance()->SetParticleType(ParticleType::Explosion);
+	particleManager->GetInstance()->SetParticleType(ParticleType::Explosion);
 	// テクスチャ"circle2"を使用
 	particleManager->GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
 
@@ -109,6 +109,7 @@ void Enemy::PlayDeathParticleOnce()
 		if (enemyDeathEmitter_) {
 			enemyDeathEmitter_->SetPosition(worldTransform_.translate_); // 位置をセット
 			enemyDeathEmitter_->SetParticleRate(8); // 必要に応じて発生数を調整
+			enemyDeathEmitter_->SetParticleCount(8);
 			// ここでパーティクルを即時発生させるメソッドがあれば呼ぶ
 			enemyDeathEmitter_->Update();
 		}

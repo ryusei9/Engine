@@ -61,6 +61,7 @@
     <ClCompile Include="DierctXGame\application\Object\Player.cpp" />
     <ClCompile Include="DierctXGame\application\Object\PlayerBullet.cpp" />
     <ClCompile Include="DierctXGame\application\Object\Enemy.cpp" />
+    <ClCompile Include="EnemyBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DierctXGame\application\Object\BaseCharacter.h" />
@@ -132,6 +133,7 @@
     <ClInclude Include="DierctXGame\application\Object\Enemy.h" />
     <ClInclude Include="DierctXGame\engine\io\Lerp.h" />
     <ClInclude Include="DierctXGame\engine\io\ParticleType.h" />
+    <ClInclude Include="EnemyBullet.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Particle.hlsli" />

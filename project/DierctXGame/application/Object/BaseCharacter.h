@@ -75,6 +75,8 @@ protected:
 	// ヒットポイント
 	int hp_ = 10;
 
+	bool isAlive_ = true;
+
 	uint32_t serialNumber_ = 0; // シリアルナンバー
 	static inline uint32_t nextSerialNumber_ = 0; // 次のシリアルナンバー
 };

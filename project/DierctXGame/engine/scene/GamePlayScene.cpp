@@ -15,7 +15,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	// パーティクルマネージャの初期化
 	particleManager = ParticleManager::GetInstance();
-	particleManager->GetInstance()->SetParticleType(ParticleType::Cylinder);
+	//particleManager->GetInstance()->SetParticleType(ParticleType::Cylinder);
 
 	// テクスチャ"モリ"を使用
 	particleManager->GetInstance()->CreateParticleGroup("mori", "resources/gradationLine.png");
@@ -78,15 +78,15 @@ void GamePlayScene::Update()
 		SetSceneNo(TITLE);
 	}*/
 	// プレイヤーの更新
-	//player_->Update();
+	player_->Update();
 
 	// 敵の更新
-	//enemy_->Update();
+	enemy_->Update();
 
 	// パーティクルグループ"モリ"の更新
-	particleEmitter1->SetPosition(particlePosition1);
-	particleEmitter1->SetParticleRate(1);
-	particleEmitter1->Update();
+	//particleEmitter1->SetPosition(particlePosition1);
+	//particleEmitter1->SetParticleRate(1);
+	//particleEmitter1->Update();
 
 	// 衝突マネージャの更新
 	collisionManager_->Update();
@@ -121,10 +121,10 @@ void GamePlayScene::Draw()
 	/*ball->Draw();
 	ground->Draw();*/
 	// プレイヤーの描画
-	//player_->Draw();
+	player_->Draw();
 
 	// 敵の描画
-	//enemy_->Draw();
+	enemy_->Draw();
 }
 
 void GamePlayScene::Finalize()

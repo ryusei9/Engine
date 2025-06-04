@@ -17,8 +17,13 @@ public:
 	// 発生場所の設定
 	void SetPosition(const Vector3& position) { position_ = position; }
 
+	void SetVelocity(const Vector3& velocity) { velocity_ = velocity; } // 追加: パーティクルの速度を設定
+
 	// 一秒あたりの最大発生数の設定
 	void SetParticleRate(uint32_t rate) { particleRate = rate; }
+
+	void SetParticleCount(uint32_t count) { particleCount_ = count; }
+	uint32_t GetParticleCount() const { return particleCount_; }
 
 	// 発生場所の取得
 	const Vector3& GetPosition() const { return position_; }
@@ -30,6 +35,8 @@ public:
 	void SetUseRingParticle(bool use) { useRingParticle_ = use; }
 
 	void SetExplosion(bool isExplosion) { isExplosion_ = isExplosion; }
+
+	void SetThruster(bool isThruster) { isThruster_ = isThruster; }
 	bool IsExplosion() const { return isExplosion_; }
 private:
 	/*------メンバ変数------*/
@@ -45,6 +52,8 @@ private:
 	// パーティクルの発生位置
 	Vector3 position_ = { 0.0f,0.0f,0.0f };
 
+	Vector3 velocity_ = { 0.0f,0.0f,0.0f }; // 追加: パーティクルの速度
+
 	// パーティクルの一秒あたりの最大発生数
 	uint32_t particleRate = 10;
 
@@ -55,5 +64,9 @@ private:
 	bool useRingParticle_ = false;
 
 	bool isExplosion_ = false; // 追加: 爆発用かどうか
+
+	bool isThruster_ = false; // 追加: スラスター用かどうか
+
+	uint32_t particleCount_ = 1; // 1回の発生で出すパーティクル数（デフォルト1）
 };
 

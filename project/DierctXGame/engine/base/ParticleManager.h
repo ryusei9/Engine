@@ -52,6 +52,7 @@ public:
 		uint32_t count;
 		float frequency;	// 発生頻度
 		float frequencyTime;	// 頻度用時刻
+		std::string groupName;
 	};
 
 	// パーティクルグループの構造体
@@ -106,6 +107,8 @@ public:
 	// 爆発パーティクルの発生場所を設定
 	void EmitExplosion(const std::string& name, const Vector3& position, uint32_t count);
 
+	void EmitWithVelocity(const std::string& name, const Vector3& position, uint32_t count, const Vector3& velocity);
+
 	// パーティクルの生成
 	Particle MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate);
 
@@ -117,6 +120,9 @@ public:
 
 	// 円柱パーティクルの生成
 	Particle MakeNewCylinderParticle(std::mt19937& randomEngine, const Vector3& translate);
+
+	// スラスターパーティクルの生成
+	Particle MakeNewThrusterParticle(std::mt19937& randomEngine, const Vector3& translate);
 
 	void UpdateExplosionParticle(Particle& particle);
 

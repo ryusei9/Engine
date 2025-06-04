@@ -13,9 +13,11 @@ void ParticleEmitter::Update()
 	//int particleCount = static_cast<int>(particleRate * interval_);
 	if (particleRate > 0.0f) {
 		if (isExplosion_) {
-			manager_->EmitExplosion(groupName_, position_, particleRate);
-		} else {
-			manager_->Emit(groupName_, position_, particleRate);
+			manager_->EmitExplosion(groupName_, position_, particleCount_);
+		}else if (isThruster_) {
+			manager_->EmitWithVelocity(groupName_, position_, particleCount_, velocity_);
+		}else {
+			manager_->Emit(groupName_, position_, particleCount_);
 		}
 		interval_ -= static_cast<float>(particleRate) / particleRate;
 	}

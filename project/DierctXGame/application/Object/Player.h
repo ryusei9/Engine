@@ -1,5 +1,7 @@
 #pragma once
 #include "BaseCharacter.h"
+#include "ParticleManager.h"
+#include "ParticleEmitter.h"
 
 class PlayerBullet; // 前方宣言
 class Player : public BaseCharacter
@@ -29,6 +31,8 @@ public:
 	// 中心座標を取得する純粋仮想関数
 	Vector3 GetCenterPosition() const override;
 
+	const Vector3& GetVelocity() const { return velocity_; }
+
 	/*------ゲッター------*/
 	std::list<std::unique_ptr<PlayerBullet>>& GetBullets() { return bullets_; }
 
@@ -42,6 +46,8 @@ private:
 	std::list<std::unique_ptr<PlayerBullet>> bullets_; // 武器
 	// プレイヤーの移動速度
 	float moveSpeed_ = 0.1f;
+
+	Vector3 velocity_ = { 0.0f, 0.0f, 0.0f }; // 速度ベクトルを追加
 	
 	// プレイヤーのヒットポイント
 	int hp_ = 1;
@@ -53,5 +59,11 @@ private:
 	Camera* camera_ = nullptr;
 
 	bool isShot_ = false; // 発射フラグ
+
+	ParticleManager* particleManager_; // パーティクルマネージャー
+
+	// メンバ変数
+	std::unique_ptr<ParticleEmitter> thrusterEmitter_;
+
 };
 

@@ -31,6 +31,13 @@ void Player::Initialize()
 	// プレイヤーの3Dオブジェクトを初期化
 	object3d_->Initialize("player.obj");
 
+	particleManager_->GetInstance()->CreateParticleGroup("thruster", "resources/circle2.png");
+
+	// 初期化
+	thrusterEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "thruster");
+	thrusterEmitter_->SetParticleRate(60); // 1秒間に60個
+	thrusterEmitter_->SetParticleCount(3);
+	thrusterEmitter_->SetThruster(true); // スラスターエミッターを有効化
 
 }
 
@@ -60,6 +67,8 @@ void Player::Update()
 	Move();
 	Attack();
 	worldTransform_.Update();
+
+	
 	// プレイヤーのワールド変換を更新
 	object3d_->SetCamera(camera_);
 	object3d_->SetTranslate(worldTransform_.translate_);
@@ -81,19 +90,43 @@ void Player::Draw()
 
 void Player::Move()
 {
-	// プレイヤーの移動
+
+	float yRad = worldTransform_.rotate_.y;
+	Vector3 leftDir = {
+		-cosf(yRad), // X
+		0.0f,        // Y
+		sinf(yRad)   // Z
+	};
+	// 速度をリセット
+	velocity_ = { 0.0f, 0.0f, 0.0f };
+
+	// 入力に応じて速度を設定
 	if (input_->PushKey(DIK_W)) {
-		worldTransform_.translate_.y += moveSpeed_;
+		velocity_.y += moveSpeed_;
 	}
 	if (input_->PushKey(DIK_S)) {
-		worldTransform_.translate_.y -= moveSpeed_;
+		velocity_.y -= moveSpeed_;
 	}
 	if (input_->PushKey(DIK_A)) {
-		worldTransform_.translate_.x -= moveSpeed_;
+		velocity_.x -= moveSpeed_;
 	}
 	if (input_->PushKey(DIK_D)) {
-		worldTransform_.translate_.x += moveSpeed_;
+		velocity_.x += moveSpeed_;
 	}
+
+	// 速度を座標に反映
+	worldTransform_.translate_ += velocity_;
+
+	// 勢いの強さはvelocityの大きさで調整
+	float power = 2.0f + velocity_.x * 1.5f; // 例: X速度で強さを変える
+	Vector3 particleVelocity = leftDir * power;
+
+	// パーティクルの発生位置（プレイヤーの中心 or 左側に少しオフセットしてもOK）
+	Vector3 emitPos = worldTransform_.translate_;
+	// Update
+	thrusterEmitter_->SetPosition(worldTransform_.translate_ - Vector3(0.2f,0.0f,0.0f));
+	thrusterEmitter_->SetVelocity(particleVelocity);
+	thrusterEmitter_->Update();
 }
 
 void Player::Attack()

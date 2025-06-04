@@ -31,6 +31,8 @@ void Player::Initialize()
 	// プレイヤーの3Dオブジェクトを初期化
 	object3d_->Initialize("player.obj");
 
+	SetRadius(radius_); // コライダーの半径を設定
+
 	particleManager_->GetInstance()->CreateParticleGroup("thruster", "resources/circle2.png");
 
 	// 初期化
@@ -43,6 +45,16 @@ void Player::Initialize()
 
 void Player::Update()
 {// プレイヤーの更新
+	if (!isAlive_) {
+		respawnTimer_ -= 1.0f / 60.0f;
+		if (respawnTimer_ <= 0.0f) {
+			// 復活
+			isAlive_ = true;
+			worldTransform_.translate_ = { 0.0f, 0.0f, 0.0f }; // 初期位置に戻す
+			hp_ = 1;
+		}
+		return; // 死亡中は何もしない
+	}
 	BaseCharacter::Update();
 
 	// 弾の削除
@@ -79,9 +91,9 @@ void Player::Update()
 
 void Player::Draw()
 {
-	BaseCharacter::Draw();
 
-	// 弾の描画
+	if (!isAlive_) return;
+	BaseCharacter::Draw();
 	for (auto& bullet : bullets_) {
 		bullet->Draw();
 	}
@@ -155,7 +167,12 @@ void Player::OnCollision(Collider* other)
 {// プレイヤーの衝突判定
 	if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
 		// 敵と衝突した場合
-		hp_ -= 1;
+		isAlive_ = false;
+		respawnTimer_ = 2.0f; // 2秒後に復活
+	}
+	if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyBullet)) {
+		isAlive_ = false;
+		respawnTimer_ = 2.0f; // 2秒後に復活
 	}
 }
 

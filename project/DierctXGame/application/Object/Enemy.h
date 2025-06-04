@@ -2,6 +2,7 @@
 #include "BaseCharacter.h"
 #include <ParticleManager.h>
 #include <ParticleEmitter.h>
+#include <EnemyBullet.h>
 class Enemy : public BaseCharacter
 {
 public:
@@ -29,6 +30,8 @@ public:
 	// 敵の半径を取得
 	float GetRadius() const { return radius_; }
 
+	std::list<std::unique_ptr<EnemyBullet>>& GetBullets() { return bullets_; }
+
 private:
 	/*------メンバ変数------*/
 	// 敵の移動速度
@@ -44,8 +47,7 @@ private:
 
 	// 敵のリスポーンタイム
 	float respawnTime_ = 3.0f;
-	// 敵のリスポーンフラグ
-	bool isAlive_ = true;
+	
 
 	float radius_ = 1.0f;
 
@@ -54,5 +56,9 @@ private:
 	std::unique_ptr<ParticleEmitter> enemyDeathEmitter_; // 敵死亡時のパーティクルエミッター
 
 	bool hasPlayedDeathParticle_ = false;
+
+	std::list<std::unique_ptr<EnemyBullet>> bullets_;
+	float shotInterval_ = 5.0f; // 1秒ごとに発射
+	float shotTimer_ = 0.0f;
 };
 

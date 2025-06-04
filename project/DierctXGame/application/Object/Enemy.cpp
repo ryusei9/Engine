@@ -43,6 +43,19 @@ void Enemy::Initialize()
 
 void Enemy::Update()
 {
+	// 弾の削除
+	bullets_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) {
+		if (!bullet->IsAlive()) {
+			bullet.reset();
+			return true;
+		}
+		return false;
+		});
+
+	// 弾の更新
+	for (auto& bullet : bullets_) {
+		bullet->Update();
+	}
 	// 敵の更新
 	BaseCharacter::Update();
 	worldTransform_.Update();
@@ -81,6 +94,9 @@ void Enemy::Draw()
 	if (isAlive_) {
 		// 敵の描画
 		BaseCharacter::Draw();
+		for (auto& bullet : bullets_) {
+			bullet->Draw();
+		}
 	}
 }
 
@@ -90,6 +106,17 @@ void Enemy::Move()
 
 void Enemy::Attack()
 {
+	if (!isAlive_) return;
+	shotTimer_ -= 1.0f / 60.0f;
+	if (shotTimer_ <= 0.0f) {
+		// プレイヤーの方向に発射（例：X軸負方向に発射）
+		Vector3 velocity = { -0.1f, 0.0f, 0.0f };
+		auto bullet = std::make_unique<EnemyBullet>();
+		bullet->Initialize(worldTransform_.translate_, velocity);
+		bullet->Update();
+		bullets_.push_back(std::move(bullet));
+		shotTimer_ = shotInterval_;
+	}
 }
 
 void Enemy::OnCollision(Collider* other)

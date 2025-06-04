@@ -166,11 +166,16 @@ void GamePlayScene::CheckAllCollisions()
 	collisionManager_->Reset();
 
 	// コライダーをリストに登録
+	collisionManager_->AddCollider(player_.get());
 	collisionManager_->AddCollider(enemy_.get());
 
 	// 複数についてコライダーをリストに登録
 	for (const auto& bullet : *playerBullets_)
 	{
+		collisionManager_->AddCollider(bullet.get());
+	}
+	// 敵の弾
+	for (const auto& bullet : enemy_->GetBullets()) {
 		collisionManager_->AddCollider(bullet.get());
 	}
 	// 衝突判定と応答

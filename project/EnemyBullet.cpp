@@ -15,7 +15,7 @@ void EnemyBullet::Initialize(const Vector3& position, const Vector3& velocity)
 
     // オブジェクトを設定
     objectBullet_ = std::make_unique<Object3d>();
-    objectBullet_->Initialize("enemy_bullet.obj");
+    objectBullet_->Initialize("player_bullet.obj");
     objectBullet_->SetScale(worldTransform_.scale_);
     objectBullet_->SetTranslate(worldTransform_.translate_);
 

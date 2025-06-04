@@ -49,8 +49,9 @@ private:
 
 	Vector3 velocity_ = { 0.0f, 0.0f, 0.0f }; // 速度ベクトルを追加
 	
-	// プレイヤーのヒットポイント
-	int hp_ = 1;
+	float radius_ = 0.1f; // 半径
+	
+	float respawnTimer_ = 0.0f;
 	// プレイヤーのシリアルナンバー
 	uint32_t serialNumber_ = 0;
 	// プレイヤーのワールド変換

@@ -58,6 +58,10 @@ void DirectXCommon::Initialize(WinApp* winApp)
 
 	CreateDissolveParamBuffer();
 
+	timeParamBuffer_ = CreateBufferResource(sizeof(TimeParams));
+	timeParamBuffer_->Map(0, nullptr, reinterpret_cast<void**>(&timeParams_));
+	timeParams_->time = 0.0f;
+
 	CreatePSO();
 }
 
@@ -1196,7 +1200,7 @@ void DirectXCommon::CreateRootSignature()
 
 	/// PixelShader
 	// shaderをコンパイルする
-	pixelShaderBlob = CompileShader(L"Resources/shaders/Dissolve.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = CompileShader(L"Resources/shaders/Noise.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定
@@ -1289,9 +1293,12 @@ void DirectXCommon::DrawRenderTexture()
 	// SRVテーブル
 	commandList->SetGraphicsRootDescriptorTable(2, GetSRVGPUDescriptorHandle(0));
 	// b0: マテリアル用CBV
-	commandList->SetGraphicsRootConstantBufferView(0, depthResource->GetGPUVirtualAddress());
+	//commandList->SetGraphicsRootConstantBufferView(0, depthResource->GetGPUVirtualAddress());
+
+	commandList->SetGraphicsRootConstantBufferView(0, timeParamBuffer_->GetGPUVirtualAddress());
+
 	// b1: DissolveParams用CBV
-	commandList->SetGraphicsRootConstantBufferView(3, dissolveParamBuffer_->GetGPUVirtualAddress());
+	//commandList->SetGraphicsRootConstantBufferView(3, dissolveParamBuffer_->GetGPUVirtualAddress());
 
 	// 頂点3つ描画
 	commandList->DrawInstanced(3, 1, 0, 0);

@@ -1,5 +1,6 @@
 #include "SRFramework.h"
 #include "TitleScene.h"
+#include <GetNowTimeInSeconds.h>
 
 void SRFramework::Initialize()
 {
@@ -105,6 +106,8 @@ void SRFramework::Update()
 	// シーンマネージャの更新
 	sceneManager_->Update();
 	camera->Update();
+
+	dxCommon->SetTimeParams(GetNowTimeInSeconds());
 	// パーティクルマネージャの更新
 	ParticleManager::GetInstance()->Update();
 }

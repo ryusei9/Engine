@@ -20,7 +20,11 @@ struct DissolveParams
 	float edgeColor[3];
 	float pad; // 16バイトアライメント用
 };
-
+struct TimeParams
+{
+	float time;
+	float pad[3]; // 16バイトアライメント
+};
 // DirectX基盤
 class DirectXCommon
 {
@@ -208,6 +212,8 @@ public: // メンバ関数
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
 	DissolveParams* GetDissolveParam() const { return dissolveParams_; }
+
+	void SetTimeParams(float time) { timeParams_->time = time; }
 private:
 	// 関数
 
@@ -332,5 +338,9 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> dissolveParamBuffer_;
 	DissolveParams* dissolveParams_ = nullptr;
+
+	// ノイズを時間経過で変えるための変数
+	Microsoft::WRL::ComPtr<ID3D12Resource> timeParamBuffer_;
+	TimeParams* timeParams_ = nullptr;
 };
 

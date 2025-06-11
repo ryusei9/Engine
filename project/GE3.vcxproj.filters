@@ -368,6 +368,9 @@
     <ClInclude Include="DepthMaterial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="DierctXGame\engine\io\GetNowTimeInSeconds.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -397,6 +400,7 @@
     <FxCompile Include="resources\shaders\DepthBasedOutline.PS.hlsl" />
     <FxCompile Include="resources\shaders\RadialBlur.PS.hlsl" />
     <FxCompile Include="resources\shaders\Dissolve.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Noise.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Object3D.hlsli">

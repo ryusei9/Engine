@@ -135,12 +135,14 @@
     <ClInclude Include="DierctXGame\engine\io\ParticleType.h" />
     <ClInclude Include="tools\json.hpp" />
     <ClInclude Include="DierctXGame\engine\util\JsonLoader.h" />
+    <ClInclude Include="DierctXGame\engine\io\LevelData.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Particle.hlsli" />
     <None Include="resources\shaders\Object3D.hlsli" />
     <None Include="resources\shaders\Sprite.hlsli" />
     <None Include="tools\level_editor.py" />
+    <None Include="resources\test.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

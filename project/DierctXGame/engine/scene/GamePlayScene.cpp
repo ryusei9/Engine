@@ -62,6 +62,12 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	playerBullet_->Initialize();
 	playerBullet_->SetPlayer(player_.get());*/
 
+	// レベルデータのロード
+	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
+
+	// オブジェクト生成
+	CreateObjectsFromLevelData();
+
 	// 衝突マネージャの生成
 	collisionManager_ = std::make_unique<CollisionManager>();
 	collisionManager_->Initialize();
@@ -158,6 +164,27 @@ void GamePlayScene::DrawImGui()
 	/*ball->DrawImGui();
 	ground->DrawImGui();*/
 	ImGui::End();
+}
+
+void GamePlayScene::CreateObjectsFromLevelData()
+{
+	// レベルデータからオブジェクトを生成、配置
+	for (auto& objectData : levelData_->objects) {
+		// ファイル名から登録済みモデルを検索
+		Model* model = nullptr;
+		auto it = models.find(objectData.fileName);
+		if (it != models.end()) { model = it->second.get(); }
+		// モデルを指定して3Dオブジェクトを生成
+		auto newObject = std::make_unique<Object3d>();
+		newObject->Initialize(objectData.fileName);
+		// 平行移動
+		newObject->SetTranslate(objectData.translation);
+		// 回転角
+		newObject->SetRotate(objectData.rotation);
+		// スケーリング
+		newObject->SetScale(objectData.scaling);
+		objects.push_back(std::move(newObject));
+	}
 }
 
 void GamePlayScene::CheckAllCollisions()

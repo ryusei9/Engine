@@ -55,6 +55,8 @@ void SRFramework::Initialize()
 
 	dxCommon->CreateDepthResource(camera.get());
 
+	dxCommon->CreateMaskSRVDescriptorHeap();
+
 	imGuiManager->Initialize(winApp.get(), dxCommon.get());
 
 	// シーンマネージャの初期化

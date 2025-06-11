@@ -11,6 +11,16 @@
 #include <Vector4.h>
 #include <DepthMaterial.h>
 #include <ResourceManager.h>
+
+struct DissolveParams
+{
+	float threshold;
+	float edgeWidth;
+	float edgeStrength;
+	float edgeColor[3];
+	float pad; // 16バイトアライメント用
+};
+
 // DirectX基盤
 class DirectXCommon
 {
@@ -143,6 +153,11 @@ public: // メンバ関数
 	void TransitionDepthBufferToSRV();
 
 	void TransitionDepthBufferToWrite();
+
+	// mask用のSRVディスクリプタヒープを作成
+	void CreateMaskSRVDescriptorHeap();
+
+	void CreateDissolveParamBuffer();
 	
 	// 記録時間
 	std::chrono::steady_clock::time_point reference_;
@@ -192,6 +207,7 @@ public: // メンバ関数
 	/// </summary>
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
+	DissolveParams* GetDissolveParam() const { return dissolveParams_; }
 private:
 	// 関数
 
@@ -309,5 +325,12 @@ private:
 
 	// クラスメンバに追加
 	D3D12_RESOURCE_STATES depthBufferState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+
+	// mask用のResourceとアップロードリソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> maskResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> maskUploadResource_;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> dissolveParamBuffer_;
+	DissolveParams* dissolveParams_ = nullptr;
 };
 

@@ -56,9 +56,8 @@ void DirectXCommon::Initialize(WinApp* winApp)
 
 	CreateDepthSRVDescriptorHeap();
 
-	//CreateDepthResource();
-	// ImGuiの初期化
-	//ImGuiInitialize();
+	CreateDissolveParamBuffer();
+
 	CreatePSO();
 }
 
@@ -1059,7 +1058,7 @@ void DirectXCommon::CreateRootSignature()
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	// Rootparameter作成。複数設定できるので配列。
-	D3D12_ROOT_PARAMETER rootParameters[3] = {};
+	D3D12_ROOT_PARAMETER rootParameters[4] = {};
 
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	// 0から始まる
@@ -1095,6 +1094,10 @@ void DirectXCommon::CreateRootSignature()
 	// Tableで利用する数
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
 
+	// DissolveParams用
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[3].Descriptor.ShaderRegister = 1; // b1
+	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	
 	//////////////////////////
 	// Samplerの設定
@@ -1282,9 +1285,14 @@ void DirectXCommon::DrawRenderTexture()
 	commandList->SetGraphicsRootSignature(rootSignature.Get());
 	// PSOを設定
 	commandList->SetPipelineState(graphicsPipelineState.Get());
-	commandList->SetGraphicsRootDescriptorTable(2, GetSRVGPUDescriptorHandle(0));
 
+	// SRVテーブル
+	commandList->SetGraphicsRootDescriptorTable(2, GetSRVGPUDescriptorHandle(0));
+	// b0: マテリアル用CBV
 	commandList->SetGraphicsRootConstantBufferView(0, depthResource->GetGPUVirtualAddress());
+	// b1: DissolveParams用CBV
+	commandList->SetGraphicsRootConstantBufferView(3, dissolveParamBuffer_->GetGPUVirtualAddress());
+
 	// 頂点3つ描画
 	commandList->DrawInstanced(3, 1, 0, 0);
 }
@@ -1345,4 +1353,35 @@ void DirectXCommon::TransitionDepthBufferToWrite() {
 	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 	commandList->ResourceBarrier(1, &barrier);
 	depthBufferState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+}
+
+void DirectXCommon::CreateMaskSRVDescriptorHeap()
+{
+	DirectX::ScratchImage maskImage = LoadTexture("resources/noise0.png");
+
+	maskResource_ = CreateTextureResource(maskImage.GetMetadata());
+
+	maskUploadResource_ = UploadTextureData(maskResource_, maskImage);
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = maskResource_->GetDesc().Format;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE handle(GetSRVDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(), 1, GetDescriptorSizeSRV());
+
+	device->CreateShaderResourceView(maskResource_.Get(), &srvDesc, handle);
+}
+
+void DirectXCommon::CreateDissolveParamBuffer()
+{
+	dissolveParamBuffer_ = CreateBufferResource(sizeof(DissolveParams));
+	dissolveParamBuffer_->Map(0, nullptr, reinterpret_cast<void**>(&dissolveParams_));
+	dissolveParams_->threshold = 0.5f; // 初期値
+	dissolveParams_->edgeWidth = 0.03f;
+	dissolveParams_->edgeStrength = 1.0f;
+	dissolveParams_->edgeColor[0] = 1.0f; // R
+	dissolveParams_->edgeColor[1] = 0.4f; // G
+	dissolveParams_->edgeColor[2] = 0.3f; // B
 }

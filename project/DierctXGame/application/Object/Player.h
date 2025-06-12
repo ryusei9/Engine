@@ -28,6 +28,8 @@ public:
 	// 衝突判定
 	void OnCollision(Collider* other) override;
 
+	void PlayDeathParticleOnce(); // 追加: 一度だけパーティクルを出す関数
+
 	// 中心座標を取得する純粋仮想関数
 	Vector3 GetCenterPosition() const override;
 
@@ -66,5 +68,8 @@ private:
 	// メンバ変数
 	std::unique_ptr<ParticleEmitter> thrusterEmitter_;
 
+	std::unique_ptr<ParticleEmitter> explosionEmitter_;
+
+	bool hasPlayedDeathParticle_ = false;
 };
 

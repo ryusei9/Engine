@@ -3,6 +3,8 @@
 #include <ParticleManager.h>
 #include <ParticleEmitter.h>
 #include <EnemyBullet.h>
+#include "EnemyAttack.h"
+class Player; // 前方宣言
 class Enemy : public BaseCharacter
 {
 public:
@@ -14,6 +16,8 @@ public:
 	void Update() override;
 	// 描画
 	void Draw() override;
+	// ImGui描画
+	void DrawImGui();
 	// キャラクターの移動
 	void Move() override;
 	// キャラクターの攻撃
@@ -29,6 +33,10 @@ public:
 
 	// 敵の半径を取得
 	float GetRadius() const { return radius_; }
+
+	Player* GetPlayer() const { return player_; } // プレイヤーへのポインタを取得
+
+	void SetPlayer(Player* player) { player_ = player; } // プレイヤーへのポインタを設定
 
 	std::list<std::unique_ptr<EnemyBullet>>& GetBullets() { return bullets_; }
 
@@ -60,5 +68,9 @@ private:
 	std::list<std::unique_ptr<EnemyBullet>> bullets_;
 	float shotInterval_ = 5.0f; // 1秒ごとに発射
 	float shotTimer_ = 0.0f;
+
+	std::unique_ptr<EnemyAttack> attack_;
+
+	Player* player_ = nullptr; // プレイヤーへのポインタ
 };
 

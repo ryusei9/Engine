@@ -55,6 +55,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	// 敵の初期化
 	enemy_ = std::make_unique<Enemy>();
 	enemy_->Initialize();
+	enemy_->SetPlayer(player_.get());
 
 	playerBullets_ = &player_->GetBullets();
 	// プレイヤーの弾の初期化
@@ -80,6 +81,7 @@ void GamePlayScene::Update()
 	// プレイヤーの更新
 	player_->Update();
 
+	enemy_->SetPlayer(player_.get());
 	// 敵の更新
 	enemy_->Update();
 
@@ -158,6 +160,7 @@ void GamePlayScene::DrawImGui()
 	/*ball->DrawImGui();
 	ground->DrawImGui();*/
 	ImGui::End();
+	enemy_->DrawImGui();
 }
 
 void GamePlayScene::CheckAllCollisions()

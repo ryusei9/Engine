@@ -39,6 +39,8 @@ void Enemy::Initialize()
 	enemyDeathEmitter_->SetUseRingParticle(true); // 必要に
 	enemyDeathEmitter_->SetExplosion(true); // 爆発エミッターに設定
 	SetRadius(0.4f); // コライダーの半径を設定
+
+	attack_ = std::make_unique<EnemyAttack>();
 }
 
 void Enemy::Update()
@@ -68,7 +70,8 @@ void Enemy::Update()
 	// 敵の移動
 	Move();
 	// 敵の攻撃
-	Attack();
+	//Attack();
+	attack_->Update(this, player_, bullets_, 1.0f / 60.0f);
 	if (hp_ <= 0)
 	{
 		// 敵のHPが0以下になったら
@@ -98,6 +101,20 @@ void Enemy::Draw()
 			bullet->Draw();
 		}
 	}
+}
+
+void Enemy::DrawImGui()
+{
+	ImGui::Begin("enemy");
+	// ImGuiで敵の情報を表示
+	ImGui::Text("Enemy Serial Number: %u", serialNumber_);
+	ImGui::Text("HP: %d", hp_);
+	ImGui::Text("Position: (%.2f, %.2f, %.2f)", worldTransform_.translate_.x, worldTransform_.translate_.y, worldTransform_.translate_.z);
+	ImGui::Text("Alive: %s", isAlive_ ? "Yes" : "No");
+	ImGui::Text("Respawn Time: %.2f seconds", respawnTime_);
+	// 攻撃パターンの選択
+	attack_->DrawImGui();
+	ImGui::End();
 }
 
 void Enemy::Move()

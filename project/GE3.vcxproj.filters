@@ -61,6 +61,7 @@
     <ClCompile Include="DierctXGame\application\Object\Player.cpp" />
     <ClCompile Include="DierctXGame\application\Object\PlayerBullet.cpp" />
     <ClCompile Include="DierctXGame\application\Object\Enemy.cpp" />
+    <ClCompile Include="DierctXGame\engine\util\JsonLoader.cpp" />
     <ClCompile Include="EnemyBullet.cpp" />
     <ClCompile Include="DierctXGame\application\Object\EnemyAttack.cpp" />
   </ItemGroup>
@@ -134,6 +135,9 @@
     <ClInclude Include="DierctXGame\application\Object\Enemy.h" />
     <ClInclude Include="DierctXGame\engine\io\Lerp.h" />
     <ClInclude Include="DierctXGame\engine\io\ParticleType.h" />
+    <ClInclude Include="tools\json.hpp" />
+    <ClInclude Include="DierctXGame\engine\util\JsonLoader.h" />
+    <ClInclude Include="DierctXGame\engine\io\LevelData.h" />
     <ClInclude Include="EnemyBullet.h" />
     <ClInclude Include="DierctXGame\application\Object\EnemyAttack.h" />
   </ItemGroup>
@@ -142,6 +146,7 @@
     <None Include="resources\shaders\Object3D.hlsli" />
     <None Include="resources\shaders\Sprite.hlsli" />
     <None Include="tools\level_editor.py" />
+    <None Include="resources\test.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

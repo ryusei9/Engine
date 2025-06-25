@@ -8,6 +8,8 @@
 struct LevelData {
     struct ObjectData {
         std::string fileName;
+        std::string name;
+        std::vector<LevelData::ObjectData> children;
         Vector3 translation;
         Vector3 rotation;
         Vector3 scaling;

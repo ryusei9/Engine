@@ -89,6 +89,11 @@ void GamePlayScene::Update()
 	// 敵の更新
 	//enemy_->Update();
 
+	// 読み込んだ全オブジェクトの更新
+	for (auto& obj : objects) {
+		obj->Update();
+	}
+
 	// パーティクルグループ"モリ"の更新
 	particleEmitter1->SetPosition(particlePosition1);
 	particleEmitter1->SetParticleRate(1);
@@ -123,6 +128,11 @@ void GamePlayScene::Draw()
 
 	/*------オブジェクトの描画------*/
 	Object3dCommon::GetInstance()->DrawSettings();
+
+	// 読み込んだ全オブジェクトの描画
+	for (auto& obj : objects) {
+		obj->Draw();
+	}
 	// ボールの描画
 	/*ball->Draw();
 	ground->Draw();*/
@@ -146,23 +156,28 @@ void GamePlayScene::DrawImGui()
 	ImGui::Text("WASD : Move Player");
 	// パーティクルエミッター1の位置
 	ImGui::SliderFloat3("ParticleEmitter1 Position", &particlePosition1.x, -10.0f, 50.0f);
-	/*ImGui::SliderFloat3("ParticleEmitter2 Position", &particlePosition2.x, -10.0f, 50.0f);*/
-	// ボールの座標
-	//ImGui::SliderFloat3("Ball Position", &ballTransform.translate.x, -10.0f, 50.0f);
-	//// ボールのスケール
-	//ImGui::SliderFloat3("Ball Scale", &ballTransform.scale.x, 0.0f, 10.0f);
-	//// ボールの回転
-	//ImGui::SliderFloat3("Ball Rotate", &ballTransform.rotate.x, 0.0f, 360.0f);
+	// レベルデータから生成したオブジェクトのImGui調整
+	for (size_t i = 0; i < objects.size(); ++i) {
+		auto& obj = objects[i];
+		ImGui::PushID(static_cast<int>(i)); // 複数オブジェクト対応
 
-	//// ボールの座標
-	//ImGui::SliderFloat3("Ball Position", &groundTransform.translate.x, -10.0f, 50.0f);
-	//// ボールのスケール
-	//ImGui::SliderFloat3("Ball Scale", &groundTransform.scale.x, 0.0f, 10.0f);
-	//// ボールの回転
-	//ImGui::SliderFloat3("Ball Rotate", &groundTransform.rotate.x, 0.0f, 360.0f);
+		// 位置・回転・スケールの取得
+		Vector3 pos = obj->GetTranslate();
+		Vector3 rot = obj->GetRotate();
+		Vector3 scale = obj->GetScale();
 
-	/*ball->DrawImGui();
-	ground->DrawImGui();*/
+		if (ImGui::SliderFloat3("あ", &pos.x, -10.0f, 10.0f)) {
+			obj->SetTranslate(pos);
+		}
+		if (ImGui::SliderFloat3("Rotation", &rot.x, -180.0f, 180.0f)) {
+			obj->SetRotate(rot);
+		}
+		if (ImGui::SliderFloat3("Scale", &scale.x, 0.01f, 10.0f)) {
+			obj->SetScale(scale);
+		}
+
+		ImGui::PopID();
+	}
 	ImGui::End();
 }
 
@@ -176,7 +191,7 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		if (it != models.end()) { model = it->second.get(); }
 		// モデルを指定して3Dオブジェクトを生成
 		auto newObject = std::make_unique<Object3d>();
-		newObject->Initialize(objectData.fileName);
+		newObject->Initialize(objectData.fileName + ".obj");
 		// 平行移動
 		newObject->SetTranslate(objectData.translation);
 		// 回転角

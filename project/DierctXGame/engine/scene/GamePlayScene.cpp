@@ -67,7 +67,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
 
 	// オブジェクト生成
-	CreateObjectsFromLevelData();
+	//CreateObjectsFromLevelData();
 
 	// 衝突マネージャの生成
 	collisionManager_ = std::make_unique<CollisionManager>();

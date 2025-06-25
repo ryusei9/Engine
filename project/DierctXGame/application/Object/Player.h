@@ -1,5 +1,7 @@
 #pragma once
 #include "BaseCharacter.h"
+#include "ParticleManager.h"
+#include "ParticleEmitter.h"
 
 class PlayerBullet; // 前方宣言
 class Player : public BaseCharacter
@@ -26,8 +28,12 @@ public:
 	// 衝突判定
 	void OnCollision(Collider* other) override;
 
+	void PlayDeathParticleOnce(); // 追加: 一度だけパーティクルを出す関数
+
 	// 中心座標を取得する純粋仮想関数
 	Vector3 GetCenterPosition() const override;
+
+	const Vector3& GetVelocity() const { return velocity_; }
 
 	/*------ゲッター------*/
 	std::list<std::unique_ptr<PlayerBullet>>& GetBullets() { return bullets_; }
@@ -42,9 +48,12 @@ private:
 	std::list<std::unique_ptr<PlayerBullet>> bullets_; // 武器
 	// プレイヤーの移動速度
 	float moveSpeed_ = 0.1f;
+
+	Vector3 velocity_ = { 0.0f, 0.0f, 0.0f }; // 速度ベクトルを追加
 	
-	// プレイヤーのヒットポイント
-	int hp_ = 1;
+	float radius_ = 0.1f; // 半径
+	
+	float respawnTimer_ = 0.0f;
 	// プレイヤーのシリアルナンバー
 	uint32_t serialNumber_ = 0;
 	// プレイヤーのワールド変換
@@ -53,5 +62,14 @@ private:
 	Camera* camera_ = nullptr;
 
 	bool isShot_ = false; // 発射フラグ
+
+	ParticleManager* particleManager_; // パーティクルマネージャー
+
+	// メンバ変数
+	std::unique_ptr<ParticleEmitter> thrusterEmitter_;
+
+	std::unique_ptr<ParticleEmitter> explosionEmitter_;
+
+	bool hasPlayedDeathParticle_ = false;
 };
 

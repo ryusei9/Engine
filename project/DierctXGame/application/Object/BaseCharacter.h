@@ -31,6 +31,8 @@ public:
 	// ヒットポイントを取得
 	int GetHp() const { return hp_; }
 
+	WorldTransform& GetWorldTransform() { return worldTransform_; }
+
 	// スケールを取得
 	Vector3 GetScale() const { return worldTransform_.scale_; }
 
@@ -74,6 +76,8 @@ protected:
 
 	// ヒットポイント
 	int hp_ = 10;
+
+	bool isAlive_ = true;
 
 	uint32_t serialNumber_ = 0; // シリアルナンバー
 	static inline uint32_t nextSerialNumber_ = 0; // 次のシリアルナンバー

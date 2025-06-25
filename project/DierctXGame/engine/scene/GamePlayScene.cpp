@@ -15,7 +15,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	// パーティクルマネージャの初期化
 	particleManager = ParticleManager::GetInstance();
-	particleManager->GetInstance()->SetParticleType(ParticleType::Cylinder);
+	//particleManager->GetInstance()->SetParticleType(ParticleType::Cylinder);
 
 	// テクスチャ"モリ"を使用
 	particleManager->GetInstance()->CreateParticleGroup("mori", "resources/gradationLine.png");
@@ -55,6 +55,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	// 敵の初期化
 	enemy_ = std::make_unique<Enemy>();
 	enemy_->Initialize();
+	enemy_->SetPlayer(player_.get());
 
 	playerBullets_ = &player_->GetBullets();
 	// プレイヤーの弾の初期化
@@ -84,10 +85,11 @@ void GamePlayScene::Update()
 		SetSceneNo(TITLE);
 	}*/
 	// プレイヤーの更新
-	//player_->Update();
+	player_->Update();
 
+	enemy_->SetPlayer(player_.get());
 	// 敵の更新
-	//enemy_->Update();
+	enemy_->Update();
 
 	// 読み込んだ全オブジェクトの更新
 	for (auto& obj : objects) {
@@ -95,9 +97,9 @@ void GamePlayScene::Update()
 	}
 
 	// パーティクルグループ"モリ"の更新
-	particleEmitter1->SetPosition(particlePosition1);
-	particleEmitter1->SetParticleRate(1);
-	particleEmitter1->Update();
+	//particleEmitter1->SetPosition(particlePosition1);
+	//particleEmitter1->SetParticleRate(1);
+	//particleEmitter1->Update();
 
 	// 衝突マネージャの更新
 	collisionManager_->Update();
@@ -137,10 +139,10 @@ void GamePlayScene::Draw()
 	/*ball->Draw();
 	ground->Draw();*/
 	// プレイヤーの描画
-	//player_->Draw();
+	player_->Draw();
 
 	// 敵の描画
-	//enemy_->Draw();
+	enemy_->Draw();
 }
 
 void GamePlayScene::Finalize()
@@ -179,6 +181,7 @@ void GamePlayScene::DrawImGui()
 		ImGui::PopID();
 	}
 	ImGui::End();
+	enemy_->DrawImGui();
 }
 
 void GamePlayScene::CreateObjectsFromLevelData()
@@ -208,11 +211,16 @@ void GamePlayScene::CheckAllCollisions()
 	collisionManager_->Reset();
 
 	// コライダーをリストに登録
+	collisionManager_->AddCollider(player_.get());
 	collisionManager_->AddCollider(enemy_.get());
 
 	// 複数についてコライダーをリストに登録
 	for (const auto& bullet : *playerBullets_)
 	{
+		collisionManager_->AddCollider(bullet.get());
+	}
+	// 敵の弾
+	for (const auto& bullet : enemy_->GetBullets()) {
 		collisionManager_->AddCollider(bullet.get());
 	}
 	// 衝突判定と応答

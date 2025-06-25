@@ -370,6 +370,20 @@ void ParticleManager::EmitExplosion(const std::string& name, const Vector3& posi
 	}
 }
 
+void ParticleManager::EmitWithVelocity(const std::string& name, const Vector3& position, uint32_t count, const Vector3& velocity)
+{
+	assert(particleGroups.find(name) != particleGroups.end() && "Particle Group is not found");
+	ParticleGroup& particleGroup = particleGroups[name];
+	if (particleGroup.particles.size() >= count) return;
+
+	for (uint32_t index = 0; index < count; ++index)
+	{
+		Particle particle = MakeNewThrusterParticle(randomEngine, position);
+		particle.velocity = velocity; // ←ここで渡す
+		particleGroup.particles.push_back(particle);
+	}
+}
+
 ParticleManager::Particle ParticleManager::MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate)
 {
 	Particle particle;
@@ -455,6 +469,31 @@ ParticleManager::Particle ParticleManager::MakeNewCylinderParticle(std::mt19937&
 	particle.currentTime = 0;
 	particle.velocity = { 0,0,0 };
 
+
+	return particle;
+}
+
+ParticleManager::Particle ParticleManager::MakeNewThrusterParticle(std::mt19937& randomEngine, const Vector3& translate)
+{
+	Particle particle;
+
+	// 一様分布生成期を使って乱数を生成
+	std::uniform_real_distribution<float> distribution(-5.0, 5.0f);
+	std::uniform_real_distribution<float> distColor(0.0, 1.0f);
+	std::uniform_real_distribution<float> distTime(1.0, 3.0f);
+
+	// 位置と速度を[-1, 1]でランダムに初期化
+	particle.transform.scale = { 0.3f, 0.3f, 0.3f };
+	particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
+	particle.transform.translate = translate;
+
+	// 色を水色に固定
+	particle.color = { 0.0f, 1.0f, 1.0f, 1.0f }; // 水色
+
+	// パーティクル生成時に0.1秒の間生存
+	particle.lifeTime = 0.1f;
+	particle.currentTime = 0;
+	particle.velocity = { distribution(randomEngine),distribution(randomEngine),distribution(randomEngine) };
 
 	return particle;
 }

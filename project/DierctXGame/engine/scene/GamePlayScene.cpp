@@ -168,7 +168,7 @@ void GamePlayScene::DrawImGui()
 		Vector3 rot = obj->GetRotate();
 		Vector3 scale = obj->GetScale();
 
-		if (ImGui::SliderFloat3("あ", &pos.x, -10.0f, 10.0f)) {
+		if (ImGui::SliderFloat3("position", &pos.x, -10.0f, 10.0f)) {
 			obj->SetTranslate(pos);
 		}
 		if (ImGui::SliderFloat3("Rotation", &rot.x, -180.0f, 180.0f)) {

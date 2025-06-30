@@ -69,6 +69,9 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	// オブジェクト生成
 	//CreateObjectsFromLevelData();
 
+	//skydome_ = std::make_unique<Skydome>();
+	//skydome_->Initialize();
+
 	// 衝突マネージャの生成
 	collisionManager_ = std::make_unique<CollisionManager>();
 	collisionManager_->Initialize();
@@ -90,6 +93,8 @@ void GamePlayScene::Update()
 	enemy_->SetPlayer(player_.get());
 	// 敵の更新
 	enemy_->Update();
+
+	//skydome_->Update();
 
 	// 読み込んだ全オブジェクトの更新
 	for (auto& obj : objects) {
@@ -143,6 +148,8 @@ void GamePlayScene::Draw()
 
 	// 敵の描画
 	enemy_->Draw();
+
+	//skydome_->Draw();
 }
 
 void GamePlayScene::Finalize()
@@ -182,6 +189,7 @@ void GamePlayScene::DrawImGui()
 	}
 	ImGui::End();
 	enemy_->DrawImGui();
+	//skydome_->DrawImGui();
 }
 
 void GamePlayScene::CreateObjectsFromLevelData()

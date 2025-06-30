@@ -16,6 +16,7 @@
 #include <CollisionManager.h>
 #include <LevelData.h>
 #include <JsonLoader.h>
+#include <Skydome.h>
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 
@@ -97,5 +98,7 @@ private:
 
 	// 複数のオブジェクトを管理するためのコンテナ
 	std::vector<std::unique_ptr<Object3d>> objects;
+
+	std::unique_ptr<Skydome> skydome_ = nullptr;
 };
 

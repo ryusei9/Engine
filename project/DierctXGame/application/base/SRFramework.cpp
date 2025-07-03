@@ -58,6 +58,9 @@ void SRFramework::Initialize()
 
 	dxCommon->CreateMaskSRVDescriptorHeap();
 
+	postEffect_ = std::make_unique<NoisePostEffect>();
+	postEffect_->Initialize(dxCommon.get());
+
 	imGuiManager->Initialize(winApp.get(), dxCommon.get());
 
 	// シーンマネージャの初期化
@@ -107,7 +110,7 @@ void SRFramework::Update()
 	sceneManager_->Update();
 	camera->Update();
 
-	dxCommon->SetTimeParams(GetNowTimeInSeconds());
+	postEffect_->SetTimeParams(GetNowTimeInSeconds());
 	// パーティクルマネージャの更新
 	ParticleManager::GetInstance()->Update();
 }
@@ -140,6 +143,7 @@ void SRFramework::PrePostEffect()
 	// --- ここでの深度バッファ状態 ---
 	// [D3D12_RESOURCE_STATE_DEPTH_WRITE]（書き込み
 	dxCommon.get()->PreRenderScene();
+	postEffect_->PreRender();
 }
 
 void SRFramework::DrawPostEffect()
@@ -157,6 +161,9 @@ void SRFramework::DrawPostEffect()
 	dxCommon.get()->TransitionRenderTextureToShaderResource();
 	dxCommon.get()->DrawRenderTexture();
 	dxCommon.get()->TransitionRenderTextureToRenderTarget();
+	postEffect_->TransitionRenderTextureToShaderResource();
+	postEffect_->Draw();
+	postEffect_->TransitionRenderTextureToRenderTarget();
 
 	// --- ここでの深度バッファ状態 ---
     // [D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE]（SRV用）のまま

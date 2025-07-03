@@ -1200,7 +1200,7 @@ void DirectXCommon::CreateRootSignature()
 
 	/// PixelShader
 	// shaderをコンパイルする
-	pixelShaderBlob = CompileShader(L"Resources/shaders/Noise.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = CompileShader(L"Resources/shaders/FullScreen.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定

@@ -8,7 +8,7 @@ public:
     virtual ~PostEffectBase() = default;
 
     // 初期化（リソース生成など）
-    virtual void Initialize(DirectXCommon* dxCommon) = 0;
+    virtual void Initialize(DirectXCommon* dxCommon);
 
     // ルートシグネイチャの作成
 	virtual void CreateRootSignature() = 0;
@@ -25,6 +25,10 @@ public:
     // 描画後の後始末（バリア戻しなど）
     virtual void PostRender() = 0;
 
+    virtual void ViewPortInitialize();
+
+	virtual void ScissorRectInitialize();
+
     virtual void TransitionRenderTextureToRenderTarget();
 
 	virtual void TransitionRenderTextureToShaderResource();
@@ -33,6 +37,8 @@ public:
 
     // 名前や種類を返す（切り替えUI用）
     virtual const char* GetName() const = 0;
+
+    virtual void SetTimeParams(float) {};
 protected:
 	DirectXCommon* dxCommon = nullptr; // DirectX共通処理
 
@@ -44,8 +50,11 @@ protected:
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap; // レンダーターゲットビュー用ヒープ
 
-    Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap; // シェーダーリソースビュー用ヒープ
-
     D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle; // レンダーターゲットビューのハンドル
-    D3D12_GPU_DESCRIPTOR_HANDLE srvHandle; // シェーダーリソースビューのハンドル
+
+    const Vector4 kRenderTargetClearValue = { 0.1f,0.25f,0.5f,1.0f };
+
+    D3D12_VIEWPORT viewport{};
+
+    D3D12_RECT scissorRect{};
 };

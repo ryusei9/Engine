@@ -12,6 +12,8 @@ public:
     void PostRender() override;
     const char* GetName() const override { return "Noise"; }
 
+    void SetTimeParams(float time) override { timeParams_->time = time; }
+
 private:
     DirectXCommon* dxCommon_ = nullptr;
 
@@ -30,12 +32,6 @@ private:
     /// RasterizerState
     D3D12_RASTERIZER_DESC rasterizerDesc{};
 
-    // shaderをコンパイルする
-    Microsoft::WRL::ComPtr<IDxcBlob> vertexShaderBlob;
-
-    /// PixelShader
-    // shaderをコンパイルする
-    Microsoft::WRL::ComPtr<IDxcBlob> pixelShaderBlob;
 
     // DepthStencilStateの設定
     D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};

@@ -1,5 +1,28 @@
 #include "PostEffectBase.h"
 
+void PostEffectBase::Initialize(DirectXCommon* dxCommon) {
+    this->dxCommon = dxCommon;
+    commandList = dxCommon->GetCommandList();
+    ViewPortInitialize();
+    ScissorRectInitialize();
+}
+
+void PostEffectBase::ViewPortInitialize() {
+    viewport.Width = static_cast<float>(WinApp::kClientWidth);
+    viewport.Height = static_cast<float>(WinApp::kClientHeight);
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    viewport.TopLeftX = 0.0f;
+    viewport.TopLeftY = 0.0f;
+}
+
+void PostEffectBase::ScissorRectInitialize() {
+    scissorRect.left = 0;
+    scissorRect.right = WinApp::kClientWidth;
+    scissorRect.top = 0;
+    scissorRect.bottom = WinApp::kClientHeight;
+}
+
 void PostEffectBase::TransitionRenderTextureToRenderTarget() {
 	if (renderTextureState == D3D12_RESOURCE_STATE_RENDER_TARGET) return;
 	D3D12_RESOURCE_BARRIER barrier{};
@@ -69,21 +92,15 @@ void PostEffectBase::CreateRenderTexture(UINT width, UINT height, DXGI_FORMAT fo
     rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
     dxCommon->GetDevice()->CreateRenderTargetView(renderTexture.Get(), nullptr, rtvHandle);
 
-    // SRVヒープ作成
-    D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-    srvHeapDesc.NumDescriptors = 1;
-    srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-    srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-    hr = dxCommon->GetDevice()->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvHeap));
-    assert(SUCCEEDED(hr));
-    srvHandle = srvHeap->GetCPUDescriptorHandleForHeapStart();
-
+    // SRVの作成（dxCommonのSRVヒープを使う。インデックスは用途に応じて指定）
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Format = format;
     srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
     srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
     srvDesc.Texture2D.MipLevels = 1;
-    dxCommon->GetDevice()->CreateShaderResourceView(renderTexture.Get(), &srvDesc, dxCommon->GetSRVCPUDescriptorHandle(0));
+
+    // 例: 0番にSRVを作成
+    dxCommon->GetDevice()->CreateShaderResourceView(renderTexture.Get(), &srvDesc, dxCommon->GetSRVCPUDescriptorHandle(1));
 
     renderTextureState = D3D12_RESOURCE_STATE_RENDER_TARGET;
 }

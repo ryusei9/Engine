@@ -4,8 +4,13 @@ void NoisePostEffect::Initialize(DirectXCommon* dxCommon)
 {
 	// 引数を代入
 	dxCommon_ = dxCommon;
-	commandList = dxCommon_->GetCommandList();
+	PostEffectBase::Initialize(dxCommon);
+    timeParamBuffer_ = dxCommon_->CreateBufferResource(sizeof(TimeParams));
+    timeParamBuffer_->Map(0, nullptr, reinterpret_cast<void**>(&timeParams_));
+    timeParams_->time = 0.0f;
     CreateRootSignature();
+	CreatePipelineStateObject();
+	CreateRenderTexture(WinApp::kClientWidth, WinApp::kClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, kRenderTargetClearValue);
 }
 
 void NoisePostEffect::CreateRootSignature()
@@ -28,9 +33,21 @@ void NoisePostEffect::CreateRootSignature()
     rootParams[1].Descriptor.RegisterSpace = 0;
     rootParams[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
+    // ★ サンプラー範囲を追加
+    D3D12_STATIC_SAMPLER_DESC samplerDesc = {};
+    samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+    samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    samplerDesc.ShaderRegister = 0; // s0
+    samplerDesc.RegisterSpace = 0;
+    samplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
     D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
     rootSigDesc.NumParameters = _countof(rootParams);
     rootSigDesc.pParameters = rootParams;
+    rootSigDesc.NumStaticSamplers = 1;
+    rootSigDesc.pStaticSamplers = &samplerDesc;
     rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
     Microsoft::WRL::ComPtr<ID3DBlob> sigBlob;
@@ -75,12 +92,12 @@ void NoisePostEffect::CreateRootSignature()
     /// VertexShader
     // shaderをコンパイルする
     vsBlob_ = dxCommon_->CompileShader(L"Resources/shaders/FullScreen.VS.hlsl", L"vs_6_0");
-    assert(vertexShaderBlob != nullptr);
+    assert(vsBlob_ != nullptr);
 
     /// PixelShader
     // shaderをコンパイルする
     psBlob_ = dxCommon_->CompileShader(L"Resources/shaders/Noise.PS.hlsl", L"ps_6_0");
-    assert(pixelShaderBlob != nullptr);
+    assert(psBlob_ != nullptr);
 
     // DepthStencilStateの設定
     // Depthの機能を有効化する
@@ -105,7 +122,7 @@ void NoisePostEffect::CreatePipelineStateObject()
     psoDesc.SampleMask = UINT_MAX;
     psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     psoDesc.NumRenderTargets = 1;
-    psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+    psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
     psoDesc.SampleDesc.Count = 1;
     psoDesc.InputLayout = { nullptr, 0 }; // フルスクリーンクアッドは頂点レイアウト不要
     hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState_));
@@ -114,23 +131,30 @@ void NoisePostEffect::CreatePipelineStateObject()
 
 void NoisePostEffect::PreRender()
 {
-    // RenderTextureに描画するためのバリアやRTVセット
-	TransitionRenderTextureToRenderTarget();
-    D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = dxCommon_->GetRtvHandles()[0];
-    commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
-    // クリア
+    // レンダーテクスチャをRTVとして使う準備
+    dxCommon_->TransitionDepthBufferToWrite();
+    D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dxCommon_->GetDSVCPUDescriptorHandle(0);
+    commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
     float clearColor[4] = { 0.1f,0.25f,0.5f,1.0f };
     commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
+    // ビューポート・シザーもセット（DirectXCommonのDrawRenderTextureと同じように）
+    commandList->RSSetViewports(1, &viewport);
+    commandList->RSSetScissorRects(1, &scissorRect);
 }
 
 void NoisePostEffect::Draw()
 {
+    // SRVヒープをセット
+    ID3D12DescriptorHeap* heaps[] = { dxCommon_->GetSRVDescriptorHeap().Get() };
+    commandList->SetDescriptorHeaps(_countof(heaps), heaps);
+
     // パイプラインステートオブジェクトの設定
     commandList->SetPipelineState(pipelineState_.Get());
     // ルートシグネチャの設定
     commandList->SetGraphicsRootSignature(rootSignature_.Get());
     // SRVとCBVの設定
-    commandList->SetGraphicsRootDescriptorTable(0, dxCommon_->GetSRVGPUDescriptorHandle(0));
+    commandList->SetGraphicsRootDescriptorTable(0, dxCommon_->GetSRVGPUDescriptorHandle(1));
     commandList->SetGraphicsRootConstantBufferView(1, timeParamBuffer_->GetGPUVirtualAddress());
     // プリミティブトポロジの設定
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

@@ -85,15 +85,15 @@ void GamePlayScene::Update()
 		SetSceneNo(TITLE);
 	}*/
 	// プレイヤーの更新
-	player_->Update();
+	//player_->Update();
 
 	enemy_->SetPlayer(player_.get());
 	// 敵の更新
-	enemy_->Update();
+	//enemy_->Update();
 
 	// 読み込んだ全オブジェクトの更新
 	for (auto& obj : objects) {
-		obj->Update();
+		//obj->Update();
 	}
 
 	// パーティクルグループ"モリ"の更新
@@ -133,16 +133,16 @@ void GamePlayScene::Draw()
 
 	// 読み込んだ全オブジェクトの描画
 	for (auto& obj : objects) {
-		obj->Draw();
+		//obj->Draw();
 	}
 	// ボールの描画
 	/*ball->Draw();
 	ground->Draw();*/
 	// プレイヤーの描画
-	player_->Draw();
+	//player_->Draw();
 
 	// 敵の描画
-	enemy_->Draw();
+	//enemy_->Draw();
 }
 
 void GamePlayScene::Finalize()

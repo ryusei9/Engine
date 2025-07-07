@@ -145,7 +145,7 @@
     <None Include="resources\shaders\Particle.hlsli" />
     <None Include="resources\shaders\Object3D.hlsli" />
     <None Include="resources\shaders\Sprite.hlsli" />
-    <None Include="tools\level_editor.py" />
+    <None Include="tools\level_editor\__init__.py" />
     <None Include="resources\test.json" />
   </ItemGroup>
   <ItemGroup>

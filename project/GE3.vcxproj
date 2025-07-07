@@ -258,7 +258,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <None Include="resources\shaders\Object3D.hlsli" />
     <None Include="resources\shaders\Sprite.hlsli" />
     <None Include="resources\test.json" />
-    <None Include="tools\level_editor.py" />
+    <None Include="tools\level_editor\__init__.py" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Particle.PS.hlsl">

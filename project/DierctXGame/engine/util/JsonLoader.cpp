@@ -40,6 +40,13 @@ LevelData::ObjectData JsonLoader::ConvertJsonToObject(const nlohmann::json& json
 {
 	LevelData::ObjectData objectData;
 
+	// disabled（無効フラグ）を読み込む
+	if (jsonNode.contains("disabled") && jsonNode["disabled"].is_boolean()) {
+		objectData.disabled = jsonNode["disabled"];
+	} else {
+		objectData.disabled = false; // デフォルトは有効（配置される）
+	}
+
 	// name を取得
 	if (jsonNode.contains("name") && jsonNode["name"].is_string()) {
 		objectData.name = jsonNode["name"];

@@ -41,6 +41,9 @@ class MYADDON_OT_export_scene(bpy.types.Operator, bpy_extras.io_utils.ExportHelp
         self.write_and_print(file,indent + "R %f %f %f" % (rot.x,rot.y,rot.z))
         self.write_and_print(file,indent + "S %f %f %f" % (scale.x,scale.y,scale.z))
         #カスタムプロパティを出力
+        #カスタムプロパティ'disabled'
+        if "disabled" in object:
+            self.write_and_print(file,indent + "D %s" % object["disabled"])
         if "File_name" in object:
             self.write_and_print(file,indent + "N %s" % object["File_name"])
         #カスタムプロパティ'collision'
@@ -103,8 +106,11 @@ class MYADDON_OT_export_scene(bpy.types.Operator, bpy_extras.io_utils.ExportHelp
         #まとめて1個分のjsonオブジェクトに登録
         json_object["transform"] = transform
         #カスタムプロパティを登録
+        #カスタムプロパティ'disabled'があれば登録
+        if "disabled" in object:
+            json_object["disabled"] = bool(object["disabled"])
+        #カスタムプロパティ'File_name'があれば登録
         if "File_name" in object:
-            #カスタムプロパティ'File_name'があれば登録
             json_object["file_name"] = object["File_name"]
         #カスタムプロパティ'collider'があれば登録
         if "collider" in object:
@@ -146,8 +152,8 @@ class MYADDON_OT_export_scene(bpy.types.Operator, bpy_extras.io_utils.ExportHelp
             #シーン直下のオブジェクトをルートノード（深さ0）とし、再帰関数で走査
             self.parse_scene_recursive_json(json_object_root["objects"], object, 0)
 
-        #オブジェクトをJSON文字列にエンコード
-        json_text = json.dumps(json_object_root,ensure_ascii=False, cls=json.JSONEncoder,indent = 4)
+        # オブジェクトをJSON文字列にエンコード
+        json_text = json.dumps(json_object_root, ensure_ascii=False, indent=4)
         #コンソールに表示してみる
         print(json_text)
 

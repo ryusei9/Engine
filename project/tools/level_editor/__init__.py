@@ -1,6 +1,7 @@
 import bpy
 
 #モジュールのインポート
+from .bl_info import bl_info
 from .stretch_vertex import MYADDON_OT_stretch_vertex
 from .create_ico_sphere import MYADDON_OT_create_ico_sphere
 from .add_file_name import MYADDON_OT_add_file_name
@@ -10,20 +11,8 @@ from .add_collider import MYADDON_OT_add_collider
 from .collider import OBJECT_PT_collider
 from .export_scene import MYADDON_OT_export_scene
 from .editor_menu import TOPBAR_MT_editor_menu
-
-#ブレンダーに登録するアドオン情報
-bl_info = {
-    "name": "レベルエディタ",
-    "author": "Ryusei Satou",
-    "version": (1, 0),
-    "blender": (3, 3, 1),
-    "location": "",
-    "description": "レベルエディタ",
-    "warning": "",
-    "wiki_url": "",
-    "tracker_url":"",
-    "category": "Object",
-}
+from .disabled import MYADDON_OT_disabled
+from .disabled import OBJECT_PT_disabled
 
 #Blenderに登録するクラスリスト
 classes = (
@@ -35,6 +24,8 @@ classes = (
     OBJECT_PT_file_name,
     MYADDON_OT_add_collider,
     OBJECT_PT_collider,
+    MYADDON_OT_disabled,
+    OBJECT_PT_disabled,
 )
 #メニュー項目描画
 def draw_menu_manual(self, context):

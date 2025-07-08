@@ -67,7 +67,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
 
 	// オブジェクト生成
-	//CreateObjectsFromLevelData();
+	CreateObjectsFromLevelData();
 
 	// 衝突マネージャの生成
 	collisionManager_ = std::make_unique<CollisionManager>();
@@ -85,11 +85,11 @@ void GamePlayScene::Update()
 		SetSceneNo(TITLE);
 	}*/
 	// プレイヤーの更新
-	player_->Update();
+	//player_->Update();
 
 	enemy_->SetPlayer(player_.get());
 	// 敵の更新
-	enemy_->Update();
+	//enemy_->Update();
 
 	// 読み込んだ全オブジェクトの更新
 	for (auto& obj : objects) {
@@ -139,10 +139,10 @@ void GamePlayScene::Draw()
 	/*ball->Draw();
 	ground->Draw();*/
 	// プレイヤーの描画
-	player_->Draw();
+	//player_->Draw();
 
 	// 敵の描画
-	enemy_->Draw();
+	//enemy_->Draw();
 }
 
 void GamePlayScene::Finalize()
@@ -188,6 +188,10 @@ void GamePlayScene::CreateObjectsFromLevelData()
 {
 	// レベルデータからオブジェクトを生成、配置
 	for (auto& objectData : levelData_->objects) {
+		if( objectData.disabled) {
+			// 無効なオブジェクトはスキップ
+			continue;
+		}
 		// ファイル名から登録済みモデルを検索
 		Model* model = nullptr;
 		auto it = models.find(objectData.fileName);

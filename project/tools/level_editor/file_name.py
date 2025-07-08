@@ -20,6 +20,4 @@ class OBJECT_PT_file_name(bpy.types.Panel):
         else:
             #プロパティがなければ、プロパティを追加
             self.layout.operator(MYADDON_OT_add_file_name.bl_idname)
-        """self.layout.operator(MYADDON_OT_stretch_vertex.bl_idname, text = MYADDON_OT_stretch_vertex.bl_label)
-        self.layout.operator(MYADDON_OT_create_ico_sphere.bl_idname, text = MYADDON_OT_create_ico_sphere.bl_label)
-        self.layout.operator(MYADDON_OT_export_scene.bl_idname, text = MYADDON_OT_export_scene.bl_label)"""
+        

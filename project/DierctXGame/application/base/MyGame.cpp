@@ -28,6 +28,7 @@ void MyGame::Update()
 #ifdef _DEBUG
 	// ゲームプレイシーンの更新
 	sceneManager_->DrawImGui();
+	postEffectManager_->DrawImGui();
 	ParticleManager::GetInstance()->DrawImGui();
 
 #endif

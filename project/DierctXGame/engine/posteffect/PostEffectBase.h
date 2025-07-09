@@ -1,7 +1,7 @@
 #pragma once
 #include "DirectXCommon.h"
 #include <wrl.h>
-
+#include "SrvManager.h"
 // ポストエフェクト用のベースクラス
 class PostEffectBase {
 public:
@@ -38,8 +38,17 @@ public:
     // 名前や種類を返す（切り替えUI用）
     virtual const char* GetName() const = 0;
 
+    // 出力SRVハンドルを取得
+    virtual D3D12_GPU_DESCRIPTOR_HANDLE GetOutputSRV() const = 0;
+
     virtual void SetTimeParams(float) {};
+
+    // 入力テクスチャをセット
+    virtual void SetInputSRV(D3D12_GPU_DESCRIPTOR_HANDLE handle) { inputSRV_ = handle; }
 protected:
+
+    uint32_t srvIndex_ = 0; // SRVインデックス（動的割り当て用）
+
 	DirectXCommon* dxCommon = nullptr; // DirectX共通処理
 
 	ID3D12GraphicsCommandList* commandList = nullptr; // コマンドリスト
@@ -57,4 +66,7 @@ protected:
     D3D12_VIEWPORT viewport{};
 
     D3D12_RECT scissorRect{};
+
+    D3D12_GPU_DESCRIPTOR_HANDLE inputSRV_ = {};
+
 };

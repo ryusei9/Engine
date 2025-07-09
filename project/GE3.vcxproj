@@ -107,6 +107,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DierctXGame\engine\posteffect\GrayscalePostEffect.cpp" />
     <ClCompile Include="DierctXGame\engine\posteffect\PostEffectBase.cpp" />
     <ClCompile Include="DierctXGame\engine\scene\BaseScene.cpp" />
     <ClCompile Include="DierctXGame\engine\audio\Audio.cpp" />
@@ -153,12 +154,14 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\posteffect\NoisePostEffect.cpp" />
     <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="ParticleManager.cpp" />
+    <ClCompile Include="DierctXGame\engine\posteffect\PostEffectManager.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DepthMaterial.h" />
     <ClInclude Include="DierctXGame\engine\io\MakeScaleMatrix.h" />
     <ClInclude Include="DierctXGame\engine\io\MakeTranslateMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\posteffect\GrayscalePostEffect.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\PostEffectBase.h" />
     <ClInclude Include="DierctXGame\engine\scene\BaseScene.h" />
     <ClInclude Include="DierctXGame\engine\audio\Audio.h" />
@@ -217,6 +220,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\posteffect\NoisePostEffect.h" />
     <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="ParticleManager.h" />
+    <ClInclude Include="DierctXGame\engine\posteffect\PostEffectManager.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="DierctXGame\engine\io\GetNowTimeInSeconds.h" />
   </ItemGroup>

@@ -1,5 +1,5 @@
 #include "PostEffectBase.h"
-
+#include "SrvManager.h"
 void PostEffectBase::Initialize(DirectXCommon* dxCommon) {
     this->dxCommon = dxCommon;
     commandList = dxCommon->GetCommandList();

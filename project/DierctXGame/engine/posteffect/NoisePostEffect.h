@@ -1,5 +1,6 @@
 #pragma once
 #include "PostEffectBase.h"
+
 class NoisePostEffect : public PostEffectBase
 {
 public:
@@ -11,6 +12,8 @@ public:
     void Draw() override;
     void PostRender() override;
     const char* GetName() const override { return "Noise"; }
+
+    D3D12_GPU_DESCRIPTOR_HANDLE GetOutputSRV() const override;
 
     void SetTimeParams(float time) override { timeParams_->time = time; }
 

@@ -44,6 +44,8 @@
 #include <SceneManager.h>
 #include "PostEffectBase.h"
 #include "NoisePostEffect.h"
+#include "PostEffectManager.h"
+#include "GrayscalePostEffect.h"
 
 #pragma comment(lib,"xaudio2.lib")
 
@@ -110,6 +112,10 @@ protected:
 
 	std::unique_ptr<SceneManager> sceneManager_ = nullptr;
 
-	std::unique_ptr<PostEffectBase> postEffect_ = nullptr;
+	std::unique_ptr<NoisePostEffect> noisePostEffect_ = nullptr;
+
+	std::unique_ptr<GrayscalePostEffect> grayscalePostEffect_ = nullptr;
+
+	std::unique_ptr<PostEffectManager> postEffectManager_ = nullptr;
 };
 

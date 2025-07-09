@@ -167,3 +167,8 @@ void NoisePostEffect::PostRender()
     // バリアをSRV用に戻す
     dxCommon_->TransitionRenderTextureToShaderResource();
 }
+
+D3D12_GPU_DESCRIPTOR_HANDLE NoisePostEffect::GetOutputSRV() const
+{
+    return dxCommon->GetSRVGPUDescriptorHandle(srvIndex_);
+}

@@ -13,10 +13,10 @@ std::shared_ptr<Object3dCommon> Object3dCommon::GetInstance()
 	return instance;
 }
 
-void Object3dCommon::Initialize(DirectXCommon* dxCommon)
+void Object3dCommon::Initialize()
 {
 	// 引数で受け取ってメンバ変数に記録する
-	dxCommon_ = dxCommon;
+	dxCommon_ = DirectXCommon::GetInstance();
 
 	GraphicsPipelineInitialize();
 }

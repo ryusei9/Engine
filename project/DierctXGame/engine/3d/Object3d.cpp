@@ -10,6 +10,7 @@
 #include "MakePerspectiveFovMatrix.h"
 #include "ModelManager.h"
 #include <imgui.h>
+#include "DirectXCommon.h"
 
 void Object3d::Initialize(const std::string& fileName)
 {

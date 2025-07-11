@@ -1,12 +1,13 @@
 #pragma once
 #include "WinApp.h"
 #include "DirectXCommon.h"
+
 // ImGuiの管理
 class ImGuiManager
 {
 public:
 	/// 初期化
-	void Initialize(WinApp* winApp_,DirectXCommon* dxCommon);
+	void Initialize(WinApp* winApp_);
 
 	/// ImGui受付開始
 	void Begin();

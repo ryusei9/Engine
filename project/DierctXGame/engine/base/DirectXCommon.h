@@ -12,6 +12,8 @@
 class DirectXCommon
 {
 public: // メンバ関数
+	// シングルトンインスタンス取得
+	static DirectXCommon* GetInstance();
 	// 初期化
 	void Initialize(WinApp* winApp);
 
@@ -152,6 +154,11 @@ public: // メンバ関数
 
 private:
 	// 関数
+	// シングルトン用
+	DirectXCommon() = default;
+	~DirectXCommon() = default;
+	DirectXCommon(const DirectXCommon&) = delete;
+	DirectXCommon& operator=(const DirectXCommon&) = delete;
 
 	
 	

@@ -3,10 +3,11 @@
 #include "externals/DirectXTex/DirectXTex.h"
 #include <wrl.h>
 #include <d3d12.h>
-#include "DirectXCommon.h"
 #include <SrvManager.h>
 #include <unordered_map>
 #include <memory>
+
+class DirectXCommon;
 // テクスチャマネージャー
 class TextureManager
 {
@@ -37,7 +38,7 @@ private:
 
 public:
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon,SrvManager* srvManager);
+	void Initialize(SrvManager* srvManager);
 
 	// シングルトンインスタンスの取得
 	static std::shared_ptr<TextureManager> GetInstance();

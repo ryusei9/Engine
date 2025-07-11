@@ -1,7 +1,7 @@
 #include "TextureManager.h"
 #include "StringUtility.h"
 #include <cassert>
-
+#include "DirectXCommon.h"
 std::shared_ptr<TextureManager> TextureManager::instance = nullptr;
 
 // ImGuiで0番を使用するため、1番から使用
@@ -109,9 +109,9 @@ uint32_t TextureManager::GetTextureIndexByFilePath(const std::string& filePath)
 	return 0;
 }
 
-void TextureManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager)
+void TextureManager::Initialize(SrvManager* srvManager)
 {
-	dxCommon_ = dxCommon;
+	dxCommon_ = DirectXCommon::GetInstance();
 	srvManager_ = srvManager;
 	// SRVの数と同数
 	textureDatas.reserve(DirectXCommon::kMaxSRVCount);

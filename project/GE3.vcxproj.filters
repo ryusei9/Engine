@@ -7,6 +7,8 @@
     <FxCompile Include="resources\shaders\Object3d.VS.hlsl" />
     <FxCompile Include="resources\shaders\Sprite.PS.hlsl" />
     <FxCompile Include="resources\shaders\Sprite.VS.hlsl" />
+    <FxCompile Include="resources\shaders\Skybox.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Skybox.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DierctXGame\application\Object\BaseCharacter.cpp" />
@@ -64,6 +66,7 @@
     <ClCompile Include="DierctXGame\engine\util\JsonLoader.cpp" />
     <ClCompile Include="DierctXGame\application\Object\EnemyBullet.cpp" />
     <ClCompile Include="DierctXGame\application\Object\EnemyAttack.cpp" />
+    <ClCompile Include="DierctXGame\engine\3d\Skybox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DierctXGame\application\Object\BaseCharacter.h" />
@@ -140,6 +143,7 @@
     <ClInclude Include="DierctXGame\engine\io\LevelData.h" />
     <ClInclude Include="DierctXGame\application\Object\EnemyBullet.h" />
     <ClInclude Include="DierctXGame\application\Object\EnemyAttack.h" />
+    <ClInclude Include="DierctXGame\engine\3d\Skybox.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Particle.hlsli" />
@@ -147,6 +151,7 @@
     <None Include="resources\shaders\Sprite.hlsli" />
     <None Include="tools\level_editor.py" />
     <None Include="resources\test.json" />
+    <None Include="resources\shaders\Skybox.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

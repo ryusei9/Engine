@@ -63,6 +63,9 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	playerBullet_->Initialize();
 	playerBullet_->SetPlayer(player_.get());*/
 
+	skybox_ = std::make_unique<Skybox>();
+	skybox_->Initialize();
+
 	// レベルデータのロード
 	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
 
@@ -135,6 +138,7 @@ void GamePlayScene::Draw()
 	for (auto& obj : objects) {
 		//obj->Draw();
 	}
+	skybox_->Draw();
 	// ボールの描画
 	/*ball->Draw();
 	ground->Draw();*/

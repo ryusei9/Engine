@@ -1,6 +1,7 @@
 #pragma once
-#include "DirectXCommon.h"
 #include "Camera.h"
+#include "DirectXCommon.h"
+
 // 3Dオブジェクト共通部
 class Object3dCommon
 {
@@ -14,7 +15,7 @@ public:
 	Object3dCommon& operator=(Object3dCommon&) = delete;
 
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon);
+	void Initialize();
 
 	// 共通描画設定
 	void DrawSettings();

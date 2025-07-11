@@ -15,7 +15,6 @@
 #include <numbers>
 #include <MaterialData.h>
 #include <Material.h>
-#include <WorldTransform.h>
 
 class Object3dCommon;
 
@@ -32,12 +31,6 @@ public:
 		Vector3 normal;
 	};
 
-	/*struct Material {
-		Vector4 color;
-		int32_t enableLighting;
-		float padding[3];
-		Matrix4x4 uvworldTransform;
-	};*/
 
 	// 座標変換行列データ
 	struct worldTransformationMatrix {

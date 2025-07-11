@@ -16,6 +16,7 @@
 #include <CollisionManager.h>
 #include <LevelData.h>
 #include <JsonLoader.h>
+#include <Skybox.h>
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 
@@ -97,5 +98,8 @@ private:
 
 	// 複数のオブジェクトを管理するためのコンテナ
 	std::vector<std::unique_ptr<Object3d>> objects;
+
+	// スカイボックス
+	std::unique_ptr<Skybox> skybox_ = nullptr;
 };
 

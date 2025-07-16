@@ -8,7 +8,9 @@ class Camera
 {
 private:
 	Transform transform;
-	
+	Matrix4x4 worldMatrix;
+	Matrix4x4 viewMatrix;
+	Matrix4x4 projectionMatrix;
 	// 水平方向視野角
 	float fovY = 0.45f;
 	// アスペクト比
@@ -18,11 +20,9 @@ private:
 	// ファークリップ距離
 	float farClip = 100.0f;
 
-	
-	Matrix4x4 worldMatrix;
-	Matrix4x4 viewMatrix;
-	Matrix4x4 projectionMatrix;
 	Matrix4x4 viewProjectionMatrix;
+
+	
 public:
 	// デフォルトコンストラクタ
 	Camera();

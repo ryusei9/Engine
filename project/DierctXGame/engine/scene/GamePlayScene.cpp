@@ -41,7 +41,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	// ボールの初期化
 	ground = std::make_unique<Object3d>();
-	ground->Initialize("terrain.obj");
+	ground->Initialize("plane.obj");
 
 	groundTransform.Initialize();
 	groundTransform.translate_ = { 0.0f,0.0f,5.0f }; // 座標

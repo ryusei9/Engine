@@ -42,6 +42,10 @@
 #include <xaudio2.h>
 #include "Audio.h"
 #include <SceneManager.h>
+#include "PostEffectBase.h"
+#include "NoisePostEffect.h"
+#include "PostEffectManager.h"
+#include "GrayscalePostEffect.h"
 
 #pragma comment(lib,"xaudio2.lib")
 
@@ -77,11 +81,10 @@ public:
 	// 終了リクエスト
 	virtual bool IsEndRequest() const { return endRequest_; }
 
-	// 3Dオブジェクト描画
-	void PreDrawObject3d();
+	// PreDrawを行う前の処理
+	void PrePostEffect();
 
-	// 2Dオブジェクト描画
-	void PreDrawSprite();
+	void DrawPostEffect();
 
 	// 実行
 	void Run();
@@ -101,13 +104,18 @@ protected:
 
 	unique_ptr<SrvManager> srvManager = nullptr;
 
-	unique_ptr < Camera> camera = make_unique<Camera>();
+	unique_ptr<Camera> camera = make_unique<Camera>();
 
-	unique_ptr < ImGuiManager> imGuiManager = make_unique<ImGuiManager>();
+	unique_ptr<ImGuiManager> imGuiManager = make_unique<ImGuiManager>();
 
 	bool endRequest_ = false;
 
 	std::unique_ptr<SceneManager> sceneManager_ = nullptr;
 
+	std::unique_ptr<NoisePostEffect> noisePostEffect_ = nullptr;
+
+	std::unique_ptr<GrayscalePostEffect> grayscalePostEffect_ = nullptr;
+
+	std::unique_ptr<PostEffectManager> postEffectManager_ = nullptr;
 };
 

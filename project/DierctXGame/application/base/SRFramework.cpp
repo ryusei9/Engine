@@ -1,5 +1,6 @@
 #include "SRFramework.h"
 #include "TitleScene.h"
+#include <GetNowTimeInSeconds.h>
 
 void SRFramework::Initialize()
 {
@@ -43,7 +44,7 @@ void SRFramework::Initialize()
 
 
 	// 3Dオブジェクト共通部の初期化
-	Object3dCommon::GetInstance()->Initialize(dxCommon.get());
+	Object3dCommon::GetInstance()->Initialize(dxCommon.get(),srvManager.get());
 
 
 	// 3Dモデルマネージャの初期化
@@ -55,39 +56,27 @@ void SRFramework::Initialize()
 
 	Input::GetInstance()->Initialize(winApp.get());
 
-	camera->SetRotate({ 0.0f,0.0f,0.0f });
-	camera->SetTranslate({ 0.0f,0.0f,-10.0f });
+	camera->SetRotate({ 0.1f,0.0f,0.0f });
+	camera->SetTranslate({ 0.0f,5.0f,-30.0f });
 	Object3dCommon::GetInstance()->SetDefaultCamera(camera.get());
 
-#ifdef _DEBUG
-	ID3D12InfoQueue* infoQueue = nullptr;
-	if (SUCCEEDED(dxCommon.get()->GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
-		// ヤバいエラー時に止まる
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
-		// エラー時に止まる
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-		// 警告時に止まる
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+	dxCommon->CreateDepthResource(camera.get());
 
-		// 抑制するメッセージ
-		D3D12_MESSAGE_ID denyIds[] = {
-			// Windows11でのDXGIデバッグレイヤーの相互作用バグによるエラーメッセージ
-			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE
-		};
-		// 抑制するレベル
-		D3D12_MESSAGE_SEVERITY severities[] = { D3D12_MESSAGE_SEVERITY_INFO };
-		D3D12_INFO_QUEUE_FILTER filter{};
+	dxCommon->CreateMaskSRVDescriptorHeap();
 
-		filter.DenyList.NumIDs = _countof(denyIds);
-		filter.DenyList.pIDList = denyIds;
-		filter.DenyList.NumSeverities = _countof(severities);
-		filter.DenyList.pSeverityList = severities;
-		// 指定したメッセージの表示を抑制する
-		infoQueue->PushStorageFilter(&filter);
-		// 解放
-		infoQueue->Release();
-	}
-#endif
+	// 各種ポストエフェクトの初期化
+	noisePostEffect_ = std::make_unique<NoisePostEffect>();
+	noisePostEffect_->Initialize(dxCommon.get());
+
+	grayscalePostEffect_ = std::make_unique<GrayscalePostEffect>();
+	grayscalePostEffect_->Initialize(dxCommon.get());
+
+	// ポストエフェクトマネージャにポストエフェクトを追加
+	postEffectManager_ = std::make_unique<PostEffectManager>();
+	postEffectManager_->Initialize(dxCommon.get());
+	postEffectManager_->AddEffect(std::move(noisePostEffect_));
+	postEffectManager_->AddEffect(std::move(grayscalePostEffect_));
+
 
 	imGuiManager->Initialize(winApp.get(), dxCommon.get());
 
@@ -137,6 +126,8 @@ void SRFramework::Update()
 	// シーンマネージャの更新
 	sceneManager_->Update();
 	camera->Update();
+
+	postEffectManager_->SetTimeParams(GetNowTimeInSeconds());
 	// パーティクルマネージャの更新
 	ParticleManager::GetInstance()->Update();
 }
@@ -155,18 +146,27 @@ void SRFramework::PostDraw()
 	dxCommon.get()->PostDraw();
 }
 
-void SRFramework::PreDrawObject3d()
+void SRFramework::PrePostEffect()
 {
-	// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックコマンドを積む
-	//Object3dCommon::GetInstance()->DrawSettings();
+	// [D3D12_RESOURCE_STATE_DEPTH_WRITE]（書き込み
+	dxCommon.get()->PreRenderScene();
+	postEffectManager_->PreRenderAll();
 }
 
-void SRFramework::PreDrawSprite()
+void SRFramework::DrawPostEffect()
 {
-	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
-	//spriteCommon->DrawSettings();
+	// 深度バッファを「SRV用」に遷移
+	dxCommon->TransitionDepthBufferToSRV();
 
-	
+	dxCommon.get()->TransitionRenderTextureToShaderResource();
+	dxCommon.get()->DrawRenderTexture();
+	dxCommon.get()->TransitionRenderTextureToRenderTarget();
+	postEffectManager_->PreBarrierAll();
+	postEffectManager_->DrawAll();
+	postEffectManager_->PostBarrierAll();
+
+	// --- ここでの深度バッファ状態 ---
+    // [D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE]（SRV用）のまま
 }
 
 void SRFramework::Run()

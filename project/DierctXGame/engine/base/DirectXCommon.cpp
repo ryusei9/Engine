@@ -1246,7 +1246,7 @@ void DirectXCommon::CreatePSO()
 
 	// 実際に生成
 	hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
-	hr = commandList->Reset(commandAllocator.Get(), nullptr);
+	//hr = commandList->Reset(commandAllocator.Get(), nullptr);
 
 	assert(SUCCEEDED(hr));
 }

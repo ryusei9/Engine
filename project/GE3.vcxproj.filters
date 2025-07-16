@@ -323,9 +323,6 @@
     <ClInclude Include="ParticleManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\MakeScaleMatrix.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="DierctXGame\engine\io\MakeTranslateMatrix.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

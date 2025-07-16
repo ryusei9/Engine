@@ -65,10 +65,10 @@ void SceneManager::DrawImGui()
 	if (nowScene_) {
 		nowScene_->DrawImGui();
 	}
-	ImGui::Begin("DxCommon");
+	/*ImGui::Begin("DxCommon");
 	ImGui::SliderFloat("Dissolve Threshold", &directXCommon_->GetDissolveParam()->threshold, 0.0f, 1.0f);
 	ImGui::SliderFloat("Edge Width", &directXCommon_->GetDissolveParam()->edgeWidth, 0.0f, 0.2f);
 	ImGui::SliderFloat("Edge Strength", &directXCommon_->GetDissolveParam()->edgeStrength, 0.0f, 5.0f);
 	ImGui::ColorEdit3("Edge Color", directXCommon_->GetDissolveParam()->edgeColor);
-	ImGui::End();
+	ImGui::End();*/
 }

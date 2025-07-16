@@ -27,6 +27,10 @@ void TextureManager::LoadTexture(const std::string& filePath)
 	} else {
 		hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	}
+	if (!SUCCEEDED(hr)) {
+		OutputDebugStringA(("Texture load failed: " + filePath + "\n").c_str());
+		OutputDebugStringA(("HRESULT: " + std::to_string(hr) + "\n").c_str());
+	}
 	assert(SUCCEEDED(hr));
 
 	// ミップマップの作成

@@ -64,7 +64,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	playerBullet_->SetPlayer(player_.get());*/
 
 	skybox_ = std::make_unique<Skybox>();
-	skybox_->Initialize();
+	skybox_->Initialize("resources/rostock_laage_airport_4k.dds");
 
 	// レベルデータのロード
 	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など

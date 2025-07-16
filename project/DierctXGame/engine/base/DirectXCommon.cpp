@@ -731,7 +731,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateTextureResource(cons
 		// Resourceの設定
 		&resourceDesc,
 		// 初回のResourceState。Textureは基本読むだけ
-		D3D12_RESOURCE_STATE_GENERIC_READ,
+		D3D12_RESOURCE_STATE_COPY_DEST,
 		// Clear最適値。使わないのでnullptr
 		nullptr,
 		// 作成するResourceポインタへのポインタ

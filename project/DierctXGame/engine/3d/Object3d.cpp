@@ -55,9 +55,7 @@ void Object3d::Draw()
 
 	worldTransform.SetPipeline();
 
-
-	// ディスクリプタヒープに関連付けられたハンドルを使用
-	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, modelData.material.gpuHandle);
+	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2,modelData.material.gpuHandle);
 
 	// 平行光源
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());

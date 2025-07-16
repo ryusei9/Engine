@@ -156,6 +156,11 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\base\SrvManager.cpp" />
     <ClCompile Include="DierctXGame\application\base\MyGame.cpp" />
     <ClCompile Include="DierctXGame\engine\scene\TitleScene.cpp" />
+    <ClCompile Include="DierctXGame\engine\posteffect\NoisePostEffect.cpp" />
+    <ClCompile Include="DierctXGame\engine\posteffect\PostEffectManager.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="DierctXGame\engine\io\MakeRotateXYZMatrix.cpp" />
     <ClCompile Include="DierctXGame\engine\base\ParticleEmitter.cpp" />
     <ClCompile Include="DierctXGame\engine\base\ParticleManager.cpp" />
@@ -238,6 +243,9 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\application\Object\Player.h" />
     <ClInclude Include="DierctXGame\application\Object\PlayerBullet.h" />
     <ClInclude Include="tools\json.hpp" />
+	<ClInclude Include="DepthMaterial.h" />
+	<ClInclude Include="DierctXGame\engine\posteffect\GrayscalePostEffect.h" />
+	<ClInclude Include="DierctXGame\engine\posteffect\PostEffectBase.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

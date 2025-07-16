@@ -116,10 +116,10 @@ void GamePlayScene::Update()
 
 	/*------オブジェクトの更新------*/
 	// ボールの更新
-	/*ball->Update();
-	ball->SetTransform(ballTransform);
+	ball->Update();
+	ball->SetWorldTransform(ballTransform);
 	ground->Update();
-	ground->SetTransform(groundTransform);*/
+	ground->SetWorldTransform(groundTransform);
 }
 
 void GamePlayScene::Draw()
@@ -136,8 +136,8 @@ void GamePlayScene::Draw()
 		obj->Draw();
 	}
 	// ボールの描画
-	/*ball->Draw();
-	ground->Draw();*/
+	ball->Draw();
+	ground->Draw();
 	// プレイヤーの描画
 	//player_->Draw();
 

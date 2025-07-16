@@ -58,6 +58,9 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	enemy_->SetPlayer(player_.get());
 
 	playerBullets_ = &player_->GetBullets();
+
+	// 敵の弾の情報をセット
+	enemyBullets_ = &enemy_->GetBullets();
 	// プレイヤーの弾の初期化
 	/*playerBullet_ = std::make_unique<PlayerBullet>();
 	playerBullet_->Initialize();
@@ -116,10 +119,10 @@ void GamePlayScene::Update()
 
 	/*------オブジェクトの更新------*/
 	// ボールの更新
-	ball->Update();
+	/*ball->Update();
 	ball->SetWorldTransform(ballTransform);
 	ground->Update();
-	ground->SetWorldTransform(groundTransform);
+	ground->SetWorldTransform(groundTransform);*/
 }
 
 void GamePlayScene::Draw()
@@ -136,8 +139,8 @@ void GamePlayScene::Draw()
 		obj->Draw();
 	}
 	// ボールの描画
-	ball->Draw();
-	ground->Draw();
+	/*ball->Draw();
+	ground->Draw();*/
 	// プレイヤーの描画
 	//player_->Draw();
 
@@ -224,9 +227,10 @@ void GamePlayScene::CheckAllCollisions()
 		collisionManager_->AddCollider(bullet.get());
 	}
 	// 敵の弾
-	for (const auto& bullet : enemy_->GetBullets()) {
+	for (const auto& bullet : *enemyBullets_) {
 		collisionManager_->AddCollider(bullet.get());
 	}
+	
 	// 衝突判定と応答
 	collisionManager_->CheckCollision();
 }

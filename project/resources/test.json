@@ -72,8 +72,54 @@
             "transform": {
                 "translation": [
                     0.0,
-                    -1.4420086145401,
+                    4.707972049713135,
                     1.8335504531860352
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "disabled": false,
+            "file_name": "monsterBall"
+        },
+        {
+            "type": "MESH",
+            "name": "球.001",
+            "transform": {
+                "translation": [
+                    2.5912232398986816,
+                    4.707972049713135,
+                    0.0748034119606018
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "disabled": false,
+            "file_name": "monsterBall"
+        },
+        {
+            "type": "MESH",
+            "name": "球.003",
+            "transform": {
+                "translation": [
+                    -2.9382431507110596,
+                    4.707972049713135,
+                    -1.2280365228652954
                 ],
                 "rotation": [
                     0.0,

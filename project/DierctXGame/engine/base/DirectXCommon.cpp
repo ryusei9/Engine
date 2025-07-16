@@ -585,7 +585,6 @@ void DirectXCommon::PreDraw()
 	// 指定した深度で画面全体をクリアする
 	//commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-
 	/// 三角形の描画
 	// Viewportを設定
 	commandList->RSSetViewports(1, &viewport);
@@ -1212,6 +1211,7 @@ void DirectXCommon::CreateRootSignature()
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 }
 
+
 void DirectXCommon::CreatePSO()
 {
 	CreateRootSignature();
@@ -1246,6 +1246,8 @@ void DirectXCommon::CreatePSO()
 
 	// 実際に生成
 	hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
+	hr = commandList->Reset(commandAllocator.Get(), nullptr);
+
 	assert(SUCCEEDED(hr));
 }
 

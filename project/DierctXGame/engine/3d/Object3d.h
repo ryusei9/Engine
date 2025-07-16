@@ -6,7 +6,7 @@
 #include "string"
 #include "fstream"
 #include "Matrix4x4.h"
-#include "Transform.h"
+#include "worldTransform.h"
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <wrl.h>
@@ -15,6 +15,7 @@
 #include <numbers>
 #include <MaterialData.h>
 #include <Material.h>
+#include <WorldTransform.h>
 
 class Object3dCommon;
 
@@ -35,11 +36,11 @@ public:
 		Vector4 color;
 		int32_t enableLighting;
 		float padding[3];
-		Matrix4x4 uvTransform;
+		Matrix4x4 uvworldTransform;
 	};*/
 
 	// 座標変換行列データ
-	struct TransformationMatrix {
+	struct worldTransformationMatrix {
 		Matrix4x4 WVP;
 		Matrix4x4 World;
 		Matrix4x4 WorldInverseTranspose;
@@ -108,24 +109,23 @@ public:
 	void DrawImGui();
 
 	// ゲッター
-	const Vector3& GetScale() const { return transform.scale; }
-	const Vector3& GetRotate() const { return transform.rotate; }
-	const Vector3& GetTranslate() const { return transform.translate; }
+	const Vector3& GetScale() const { return worldTransform.scale_; }
+	const Vector3& GetRotate() const { return worldTransform.rotate_; }
+	const Vector3& GetTranslate() const { return worldTransform.translate_; }
 
 	// セッター
 	void SetModel(Model* model) { this->model = model; }
 	void SetModel(const std::string& filePath);
-	void SetScale(const Vector3& scale) { transform.scale = scale; }
-	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
-	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
-	void SetTransform(const Transform& transform) { this->transform = transform; }
+	void SetScale(const Vector3& scale) { worldTransform.scale_ = scale; }
+	void SetRotate(const Vector3& rotate) { worldTransform.rotate_ = rotate; }
+	void SetTranslate(const Vector3& translate) { worldTransform.translate_ = translate; }
+	void SetWorldTransform(const WorldTransform& worldTransform) { this->worldTransform = worldTransform; }
 	void SetCamera(Camera* camera) { this->camera = camera; }
 private:
 	// BufferResourceの作成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes);
 	void CreateVertexData();
 	void CreateMaterialData();
-	void CreateWVPData();
 	void CreateDirectionalLightData();
 
 	Model* model = nullptr;
@@ -144,7 +144,7 @@ private:
 	//// バッファリソース内のデータを指すポインタ
 	VertexData* vertexData = nullptr;
 	Material* materialData = nullptr;
-	TransformationMatrix* transformationMatrixData = nullptr;
+	worldTransformationMatrix* worldTransformationMatrixData = nullptr;
 	DirectionalLight* directionalLightData = nullptr;
 	// カメラにデータを書き込む
 	CameraForGPU* cameraData = nullptr;
@@ -155,7 +155,7 @@ private:
 	//// 頂点バッファビューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 
-	Transform transform;
+	WorldTransform worldTransform;
 
 	Camera* camera = nullptr;
 

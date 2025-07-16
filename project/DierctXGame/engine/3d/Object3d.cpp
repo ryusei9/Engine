@@ -20,14 +20,13 @@ void Object3d::Initialize(const std::string& fileName)
 	modelData = LoadObjFile("resources", fileName);
 	CreateVertexData();
 	CreateMaterialData();
-	CreateWVPData();
 	CreateDirectionalLightData();
 	// .objの参照しているテクスチャファイル読み込み
 	TextureManager::GetInstance()->LoadTexture(modelData.material.textureFilePath);
 	// 読み込んだテクスチャの番号を取得
 	modelData.material.gpuHandle = TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureFilePath);
 	// Transform変数を作る
-	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	worldTransform.Initialize();
 	//cameraTransform = { {1.0f,1.0f,1.0f},{0.3f,0.0f,0.0f},{0.0f,4.0f,-10.0f} };
 	this->camera = Object3dCommon::GetInstance()->GetDefaultCamera();
 
@@ -41,19 +40,7 @@ void Object3d::Initialize(const std::string& fileName)
 
 void Object3d::Update()
 {
-	Matrix4x4 worldMatrix = MakeAffineMatrix::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-	Matrix4x4 worldViewProjectionMatrix;
-	if (camera) {
-		const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
-		worldViewProjectionMatrix = Multiply::Multiply(worldMatrix, viewProjectionMatrix);
-	} else {
-		worldViewProjectionMatrix = worldMatrix;
-	}
-
-	transformationMatrixData->WVP = worldViewProjectionMatrix;
-	transformationMatrixData->World = worldMatrix;
-	// 非均一スケール用にワールド行列の逆行列を求める
-	transformationMatrixData->WorldInverseTranspose = Inverse::Inverse(worldMatrix);
+	worldTransform.Update();
 }
 
 void Object3d::Draw()
@@ -66,8 +53,7 @@ void Object3d::Draw()
 	//// 第一引数の0はRootParameter配列の0番目
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 
-	// wvp用のCBufferの場所を設定
-	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+	worldTransform.SetPipeline();
 
 
 	// ディスクリプタヒープに関連付けられたハンドルを使用
@@ -384,18 +370,6 @@ void Object3d::CreateMaterialData()
 
 	// 単位行列で初期化
 	materialData->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
-}
-
-void Object3d::CreateWVPData()
-{
-	wvpResource = CreateBufferResource(Object3dCommon::GetInstance()->GetDxCommon()->GetDevice(), sizeof(TransformationMatrix));
-
-	// 書き込むためのアドレスを取得
-	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
-
-	// 単位行列を書き込んでおく
-	transformationMatrixData->WVP = MakeIdentity4x4::MakeIdentity4x4();
-	transformationMatrixData->World = MakeIdentity4x4::MakeIdentity4x4();
 }
 
 void Object3d::CreateDirectionalLightData()

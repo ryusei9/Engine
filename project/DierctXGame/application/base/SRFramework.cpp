@@ -32,6 +32,11 @@ void SRFramework::Initialize()
 	TextureManager::GetInstance()->LoadTexture("resources/monsterBall.png");
 	TextureManager::GetInstance()->LoadTexture("resources/mori.png");
 	TextureManager::GetInstance()->LoadTexture("resources/mori_Red.png");
+	TextureManager::GetInstance()->LoadTexture("resources/circle2.png");
+	TextureManager::GetInstance()->LoadTexture("resources/gradationLine.png");
+	TextureManager::GetInstance()->LoadTexture("resources/player.png");
+	TextureManager::GetInstance()->LoadTexture("resources/Boss.png");
+	TextureManager::GetInstance()->LoadTexture("resources/player_bullet.png");
 	
 	// スプライト共通部の初期化
 	
@@ -49,6 +54,7 @@ void SRFramework::Initialize()
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
 
+	Input::GetInstance()->Initialize(winApp.get());
 
 	camera->SetRotate({ 0.1f,0.0f,0.0f });
 	camera->SetTranslate({ 0.0f,5.0f,-30.0f });

@@ -10,7 +10,19 @@ class Input{
 public:
 	// namespace省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
-public:
+
+	// シングルトンインスタンスの取得
+	static Input* GetInstance() {
+		static Input instance;
+		return &instance;
+	}
+
+	Input() = default;
+	~Input() = default;
+
+
+	Input(const Input&) = delete;
+	Input& operator=(const Input&) = delete;
 	// メンバ変数
 	// 初期化
 	void Initialize(WinApp* winApp);
@@ -28,6 +40,9 @@ public:
 	/// </summary>
 	bool TriggerKey(BYTE keyNumber);
 private:
+	
+	
+
 	// メンバ変数
 	// キーボードのデバイス
 	ComPtr<IDirectInputDevice8> keyboard;

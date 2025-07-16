@@ -41,7 +41,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	// ボールの初期化
 	ground = std::make_unique<Object3d>();
-	ground->Initialize("plane.obj");
+	ground->Initialize("terrain.obj");
 
 	groundTransform.Initialize();
 	groundTransform.translate_ = { 0.0f,0.0f,5.0f }; // 座標
@@ -116,10 +116,10 @@ void GamePlayScene::Update()
 
 	/*------オブジェクトの更新------*/
 	// ボールの更新
-	/*ball->Update();
-	ball->SetTransform(ballTransform);
+	ball->Update();
+	ball->SetWorldTransform(ballTransform);
 	ground->Update();
-	ground->SetTransform(groundTransform);*/
+	ground->SetWorldTransform(groundTransform);
 }
 
 void GamePlayScene::Draw()
@@ -136,8 +136,8 @@ void GamePlayScene::Draw()
 		obj->Draw();
 	}
 	// ボールの描画
-	/*ball->Draw();
-	ground->Draw();*/
+	ball->Draw();
+	ground->Draw();
 	// プレイヤーの描画
 	//player_->Draw();
 

@@ -68,6 +68,8 @@ void Object3d::Draw()
 
 	// スポットライト
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
+
+	//Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(7, textureHandle_);
 	// 3Dモデルが割り当てられていれば描画する
 	if (model) {
 		model->Draw();

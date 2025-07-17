@@ -66,6 +66,8 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	skybox_ = std::make_unique<Skybox>();
 	skybox_->Initialize("resources/rostock_laage_airport_4k.dds");
+
+	ball->SetTextureHandle(skybox_->GetTextureHandle());
 	
 	// レベルデータのロード
 	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
@@ -120,9 +122,9 @@ void GamePlayScene::Update()
 
 	/*------オブジェクトの更新------*/
 	// ボールの更新
-	/*ball->Update();
-	ball->SetTransform(ballTransform);
-	ground->Update();
+	ball->Update();
+	ball->SetWorldTransform(ballTransform);
+	/*ground->Update();
 	ground->SetTransform(groundTransform);*/
 }
 
@@ -141,8 +143,8 @@ void GamePlayScene::Draw()
 	}
 	skybox_->Draw();
 	// ボールの描画
-	/*ball->Draw();
-	ground->Draw();*/
+	ball->Draw();
+	/*ground->Draw();*/
 	// プレイヤーの描画
 	//player_->Draw();
 

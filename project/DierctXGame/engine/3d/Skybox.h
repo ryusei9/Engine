@@ -33,6 +33,8 @@ public:
 
 	WorldTransform& GetWorldTransform() { return worldTransform_; }
 
+    D3D12_GPU_DESCRIPTOR_HANDLE GetTextureHandle() const { return textureHandle_; }
+	
 private:
     void CreateVertexBuffer();
     void CreateTexture(const std::string& texturePath);

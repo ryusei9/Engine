@@ -38,14 +38,14 @@ void Object3dCommon::RootSignatureInitialize()
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
-	// Rootparameter作成。複数設定できるので配列。今回は結果1つだけなので長さ1の配列
+	// Rootparameter作成。複数設定できるので配列
 	D3D12_ROOT_PARAMETER rootParameters[7] = {};
 
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	// 0から始まる
 	descriptorRange[0].BaseShaderRegister = 0;
 	// 数は1つ
-	descriptorRange[0].NumDescriptors = 1;
+	descriptorRange[0].NumDescriptors = 2;
 	// SRVを使う
 	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	// Offsetを自動計算
@@ -99,6 +99,15 @@ void Object3dCommon::RootSignatureInitialize()
 	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // 新しいCBVの可視性を設定
 	// レジスタ番号2を使う
 	rootParameters[6].Descriptor.ShaderRegister = 4; // 新しいCBVのレジスタ番号を設定
+
+	///*------環境マップ用------*/
+	//rootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	//// PixelShaderで使う
+	//rootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	//// Tableの中身の配列を指定
+	//rootParameters[7].DescriptorTable.pDescriptorRanges = descriptorRange;
+	//// Tableで利用する数
+	//rootParameters[7].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
 
 	//////////////////////////
 	// Samplerの設定

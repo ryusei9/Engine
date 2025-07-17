@@ -2,9 +2,7 @@
 
 struct Material{
     float32_t4 color;
-    uint32_t enableLighting;
     float32_t4x4 uvTransform;
-    float32_t shininess;
 };
 
 struct DirectionalLight
@@ -50,10 +48,10 @@ ConstantBuffer<Material> gMaterial : register(b0);
 TextureCube<float32_t4> gTexture : register(t0);
 SamplerState gSampler : register(s0);
 
-ConstantBuffer<DirectionalLight> gDirectionalLight : register(b1);
-ConstantBuffer<Camera> gCamera : register(b2);
-ConstantBuffer<PointLight> gPointLight : register(b3);
-ConstantBuffer<SpotLight> gSpotLight : register(b4);
+//ConstantBuffer<DirectionalLight> gDirectionalLight : register(b1);
+//ConstantBuffer<Camera> gCamera : register(b2);
+//ConstantBuffer<PointLight> gPointLight : register(b3);
+//ConstantBuffer<SpotLight> gSpotLight : register(b4);
 
 struct PixelShaderOutput {
     float32_t4 color : SV_TARGET0;
@@ -65,7 +63,7 @@ PixelShaderOutput main(VertexShaderOutput input){
     // UV設定
     //float32_t4 transformedUV = mul(float32_t4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
     float32_t4 textureColor = gTexture.Sample(gSampler, input.texcoord); // テクスチャの色
-    textureColor.rgb = pow(textureColor.rgb, 2.2f); // ガンマ補正済みのテクスチャの場合、リニア空間に変換
+    //textureColor.rgb = pow(textureColor.rgb, 2.2f); // ガンマ補正済みのテクスチャの場合、リニア空間に変換
     output.color = textureColor * gMaterial.color; // マテリアルの色とテクスチャの色を掛け合わせる
      // 照明効果の統合
     //if (gMaterial.enableLighting != 0)

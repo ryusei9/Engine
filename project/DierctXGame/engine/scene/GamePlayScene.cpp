@@ -1,5 +1,6 @@
 #include "GamePlayScene.h"
 #include "SRFramework.h"
+#include "Object3dCommon.h"
 
 void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
@@ -65,7 +66,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	skybox_ = std::make_unique<Skybox>();
 	skybox_->Initialize("resources/rostock_laage_airport_4k.dds");
-
+	
 	// レベルデータのロード
 	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
 
@@ -111,7 +112,7 @@ void GamePlayScene::Update()
 	/*particleEmitter2->SetPosition(particlePosition2);
 	particleEmitter2->SetParticleRate(8);
 	particleEmitter2->Update();*/
-
+	skybox_->Update();
 
 	// スプライトの更新
 	/*sprite->Update();
@@ -186,6 +187,7 @@ void GamePlayScene::DrawImGui()
 	}
 	ImGui::End();
 	enemy_->DrawImGui();
+	skybox_->DrawImGui();
 }
 
 void GamePlayScene::CreateObjectsFromLevelData()

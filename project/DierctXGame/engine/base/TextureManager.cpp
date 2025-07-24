@@ -1,7 +1,7 @@
 #include "TextureManager.h"
 #include "StringUtility.h"
 #include <cassert>
-
+#include "DirectXCommon.h"
 std::shared_ptr<TextureManager> TextureManager::instance = nullptr;
 
 // ImGuiで0番を使用するため、1番から使用
@@ -21,13 +21,29 @@ void TextureManager::LoadTexture(const std::string& filePath)
 	// テクスチャファイルを読んでプログラムで扱えるようにする
 	DirectX::ScratchImage image{};
 	std::wstring filePathW = StringUtility::ConvertString(filePath);
-	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
+	HRESULT hr;
+	if (filePathW.ends_with(L".dds")) {
+		hr = DirectX::LoadFromDDSFile(filePathW.c_str(), DirectX::DDS_FLAGS_NONE, nullptr, image);
+	} else {
+		hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
+	}
+	if (!SUCCEEDED(hr)) {
+		OutputDebugStringA(("Texture load failed: " + filePath + "\n").c_str());
+		OutputDebugStringA(("HRESULT: " + std::to_string(hr) + "\n").c_str());
+	}
 	assert(SUCCEEDED(hr));
 
 	// ミップマップの作成
 	DirectX::ScratchImage mipImages{};
-	hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 0, mipImages);
-	assert(SUCCEEDED(hr));
+	if(DirectX::IsCompressed(image.GetMetadata().format)) {
+		// 圧縮テクスチャの場合はミップマップを生成しない
+		mipImages = std::move(image);
+	} else {
+		// 非圧縮テクスチャの場合はミップマップを生成する
+		hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_DEFAULT, 0, mipImages);
+		assert(SUCCEEDED(hr));
+	}
+	
 
 	// ミップマップの結果を使用する
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
@@ -55,9 +71,15 @@ void TextureManager::LoadTexture(const std::string& filePath)
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = textureData.metadata.format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
-
+	if (metadata.IsCubemap()) {
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+		srvDesc.TextureCube.MostDetailedMip = 0;
+		srvDesc.TextureCube.MipLevels = UINT_MAX;
+		srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+	} else {
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
+	}
 	// SRVを作成
 	dxCommon_->GetDevice()->CreateShaderResourceView(textureData.resource.Get(), &srvDesc, textureData.srvHandleCPU);
 
@@ -91,9 +113,9 @@ uint32_t TextureManager::GetTextureIndexByFilePath(const std::string& filePath)
 	return 0;
 }
 
-void TextureManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager)
+void TextureManager::Initialize(SrvManager* srvManager)
 {
-	dxCommon_ = dxCommon;
+	dxCommon_ = DirectXCommon::GetInstance();
 	srvManager_ = srvManager;
 	// SRVの数と同数
 	textureDatas.reserve(DirectXCommon::kMaxSRVCount);

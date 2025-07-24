@@ -13,7 +13,7 @@ public:
 	~SceneManager();
 
 	// 初期化
-	void Initialize(DirectXCommon* directXCommon, WinApp* winApp);
+	void Initialize(WinApp* winApp);
 
 	// 更新
 	void Update();

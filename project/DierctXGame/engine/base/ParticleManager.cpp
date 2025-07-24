@@ -12,6 +12,7 @@
 #include <iostream>
 #include <numbers>
 #include <Lerp.h>
+#include "DirectXCommon.h"
 
 using namespace Logger;
 
@@ -23,9 +24,9 @@ ParticleManager* ParticleManager::GetInstance()
 	return &instance;
 }
 
-void ParticleManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager, Camera* camera)
+void ParticleManager::Initialize(SrvManager* srvManager, Camera* camera)
 {
-	dxCommon_ = dxCommon;
+	dxCommon_ = DirectXCommon::GetInstance();
 	srvManager_ = srvManager;
 	camera_ = camera;
 

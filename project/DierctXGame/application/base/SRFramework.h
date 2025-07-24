@@ -89,18 +89,11 @@ public:
 	// 実行
 	void Run();
 
-	// ゲッター
-	DirectXCommon* GetDirectXCommon() const { return dxCommon.get(); }
-
-	//SpriteCommon* GetSpriteCommon() const { return spriteCommon.get(); }
-
 	WinApp* GetWinApp() const { return winApp.get(); }
 protected:
 	// メンバ変数
 	// ポインタ
 	unique_ptr<WinApp> winApp = nullptr;
-
-	unique_ptr<DirectXCommon> dxCommon = nullptr;
 
 	unique_ptr<SrvManager> srvManager = nullptr;
 

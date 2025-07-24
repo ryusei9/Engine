@@ -3,6 +3,7 @@
 #include <cassert>
 #include "Logger.h"
 
+
 std::shared_ptr<SpriteCommon> SpriteCommon::instance = nullptr;
 
 std::shared_ptr<SpriteCommon> SpriteCommon::GetInstance()
@@ -13,10 +14,10 @@ std::shared_ptr<SpriteCommon> SpriteCommon::GetInstance()
 	return instance;
 	
 }
-void SpriteCommon::Initialize(DirectXCommon* dxCommon)
+void SpriteCommon::Initialize()
 {
 	// 引数で受け取ってメンバ変数に記録する
-	dxCommon_ = dxCommon;
+	dxCommon_ = DirectXCommon::GetInstance();
 	
 	GraphicsPipelineInitialize();
 	

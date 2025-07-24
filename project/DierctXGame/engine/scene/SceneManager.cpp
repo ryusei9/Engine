@@ -1,4 +1,5 @@
 #include "SceneManager.h"
+#include "DirectXCommon.h"
 #include <imgui.h>
  
 
@@ -10,9 +11,9 @@ SceneManager::~SceneManager()
 	}
 }
 
-void SceneManager::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
+void SceneManager::Initialize(WinApp* winApp)
 {
-	directXCommon_ = directXCommon;
+	directXCommon_ = DirectXCommon::GetInstance();
 	winApp_ = winApp;
 
 	// 初期シーンを設定（例としてDebugSceneを設定）

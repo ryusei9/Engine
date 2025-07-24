@@ -23,7 +23,6 @@ public:
 
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon,SrvManager* srvManager);
-
 	// 共通描画設定
 	void DrawSettings();
 

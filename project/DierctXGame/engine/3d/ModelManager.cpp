@@ -1,5 +1,6 @@
 #include "ModelManager.h"
 
+
 std::shared_ptr<ModelManager> ModelManager::instance = nullptr;
 
 std::shared_ptr<ModelManager> ModelManager::GetInstance() {
@@ -9,10 +10,10 @@ std::shared_ptr<ModelManager> ModelManager::GetInstance() {
 	return instance;
 }
 
-void ModelManager::Initialize(DirectXCommon* dxCommon)
+void ModelManager::Initialize()
 {
 	modelCommon = std::make_unique<ModelCommon>();
-	modelCommon->Initialize(dxCommon);
+	modelCommon->Initialize(DirectXCommon::GetInstance());
 }
 
 void ModelManager::LoadModel(const std::string& filePath)

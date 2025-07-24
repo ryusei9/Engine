@@ -16,16 +16,15 @@ void SRFramework::Initialize()
 
 
 	// DirectXの初期化
-	dxCommon = make_unique<DirectXCommon>();
-	dxCommon->Initialize(winApp.get());
+	DirectXCommon::GetInstance()->Initialize(winApp.get());
 
 
 	// SRVマネージャの初期化
 	srvManager = make_unique<SrvManager>();
-	srvManager->Initialize(dxCommon.get());
+	srvManager->Initialize();
 
 	// テクスチャマネージャの初期化
-	TextureManager::GetInstance()->Initialize(dxCommon.get(), srvManager.get());
+	TextureManager::GetInstance()->Initialize(srvManager.get());
 
 	// テクスチャを事前にロード
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
@@ -40,7 +39,7 @@ void SRFramework::Initialize()
 	
 	// スプライト共通部の初期化
 	
-	SpriteCommon::GetInstance()->Initialize(dxCommon.get());
+	SpriteCommon::GetInstance()->Initialize();
 
 
 	// 3Dオブジェクト共通部の初期化
@@ -48,7 +47,7 @@ void SRFramework::Initialize()
 
 
 	// 3Dモデルマネージャの初期化
-	ModelManager::GetInstance()->Initialize(dxCommon.get());
+	ModelManager::GetInstance()->Initialize();
 
 	// .objファイルからモデルを読み込む
 	ModelManager::GetInstance()->LoadModel("plane.obj");
@@ -59,6 +58,7 @@ void SRFramework::Initialize()
 	camera->SetRotate({ 0.1f,0.0f,0.0f });
 	camera->SetTranslate({ 0.0f,5.0f,-30.0f });
 	Object3dCommon::GetInstance()->SetDefaultCamera(camera.get());
+
 
 	dxCommon->CreateDepthResource(camera.get());
 
@@ -78,14 +78,15 @@ void SRFramework::Initialize()
 	postEffectManager_->AddEffect(std::move(grayscalePostEffect_));
 
 
-	imGuiManager->Initialize(winApp.get(), dxCommon.get());
+
+	imGuiManager->Initialize(winApp.get());
 
 	// シーンマネージャの初期化
 	sceneManager_ = std::make_unique<SceneManager>();
-	sceneManager_->Initialize(dxCommon.get(), winApp.get());
+	sceneManager_->Initialize(winApp.get());
 
 	/*------パーティクルマネージャの初期化------*/
-	ParticleManager::GetInstance()->Initialize(dxCommon.get(), srvManager.get(),camera.get());
+	ParticleManager::GetInstance()->Initialize(srvManager.get(),camera.get());
 }
 
 void SRFramework::Finelize()
@@ -100,7 +101,7 @@ void SRFramework::Finelize()
 	winApp->Finalize();
 	
 
-	CloseHandle(dxCommon.get()->GetFenceEvent());
+	CloseHandle(DirectXCommon::GetInstance()->GetFenceEvent());
 	
 
 	// テクスチャマネージャの終了
@@ -144,7 +145,7 @@ void SRFramework::PreDraw()
 	// --- ここでの深度バッファ状態 ---
 	// [D3D12_RESOURCE_STATE_DEPTH_WRITE]（書き込み
 	// 描画前処理
-	dxCommon.get()->PreDraw();
+	DirectXCommon::GetInstance()->PreDraw();
 
 	srvManager->PreDraw();
 	
@@ -152,7 +153,7 @@ void SRFramework::PreDraw()
 
 void SRFramework::PostDraw()
 {
-	dxCommon.get()->PostDraw();
+	DirectXCommon::GetInstance()->PostDraw();
 }
 
 void SRFramework::PrePostEffect()

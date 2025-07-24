@@ -1,7 +1,7 @@
 #pragma once
-#include <DirectXCommon.h>
 #include <wrl.h>
 #include <queue>
+#include "DirectXCommon.h"
 
 // SRV管理
 class SrvManager
@@ -10,7 +10,7 @@ class SrvManager
 public:
 	// メンバ関数
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon);
+	void Initialize();
 
 	uint32_t Allocate();
 

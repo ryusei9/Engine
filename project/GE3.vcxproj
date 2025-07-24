@@ -114,6 +114,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\application\Object\BaseCharacter.cpp" />
     <ClCompile Include="DierctXGame\application\Object\Collider.cpp" />
     <ClCompile Include="DierctXGame\application\Object\EnemyAttack.cpp" />
+    <ClCompile Include="DierctXGame\engine\3d\Skybox.cpp" />
     <ClCompile Include="DierctXGame\engine\base\CollisionManager.cpp" />
     <ClCompile Include="DierctXGame\engine\scene\BaseScene.cpp" />
     <ClCompile Include="DierctXGame\engine\audio\Audio.cpp" />
@@ -176,6 +177,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\application\Object\BaseCharacter.h" />
     <ClInclude Include="DierctXGame\application\Object\Collider.h" />
     <ClInclude Include="DierctXGame\application\Object\EnemyAttack.h" />
+    <ClInclude Include="DierctXGame\engine\3d\Skybox.h" />
     <ClInclude Include="DierctXGame\engine\base\CollisionManager.h" />
     <ClInclude Include="DierctXGame\application\Object\CollisionTypeIdDef.h" />
     <ClInclude Include="DierctXGame\engine\io\MakeScaleMatrix.h" />
@@ -251,9 +253,9 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\application\Object\Player.h" />
     <ClInclude Include="DierctXGame\application\Object\PlayerBullet.h" />
     <ClInclude Include="tools\json.hpp" />
-	<ClInclude Include="DepthMaterial.h" />
-	<ClInclude Include="DierctXGame\engine\posteffect\GrayscalePostEffect.h" />
-	<ClInclude Include="DierctXGame\engine\posteffect\PostEffectBase.h" />
+    <ClInclude Include="DepthMaterial.h" />
+    <ClInclude Include="DierctXGame\engine\posteffect\GrayscalePostEffect.h" />
+    <ClInclude Include="DierctXGame\engine\posteffect\PostEffectBase.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
@@ -273,6 +275,10 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </None>
     <None Include="resources\shaders\FullScreen.hlsli" />
     <None Include="resources\shaders\Object3D.hlsli" />
+    <None Include="resources\shaders\Skybox.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="resources\shaders\Sprite.hlsli" />
     <None Include="resources\test.json" />
     <None Include="tools\level_editor\__init__.py" />
@@ -337,6 +343,16 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="resources\shaders\Object3d.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Skybox.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Skybox.VS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>

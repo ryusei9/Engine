@@ -2,9 +2,11 @@
 #include "ImGui/imgui.h"
 #include <ImGui/imgui_impl_win32.h>
 #include <ImGui/imgui_impl_dx12.h>
-void ImGuiManager::Initialize(WinApp* winApp_, DirectXCommon* dxCommon)
+
+
+void ImGuiManager::Initialize(WinApp* winApp_)
 {
-	dxCommon_ = dxCommon;
+	dxCommon_ = DirectXCommon::GetInstance();
 	
 
 	// デスクリプタヒープの設定

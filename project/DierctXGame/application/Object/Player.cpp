@@ -186,6 +186,10 @@ void Player::OnCollision(Collider* other)
 	}
 }
 
+void Player::DrawImGui() {
+	object3d_->DrawImGui();
+}
+
 Vector3 Player::GetCenterPosition() const
 {
 	const Vector3 offset = { 0.0f, 0.0f, 0.0f }; // プレイヤーの中心を考慮

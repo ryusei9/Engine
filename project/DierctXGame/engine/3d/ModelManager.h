@@ -17,7 +17,7 @@ public:
     ModelManager& operator=(const ModelManager&) = delete;
 
     static std::shared_ptr<ModelManager> GetInstance();
-    void Initialize(DirectXCommon* dxCommon);
+    void Initialize();
     void LoadModel(const std::string& filePath);
    
     void Finalize();

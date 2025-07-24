@@ -1,5 +1,6 @@
 #include "GamePlayScene.h"
 #include "SRFramework.h"
+#include "Object3dCommon.h"
 
 void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
@@ -34,7 +35,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	ball->Initialize("monsterBall.obj");
 
 	ballTransform.Initialize();
-
+	ball->SetSkyboxFilePath("resources/skybox.dds");
 	ballTransform.translate_ = { 0.0f,0.0f,5.0f };  // 座標
 	
 	ball->SetWorldTransform(ballTransform);
@@ -66,6 +67,11 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	playerBullet_->Initialize();
 	playerBullet_->SetPlayer(player_.get());*/
 
+	skybox_ = std::make_unique<Skybox>();
+	skybox_->Initialize("resources/rostock_laage_airport_4k.dds");
+
+	
+	
 	// レベルデータのロード
 	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
 
@@ -88,15 +94,15 @@ void GamePlayScene::Update()
 		SetSceneNo(TITLE);
 	}*/
 	// プレイヤーの更新
-	//player_->Update();
+	player_->Update();
 
 	enemy_->SetPlayer(player_.get());
 	// 敵の更新
-	//enemy_->Update();
+	enemy_->Update();
 
 	// 読み込んだ全オブジェクトの更新
 	for (auto& obj : objects) {
-		obj->Update();
+		//obj->Update();
 	}
 
 	// パーティクルグループ"モリ"の更新
@@ -111,7 +117,7 @@ void GamePlayScene::Update()
 	/*particleEmitter2->SetPosition(particlePosition2);
 	particleEmitter2->SetParticleRate(8);
 	particleEmitter2->Update();*/
-
+	skybox_->Update();
 
 	// スプライトの更新
 	/*sprite->Update();
@@ -119,10 +125,10 @@ void GamePlayScene::Update()
 
 	/*------オブジェクトの更新------*/
 	// ボールの更新
-	/*ball->Update();
-	ball->SetWorldTransform(ballTransform);
-	ground->Update();
-	ground->SetWorldTransform(groundTransform);*/
+	//ball->Update();
+	//ball->SetWorldTransform(ballTransform);
+	//ground->Update();
+	//ground->SetWorldTransform(groundTransform);
 }
 
 void GamePlayScene::Draw()
@@ -136,16 +142,20 @@ void GamePlayScene::Draw()
 
 	// 読み込んだ全オブジェクトの描画
 	for (auto& obj : objects) {
-		obj->Draw();
+		//obj->Draw();
 	}
-	// ボールの描画
-	/*ball->Draw();
-	ground->Draw();*/
+	//ground->Draw();
 	// プレイヤーの描画
-	//player_->Draw();
+	player_->Draw();
 
 	// 敵の描画
-	//enemy_->Draw();
+	enemy_->Draw();
+	// ボールの描画
+	//ball->Draw();
+
+	/*------skyboxの描画------*/
+	skybox_->DrawSettings();
+	skybox_->Draw();
 }
 
 void GamePlayScene::Finalize()
@@ -184,7 +194,10 @@ void GamePlayScene::DrawImGui()
 		ImGui::PopID();
 	}
 	ImGui::End();
+	player_->DrawImGui();
 	enemy_->DrawImGui();
+	skybox_->DrawImGui();
+	//ball->DrawImGui();
 }
 
 void GamePlayScene::CreateObjectsFromLevelData()

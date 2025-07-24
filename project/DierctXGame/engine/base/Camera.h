@@ -39,7 +39,7 @@ public:
 
 	// getter
 	const Matrix4x4& GetWorldMatrix()const { return worldMatrix; }
-	const Matrix4x4& GeteViewMatrix()const { return viewMatrix; }
+	const Matrix4x4& GetViewMatrix()const { return viewMatrix; }
 	const Matrix4x4& GetProjectionMatrix()const { return projectionMatrix; }
 	const Matrix4x4& GetViewProjectionMatrix()const { return viewProjectionMatrix; }
 	const Vector3& GetRotate()const { return transform.rotate; }

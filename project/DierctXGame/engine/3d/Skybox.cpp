@@ -10,11 +10,11 @@
 
 void Skybox::Initialize(const std::string& texturePath)
 {
-	
+	filePath_ = texturePath;
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
 
 	CreateVertexBuffer();
-	CreateTexture(texturePath);
+	CreateTexture(filePath_);
 	CreateMaterialResource();
 	CreateIndexBuffer();
 
@@ -320,4 +320,12 @@ void Skybox::DrawImGui()
 	ImGui::SliderAngle("Rotation.z", &worldTransform_.rotate_.z);
 	ImGui::SliderFloat3("Scale", &worldTransform_.scale_.x, 0.1f, 50.0f);
 	ImGui::End();
+}
+
+void Skybox::DrawSettings() {
+	auto* cmdList = DirectXCommon::GetInstance()->GetCommandList();
+
+	cmdList->SetGraphicsRootSignature(rootSignature_.Get());
+	cmdList->SetPipelineState(pipelineState_.Get());
+	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

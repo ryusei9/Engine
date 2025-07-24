@@ -114,7 +114,7 @@ public:
 	void SetTranslate(const Vector3& translate) { worldTransform.translate_ = translate; }
 	void SetWorldTransform(const WorldTransform& worldTransform) { this->worldTransform = worldTransform; }
 	void SetCamera(Camera* camera) { this->camera = camera; }
-	void SetTextureHandle(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle) { textureHandle_ = textureHandle; }
+	void SetSkyboxFilePath(std::string filePath);
 private:
 	// BufferResourceの作成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes);
@@ -163,7 +163,10 @@ private:
 	// 球体の頂点数の計算
 	uint32_t TotalVertexCount = kSubdivision * kSubdivision * 6;
 
-	// 環境マップテクスチャ
-	D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_;
+	
+	std::string filePath_; // ファイル名
+
+	// 追加
+	D3D12_GPU_DESCRIPTOR_HANDLE skyboxGpuHandle_{};
 };
 

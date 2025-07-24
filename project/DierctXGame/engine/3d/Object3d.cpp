@@ -16,7 +16,6 @@ void Object3d::Initialize(const std::string& fileName)
 {
 	// 引数で受け取ってメンバ変数に記録する
 	//object3dCommon_ = object3dCommon;
-
 	//// モデル読み込み
 	modelData = LoadObjFile("resources", fileName);
 	CreateVertexData();
@@ -24,6 +23,13 @@ void Object3d::Initialize(const std::string& fileName)
 	CreateDirectionalLightData();
 	// .objの参照しているテクスチャファイル読み込み
 	TextureManager::GetInstance()->LoadTexture(modelData.material.textureFilePath);
+	
+	filePath_ = "resources/skybox.dds";
+
+	TextureManager::GetInstance()->LoadTexture(filePath_);
+	// Skybox用のGPUハンドルを取得して保持
+	skyboxGpuHandle_ = TextureManager::GetInstance()->GetSrvHandleGPU(filePath_);
+
 	// 読み込んだテクスチャの番号を取得
 	modelData.material.gpuHandle = TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureFilePath);
 	// Transform変数を作る
@@ -37,6 +43,7 @@ void Object3d::Initialize(const std::string& fileName)
 	CreatePointLightResource();
 	// スポットライトの作成
 	CreateSpotLightResource();
+	
 }
 
 void Object3d::Update()
@@ -56,7 +63,7 @@ void Object3d::Draw()
 
 	worldTransform.SetPipeline();
 
-	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2,modelData.material.gpuHandle);
+	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, modelData.material.gpuHandle);
 
 	// 平行光源
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
@@ -69,7 +76,11 @@ void Object3d::Draw()
 	// スポットライト
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
 
-	//Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(7, textureHandle_);
+	if(skyboxGpuHandle_.ptr != 0) {
+		// スカイボックスのテクスチャをセット
+		Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(7, skyboxGpuHandle_);
+	}
+	
 	// 3Dモデルが割り当てられていれば描画する
 	if (model) {
 		model->Draw();
@@ -236,10 +247,15 @@ void Object3d::DrawImGui()
 {
 	// ImGuiのウィンドウを作成
 	ImGui::Begin("Object3d");
+	ImGui::DragFloat3("position", &worldTransform.translate_.x, 0.01f);
+	ImGui::DragFloat3("rotation", &worldTransform.rotate_.x, 0.01f);
+	ImGui::DragFloat3("scale", &worldTransform.scale_.x, 0.01f);
+
 	ImGui::ColorEdit4("color", &materialData->color.x);
 	ImGui::ColorEdit4("lightColor", &directionalLightData->color.x);
 	ImGui::DragFloat3("lightDirection", &directionalLightData->direction.x, 0.01f);
 	ImGui::DragFloat("intensity", &directionalLightData->intensity, 0.01f);
+	ImGui::SliderFloat("environmentCoefficient", &materialData->environmentCoefficient, 0.0f, 1.0f);
 
 	/*------ポイントライト------*/
 	ImGui::ColorEdit4("pointLightColor", &pointLightData->color.x);
@@ -265,6 +281,14 @@ void Object3d::SetModel(const std::string& filePath)
 {
 	// モデルを検索してセットする
 	model = ModelManager::GetInstance()->FindModel(filePath);
+}
+
+void Object3d::SetSkyboxFilePath(std::string filePath)
+{
+	filePath_ = filePath;
+	TextureManager::GetInstance()->LoadTexture(filePath_);
+	// Skybox用のGPUハンドルを取得して保持
+	skyboxGpuHandle_ = TextureManager::GetInstance()->GetSrvHandleGPU(filePath_);
 }
 
 Microsoft::WRL::ComPtr<ID3D12Resource> Object3d::CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes)
@@ -371,6 +395,9 @@ void Object3d::CreateMaterialData()
 
 	// 単位行列で初期化
 	materialData->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
+
+	// 金属感
+	materialData->environmentCoefficient = 0.5f;
 }
 
 void Object3d::CreateDirectionalLightData()

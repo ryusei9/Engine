@@ -31,9 +31,11 @@ public:
 
     void SetCamera(Camera* camera);
 
+	void DrawSettings();
+
 	WorldTransform& GetWorldTransform() { return worldTransform_; }
 
-    D3D12_GPU_DESCRIPTOR_HANDLE GetTextureHandle() const { return textureHandle_; }
+    std::string GetFilePath() const { return filePath_; }
 	
 private:
     void CreateVertexBuffer();
@@ -71,4 +73,6 @@ private:
     Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
     D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
     uint32_t* indexData_ = nullptr;
+
+    std::string filePath_;
 };

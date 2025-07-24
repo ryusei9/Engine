@@ -5,6 +5,7 @@ struct Material{
     uint32_t enableLighting;
     float32_t4x4 uvTransform;
     float32_t shininess;
+    float environmentCoefficient;
 };
 
 struct DirectionalLight
@@ -162,7 +163,7 @@ PixelShaderOutput main(VertexShaderOutput input){
         float32_t3 cameraToPosition = normalize(input.worldPosition - gCamera.worldPosition);
         float32_t3 reflectedVector = reflect(cameraToPosition, normalize(input.normal));
         float32_t4 environmentColor = gEnvironmentTexture.Sample(gSampler, reflectedVector);
-        output.color.rgb += environmentColor.rgb;
+        output.color.rgb += environmentColor.rgb * gMaterial.environmentCoefficient;
         
 
         // ガンマ補正を適用（必要なら）

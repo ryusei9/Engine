@@ -35,7 +35,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	ball->Initialize("monsterBall.obj");
 
 	ballTransform.Initialize();
-
+	ball->SetSkyboxFilePath("resources/skybox.dds");
 	ballTransform.translate_ = { 0.0f,0.0f,5.0f };  // 座標
 	
 	ball->SetWorldTransform(ballTransform);
@@ -67,7 +67,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	skybox_ = std::make_unique<Skybox>();
 	skybox_->Initialize("resources/rostock_laage_airport_4k.dds");
 
-	ball->SetTextureHandle(skybox_->GetTextureHandle());
+	
 	
 	// レベルデータのロード
 	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
@@ -123,7 +123,7 @@ void GamePlayScene::Update()
 	/*------オブジェクトの更新------*/
 	// ボールの更新
 	ball->Update();
-	ball->SetWorldTransform(ballTransform);
+	//ball->SetWorldTransform(ballTransform);
 	/*ground->Update();
 	ground->SetTransform(groundTransform);*/
 }
@@ -141,15 +141,19 @@ void GamePlayScene::Draw()
 	for (auto& obj : objects) {
 		//obj->Draw();
 	}
-	skybox_->Draw();
-	// ボールの描画
-	ball->Draw();
 	/*ground->Draw();*/
 	// プレイヤーの描画
 	//player_->Draw();
 
 	// 敵の描画
 	//enemy_->Draw();
+	// ボールの描画
+	ball->Draw();
+
+	/*------skyboxの描画------*/
+	skybox_->DrawSettings();
+	skybox_->Draw();
+	
 }
 
 void GamePlayScene::Finalize()
@@ -188,8 +192,9 @@ void GamePlayScene::DrawImGui()
 		ImGui::PopID();
 	}
 	ImGui::End();
-	enemy_->DrawImGui();
+	//enemy_->DrawImGui();
 	skybox_->DrawImGui();
+	ball->DrawImGui();
 }
 
 void GamePlayScene::CreateObjectsFromLevelData()

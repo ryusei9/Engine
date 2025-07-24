@@ -44,8 +44,8 @@
             }
         },
         {
-            "type": "MESH",
-            "name": "球",
+            "type": "PlayerSpawn",
+            "name": "PlayerSpawn",
             "transform": {
                 "translation": [
                     0.0,
@@ -61,90 +61,6 @@
                     1.0,
                     1.0,
                     1.0
-                ]
-            },
-            "file_name": "monsterBall",
-            "collider": {
-                "type": "Box",
-                "center": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "size": [
-                    2.0,
-                    2.0,
-                    2.0
-                ]
-            }
-        },
-        {
-            "type": "MESH",
-            "name": "球.002",
-            "transform": {
-                "translation": [
-                    -2.846153497695923,
-                    2.6656970977783203,
-                    0.946458101272583
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    89.86695098876953
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "file_name": "Boss",
-            "collider": {
-                "type": "Box",
-                "center": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "size": [
-                    2.0,
-                    2.0,
-                    2.0
-                ]
-            }
-        },
-        {
-            "type": "MESH",
-            "name": "球.001",
-            "transform": {
-                "translation": [
-                    0.0,
-                    2.800910472869873,
-                    1.3154550790786743
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "file_name": "monsterBall",
-            "collider": {
-                "type": "Box",
-                "center": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "size": [
-                    2.0,
-                    2.0,
-                    2.0
                 ]
             }
         }

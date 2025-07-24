@@ -42,7 +42,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	// ボールの初期化
 	ground = std::make_unique<Object3d>();
-	ground->Initialize("plane.obj");
+	ground->Initialize("terrain.obj");
 
 	groundTransform.Initialize();
 	groundTransform.translate_ = { 0.0f,0.0f,5.0f }; // 座標
@@ -59,6 +59,9 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	enemy_->SetPlayer(player_.get());
 
 	playerBullets_ = &player_->GetBullets();
+
+	// 敵の弾の情報をセット
+	enemyBullets_ = &enemy_->GetBullets();
 	// プレイヤーの弾の初期化
 	/*playerBullet_ = std::make_unique<PlayerBullet>();
 	playerBullet_->Initialize();
@@ -73,7 +76,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
 
 	// オブジェクト生成
-	//CreateObjectsFromLevelData();
+	CreateObjectsFromLevelData();
 
 	// 衝突マネージャの生成
 	collisionManager_ = std::make_unique<CollisionManager>();
@@ -122,10 +125,10 @@ void GamePlayScene::Update()
 
 	/*------オブジェクトの更新------*/
 	// ボールの更新
-	ball->Update();
-	//ball->SetWorldTransform(ballTransform);
-	/*ground->Update();
-	ground->SetTransform(groundTransform);*/
+	/*ball->Update();
+	ball->SetWorldTransform(ballTransform);
+	ground->Update();
+	ground->SetWorldTransform(groundTransform);*/
 }
 
 void GamePlayScene::Draw()
@@ -153,7 +156,6 @@ void GamePlayScene::Draw()
 	/*------skyboxの描画------*/
 	skybox_->DrawSettings();
 	skybox_->Draw();
-	
 }
 
 void GamePlayScene::Finalize()
@@ -201,6 +203,10 @@ void GamePlayScene::CreateObjectsFromLevelData()
 {
 	// レベルデータからオブジェクトを生成、配置
 	for (auto& objectData : levelData_->objects) {
+		if( objectData.disabled) {
+			// 無効なオブジェクトはスキップ
+			continue;
+		}
 		// ファイル名から登録済みモデルを検索
 		Model* model = nullptr;
 		auto it = models.find(objectData.fileName);
@@ -233,9 +239,10 @@ void GamePlayScene::CheckAllCollisions()
 		collisionManager_->AddCollider(bullet.get());
 	}
 	// 敵の弾
-	for (const auto& bullet : enemy_->GetBullets()) {
+	for (const auto& bullet : *enemyBullets_) {
 		collisionManager_->AddCollider(bullet.get());
 	}
+	
 	// 衝突判定と応答
 	collisionManager_->CheckCollision();
 }

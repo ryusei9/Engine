@@ -88,6 +88,9 @@ private:
 	// プレイヤーの弾
 	std::list<std::unique_ptr<PlayerBullet>>* playerBullets_;
 
+	// 敵の弾
+	std::list<std::unique_ptr<EnemyBullet>>* enemyBullets_;
+
 	// 敵
 	std::unique_ptr<Enemy> enemy_ = nullptr;
 

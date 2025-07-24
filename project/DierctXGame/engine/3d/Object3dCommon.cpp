@@ -2,6 +2,8 @@
 #include <d3d12.h>
 #include <cassert>
 #include "Logger.h"
+#include <SrvManager.h>
+#include "DirectXCommon.h"
 
 std::shared_ptr<Object3dCommon> Object3dCommon::instance = nullptr;
 
@@ -13,10 +15,12 @@ std::shared_ptr<Object3dCommon> Object3dCommon::GetInstance()
 	return instance;
 }
 
-void Object3dCommon::Initialize()
+void Object3dCommon::Initialize(DirectXCommon* dxCommon,SrvManager* srvManager)
 {
 	// 引数で受け取ってメンバ変数に記録する
 	dxCommon_ = DirectXCommon::GetInstance();
+
+	srvManager_ = srvManager;
 
 	GraphicsPipelineInitialize();
 }
@@ -29,6 +33,10 @@ void Object3dCommon::DrawSettings()
 	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
 	// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考える
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	ID3D12DescriptorHeap* descriptorHeaps[] = { srvManager_->GetDescriptorHeap() };
+	// SRVを設定
+	dxCommon_->GetCommandList()->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 }
 
 void Object3dCommon::RootSignatureInitialize()

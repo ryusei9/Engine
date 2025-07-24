@@ -1,5 +1,6 @@
 #include "CollisionManager.h"
 #include "Collider.h"
+#include "CollisionTypeIdDef.h"
 
 void CollisionManager::Initialize()
 {
@@ -63,6 +64,16 @@ void CollisionManager::RemoveCollider(Collider* collider)
 
 void CollisionManager::CheckCollisionPair(Collider* colliderA, Collider* colliderB)
 {
+	// タイプID取得
+	uint32_t typeA = colliderA->GetTypeID();
+	uint32_t typeB = colliderB->GetTypeID();
+
+	// 敵弾同士、敵と敵弾、プレイヤー弾同士など不要な判定をスキップ
+	if ((typeA == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyBullet) && typeB == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyBullet)) ||
+		(typeA == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy) && typeB == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyBullet)) ||
+		(typeA == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyBullet) && typeB == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy))) {
+		return;
+	}
 	// 衝突判定
 	if (CheckSphereCollision(colliderA, colliderB))
 	{

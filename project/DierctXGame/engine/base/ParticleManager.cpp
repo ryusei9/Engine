@@ -169,6 +169,9 @@ void ParticleManager::Draw()
 {
 	ID3D12GraphicsCommandList* commandList = dxCommon_->GetCommandList();
 
+	ID3D12DescriptorHeap* heaps[] = { srvManager_->GetDescriptorHeap() };
+	commandList->SetDescriptorHeaps(1, heaps);
+
 	// ルートシグネチャを設定
 	commandList->SetGraphicsRootSignature(rootSignature_.Get());
 

@@ -7,7 +7,7 @@ void PostEffectManager::Initialize(DirectXCommon* dxCommon) {
 
 void PostEffectManager::AddEffect(std::unique_ptr<PostEffectBase> effect) {
     effects_.push_back(std::move(effect));
-    enabled_.push_back(true); // 追加時は有効化
+    enabled_.push_back(true); // 追加時は無効化
 }
 
 void PostEffectManager::SetEffectEnabled(size_t index, bool enabled) {
@@ -33,6 +33,7 @@ void PostEffectManager::PreRenderAll() {
 }
 
 void PostEffectManager::DrawAll() {
+    PreBarrierAll(); // 追加: SRVバリアを張る
     D3D12_GPU_DESCRIPTOR_HANDLE currentInputSRV = dxCommon_->GetSRVGPUDescriptorHandle(0); // 0: シーンの出力
     for (size_t i = 0; i < effects_.size(); ++i) {
         if (enabled_[i] && effects_[i]) {

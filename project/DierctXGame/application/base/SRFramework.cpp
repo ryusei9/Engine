@@ -43,7 +43,7 @@ void SRFramework::Initialize()
 
 
 	// 3Dオブジェクト共通部の初期化
-	Object3dCommon::GetInstance()->Initialize(dxCommon.get(),srvManager.get());
+	Object3dCommon::GetInstance()->Initialize(srvManager.get());
 
 
 	// 3Dモデルマネージャの初期化
@@ -56,9 +56,10 @@ void SRFramework::Initialize()
 	Input::GetInstance()->Initialize(winApp.get());
 
 	camera->SetRotate({ 0.1f,0.0f,0.0f });
-	camera->SetTranslate({ 0.0f,5.0f,-30.0f });
+	camera->SetTranslate({ 0.0f,1.0f,-10.0f });
 	Object3dCommon::GetInstance()->SetDefaultCamera(camera.get());
 
+	dxCommon = DirectXCommon::GetInstance();
 
 	dxCommon->CreateDepthResource(camera.get());
 
@@ -66,18 +67,19 @@ void SRFramework::Initialize()
 
 	// 各種ポストエフェクトの初期化
 	noisePostEffect_ = std::make_unique<NoisePostEffect>();
-	noisePostEffect_->Initialize(dxCommon.get());
+	noisePostEffect_->Initialize(dxCommon);
 
 	grayscalePostEffect_ = std::make_unique<GrayscalePostEffect>();
-	grayscalePostEffect_->Initialize(dxCommon.get());
+	grayscalePostEffect_->Initialize(dxCommon);
 
 	// ポストエフェクトマネージャにポストエフェクトを追加
 	postEffectManager_ = std::make_unique<PostEffectManager>();
-	postEffectManager_->Initialize(dxCommon.get());
+	postEffectManager_->Initialize(dxCommon);
 	postEffectManager_->AddEffect(std::move(noisePostEffect_));
 	postEffectManager_->AddEffect(std::move(grayscalePostEffect_));
 
-
+	postEffectManager_->SetEffectEnabled(0, false);
+	postEffectManager_->SetEffectEnabled(1, false);
 
 	imGuiManager->Initialize(winApp.get());
 
@@ -159,7 +161,7 @@ void SRFramework::PostDraw()
 void SRFramework::PrePostEffect()
 {
 	// [D3D12_RESOURCE_STATE_DEPTH_WRITE]（書き込み
-	dxCommon.get()->PreRenderScene();
+	dxCommon->PreRenderScene();
 	postEffectManager_->PreRenderAll();
 }
 
@@ -168,9 +170,9 @@ void SRFramework::DrawPostEffect()
 	// 深度バッファを「SRV用」に遷移
 	dxCommon->TransitionDepthBufferToSRV();
 
-	dxCommon.get()->TransitionRenderTextureToShaderResource();
-	dxCommon.get()->DrawRenderTexture();
-	dxCommon.get()->TransitionRenderTextureToRenderTarget();
+	dxCommon->TransitionRenderTextureToShaderResource();
+	dxCommon->DrawRenderTexture();
+	dxCommon->TransitionRenderTextureToRenderTarget();
 	postEffectManager_->PreBarrierAll();
 	postEffectManager_->DrawAll();
 	postEffectManager_->PostBarrierAll();

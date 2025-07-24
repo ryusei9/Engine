@@ -253,9 +253,9 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\application\Object\Player.h" />
     <ClInclude Include="DierctXGame\application\Object\PlayerBullet.h" />
     <ClInclude Include="tools\json.hpp" />
-	<ClInclude Include="DepthMaterial.h" />
-	<ClInclude Include="DierctXGame\engine\posteffect\GrayscalePostEffect.h" />
-	<ClInclude Include="DierctXGame\engine\posteffect\PostEffectBase.h" />
+    <ClInclude Include="DepthMaterial.h" />
+    <ClInclude Include="DierctXGame\engine\posteffect\GrayscalePostEffect.h" />
+    <ClInclude Include="DierctXGame\engine\posteffect\PostEffectBase.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
@@ -275,7 +275,10 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </None>
     <None Include="resources\shaders\FullScreen.hlsli" />
     <None Include="resources\shaders\Object3D.hlsli" />
-    <None Include="resources\shaders\Skybox.hlsli" />
+    <None Include="resources\shaders\Skybox.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="resources\shaders\Sprite.hlsli" />
     <None Include="resources\test.json" />
     <None Include="tools\level_editor\__init__.py" />
@@ -350,6 +353,11 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="resources\shaders\Skybox.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="resources\shaders\RadialBlur.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

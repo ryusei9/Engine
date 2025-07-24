@@ -94,11 +94,11 @@ void GamePlayScene::Update()
 		SetSceneNo(TITLE);
 	}*/
 	// プレイヤーの更新
-	//player_->Update();
+	player_->Update();
 
 	enemy_->SetPlayer(player_.get());
 	// 敵の更新
-	//enemy_->Update();
+	enemy_->Update();
 
 	// 読み込んだ全オブジェクトの更新
 	for (auto& obj : objects) {
@@ -125,10 +125,10 @@ void GamePlayScene::Update()
 
 	/*------オブジェクトの更新------*/
 	// ボールの更新
-	/*ball->Update();
-	ball->SetWorldTransform(ballTransform);
-	ground->Update();
-	ground->SetWorldTransform(groundTransform);*/
+	//ball->Update();
+	//ball->SetWorldTransform(ballTransform);
+	//ground->Update();
+	//ground->SetWorldTransform(groundTransform);
 }
 
 void GamePlayScene::Draw()
@@ -144,14 +144,14 @@ void GamePlayScene::Draw()
 	for (auto& obj : objects) {
 		//obj->Draw();
 	}
-	/*ground->Draw();*/
+	//ground->Draw();
 	// プレイヤーの描画
-	//player_->Draw();
+	player_->Draw();
 
 	// 敵の描画
-	//enemy_->Draw();
+	enemy_->Draw();
 	// ボールの描画
-	ball->Draw();
+	//ball->Draw();
 
 	/*------skyboxの描画------*/
 	skybox_->DrawSettings();
@@ -194,9 +194,10 @@ void GamePlayScene::DrawImGui()
 		ImGui::PopID();
 	}
 	ImGui::End();
-	//enemy_->DrawImGui();
+	player_->DrawImGui();
+	enemy_->DrawImGui();
 	skybox_->DrawImGui();
-	ball->DrawImGui();
+	//ball->DrawImGui();
 }
 
 void GamePlayScene::CreateObjectsFromLevelData()

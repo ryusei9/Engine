@@ -22,7 +22,7 @@ public:
 	Object3dCommon& operator=(Object3dCommon&) = delete;
 
 	// 初期化
-	void Initialize(SrvManager* srvManager);
+	void Initialize();
 	// 共通描画設定
 	void DrawSettings();
 

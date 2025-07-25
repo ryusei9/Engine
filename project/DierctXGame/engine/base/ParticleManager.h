@@ -86,7 +86,7 @@ public:
 	ParticleManager& operator=(const ParticleManager&) = delete;
 
 	// 初期化
-	void Initialize(SrvManager* srvManager,Camera* camera);
+	void Initialize(Camera* camera);
 
 	// 更新
 	void Update();

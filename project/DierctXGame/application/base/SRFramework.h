@@ -95,8 +95,6 @@ protected:
 	// ポインタ
 	unique_ptr<WinApp> winApp = nullptr;
 
-	unique_ptr<SrvManager> srvManager = nullptr;
-
 	unique_ptr<Camera> camera = make_unique<Camera>();
 
 	unique_ptr<ImGuiManager> imGuiManager = make_unique<ImGuiManager>();

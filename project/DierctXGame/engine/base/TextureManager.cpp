@@ -113,10 +113,10 @@ uint32_t TextureManager::GetTextureIndexByFilePath(const std::string& filePath)
 	return 0;
 }
 
-void TextureManager::Initialize(SrvManager* srvManager)
+void TextureManager::Initialize()
 {
 	dxCommon_ = DirectXCommon::GetInstance();
-	srvManager_ = srvManager;
+	srvManager_ = SrvManager::GetInstance();
 	// SRVの数と同数
 	textureDatas.reserve(DirectXCommon::kMaxSRVCount);
 }

@@ -8,6 +8,9 @@ class SrvManager
 {
 
 public:
+	// シングルトンインスタンス取得
+	static SrvManager* GetInstance();
+	
 	// メンバ関数
 	// 初期化
 	void Initialize();
@@ -21,6 +24,10 @@ public:
 
 	// SRV生成(Structured Buffer用)
 	void CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structuredByteStride);
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
+
+	void CreateDepthSRVDescriptorHeap();
 
 	void PreDraw();
 
@@ -52,8 +59,13 @@ public:
 	// 最大SRV数(最大テクスチャ枚数)
 	static const uint32_t kMaxSRVCount;
 private:
+	SrvManager() = default;
+	~SrvManager() = default;
+	SrvManager(const SrvManager&) = delete;
+	SrvManager& operator=(const SrvManager&) = delete;
+
 	// メンバ変数
-	DirectXCommon* directXCommon = nullptr;
+	DirectXCommon* directXCommon_ = nullptr;
 
 	
 

@@ -1,5 +1,5 @@
 #include "GrayscalePostEffect.h"
-
+#include "SrvManager.h"
 void GrayscalePostEffect::Initialize(DirectXCommon* dxCommon) {
     dxCommon_ = dxCommon;
     PostEffectBase::Initialize(dxCommon);
@@ -86,7 +86,7 @@ void GrayscalePostEffect::Draw() {
     commandList->SetDescriptorHeaps(_countof(heaps), heaps);
     commandList->SetPipelineState(pipelineState_.Get());
     commandList->SetGraphicsRootSignature(rootSignature_.Get());
-    commandList->SetGraphicsRootDescriptorTable(0, dxCommon_->GetSRVGPUDescriptorHandle(1));
+    commandList->SetGraphicsRootDescriptorTable(0, SrvManager::GetInstance()->GetGPUDescriptorHandle(1));
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList->DrawInstanced(3, 1, 0, 0);
 }
@@ -97,5 +97,5 @@ void GrayscalePostEffect::PostRender() {
 
 D3D12_GPU_DESCRIPTOR_HANDLE GrayscalePostEffect::GetOutputSRV() const
 {
-   return dxCommon->GetSRVGPUDescriptorHandle(srvIndex_);
+   return SrvManager::GetInstance()->GetGPUDescriptorHandle(srvIndex_);
 }

@@ -24,10 +24,10 @@ ParticleManager* ParticleManager::GetInstance()
 	return &instance;
 }
 
-void ParticleManager::Initialize(SrvManager* srvManager, Camera* camera)
+void ParticleManager::Initialize(Camera* camera)
 {
 	dxCommon_ = DirectXCommon::GetInstance();
-	srvManager_ = srvManager;
+	srvManager_ = SrvManager::GetInstance();
 	camera_ = camera;
 
 	// ランダムエンジンの初期化

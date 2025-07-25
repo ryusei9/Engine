@@ -20,11 +20,12 @@ void SRFramework::Initialize()
 
 
 	// SRVマネージャの初期化
-	srvManager = make_unique<SrvManager>();
-	srvManager->Initialize();
+	SrvManager::GetInstance()->Initialize();
+
+	DirectXCommon::GetInstance()->CreateRenderTexture();
 
 	// テクスチャマネージャの初期化
-	TextureManager::GetInstance()->Initialize(srvManager.get());
+	TextureManager::GetInstance()->Initialize();
 
 	// テクスチャを事前にロード
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
@@ -43,7 +44,7 @@ void SRFramework::Initialize()
 
 
 	// 3Dオブジェクト共通部の初期化
-	Object3dCommon::GetInstance()->Initialize(srvManager.get());
+	Object3dCommon::GetInstance()->Initialize();
 
 
 	// 3Dモデルマネージャの初期化
@@ -58,6 +59,8 @@ void SRFramework::Initialize()
 	camera->SetRotate({ 0.1f,0.0f,0.0f });
 	camera->SetTranslate({ 0.0f,1.0f,-10.0f });
 	Object3dCommon::GetInstance()->SetDefaultCamera(camera.get());
+
+	SrvManager::GetInstance()->CreateDepthSRVDescriptorHeap();
 
 	dxCommon = DirectXCommon::GetInstance();
 
@@ -88,14 +91,14 @@ void SRFramework::Initialize()
 	sceneManager_->Initialize(winApp.get());
 
 	/*------パーティクルマネージャの初期化------*/
-	ParticleManager::GetInstance()->Initialize(srvManager.get(),camera.get());
+	ParticleManager::GetInstance()->Initialize(camera.get());
 }
 
 void SRFramework::Finelize()
 {
 	for (uint32_t i = 0; i < SrvManager::kMaxSRVCount; i++) {
 		// 使われているSRVインデックスを解放
-		srvManager->Free(i);
+		SrvManager::GetInstance()->Free(i);
 	}
 	
 	
@@ -149,7 +152,7 @@ void SRFramework::PreDraw()
 	// 描画前処理
 	DirectXCommon::GetInstance()->PreDraw();
 
-	srvManager->PreDraw();
+	SrvManager::GetInstance()->PreDraw();
 	
 }
 

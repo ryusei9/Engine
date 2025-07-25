@@ -1,5 +1,5 @@
 #include "NoisePostEffect.h"
-
+#include "SrvManager.h"
 void NoisePostEffect::Initialize(DirectXCommon* dxCommon)
 {
 	// 引数を代入
@@ -145,6 +145,9 @@ void NoisePostEffect::PreRender()
 
 void NoisePostEffect::Draw()
 {
+    // SRVバリアを必ず張る
+    TransitionRenderTextureToShaderResource();
+
     // SRVヒープをセット
     ID3D12DescriptorHeap* heaps[] = { dxCommon_->GetSRVDescriptorHeap().Get() };
     commandList->SetDescriptorHeaps(_countof(heaps), heaps);
@@ -154,7 +157,7 @@ void NoisePostEffect::Draw()
     // ルートシグネチャの設定
     commandList->SetGraphicsRootSignature(rootSignature_.Get());
     // SRVとCBVの設定
-    commandList->SetGraphicsRootDescriptorTable(0, dxCommon_->GetSRVGPUDescriptorHandle(1));
+    commandList->SetGraphicsRootDescriptorTable(0, SrvManager::GetInstance()->GetGPUDescriptorHandle(1));
     commandList->SetGraphicsRootConstantBufferView(1, timeParamBuffer_->GetGPUVirtualAddress());
     // プリミティブトポロジの設定
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -170,5 +173,5 @@ void NoisePostEffect::PostRender()
 
 D3D12_GPU_DESCRIPTOR_HANDLE NoisePostEffect::GetOutputSRV() const
 {
-    return dxCommon->GetSRVGPUDescriptorHandle(srvIndex_);
+    return SrvManager::GetInstance()->GetGPUDescriptorHandle(srvIndex_);
 }

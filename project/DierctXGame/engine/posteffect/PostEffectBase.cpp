@@ -100,7 +100,7 @@ void PostEffectBase::CreateRenderTexture(UINT width, UINT height, DXGI_FORMAT fo
     srvDesc.Texture2D.MipLevels = 1;
 
     // 例: 0番にSRVを作成
-    dxCommon->GetDevice()->CreateShaderResourceView(renderTexture.Get(), &srvDesc, dxCommon->GetSRVCPUDescriptorHandle(1));
+    dxCommon->GetDevice()->CreateShaderResourceView(renderTexture.Get(), &srvDesc, SrvManager::GetInstance()->GetCPUDescriptorHandle(1));
 
     renderTextureState = D3D12_RESOURCE_STATE_RENDER_TARGET;
 }

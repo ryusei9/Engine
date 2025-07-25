@@ -38,7 +38,7 @@ private:
 
 public:
 	// 初期化
-	void Initialize(SrvManager* srvManager);
+	void Initialize();
 
 	// シングルトンインスタンスの取得
 	static std::shared_ptr<TextureManager> GetInstance();

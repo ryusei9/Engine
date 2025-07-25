@@ -15,12 +15,12 @@ std::shared_ptr<Object3dCommon> Object3dCommon::GetInstance()
 	return instance;
 }
 
-void Object3dCommon::Initialize(SrvManager* srvManager)
+void Object3dCommon::Initialize()
 {
 	// 引数で受け取ってメンバ変数に記録する
 	dxCommon_ = DirectXCommon::GetInstance();
 
-	srvManager_ = srvManager;
+	srvManager_ = SrvManager::GetInstance();
 
 	GraphicsPipelineInitialize();
 }

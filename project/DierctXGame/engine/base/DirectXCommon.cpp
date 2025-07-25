@@ -10,6 +10,7 @@
 #include "externals/DirectXTex/d3dx12.h"
 #include <thread>
 #include <Inverse.h>
+#include <SrvManager.h>
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -47,7 +48,7 @@ void DirectXCommon::Initialize(WinApp* winApp)
 	// レンダーターゲットビュー
 	RenderTargetView();
 
-	CreateRenderTexture();
+	//CreateRenderTexture();
 	// 深度ステンシルビューの初期化
 	DepthStencilViewInitialize();
 	// フェンスの初期化
@@ -59,7 +60,7 @@ void DirectXCommon::Initialize(WinApp* winApp)
 	// DXCコンパイラの初期化
 	CreateDXCCompiler();
 
-	CreateDepthSRVDescriptorHeap();
+	//CreateDepthSRVDescriptorHeap();
 
 	CreateDissolveParamBuffer();
 
@@ -284,22 +285,19 @@ void DirectXCommon::DescriptorHeap()
 	// ディスクリプタの数は2。RTVはshader内で触るものではないなので、shaderVisibleはfalse
 	rtvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
 
-	// ディスクリプタの数は128。SRVはshader内で触るものなので、shaderVisibleはtrue
-	srvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
-
 	// DSV用のヒープでディスクリプタの数は1。DSVはShader内で触るものではないので、ShaderVisibleはfalse
 	dsvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 
 	CreateCBVSRVUAVDescriptorHeap(device.Get());
-	// SRVディスクリプタヒープの設定
-	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = 2; // 必要なディスクリプタの数
-	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	//// SRVディスクリプタヒープの設定
+	//D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+	//srvHeapDesc.NumDescriptors = 2; // 必要なディスクリプタの数
+	//srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	//srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
-	// SRVディスクリプタヒープの作成
-	HRESULT hr = device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvDescriptorHeap));
-	assert(SUCCEEDED(hr));
+	//// SRVディスクリプタヒープの作成
+	//HRESULT hr = device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvDescriptorHeap));
+	//assert(SUCCEEDED(hr));
 
 
 	//// DSVの設定
@@ -376,16 +374,16 @@ void DirectXCommon::RenderTargetView()
 	// 2つ目を作る
 	device->CreateRenderTargetView(swapChainResources[1].Get(), &rtvDesc, rtvHandles[1]);
 }
+//
+//D3D12_CPU_DESCRIPTOR_HANDLE DirectXCommon::GetSRVCPUDescriptorHandle(uint32_t index)
+//{
+//	return GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, index);
+//}
 
-D3D12_CPU_DESCRIPTOR_HANDLE DirectXCommon::GetSRVCPUDescriptorHandle(uint32_t index)
-{
-	return GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, index);
-}
-
-D3D12_GPU_DESCRIPTOR_HANDLE DirectXCommon::GetSRVGPUDescriptorHandle(uint32_t index)
-{
-	return GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, index);
-}
+//D3D12_GPU_DESCRIPTOR_HANDLE DirectXCommon::GetSRVGPUDescriptorHandle(uint32_t index)
+//{
+//	return GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, index);
+//}
 
 void DirectXCommon::DepthStencilViewInitialize()
 {
@@ -517,23 +515,6 @@ void DirectXCommon::CreateDXCCompiler()
 	/*IDxcIncludeHandler* includeHandler = nullptr;*/
 	hr = dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
 	assert(SUCCEEDED(hr));
-}
-
-void DirectXCommon::ImGuiInitialize()
-{
-	/////////////////////
-	// ImGuiの初期化
-	/////////////////////
-	/*IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-	ImGui_ImplWin32_Init(winApp_->GetHwnd());
-	ImGui_ImplDX12_Init(device.Get(),
-		swapChainDesc.BufferCount,
-		rtvDesc.Format,
-		srvDescriptorHeap.Get(),
-		GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0),
-		GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0));*/
 }
 
 /*------RenderTextureの描画------*/
@@ -1039,7 +1020,7 @@ void DirectXCommon::CreateRenderTexture()
 
 	// 0番：カラーテクスチャ（gTexture）用SRV
 	// SRVの作成
-	device->CreateShaderResourceView(renderTexture.Get(), &renderTextureSrvDesc, GetSRVCPUDescriptorHandle(0));
+	device->CreateShaderResourceView(renderTexture.Get(), &renderTextureSrvDesc, SrvManager::GetInstance()->GetCPUDescriptorHandle(0));
 }
 
 void DirectXCommon::CreateCBVSRVUAVDescriptorHeap(ID3D12Device* device)
@@ -1289,7 +1270,8 @@ void DirectXCommon::TransitionRenderTextureToRenderTarget()
 
 void DirectXCommon::DrawRenderTexture()
 {
-	ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap.Get() };
+	
+	ID3D12DescriptorHeap* descriptorHeaps[] = { SrvManager::GetInstance()->GetDescriptorHeap() };
 	commandList->SetDescriptorHeaps(1, descriptorHeaps);
 
 	commandList->SetGraphicsRootSignature(rootSignature.Get());
@@ -1297,7 +1279,7 @@ void DirectXCommon::DrawRenderTexture()
 	commandList->SetPipelineState(graphicsPipelineState.Get());
 
 	// SRVテーブル
-	commandList->SetGraphicsRootDescriptorTable(2, GetSRVGPUDescriptorHandle(0));
+	commandList->SetGraphicsRootDescriptorTable(2, SrvManager::GetInstance()->GetGPUDescriptorHandle(0));
 	// b0: マテリアル用CBV
 	//commandList->SetGraphicsRootConstantBufferView(0, depthResource->GetGPUVirtualAddress());
 
@@ -1319,7 +1301,7 @@ void DirectXCommon::CreateDepthSRVDescriptorHeap()
 	depthTextureSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	depthTextureSrvDesc.Texture2D.MipLevels = 1;
 	// 1番に「深度テクスチャ（gDepthTexture）」を登録
-	device->CreateShaderResourceView(depthStencilResource.Get(), &depthTextureSrvDesc, GetSRVCPUDescriptorHandle(1));
+	device->CreateShaderResourceView(depthStencilResource.Get(), &depthTextureSrvDesc, SrvManager::GetInstance()->GetCPUDescriptorHandle(1));
 }
 
 // depth用のリソースの作成

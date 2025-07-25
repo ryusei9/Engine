@@ -62,12 +62,12 @@ public: // メンバ関数
 	/// <summary>
 	/// SRVの指定番号のCPUデスクリプタハンドルを取得する
 	/// </summary>
-	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUDescriptorHandle(uint32_t index);
+	//D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUDescriptorHandle(uint32_t index);
 
 	/// <summary>
 	/// SRVの指定番号のGPUデスクリプタハンドルを取得する
 	/// </summary>
-	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUDescriptorHandle(uint32_t index);
+	//D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUDescriptorHandle(uint32_t index);
 
 	// 深度ステンシルビューの初期化
 	void DepthStencilViewInitialize();
@@ -85,9 +85,6 @@ public: // メンバ関数
 
 	// DXCコンパイラの生成
 	void CreateDXCCompiler();
-
-	// ImGuiの初期化
-	void ImGuiInitialize();
 
 	// RenderTextureに対してのSceneの描画
 	void PreRenderScene();
@@ -199,6 +196,8 @@ public: // メンバ関数
 	UINT GetBackBufferIndex() { return backBufferIndex; }
 
 	UINT GetBackBufferCount() const { return backBufferCount; }
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetDepthStencilResource() const { return depthStencilResource; }
 
 	// 最大SRV数(最大テクスチャ枚数)
 	static const uint32_t kMaxSRVCount;

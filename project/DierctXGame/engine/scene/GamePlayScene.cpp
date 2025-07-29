@@ -52,6 +52,15 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	player_ = std::make_unique<Player>();
 	player_->Initialize();
 	//player_->SetBullet(playerBullet_.get());
+	// レベルデータのロード
+	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
+
+	// プレイヤー配置データからプレイヤーを配置
+	if (!levelData_->players.empty()) {
+		auto& playerData = levelData_->players[0];
+		player_->SetPosition(playerData.translation);
+		player_->SetRotation(playerData.rotation);
+	}
 
 	// 敵の初期化
 	enemy_ = std::make_unique<Enemy>();
@@ -69,11 +78,6 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	skybox_ = std::make_unique<Skybox>();
 	skybox_->Initialize("resources/rostock_laage_airport_4k.dds");
-
-	
-	
-	// レベルデータのロード
-	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
 
 	// オブジェクト生成
 	CreateObjectsFromLevelData();

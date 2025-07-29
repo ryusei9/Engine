@@ -16,4 +16,10 @@ struct LevelData {
         bool disabled;
     };
     std::vector<ObjectData> objects;
+
+    struct PlayerData {
+        Vector3 translation; // プレイヤーの位置
+        Vector3 rotation;    // プレイヤーの回転
+	};
+	std::vector<PlayerData> players; // プレイヤーのデータ
 };

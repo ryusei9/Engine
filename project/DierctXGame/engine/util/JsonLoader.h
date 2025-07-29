@@ -4,6 +4,11 @@
 #include <json.hpp>
 #include <LevelData.h>
 
+struct PlayerSpawnData {
+	Vector3 translation; // プレイヤーの位置
+    Vector3 rotation;    // プレイヤーの回転
+};
+
 class JsonLoader {
 public:
     // JSONファイルを読み込む
@@ -11,4 +16,7 @@ public:
 
     // オブジェクトを走査するための再帰関数
     static LevelData::ObjectData ConvertJsonToObject(const nlohmann::json& jsonNode);
+
+    // 自キャラ配列
+	std::vector<PlayerSpawnData> players;
 };

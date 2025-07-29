@@ -29,6 +29,20 @@ LevelData* JsonLoader::Load(const std::string& fileName)
 			if (objectJson.contains("type") && objectJson["type"] == "MESH") {
                 LevelData::ObjectData obj = ConvertJsonToObject(objectJson);
 				levelData->objects.push_back(obj);
+			} else if (objectJson.contains("type") && objectJson["type"] == "PlayerSpawn") {
+				LevelData::PlayerData playerData;
+				// プレイヤーの位置と回転を取得
+				if (objectJson.contains("transform")) {
+					const auto& transform = objectJson["transform"];
+					playerData.translation.x = (float)transform["translation"][0];
+					playerData.translation.y = (float)transform["translation"][2];
+					playerData.translation.z = (float)transform["translation"][1];
+					playerData.rotation.x = -(float)transform["rotation"][0];
+					playerData.rotation.y = -(float)transform["rotation"][2];
+					playerData.rotation.z = -(float)transform["rotation"][1];
+				}
+				// プレイヤーのデータを追加
+				levelData->players.push_back(playerData);
 			}
 		}
 	}

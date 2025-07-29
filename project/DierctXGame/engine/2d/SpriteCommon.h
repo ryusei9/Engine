@@ -1,5 +1,6 @@
 #pragma once
 #include "DirectXCommon.h"
+
 // スプライト共通部
 class SpriteCommon
 {
@@ -12,7 +13,7 @@ public:
 	SpriteCommon& operator=(SpriteCommon&) = delete;
 
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon);
+	void Initialize();
 
 	// 共通描画設定
 	void DrawSettings();

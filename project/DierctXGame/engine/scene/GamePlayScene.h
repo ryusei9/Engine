@@ -16,6 +16,7 @@
 #include <CollisionManager.h>
 #include <LevelData.h>
 #include <JsonLoader.h>
+#include <Skybox.h>
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 
@@ -87,6 +88,9 @@ private:
 	// プレイヤーの弾
 	std::list<std::unique_ptr<PlayerBullet>>* playerBullets_;
 
+	// 敵の弾
+	std::list<std::unique_ptr<EnemyBullet>>* enemyBullets_;
+
 	// 敵
 	std::unique_ptr<Enemy> enemy_ = nullptr;
 
@@ -97,5 +101,8 @@ private:
 
 	// 複数のオブジェクトを管理するためのコンテナ
 	std::vector<std::unique_ptr<Object3d>> objects;
+
+	// スカイボックス
+	std::unique_ptr<Skybox> skybox_ = nullptr;
 };
 

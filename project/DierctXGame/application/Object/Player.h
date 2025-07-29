@@ -28,6 +28,9 @@ public:
 	// 衝突判定
 	void OnCollision(Collider* other) override;
 
+	// ImGuiでの描画
+	void DrawImGui();
+
 	void PlayDeathParticleOnce(); // 追加: 一度だけパーティクルを出す関数
 
 	// 中心座標を取得する純粋仮想関数

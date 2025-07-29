@@ -41,6 +41,8 @@ void Enemy::Initialize()
 	SetRadius(0.4f); // コライダーの半径を設定
 
 	attack_ = std::make_unique<EnemyAttack>();
+
+	attack_->SetPattern(3);
 }
 
 void Enemy::Update()
@@ -114,6 +116,7 @@ void Enemy::DrawImGui()
 	ImGui::Text("Respawn Time: %.2f seconds", respawnTime_);
 	// 攻撃パターンの選択
 	attack_->DrawImGui();
+	object3d_->DrawImGui();
 	ImGui::End();
 }
 

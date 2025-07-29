@@ -1,5 +1,6 @@
 #include "GamePlayScene.h"
 #include "SRFramework.h"
+#include "Object3dCommon.h"
 
 void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
@@ -34,14 +35,14 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	ball->Initialize("monsterBall.obj");
 
 	ballTransform.Initialize();
-
+	ball->SetSkyboxFilePath("resources/skybox.dds");
 	ballTransform.translate_ = { 0.0f,0.0f,5.0f };  // 座標
 	
 	ball->SetWorldTransform(ballTransform);
 
 	// ボールの初期化
 	ground = std::make_unique<Object3d>();
-	ground->Initialize("plane.obj");
+	ground->Initialize("terrain.obj");
 
 	groundTransform.Initialize();
 	groundTransform.translate_ = { 0.0f,0.0f,5.0f }; // 座標
@@ -67,12 +68,17 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	enemy_->SetPlayer(player_.get());
 
 	playerBullets_ = &player_->GetBullets();
+
+	// 敵の弾の情報をセット
+	enemyBullets_ = &enemy_->GetBullets();
 	// プレイヤーの弾の初期化
 	/*playerBullet_ = std::make_unique<PlayerBullet>();
 	playerBullet_->Initialize();
 	playerBullet_->SetPlayer(player_.get());*/
 
-	
+	skybox_ = std::make_unique<Skybox>();
+	skybox_->Initialize("resources/rostock_laage_airport_4k.dds");
+
 	// オブジェクト生成
 	CreateObjectsFromLevelData();
 
@@ -96,11 +102,11 @@ void GamePlayScene::Update()
 
 	enemy_->SetPlayer(player_.get());
 	// 敵の更新
-	//enemy_->Update();
+	enemy_->Update();
 
 	// 読み込んだ全オブジェクトの更新
 	for (auto& obj : objects) {
-		obj->Update();
+		//obj->Update();
 	}
 
 	// パーティクルグループ"モリ"の更新
@@ -115,7 +121,7 @@ void GamePlayScene::Update()
 	/*particleEmitter2->SetPosition(particlePosition2);
 	particleEmitter2->SetParticleRate(8);
 	particleEmitter2->Update();*/
-
+	skybox_->Update();
 
 	// スプライトの更新
 	/*sprite->Update();
@@ -123,10 +129,10 @@ void GamePlayScene::Update()
 
 	/*------オブジェクトの更新------*/
 	// ボールの更新
-	/*ball->Update();
-	ball->SetTransform(ballTransform);
-	ground->Update();
-	ground->SetTransform(groundTransform);*/
+	//ball->Update();
+	//ball->SetWorldTransform(ballTransform);
+	//ground->Update();
+	//ground->SetWorldTransform(groundTransform);
 }
 
 void GamePlayScene::Draw()
@@ -140,16 +146,20 @@ void GamePlayScene::Draw()
 
 	// 読み込んだ全オブジェクトの描画
 	for (auto& obj : objects) {
-		obj->Draw();
+		//obj->Draw();
 	}
-	// ボールの描画
-	/*ball->Draw();
-	ground->Draw();*/
+	//ground->Draw();
 	// プレイヤーの描画
 	player_->Draw();
 
 	// 敵の描画
-	//enemy_->Draw();
+	enemy_->Draw();
+	// ボールの描画
+	//ball->Draw();
+
+	/*------skyboxの描画------*/
+	skybox_->DrawSettings();
+	skybox_->Draw();
 }
 
 void GamePlayScene::Finalize()
@@ -188,7 +198,10 @@ void GamePlayScene::DrawImGui()
 		ImGui::PopID();
 	}
 	ImGui::End();
+	player_->DrawImGui();
 	enemy_->DrawImGui();
+	skybox_->DrawImGui();
+	//ball->DrawImGui();
 }
 
 void GamePlayScene::CreateObjectsFromLevelData()
@@ -231,9 +244,10 @@ void GamePlayScene::CheckAllCollisions()
 		collisionManager_->AddCollider(bullet.get());
 	}
 	// 敵の弾
-	for (const auto& bullet : enemy_->GetBullets()) {
+	for (const auto& bullet : *enemyBullets_) {
 		collisionManager_->AddCollider(bullet.get());
 	}
+	
 	// 衝突判定と応答
 	collisionManager_->CheckCollision();
 }

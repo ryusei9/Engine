@@ -8,9 +8,7 @@ class Camera
 {
 private:
 	Transform transform;
-	Matrix4x4 worldMatrix;
-	Matrix4x4 viewMatrix;
-	Matrix4x4 projectionMatrix;
+	
 	// 水平方向視野角
 	float fovY = 0.45f;
 	// アスペクト比
@@ -20,9 +18,11 @@ private:
 	// ファークリップ距離
 	float farClip = 100.0f;
 
-	Matrix4x4 viewProjectionMatrix;
-
 	
+	Matrix4x4 worldMatrix;
+	Matrix4x4 viewMatrix;
+	Matrix4x4 projectionMatrix;
+	Matrix4x4 viewProjectionMatrix;
 public:
 	// デフォルトコンストラクタ
 	Camera();
@@ -39,7 +39,7 @@ public:
 
 	// getter
 	const Matrix4x4& GetWorldMatrix()const { return worldMatrix; }
-	const Matrix4x4& GeteViewMatrix()const { return viewMatrix; }
+	const Matrix4x4& GetViewMatrix()const { return viewMatrix; }
 	const Matrix4x4& GetProjectionMatrix()const { return projectionMatrix; }
 	const Matrix4x4& GetViewProjectionMatrix()const { return viewProjectionMatrix; }
 	const Vector3& GetRotate()const { return transform.rotate; }

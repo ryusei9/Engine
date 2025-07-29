@@ -8,6 +8,8 @@
 #include <random>
 #include "Material.h"
 #include <ParticleType.h>
+
+class DirectXCommon;
 class Camera;
 /*------パーティクルを管理するクラス------*/
 class ParticleManager
@@ -84,7 +86,7 @@ public:
 	ParticleManager& operator=(const ParticleManager&) = delete;
 
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon, SrvManager* srvManager,Camera* camera);
+	void Initialize(SrvManager* srvManager,Camera* camera);
 
 	// 更新
 	void Update();

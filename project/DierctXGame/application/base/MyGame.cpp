@@ -28,6 +28,7 @@ void MyGame::Update()
 #ifdef _DEBUG
 	// ゲームプレイシーンの更新
 	sceneManager_->DrawImGui();
+	postEffectManager_->DrawImGui();
 	ParticleManager::GetInstance()->DrawImGui();
 
 #endif
@@ -37,18 +38,16 @@ void MyGame::Update()
 
 void MyGame::Draw()
 {
-	SRFramework::PreDraw();
+	SRFramework::PrePostEffect();
 
-	
-
-	SRFramework::PreDrawObject3d();
-
-	
-	SRFramework::PreDrawSprite();
+	sceneManager_->Draw();
 
 	ParticleManager::GetInstance()->Draw();
-	sceneManager_->Draw();
-	
+
+	SRFramework::PreDraw();
+
+	SRFramework::DrawPostEffect();
+
 	imGuiManager->Draw();
 	
 	SRFramework::PostDraw();

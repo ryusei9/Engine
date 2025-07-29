@@ -15,7 +15,6 @@
 #include <numbers>
 #include <MaterialData.h>
 #include <Material.h>
-#include <WorldTransform.h>
 
 class Object3dCommon;
 
@@ -32,12 +31,6 @@ public:
 		Vector3 normal;
 	};
 
-	/*struct Material {
-		Vector4 color;
-		int32_t enableLighting;
-		float padding[3];
-		Matrix4x4 uvworldTransform;
-	};*/
 
 	// 座標変換行列データ
 	struct worldTransformationMatrix {
@@ -121,6 +114,7 @@ public:
 	void SetTranslate(const Vector3& translate) { worldTransform.translate_ = translate; }
 	void SetWorldTransform(const WorldTransform& worldTransform) { this->worldTransform = worldTransform; }
 	void SetCamera(Camera* camera) { this->camera = camera; }
+	void SetSkyboxFilePath(std::string filePath);
 private:
 	// BufferResourceの作成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes);
@@ -168,5 +162,11 @@ private:
 
 	// 球体の頂点数の計算
 	uint32_t TotalVertexCount = kSubdivision * kSubdivision * 6;
+
+	
+	std::string filePath_; // ファイル名
+
+	// 追加
+	D3D12_GPU_DESCRIPTOR_HANDLE skyboxGpuHandle_{};
 };
 

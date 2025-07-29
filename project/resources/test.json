@@ -44,12 +44,12 @@
             }
         },
         {
-            "type": "MESH",
-            "name": "球.002",
+            "type": "PlayerSpawn",
+            "name": "PlayerSpawn",
             "transform": {
                 "translation": [
                     0.0,
-                    0.0,
+                    4.325197696685791,
                     0.0
                 ],
                 "rotation": [
@@ -62,18 +62,16 @@
                     1.0,
                     1.0
                 ]
-            },
-            "disabled": true,
-            "file_name": "Boss"
+            }
         },
         {
             "type": "MESH",
             "name": "球",
             "transform": {
                 "translation": [
-                    0.0,
-                    -1.4420086145401,
-                    1.8335504531860352
+                    -2.0249996185302734,
+                    2.6923987865448,
+                    1.1905930042266846
                 ],
                 "rotation": [
                     0.0,
@@ -86,7 +84,72 @@
                     1.0
                 ]
             },
-            "disabled": false,
+            "file_name": "monsterBall"
+        },
+        {
+            "type": "MESH",
+            "name": "球.001",
+            "transform": {
+                "translation": [
+                    2.3471813201904297,
+                    2.6923987865448,
+                    1.1905930042266846
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "monsterBall"
+        },
+        {
+            "type": "MESH",
+            "name": "球.002",
+            "transform": {
+                "translation": [
+                    -0.050138235092163086,
+                    0.1698160171508789,
+                    -1.462580680847168
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "monsterBall"
+        },
+        {
+            "type": "MESH",
+            "name": "球.003",
+            "transform": {
+                "translation": [
+                    -0.050138235092163086,
+                    7.81291389465332,
+                    -0.21831965446472168
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
             "file_name": "monsterBall"
         }
     ]

@@ -51,6 +51,15 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	player_ = std::make_unique<Player>();
 	player_->Initialize();
 	//player_->SetBullet(playerBullet_.get());
+	// レベルデータのロード
+	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
+
+	// プレイヤー配置データからプレイヤーを配置
+	if (!levelData_->players.empty()) {
+		auto& playerData = levelData_->players[0];
+		player_->SetPosition(playerData.translation);
+		player_->SetRotation(playerData.rotation);
+	}
 
 	// 敵の初期化
 	enemy_ = std::make_unique<Enemy>();
@@ -63,9 +72,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	playerBullet_->Initialize();
 	playerBullet_->SetPlayer(player_.get());*/
 
-	// レベルデータのロード
-	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
-
+	
 	// オブジェクト生成
 	CreateObjectsFromLevelData();
 
@@ -85,7 +92,7 @@ void GamePlayScene::Update()
 		SetSceneNo(TITLE);
 	}*/
 	// プレイヤーの更新
-	//player_->Update();
+	player_->Update();
 
 	enemy_->SetPlayer(player_.get());
 	// 敵の更新
@@ -139,7 +146,7 @@ void GamePlayScene::Draw()
 	/*ball->Draw();
 	ground->Draw();*/
 	// プレイヤーの描画
-	//player_->Draw();
+	player_->Draw();
 
 	// 敵の描画
 	//enemy_->Draw();

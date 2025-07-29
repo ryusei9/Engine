@@ -106,7 +106,7 @@ void GamePlayScene::Update()
 
 	// 読み込んだ全オブジェクトの更新
 	for (auto& obj : objects) {
-		//obj->Update();
+		obj->Update();
 	}
 
 	// パーティクルグループ"モリ"の更新
@@ -146,7 +146,7 @@ void GamePlayScene::Draw()
 
 	// 読み込んだ全オブジェクトの描画
 	for (auto& obj : objects) {
-		//obj->Draw();
+		obj->Draw();
 	}
 	//ground->Draw();
 	// プレイヤーの描画

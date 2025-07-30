@@ -45,11 +45,11 @@
         },
         {
             "type": "PlayerSpawn",
-            "name": "PlayerSpawn",
+            "name": "PlayerSpawn.001",
             "transform": {
                 "translation": [
                     0.0,
-                    4.325197696685791,
+                    0.0,
                     0.0
                 ],
                 "rotation": [
@@ -65,13 +65,13 @@
             }
         },
         {
-            "type": "MESH",
-            "name": "球",
+            "type": "EnemySpawn",
+            "name": "EnemySpawn.001",
             "transform": {
                 "translation": [
-                    -2.0249996185302734,
-                    2.6923987865448,
-                    1.1905930042266846
+                    3.011479616165161,
+                    0.12502336502075195,
+                    0.0
                 ],
                 "rotation": [
                     0.0,
@@ -83,17 +83,16 @@
                     1.0,
                     1.0
                 ]
-            },
-            "file_name": "monsterBall"
+            }
         },
         {
-            "type": "MESH",
-            "name": "球.001",
+            "type": "EnemySpawn",
+            "name": "EnemySpawn.002",
             "transform": {
                 "translation": [
-                    2.3471813201904297,
-                    2.6923987865448,
-                    1.1905930042266846
+                    3.090182065963745,
+                    0.0,
+                    1.8501702547073364
                 ],
                 "rotation": [
                     0.0,
@@ -105,17 +104,16 @@
                     1.0,
                     1.0
                 ]
-            },
-            "file_name": "monsterBall"
+            }
         },
         {
-            "type": "MESH",
-            "name": "球.002",
+            "type": "EnemySpawn",
+            "name": "EnemySpawn.003",
             "transform": {
                 "translation": [
-                    -0.050138235092163086,
-                    0.1698160171508789,
-                    -1.462580680847168
+                    2.9574484825134277,
+                    0.0,
+                    -1.8237186670303345
                 ],
                 "rotation": [
                     0.0,
@@ -127,76 +125,7 @@
                     1.0,
                     1.0
                 ]
-            },
-            "file_name": "monsterBall"
-        },
-        {
-            "type": "MESH",
-            "name": "球.003",
-            "transform": {
-                "translation": [
-                    -0.050138235092163086,
-                    7.81291389465332,
-                    -0.21831965446472168
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "file_name": "monsterBall"
-        },
-        {
-            "type": "MESH",
-            "name": "球.001",
-            "transform": {
-                "translation": [
-                    2.5912232398986816,
-                    4.707972049713135,
-                    0.0748034119606018
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "disabled": false,
-            "file_name": "monsterBall"
-        },
-        {
-            "type": "MESH",
-            "name": "球.003",
-            "transform": {
-                "translation": [
-                    -2.9382431507110596,
-                    4.707972049713135,
-                    -1.2280365228652954
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "disabled": false,
-            "file_name": "monsterBall"
+            }
         }
     ]
 }

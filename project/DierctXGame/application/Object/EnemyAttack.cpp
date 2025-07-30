@@ -84,30 +84,30 @@ void EnemyAttackPatternRush::Update(Enemy* enemy, Player*, std::list<std::unique
 }
 
 void EnemyAttackPatternWait::Update(Enemy* enemy, Player*, std::list<std::unique_ptr<EnemyBullet>>&,float deltaTime) {
-	static const Vector3 target = { 3.0f, 0.0f, 0.0f };
+	//static const Vector3 target = { 3.0f, 0.0f, 0.0f };
 
-	// イージング開始判定
-	if (!easing_) {
+	//// イージング開始判定
+	//if (!easing_) {
 
-		easing_ = true;
-		easingTime_ = 0.0f;
-		startPos_ = enemy->GetWorldTransform().translate_;
+	//	easing_ = true;
+	//	easingTime_ = 0.0f;
+	//	startPos_ = enemy->GetWorldTransform().translate_;
 
-	}
+	//}
 
-	if (easing_) {
-		easingTime_ += deltaTime;
-		float t = std::clamp(easingTime_ / easingDuration_, 0.0f, 1.0f);
-		// イージング（イーズアウト・クワッド）
-		float ease = 1.0f - (1.0f - t) * (1.0f - t);
-		enemy->GetWorldTransform().translate_ =
-			startPos_ * (1.0f - ease) + target * ease;
+	//if (easing_) {
+	//	easingTime_ += deltaTime;
+	//	float t = std::clamp(easingTime_ / easingDuration_, 0.0f, 1.0f);
+	//	// イージング（イーズアウト・クワッド）
+	//	float ease = 1.0f - (1.0f - t) * (1.0f - t);
+	//	enemy->GetWorldTransform().translate_ =
+	//		startPos_ * (1.0f - ease) + target * ease;
 
-		if (t >= 1.0f) {
-			enemy->GetWorldTransform().translate_ = target;
-			easing_ = false;
-		}
-	}
+	//	if (t >= 1.0f) {
+	//		enemy->GetWorldTransform().translate_ = target;
+	//		easing_ = false;
+	//	}
+	//}
 }
 void EnemyAttackPatternWait::DrawImGui(int idx, bool selected) {
 	if (ImGui::Selectable(GetName(), selected)) {}

@@ -43,7 +43,25 @@ LevelData* JsonLoader::Load(const std::string& fileName)
 				}
 				// プレイヤーのデータを追加
 				levelData->players.push_back(playerData);
-			}
+			} else if (objectJson.contains("type") && objectJson["type"] == "EnemySpawn") {
+				LevelData::EnemyData enemyData;
+				// 敵のファイル名を取得
+				if (objectJson.contains("file_name") && objectJson["file_name"].is_string()) {
+					enemyData.fileName = objectJson["file_name"];
+				}
+				// 敵の位置と回転を取得
+				if (objectJson.contains("transform")) {
+					const auto& transform = objectJson["transform"];
+					enemyData.translation.x = (float)transform["translation"][0];
+					enemyData.translation.y = (float)transform["translation"][2];
+					enemyData.translation.z = (float)transform["translation"][1];
+					enemyData.rotation.x = -(float)transform["rotation"][0];
+					enemyData.rotation.y = -(float)transform["rotation"][2];
+					enemyData.rotation.z = -(float)transform["rotation"][1];
+				}
+				// 敵のデータを追加
+				levelData->enemies.push_back(enemyData);
+			} 
 		}
 	}
 

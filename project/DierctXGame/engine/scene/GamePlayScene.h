@@ -40,6 +40,8 @@ public:
 	// ローダーから読み込んだレベルデータからオブジェクトを生成、配置する関数
 	void CreateObjectsFromLevelData();
 
+	void DrawImGuiImportObjectsFromJson();
+
 private:
 
 	// 衝突判定と応答
@@ -104,5 +106,8 @@ private:
 
 	// スカイボックス
 	std::unique_ptr<Skybox> skybox_ = nullptr;
+
+	// 複数の敵を管理するためのコンテナ
+	std::vector<std::unique_ptr<Enemy>> enemies_;
 };
 

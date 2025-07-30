@@ -8,7 +8,11 @@ struct PlayerSpawnData {
 	Vector3 translation; // プレイヤーの位置
     Vector3 rotation;    // プレイヤーの回転
 };
-
+struct EnemySpawnData {
+    std::string fileName;   // ファイル名
+	Vector3 translation; // 位置
+    Vector3 rotation;   // 回転
+};
 class JsonLoader {
 public:
     // JSONファイルを読み込む
@@ -19,4 +23,7 @@ public:
 
     // 自キャラ配列
 	std::vector<PlayerSpawnData> players;
+
+    // 敵キャラ配列
+    std::vector<EnemySpawnData> enemies;
 };

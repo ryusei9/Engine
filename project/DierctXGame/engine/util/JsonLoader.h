@@ -21,6 +21,7 @@ public:
     // オブジェクトを走査するための再帰関数
     static LevelData::ObjectData ConvertJsonToObject(const nlohmann::json& jsonNode);
 
+private:
     // 自キャラ配列
 	std::vector<PlayerSpawnData> players;
 

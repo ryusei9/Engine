@@ -19,14 +19,14 @@ void Enemy::Initialize()
 
 	worldTransform_.Initialize();
 	// 敵のワールド変換を初期化
-	worldTransform_.scale_ = { 0.5f,0.5f,0.5f };
+	worldTransform_.scale_ = { 1.0f,1.0f,1.0f };
 	worldTransform_.rotate_ = { 0.0f,0.0f,0.0f };
 	worldTransform_.translate_ = { 3.0f,0.0f,0.0f };
 	// 敵のカメラを取得
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
 	object3d_ = std::make_unique<Object3d>();
 	// 敵の3Dオブジェクトを初期化
-	object3d_->Initialize("Boss.obj");
+	object3d_->Initialize("enemy.obj");
 
 	// パーティクルマネージャの初期化
 	particleManager = ParticleManager::GetInstance();

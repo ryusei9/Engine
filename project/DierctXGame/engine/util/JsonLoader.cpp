@@ -1,4 +1,7 @@
 #include "../util/JsonLoader.h"
+#include <cmath> // 追加
+
+constexpr float kDeg2Rad = 3.14159265358979323846f / 180.0f;
 
 LevelData* JsonLoader::Load(const std::string& fileName)
 {
@@ -37,9 +40,9 @@ LevelData* JsonLoader::Load(const std::string& fileName)
 					playerData.translation.x = (float)transform["translation"][0];
 					playerData.translation.y = (float)transform["translation"][2];
 					playerData.translation.z = (float)transform["translation"][1];
-					playerData.rotation.x = -(float)transform["rotation"][0];
-					playerData.rotation.y = -(float)transform["rotation"][2];
-					playerData.rotation.z = -(float)transform["rotation"][1];
+					playerData.rotation.x = -(float)transform["rotation"][0] * kDeg2Rad;
+					playerData.rotation.y = -(float)transform["rotation"][2] * kDeg2Rad;
+					playerData.rotation.z = -(float)transform["rotation"][1] * kDeg2Rad;
 				}
 				// プレイヤーのデータを追加
 				levelData->players.push_back(playerData);
@@ -55,9 +58,9 @@ LevelData* JsonLoader::Load(const std::string& fileName)
 					enemyData.translation.x = (float)transform["translation"][0];
 					enemyData.translation.y = (float)transform["translation"][2];
 					enemyData.translation.z = (float)transform["translation"][1];
-					enemyData.rotation.x = -(float)transform["rotation"][0];
-					enemyData.rotation.y = -(float)transform["rotation"][2];
-					enemyData.rotation.z = -(float)transform["rotation"][1];
+					enemyData.rotation.x = -(float)transform["rotation"][0] * kDeg2Rad;
+					enemyData.rotation.y = -(float)transform["rotation"][2] * kDeg2Rad;
+					enemyData.rotation.z = -(float)transform["rotation"][1] * kDeg2Rad;
 				}
 				// 敵のデータを追加
 				levelData->enemies.push_back(enemyData);
@@ -93,9 +96,9 @@ LevelData::ObjectData JsonLoader::ConvertJsonToObject(const nlohmann::json& json
 	objectData.translation.y = (float)transform["translation"][2];
 	objectData.translation.z = (float)transform["translation"][1];
 
-	objectData.rotation.x = -(float)transform["rotation"][0];
-	objectData.rotation.y = -(float)transform["rotation"][2];
-	objectData.rotation.z = -(float)transform["rotation"][1];
+	objectData.rotation.x = -(float)transform["rotation"][0] * kDeg2Rad;
+	objectData.rotation.y = -(float)transform["rotation"][2] * kDeg2Rad;
+	objectData.rotation.z = -(float)transform["rotation"][1] * kDeg2Rad;
 
 	objectData.scaling.x = (float)transform["scale"][0];
 	objectData.scaling.y = (float)transform["scale"][2];

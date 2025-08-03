@@ -53,6 +53,9 @@ void SRFramework::Initialize()
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
 
+	// 弾用モデルを事前にロード
+	ModelManager::GetInstance()->LoadModel("player_bullet.obj"); // ←追加
+
 	Input::GetInstance()->Initialize(winApp.get());
 
 	camera->SetRotate({ 0.1f,0.0f,0.0f });

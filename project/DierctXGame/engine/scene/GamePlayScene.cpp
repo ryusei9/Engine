@@ -63,14 +63,14 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	}
 
 	// 敵の初期化
-	enemy_ = std::make_unique<Enemy>();
+	/*enemy_ = std::make_unique<Enemy>();
 	enemy_->Initialize();
-	enemy_->SetPlayer(player_.get());
+	enemy_->SetPlayer(player_.get());*/
 
 	playerBullets_ = &player_->GetBullets();
 
 	// 敵の弾の情報をセット
-	enemyBullets_ = &enemy_->GetBullets();
+	//enemyBullets_ = &enemy_->GetBullets();
 	// プレイヤーの弾の初期化
 	/*playerBullet_ = std::make_unique<PlayerBullet>();
 	playerBullet_->Initialize();
@@ -187,7 +187,11 @@ void GamePlayScene::DrawImGui()
 	DrawImGuiImportObjectsFromJson();
 	ImGui::End();
 	player_->DrawImGui();
-	enemy_->DrawImGui();
+	
+	for (auto& enemy : enemies_) {
+		enemy->DrawImGui();
+	}
+
 	skybox_->DrawImGui();
 	//ball->DrawImGui();
 }
@@ -229,6 +233,7 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		newEnemy->SetPosition(enemyData.translation);
 		newEnemy->SetRotation(enemyData.rotation);
 		newEnemy->SetPlayer(player_.get());
+		enemyBullets_ = &newEnemy->GetBullets();
 		enemies_.push_back(std::move(newEnemy));
 	}
 }
@@ -260,12 +265,15 @@ void GamePlayScene::DrawImGuiImportObjectsFromJson()
 	// レベルデータから生成した敵のImGui調整
 	for (size_t i = 0;i < enemies_.size();++i) {
 		auto& enemy = enemies_[i];
+		ImGui::Begin("Enemy");
+		ImGui::Text("Enemy %d", static_cast<int>(i + 1));
 		ImGui::PushID(static_cast<int>(i)); // 複数オブジェクト対応
 
 		// 位置・回転・スケールの取得
 		Vector3 pos = enemy->GetPosition();
 		Vector3 rot = enemy->GetRotation();
 		Vector3 scale = enemy->GetScale();
+		
 
 		if (ImGui::SliderFloat3("position", &pos.x, -10.0f, 10.0f)) {
 			enemy->SetPosition(pos);
@@ -278,6 +286,7 @@ void GamePlayScene::DrawImGuiImportObjectsFromJson()
 		}
 
 		ImGui::PopID();
+		ImGui::End();
 	}
 }
 
@@ -288,7 +297,10 @@ void GamePlayScene::CheckAllCollisions()
 
 	// コライダーをリストに登録
 	collisionManager_->AddCollider(player_.get());
-	collisionManager_->AddCollider(enemy_.get());
+	
+	for (auto& enemy : enemies_) {
+		collisionManager_->AddCollider(enemy.get());
+	}
 
 	// 複数についてコライダーをリストに登録
 	for (const auto& bullet : *playerBullets_)

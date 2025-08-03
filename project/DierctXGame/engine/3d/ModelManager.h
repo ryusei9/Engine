@@ -22,7 +22,7 @@ public:
    
     void Finalize();
 
-	
+    Model* GetModel(const std::string& fileName);
 
 	// モデルの検索
 	Model* FindModel(const std::string& filePath);

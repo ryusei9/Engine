@@ -2,6 +2,8 @@
 #include <Object3dCommon.h>
 #include <CollisionTypeIdDef.h>
 #include <PlayerBullet.h>
+#include <PlayerChargeBullet.h>
+#include <imgui.h>
 Player::Player()
 {
 	// シリアルナンバーを振る
@@ -149,23 +151,35 @@ void Player::Move()
 
 void Player::Attack()
 {// プレイヤーの攻撃
-	  // プレイヤーの攻撃
-	if (input_->TriggerKey(DIK_SPACE)) {
-		isShot_ = true;
-	}
-	if (isShot_) {
-		// 弾を生成
-		auto bullet = std::make_unique<PlayerBullet>();
-
-		// 弾の初期化
-		bullet->Initialize(worldTransform_.translate_);
-
-		// 弾の位置をプレイヤーの位置に設定
-		//bullet->SetTranslate(worldTransform_.translate_);
-		bullet->Update(); // ←ここで1回Update
-		// 弾をリストに追加
-		bullets_.push_back(std::move(bullet));
-		isShot_ = false;
+	 // チャージ開始
+	if (input_->PushKey(DIK_SPACE)) {
+		if (!isCharging_) {
+			isCharging_ = true;
+			chargeTime_ = 0.0f;
+		}
+		chargeTime_ += 1.0f / 60.0f; // 1フレーム分加算
+		if (chargeTime_ >= 3.0f) {
+			chargeReady_ = true;
+		}
+	} else {
+		// チャージショット発射
+		if (isCharging_ && chargeReady_) {
+			auto chargeBullet = std::make_unique<PlayerChargeBullet>();
+			chargeBullet->Initialize(worldTransform_.translate_);
+			chargeBullet->Update();
+			bullets_.push_back(std::move(chargeBullet));
+		}
+		// 通常ショット
+		else if (isCharging_ && chargeTime_ < 3.0f) {
+			auto bullet = std::make_unique<PlayerBullet>();
+			bullet->Initialize(worldTransform_.translate_);
+			bullet->Update();
+			bullets_.push_back(std::move(bullet));
+		}
+		// チャージ状態リセット
+		isCharging_ = false;
+		chargeTime_ = 0.0f;
+		chargeReady_ = false;
 	}
 }
 
@@ -188,6 +202,11 @@ void Player::OnCollision(Collider* other)
 
 void Player::DrawImGui() {
 	object3d_->DrawImGui();
+	ImGui::Begin("Player Info");
+	ImGui::Text("Charge Time: %.2f seconds", chargeTime_);
+	ImGui::Text("Is Charging: %s", isCharging_ ? "Yes" : "No");
+	ImGui::Text("Charge Ready: %s", chargeReady_ ? "Yes" : "No");
+	ImGui::End();
 }
 
 Vector3 Player::GetCenterPosition() const

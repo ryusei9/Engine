@@ -7,6 +7,7 @@ enum class CollisionTypeIdDef : uint32_t
 	kDefault,		 // デフォルトID
 	kPlayer,		 // プレイヤーID
 	kPlayerBullet,	 // プレイヤーの弾ID
+	kPlayerChargeBullet, // プレイヤーのチャージ弾ID
 	kEnemy,			 // エネミーID
 	kEnemyBullet,	 // エネミー弾ID
 };

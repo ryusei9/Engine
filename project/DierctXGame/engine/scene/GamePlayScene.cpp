@@ -1,7 +1,7 @@
 #include "GamePlayScene.h"
 #include "SRFramework.h"
 #include "Object3dCommon.h"
-
+#include "PlayerChargeBullet.h"
 void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
 	sprite = std::make_unique<Sprite>();
@@ -68,7 +68,8 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	enemy_->SetPlayer(player_.get());*/
 
 	playerBullets_ = &player_->GetBullets();
-
+	playerChargeBullets_ = &player_->GetChargeBullets();
+	
 	// 敵の弾の情報をセット
 	//enemyBullets_ = &enemy_->GetBullets();
 	// プレイヤーの弾の初期化
@@ -127,7 +128,7 @@ void GamePlayScene::Update()
 	particleEmitter2->SetParticleRate(8);
 	particleEmitter2->Update();*/
 	skybox_->Update();
-
+	
 	// スプライトの更新
 	/*sprite->Update();
 	sprite->SetPosition(spritePosition);*/
@@ -306,6 +307,9 @@ void GamePlayScene::CheckAllCollisions()
 	for (const auto& bullet : *playerBullets_)
 	{
 		collisionManager_->AddCollider(bullet.get());
+	}
+	for (const auto& chargeBullet : *playerChargeBullets_) {
+		collisionManager_->AddCollider(chargeBullet.get());
 	}
 	// 敵の弾
 	for (const auto& bullet : *enemyBullets_) {

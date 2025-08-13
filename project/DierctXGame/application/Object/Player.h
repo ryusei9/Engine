@@ -4,6 +4,7 @@
 #include "ParticleEmitter.h"
 
 class PlayerBullet; // 前方宣言
+class PlayerChargeBullet; // 前方宣言
 class Player : public BaseCharacter
 {
 public:
@@ -41,6 +42,8 @@ public:
 	/*------ゲッター------*/
 	std::list<std::unique_ptr<PlayerBullet>>& GetBullets() { return bullets_; }
 
+	std::list<std::unique_ptr<PlayerChargeBullet>>& GetChargeBullets() { return chargeBullets_; }
+
 	//void SetBullet(PlayerBullet* bullet) { bullet_ = bullet; } // 武器の設定
 
 	//void SetAttack(bool attack) { isAttack_ = attack; } // 攻撃フラグの設定
@@ -49,6 +52,8 @@ private:
 	/*------メンバ変数------*/
 
 	std::list<std::unique_ptr<PlayerBullet>> bullets_; // 武器
+	std::list<std::unique_ptr<PlayerChargeBullet>> chargeBullets_; // チャージ弾
+
 	// プレイヤーの移動速度
 	float moveSpeed_ = 0.1f;
 
@@ -74,5 +79,9 @@ private:
 	std::unique_ptr<ParticleEmitter> explosionEmitter_;
 
 	bool hasPlayedDeathParticle_ = false;
+
+	float chargeTime_ = 0.0f;
+	bool isCharging_ = false;
+	bool chargeReady_ = false;
 };
 

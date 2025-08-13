@@ -2,6 +2,7 @@
 #include <CollisionTypeIdDef.h>
 #include <Object3dCommon.h>
 #include <ParticleEmitter.h>
+#include <PlayerChargeBullet.h>
 Enemy::Enemy()
 {
 	// シリアルナンバーを振る
@@ -142,12 +143,20 @@ void Enemy::Attack()
 void Enemy::OnCollision(Collider* other)
 {
 	// 敵の衝突判定
-	if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerBullet))
+	if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerChargeBullet))
+	{
+		auto* chargeBullet = dynamic_cast<PlayerChargeBullet*>(other);
+		if (chargeBullet) {
+			hp_ -= static_cast<int>(chargeBullet->GetDamage()); // チャージ弾
+		}
+		PlayDeathParticleOnce(); // ここで一度だけパーティクルを出す
+	} else if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerBullet))
 	{
 		// プレイヤー弾と衝突した場合
 		hp_ -= 1;
 		PlayDeathParticleOnce(); // ここで一度だけパーティクルを出す
 	}
+	
 }
 
 void Enemy::PlayDeathParticleOnce()

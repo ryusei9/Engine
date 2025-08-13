@@ -45,7 +45,7 @@ void PlayerBullet::Update()
 		isAlive_ = false;
 	}
 	worldTransform_.Update();
-	objectBullet_->SetScale(worldTransform_.scale_);
+	//objectBullet_->SetScale(worldTransform_.scale_);
 	objectBullet_->SetTranslate(worldTransform_.translate_);
 	objectBullet_->Update();
 	

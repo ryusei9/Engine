@@ -88,97 +88,97 @@
     <ClCompile Include="externals\imgui\imgui_widgets.cpp">
       <Filter>externals\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\io\MakePerspectiveFovMatrix.cpp">
+    <ClCompile Include="DierctXGame\engine\math\MakePerspectiveFovMatrix.cpp">
       <Filter>engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\io\MakeRotateXMatrix.cpp">
+    <ClCompile Include="DierctXGame\engine\math\MakeRotateXMatrix.cpp">
       <Filter>engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\io\MakeRotateXYZMatrix.cpp">
+    <ClCompile Include="DierctXGame\engine\math\MakeRotateXYZMatrix.cpp">
       <Filter>engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\io\MakeRotateYMatrix.cpp">
+    <ClCompile Include="DierctXGame\engine\math\MakeRotateYMatrix.cpp">
       <Filter>engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\io\MakeRotateZMatrix.cpp">
+    <ClCompile Include="DierctXGame\engine\math\MakeRotateZMatrix.cpp">
       <Filter>engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\io\Inverse.cpp">
+    <ClCompile Include="DierctXGame\engine\math\Inverse.cpp">
       <Filter>engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\io\MakeAffineMatrix.cpp">
+    <ClCompile Include="DierctXGame\engine\math\MakeAffineMatrix.cpp">
       <Filter>engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\io\MakeIdentity4x4.cpp">
+    <ClCompile Include="DierctXGame\engine\math\MakeIdentity4x4.cpp">
       <Filter>engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\io\MakeOrthographicMatrix.cpp">
+    <ClCompile Include="DierctXGame\engine\math\MakeOrthographicMatrix.cpp">
       <Filter>engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\io\Multiply.cpp">
+    <ClCompile Include="DierctXGame\engine\math\Multiply.cpp">
       <Filter>engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\io\Normalize.cpp">
+    <ClCompile Include="DierctXGame\engine\math\Normalize.cpp">
       <Filter>engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\application\Object\BaseCharacter.cpp">
+    <ClCompile Include="DierctXGame\application\Object\base\BaseCharacter.cpp">
       <Filter>application\character\base</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\scene\BaseScene.cpp">
+    <ClCompile Include="DierctXGame\application\scene\base\BaseScene.cpp">
       <Filter>application\scene\base</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\application\Object\Enemy.cpp">
+    <ClCompile Include="DierctXGame\application\Object\enemy\Enemy.cpp">
       <Filter>application\character\enemy</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\application\Object\EnemyAttack.cpp">
+    <ClCompile Include="DierctXGame\application\Object\enemy\EnemyAttack.cpp">
       <Filter>application\character\enemy</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\application\Object\EnemyBullet.cpp">
+    <ClCompile Include="DierctXGame\application\Object\enemy\EnemyBullet.cpp">
       <Filter>application\character\enemy</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\application\Object\Player.cpp">
+    <ClCompile Include="DierctXGame\application\Object\player\Player.cpp">
       <Filter>application\character\player</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\application\Object\PlayerBullet.cpp">
+    <ClCompile Include="DierctXGame\application\Object\player\PlayerBullet.cpp">
       <Filter>application\character\player</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\application\Object\PlayerChargeBullet.cpp">
+    <ClCompile Include="DierctXGame\application\Object\player\PlayerChargeBullet.cpp">
       <Filter>application\character\player</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\scene\GamePlayScene.cpp">
+    <ClCompile Include="DierctXGame\application\scene\GamePlayScene.cpp">
       <Filter>application\scene</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\scene\TitleScene.cpp">
+    <ClCompile Include="DierctXGame\application\scene\TitleScene.cpp">
       <Filter>application\scene</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\application\base\SRFramework.cpp">
+    <ClCompile Include="DierctXGame\engine\base\framework\SRFramework.cpp">
       <Filter>engine\base\framework</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\application\base\MyGame.cpp">
+    <ClCompile Include="DierctXGame\engine\base\framework\MyGame.cpp">
       <Filter>engine\base\framework</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\base\CollisionManager.cpp">
+    <ClCompile Include="DierctXGame\engine\manager\CollisionManager.cpp">
       <Filter>engine\manager</Filter>
     </ClCompile>
     <ClCompile Include="DierctXGame\engine\3d\ModelManager.cpp">
       <Filter>engine\manager</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\base\ParticleManager.cpp">
+    <ClCompile Include="DierctXGame\engine\manager\ParticleManager.cpp">
       <Filter>engine\manager</Filter>
     </ClCompile>
     <ClCompile Include="DierctXGame\engine\posteffect\PostEffectManager.cpp">
       <Filter>engine\manager</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\base\ResourceManager.cpp">
+    <ClCompile Include="DierctXGame\engine\manager\ResourceManager.cpp">
       <Filter>engine\manager</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\scene\SceneManager.cpp">
+    <ClCompile Include="DierctXGame\application\scene\SceneManager.cpp">
       <Filter>engine\manager</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\base\SrvManager.cpp">
+    <ClCompile Include="DierctXGame\engine\manager\SrvManager.cpp">
       <Filter>engine\manager</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\base\TextureManager.cpp">
+    <ClCompile Include="DierctXGame\engine\manager\TextureManager.cpp">
       <Filter>engine\manager</Filter>
     </ClCompile>
     <ClCompile Include="DierctXGame\engine\2d\Sprite.cpp">
@@ -202,22 +202,22 @@
     <ClCompile Include="DierctXGame\engine\3d\Model.cpp">
       <Filter>engine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\base\WinApp.cpp">
+    <ClCompile Include="DierctXGame\engine\base\winapp\WinApp.cpp">
       <Filter>engine\base\winapp</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\base\DirectXCommon.cpp">
+    <ClCompile Include="DierctXGame\engine\base\DirectX\DirectXCommon.cpp">
       <Filter>engine\base\DirectX</Filter>
     </ClCompile>
     <ClCompile Include="DierctXGame\engine\audio\Audio.cpp">
       <Filter>engine\audio</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\base\Camera.cpp">
+    <ClCompile Include="DierctXGame\engine\camera\Camera.cpp">
       <Filter>engine\camera</Filter>
     </ClCompile>
     <ClCompile Include="DierctXGame\engine\util\JsonLoader.cpp">
       <Filter>engine\manager</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\base\D3DresourceLeakChecker.cpp">
+    <ClCompile Include="DierctXGame\engine\math\D3DresourceLeakChecker.cpp">
       <Filter>engine\manager</Filter>
     </ClCompile>
     <ClCompile Include="DierctXGame\engine\posteffect\NoisePostEffect.cpp">
@@ -229,25 +229,25 @@
     <ClCompile Include="DierctXGame\engine\posteffect\PostEffectBase.cpp">
       <Filter>engine\posteffects\base</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\application\Object\Collider.cpp">
+    <ClCompile Include="DierctXGame\application\Object\collider\Collider.cpp">
       <Filter>engine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\base\StringUtility.cpp">
+    <ClCompile Include="DierctXGame\engine\math\StringUtility.cpp">
       <Filter>engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\base\Logger.cpp">
+    <ClCompile Include="DierctXGame\engine\math\Logger.cpp">
       <Filter>engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\base\Input.cpp">
+    <ClCompile Include="DierctXGame\engine\input\Input.cpp">
       <Filter>engine\input</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\base\ParticleEmitter.cpp">
+    <ClCompile Include="DierctXGame\engine\particle\ParticleEmitter.cpp">
       <Filter>engine\particle</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\base\WorldTransform.cpp">
+    <ClCompile Include="DierctXGame\engine\worldtransform\WorldTransform.cpp">
       <Filter>engine\worldtransform</Filter>
     </ClCompile>
-    <ClCompile Include="DierctXGame\engine\base\ImGuiManager.cpp">
+    <ClCompile Include="DierctXGame\engine\manager\ImGuiManager.cpp">
       <Filter>engine\manager</Filter>
     </ClCompile>
   </ItemGroup>
@@ -375,139 +375,139 @@
     <ClInclude Include="externals\imgui\imstb_textedit.h">
       <Filter>externals\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\MakeOrthographicMatrix.h">
+    <ClInclude Include="DierctXGame\engine\math\MakeOrthographicMatrix.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\MakePerspectiveFovMatrix.h">
+    <ClInclude Include="DierctXGame\engine\math\MakePerspectiveFovMatrix.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\MakeRotateXMatrix.h">
+    <ClInclude Include="DierctXGame\engine\math\MakeRotateXMatrix.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\MakeRotateXYZMatrix.h">
+    <ClInclude Include="DierctXGame\engine\math\MakeRotateXYZMatrix.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\MakeRotateYMatrix.h">
+    <ClInclude Include="DierctXGame\engine\math\MakeRotateYMatrix.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\Inverse.h">
+    <ClInclude Include="DierctXGame\engine\math\Inverse.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\LevelData.h">
+    <ClInclude Include="DierctXGame\engine\math\LevelData.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\MakeAffineMatrix.h">
+    <ClInclude Include="DierctXGame\engine\math\MakeAffineMatrix.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\MakeIdentity4x4.h">
+    <ClInclude Include="DierctXGame\engine\math\MakeIdentity4x4.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\MakeRotateZMatrix.h">
+    <ClInclude Include="DierctXGame\engine\math\MakeRotateZMatrix.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\MakeScaleMatrix.h">
+    <ClInclude Include="DierctXGame\engine\math\MakeScaleMatrix.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\MakeTranslateMatrix.h">
+    <ClInclude Include="DierctXGame\engine\math\MakeTranslateMatrix.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\Material.h">
+    <ClInclude Include="DierctXGame\engine\math\Material.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\MaterialData.h">
+    <ClInclude Include="DierctXGame\engine\math\MaterialData.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\Matrix3x3.h">
+    <ClInclude Include="DierctXGame\engine\math\Matrix3x3.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\Matrix4x4.h">
+    <ClInclude Include="DierctXGame\engine\math\Matrix4x4.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\ModelData.h">
+    <ClInclude Include="DierctXGame\engine\math\ModelData.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\Multiply.h">
+    <ClInclude Include="DierctXGame\engine\math\Multiply.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\Normalize.h">
+    <ClInclude Include="DierctXGame\engine\math\Normalize.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\Transform.h">
+    <ClInclude Include="DierctXGame\engine\math\Transform.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\TransformationMatrix.h">
+    <ClInclude Include="DierctXGame\engine\math\TransformationMatrix.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\Vector2.h">
+    <ClInclude Include="DierctXGame\engine\math\Vector2.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\Vector3.h">
+    <ClInclude Include="DierctXGame\engine\math\Vector3.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\Vector4.h">
+    <ClInclude Include="DierctXGame\engine\math\Vector4.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\VertexData.h">
+    <ClInclude Include="DierctXGame\engine\math\VertexData.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\application\Object\BaseCharacter.h">
+    <ClInclude Include="DierctXGame\application\Object\base\BaseCharacter.h">
       <Filter>application\character\base</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\scene\BaseScene.h">
+    <ClInclude Include="DierctXGame\application\scene\base\BaseScene.h">
       <Filter>application\scene\base</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\application\Object\Enemy.h">
+    <ClInclude Include="DierctXGame\application\Object\enemy\Enemy.h">
       <Filter>application\character\enemy</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\application\Object\EnemyAttack.h">
+    <ClInclude Include="DierctXGame\application\Object\enemy\EnemyAttack.h">
       <Filter>application\character\enemy</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\application\Object\EnemyBullet.h">
+    <ClInclude Include="DierctXGame\application\Object\enemy\EnemyBullet.h">
       <Filter>application\character\enemy</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\application\Object\Player.h">
+    <ClInclude Include="DierctXGame\application\Object\player\Player.h">
       <Filter>application\character\player</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\application\Object\PlayerBullet.h">
+    <ClInclude Include="DierctXGame\application\Object\player\PlayerBullet.h">
       <Filter>application\character\player</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\application\Object\PlayerChargeBullet.h">
+    <ClInclude Include="DierctXGame\application\Object\player\PlayerChargeBullet.h">
       <Filter>application\character\player</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\scene\GamePlayScene.h">
+    <ClInclude Include="DierctXGame\application\scene\GamePlayScene.h">
       <Filter>application\scene</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\scene\TitleScene.h">
+    <ClInclude Include="DierctXGame\application\scene\TitleScene.h">
       <Filter>application\scene</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\application\base\SRFramework.h">
+    <ClInclude Include="DierctXGame\engine\base\framework\SRFramework.h">
       <Filter>engine\base\framework</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\application\base\MyGame.h">
+    <ClInclude Include="DierctXGame\engine\base\framework\MyGame.h">
       <Filter>engine\base\framework</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\base\CollisionManager.h">
+    <ClInclude Include="DierctXGame\engine\manager\CollisionManager.h">
       <Filter>engine\manager</Filter>
     </ClInclude>
     <ClInclude Include="DierctXGame\engine\3d\ModelManager.h">
       <Filter>engine\manager</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\base\ParticleManager.h">
+    <ClInclude Include="DierctXGame\engine\manager\ParticleManager.h">
       <Filter>engine\manager</Filter>
     </ClInclude>
     <ClInclude Include="DierctXGame\engine\posteffect\PostEffectManager.h">
       <Filter>engine\manager</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\base\ResourceManager.h">
+    <ClInclude Include="DierctXGame\engine\manager\ResourceManager.h">
       <Filter>engine\manager</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\scene\SceneManager.h">
+    <ClInclude Include="DierctXGame\application\scene\SceneManager.h">
       <Filter>engine\manager</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\base\SrvManager.h">
+    <ClInclude Include="DierctXGame\engine\manager\SrvManager.h">
       <Filter>engine\manager</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\base\TextureManager.h">
+    <ClInclude Include="DierctXGame\engine\manager\TextureManager.h">
       <Filter>engine\manager</Filter>
     </ClInclude>
     <ClInclude Include="DierctXGame\engine\2d\Sprite.h">
@@ -531,22 +531,22 @@
     <ClInclude Include="DierctXGame\engine\3d\Model.h">
       <Filter>engine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\base\WinApp.h">
+    <ClInclude Include="DierctXGame\engine\base\winapp\WinApp.h">
       <Filter>engine\base\winapp</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\base\DirectXCommon.h">
+    <ClInclude Include="DierctXGame\engine\base\DirectX\DirectXCommon.h">
       <Filter>engine\base\DirectX</Filter>
     </ClInclude>
     <ClInclude Include="DierctXGame\engine\audio\Audio.h">
       <Filter>engine\audio</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\base\Camera.h">
+    <ClInclude Include="DierctXGame\engine\camera\Camera.h">
       <Filter>engine\camera</Filter>
     </ClInclude>
     <ClInclude Include="DierctXGame\engine\util\JsonLoader.h">
       <Filter>engine\manager</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\base\D3DresourceLeakChecker.h">
+    <ClInclude Include="DierctXGame\engine\math\D3DresourceLeakChecker.h">
       <Filter>engine\manager</Filter>
     </ClInclude>
     <ClInclude Include="DierctXGame\engine\posteffect\NoisePostEffect.h">
@@ -558,46 +558,46 @@
     <ClInclude Include="DierctXGame\engine\posteffect\PostEffectBase.h">
       <Filter>engine\posteffects\base</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\application\Object\Collider.h">
+    <ClInclude Include="DierctXGame\application\Object\collider\Collider.h">
       <Filter>engine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\application\Object\CollisionTypeIdDef.h">
+    <ClInclude Include="DierctXGame\application\Object\collider\CollisionTypeIdDef.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\DepthMaterial.h">
+    <ClInclude Include="DierctXGame\engine\math\DepthMaterial.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\DirectionalLight.h">
+    <ClInclude Include="DierctXGame\engine\math\DirectionalLight.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\GetNowTimeInSeconds.h">
+    <ClInclude Include="DierctXGame\engine\math\GetNowTimeInSeconds.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\Lerp.h">
+    <ClInclude Include="DierctXGame\engine\math\Lerp.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\base\StringUtility.h">
+    <ClInclude Include="DierctXGame\engine\math\StringUtility.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\base\Logger.h">
+    <ClInclude Include="DierctXGame\engine\math\Logger.h">
       <Filter>engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\base\Input.h">
+    <ClInclude Include="DierctXGame\engine\input\Input.h">
       <Filter>engine\input</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\base\ParticleEmitter.h">
+    <ClInclude Include="DierctXGame\engine\particle\ParticleEmitter.h">
       <Filter>engine\particle</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\io\ParticleType.h">
+    <ClInclude Include="DierctXGame\engine\math\ParticleType.h">
       <Filter>engine\particle</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\base\WorldTransform.h">
+    <ClInclude Include="DierctXGame\engine\worldtransform\WorldTransform.h">
       <Filter>engine\worldtransform</Filter>
     </ClInclude>
     <ClInclude Include="tools\json.hpp">
       <Filter>externals\json</Filter>
     </ClInclude>
-    <ClInclude Include="DierctXGame\engine\base\ImGuiManager.h">
+    <ClInclude Include="DierctXGame\engine\manager\ImGuiManager.h">
       <Filter>engine\manager</Filter>
     </ClInclude>
   </ItemGroup>

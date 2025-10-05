@@ -57,5 +57,10 @@ private:
 	WorldTransform titleLogoTransform_;
 
 	std::unique_ptr<Camera> camera_ = std::make_unique<Camera>();
+
+	// skydome
+	std::unique_ptr<Object3d> skydome_ = nullptr;
+
+	WorldTransform skydomeTransform_;
 };
 

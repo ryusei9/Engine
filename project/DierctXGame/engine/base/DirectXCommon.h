@@ -8,10 +8,29 @@
 #include "externals/DirectXTex/DirectXTex.h"
 #include "string"
 #include "chrono"
+#include <Vector4.h>
+#include <DepthMaterial.h>
+#include <ResourceManager.h>
+
+struct DissolveParams
+{
+	float threshold;
+	float edgeWidth;
+	float edgeStrength;
+	float edgeColor[3];
+	float pad; // 16バイトアライメント用
+};
+struct TimeParams
+{
+	float time;
+	float pad[3]; // 16バイトアライメント
+};
 // DirectX基盤
 class DirectXCommon
 {
 public: // メンバ関数
+	// シングルトンインスタンス取得
+	static DirectXCommon* GetInstance();
 	// 初期化
 	void Initialize(WinApp* winApp);
 
@@ -70,6 +89,9 @@ public: // メンバ関数
 	// ImGuiの初期化
 	void ImGuiInitialize();
 
+	// RenderTextureに対してのSceneの描画
+	void PreRenderScene();
+
 	// 描画前処理
 	void PreDraw();
 
@@ -105,6 +127,44 @@ public: // メンバ関数
 	// CPUとGPUの同期を待つ
 	void SyncCPUWithGPU();
 
+	// RenderTextureの生成
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateRenderTextureResoruce(Microsoft::WRL::ComPtr<ID3D12Device> device,uint32_t width,uint32_t height,DXGI_FORMAT format,const Vector4& clearColor);
+
+	// RenderTextureを生成
+	void CreateRenderTexture();
+
+	// ディスクリプタヒープを作成する関数
+	void CreateCBVSRVUAVDescriptorHeap(ID3D12Device* device);
+
+	// RootSignatureの作成
+	void CreateRootSignature();
+
+	// PSOの作成
+	void CreatePSO();
+
+	// コピーの前に張る1のバリア
+	void TransitionRenderTextureToShaderResource();
+
+	// コピーの後に張る2のバリア
+	void TransitionRenderTextureToRenderTarget();
+
+	// RenderTextureを描画
+	void DrawRenderTexture();
+
+	void CreateDepthSRVDescriptorHeap();
+
+	// depth用のリソースの作成
+	void CreateDepthResource(Camera* camera);
+
+	void TransitionDepthBufferToSRV();
+
+	void TransitionDepthBufferToWrite();
+
+	// mask用のSRVディスクリプタヒープを作成
+	void CreateMaskSRVDescriptorHeap();
+
+	void CreateDissolveParamBuffer();
+	
 	// 記録時間
 	std::chrono::steady_clock::time_point reference_;
 	/// <summary>
@@ -120,6 +180,9 @@ public: // メンバ関数
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetSRVDescriptorHeap() { return srvDescriptorHeap; }
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetDSVDescriptorHeap() { return dsvDescriptorHeap; }
+
+	// ディスクリプタヒープを取得する関数
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetCBVSRVUAVDescriptorHeap() const {return cbvSrvUavDescriptorHeap;}
 
 	uint32_t GetDescriptorSizeSRV() { return descriptorSizeSRV; }
 	uint32_t GetDescriptorSizeDSV() { return descriptorSizeDSV; }
@@ -150,8 +213,16 @@ public: // メンバ関数
 	/// </summary>
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
+	DissolveParams* GetDissolveParam() const { return dissolveParams_; }
+
+	void SetTimeParams(float time) { timeParams_->time = time; }
 private:
 	// 関数
+	// シングルトン用
+	DirectXCommon() = default;
+	~DirectXCommon() = default;
+	DirectXCommon(const DirectXCommon&) = delete;
+	DirectXCommon& operator=(const DirectXCommon&) = delete;
 
 	
 	
@@ -181,6 +252,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap;
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap;
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> cbvSrvUavDescriptorHeap;
 
 	// SwapChainからResourceを引っ張ってくる
 	//Microsoft::WRL::ComPtr<ID3D12Resource> swapChainResources[2];
@@ -223,5 +296,58 @@ private:
 	UINT backBufferIndex;
 
 	UINT backBufferCount = 2;
+
+	// 今回は赤を設定する
+	const Vector4 kRenderTargetClearValue = { 0.1f,0.25f,0.5f,1.0f };
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> renderTexture;
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC renderTextureSrvDesc{};
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> renderTextureRtvHeap;
+
+	// ルートシグネチャ
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;
+
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
+
+	/// BlendStateの設定
+	D3D12_RENDER_TARGET_BLEND_DESC blendDesc{};
+
+	/// RasterizerState
+	D3D12_RASTERIZER_DESC rasterizerDesc{};
+
+	// shaderをコンパイルする
+	Microsoft::WRL::ComPtr<IDxcBlob> vertexShaderBlob;
+
+	/// PixelShader
+	// shaderをコンパイルする
+	Microsoft::WRL::ComPtr<IDxcBlob> pixelShaderBlob;
+
+	// DepthStencilStateの設定
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+
+	// グラフィックスパイプライン
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
+
+	D3D12_RESOURCE_STATES renderTextureState = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthResource = nullptr;
+
+	DepthMaterial* depthData = nullptr;
+
+	// クラスメンバに追加
+	D3D12_RESOURCE_STATES depthBufferState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+
+	// mask用のResourceとアップロードリソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> maskResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> maskUploadResource_;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> dissolveParamBuffer_;
+	DissolveParams* dissolveParams_ = nullptr;
+
+	// ノイズを時間経過で変えるための変数
+	Microsoft::WRL::ComPtr<ID3D12Resource> timeParamBuffer_;
+	TimeParams* timeParams_ = nullptr;
 };
 

@@ -12,6 +12,7 @@
 #include <iostream>
 #include <numbers>
 #include <Lerp.h>
+#include "DirectXCommon.h"
 
 using namespace Logger;
 
@@ -23,9 +24,9 @@ ParticleManager* ParticleManager::GetInstance()
 	return &instance;
 }
 
-void ParticleManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager, Camera* camera)
+void ParticleManager::Initialize(SrvManager* srvManager, Camera* camera)
 {
-	dxCommon_ = dxCommon;
+	dxCommon_ = DirectXCommon::GetInstance();
 	srvManager_ = srvManager;
 	camera_ = camera;
 
@@ -167,6 +168,9 @@ void ParticleManager::Update()
 void ParticleManager::Draw()
 {
 	ID3D12GraphicsCommandList* commandList = dxCommon_->GetCommandList();
+
+	ID3D12DescriptorHeap* heaps[] = { srvManager_->GetDescriptorHeap() };
+	commandList->SetDescriptorHeaps(1, heaps);
 
 	// ルートシグネチャを設定
 	commandList->SetGraphicsRootSignature(rootSignature_.Get());

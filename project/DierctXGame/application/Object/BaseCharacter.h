@@ -31,6 +31,8 @@ public:
 	// ヒットポイントを取得
 	int GetHp() const { return hp_; }
 
+	WorldTransform& GetWorldTransform() { return worldTransform_; }
+
 	// スケールを取得
 	Vector3 GetScale() const { return worldTransform_.scale_; }
 

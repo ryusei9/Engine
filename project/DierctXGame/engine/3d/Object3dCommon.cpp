@@ -2,6 +2,8 @@
 #include <d3d12.h>
 #include <cassert>
 #include "Logger.h"
+#include <SrvManager.h>
+#include "DirectXCommon.h"
 
 std::shared_ptr<Object3dCommon> Object3dCommon::instance = nullptr;
 
@@ -13,10 +15,12 @@ std::shared_ptr<Object3dCommon> Object3dCommon::GetInstance()
 	return instance;
 }
 
-void Object3dCommon::Initialize(DirectXCommon* dxCommon)
+void Object3dCommon::Initialize(SrvManager* srvManager)
 {
 	// 引数で受け取ってメンバ変数に記録する
-	dxCommon_ = dxCommon;
+	dxCommon_ = DirectXCommon::GetInstance();
+
+	srvManager_ = srvManager;
 
 	GraphicsPipelineInitialize();
 }
@@ -29,6 +33,10 @@ void Object3dCommon::DrawSettings()
 	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
 	// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考える
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	ID3D12DescriptorHeap* descriptorHeaps[] = { srvManager_->GetDescriptorHeap() };
+	// SRVを設定
+	dxCommon_->GetCommandList()->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 }
 
 void Object3dCommon::RootSignatureInitialize()
@@ -38,10 +46,10 @@ void Object3dCommon::RootSignatureInitialize()
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
-	// Rootparameter作成。複数設定できるので配列。今回は結果1つだけなので長さ1の配列
-	D3D12_ROOT_PARAMETER rootParameters[7] = {};
+	// Rootparameter作成。複数設定できるので配列
+	D3D12_ROOT_PARAMETER rootParameters[8] = {};
 
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
+	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
 	// 0から始まる
 	descriptorRange[0].BaseShaderRegister = 0;
 	// 数は1つ
@@ -50,6 +58,13 @@ void Object3dCommon::RootSignatureInitialize()
 	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	// Offsetを自動計算
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	// 環境マップ用
+	descriptorRange[1].BaseShaderRegister = 1; // t1
+	descriptorRange[1].NumDescriptors = 1;
+	descriptorRange[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
 
 	/*------マテリアル用------*/
 	// CBVを使う
@@ -71,9 +86,9 @@ void Object3dCommon::RootSignatureInitialize()
 	// PixelShaderで使う
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	// Tableの中身の配列を指定
-	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;
+	rootParameters[2].DescriptorTable.pDescriptorRanges = &descriptorRange[0];
 	// Tableで利用する数
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
+	rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
 
 	/*------平行光源用------*/
 	// CBVを使う
@@ -99,6 +114,15 @@ void Object3dCommon::RootSignatureInitialize()
 	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // 新しいCBVの可視性を設定
 	// レジスタ番号2を使う
 	rootParameters[6].Descriptor.ShaderRegister = 4; // 新しいCBVのレジスタ番号を設定
+
+	///*------環境マップ用------*/
+	rootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	// PixelShaderで使う
+	rootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	// Tableの中身の配列を指定
+	rootParameters[7].DescriptorTable.pDescriptorRanges = &descriptorRange[1];
+	// Tableで利用する数
+	rootParameters[7].DescriptorTable.NumDescriptorRanges = 1;
 
 	//////////////////////////
 	// Samplerの設定

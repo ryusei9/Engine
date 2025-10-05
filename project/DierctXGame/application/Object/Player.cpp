@@ -21,7 +21,7 @@ void Player::Initialize()
 	// プレイヤーのワールド変換を初期化
 	worldTransform_.scale_ = { 1.0f,1.0f,1.0f };
 	worldTransform_.rotate_ = { 0.0f,0.0f,0.0f };
-	worldTransform_.translate_ = { 0.0f,0.0f,0.0f };
+	worldTransform_.translate_ = { 0.0f,1.0f,0.0f };
 
 	// プレイヤーのカメラを取得
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
@@ -34,12 +34,17 @@ void Player::Initialize()
 	SetRadius(radius_); // コライダーの半径を設定
 
 	particleManager_->GetInstance()->CreateParticleGroup("thruster", "resources/circle2.png");
+	particleManager_->GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
 
 	// 初期化
 	thrusterEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "thruster");
 	thrusterEmitter_->SetParticleRate(60); // 1秒間に60個
 	thrusterEmitter_->SetParticleCount(3);
 	thrusterEmitter_->SetThruster(true); // スラスターエミッターを有効化
+
+	explosionEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "explosion");
+	explosionEmitter_->SetUseRingParticle(true); // リングパーティクルを使用
+	explosionEmitter_->SetExplosion(true); // 爆発エミッターを有効化
 
 }
 
@@ -52,6 +57,7 @@ void Player::Update()
 			isAlive_ = true;
 			worldTransform_.translate_ = { 0.0f, 0.0f, 0.0f }; // 初期位置に戻す
 			hp_ = 1;
+			hasPlayedDeathParticle_ = false;
 		}
 		return; // 死亡中は何もしない
 	}
@@ -165,15 +171,23 @@ void Player::Attack()
 
 void Player::OnCollision(Collider* other)
 {// プレイヤーの衝突判定
-	if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
-		// 敵と衝突した場合
-		isAlive_ = false;
-		respawnTimer_ = 2.0f; // 2秒後に復活
+	if (isAlive_) {
+		if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
+			// 敵と衝突した場合
+			isAlive_ = false;
+			respawnTimer_ = 2.0f; // 2秒後に復活
+			PlayDeathParticleOnce();
+		}
+		if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyBullet)) {
+			isAlive_ = false;
+			respawnTimer_ = 2.0f; // 2秒後に復活
+			PlayDeathParticleOnce();
+		}
 	}
-	if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyBullet)) {
-		isAlive_ = false;
-		respawnTimer_ = 2.0f; // 2秒後に復活
-	}
+}
+
+void Player::DrawImGui() {
+	object3d_->DrawImGui();
 }
 
 Vector3 Player::GetCenterPosition() const
@@ -181,4 +195,17 @@ Vector3 Player::GetCenterPosition() const
 	const Vector3 offset = { 0.0f, 0.0f, 0.0f }; // プレイヤーの中心を考慮
 	Vector3 worldPosition = worldTransform_.translate_ + offset;
 	return worldPosition;
+}
+
+void Player::PlayDeathParticleOnce() {
+	if (!hasPlayedDeathParticle_) {
+		if (explosionEmitter_) {
+			explosionEmitter_->SetPosition(worldTransform_.translate_); // 位置をセット
+			explosionEmitter_->SetParticleRate(1); // 必要に応じて発生数を調整
+			explosionEmitter_->SetParticleCount(0);
+			// ここでパーティクルを即時発生させるメソッドがあれば呼ぶ
+			explosionEmitter_->Update();
+		}
+		hasPlayedDeathParticle_ = true;
+	}
 }

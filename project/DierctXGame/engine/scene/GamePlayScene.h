@@ -14,7 +14,9 @@
 #include <PlayerBullet.h>
 #include <Enemy.h>
 #include <CollisionManager.h>
-
+#include <LevelData.h>
+#include <JsonLoader.h>
+#include <Skybox.h>
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 
@@ -34,6 +36,9 @@ public:
 
 	// ImGui描画
 	void DrawImGui() override;
+
+	// ローダーから読み込んだレベルデータからオブジェクトを生成、配置する関数
+	void CreateObjectsFromLevelData();
 
 private:
 
@@ -83,8 +88,21 @@ private:
 	// プレイヤーの弾
 	std::list<std::unique_ptr<PlayerBullet>>* playerBullets_;
 
+	// 敵の弾
+	std::list<std::unique_ptr<EnemyBullet>>* enemyBullets_;
+
 	// 敵
 	std::unique_ptr<Enemy> enemy_ = nullptr;
 
+	LevelData* levelData_ = nullptr;
+
+	// 複数のモデルを管理するためのコンテナ
+	std::unordered_map<std::string, std::unique_ptr<Model>> models;
+
+	// 複数のオブジェクトを管理するためのコンテナ
+	std::vector<std::unique_ptr<Object3d>> objects;
+
+	// スカイボックス
+	std::unique_ptr<Skybox> skybox_ = nullptr;
 };
 

@@ -28,6 +28,11 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	titleLogoTransform_.rotate_ = { -1.73f, 0.0f, 0.0f };
 	titleLogoTransform_.translate_ = { 0.0f, 1.2f, 0.0f };
+
+	skydome_ = std::make_unique<Object3d>();
+	skydome_->Initialize("skydome.obj");
+	skydome_->SetPointLight(0.0f);
+	skydomeTransform_.Initialize();
 }
 
 void TitleScene::Update()
@@ -51,6 +56,9 @@ void TitleScene::Update()
 	titleLogo_->SetWorldTransform(titleLogoTransform_);
 	titleLogo_->Update();
 
+	skydome_->SetWorldTransform(skydomeTransform_);
+	skydome_->Update();
+
 	CameraMove();
 }
 
@@ -58,12 +66,14 @@ void TitleScene::Draw()
 {
 	/*------スプライトの更新------*/
 	SpriteCommon::GetInstance()->DrawSettings();
-	sprite->Draw();
+	//sprite->Draw();
 	/*------オブジェクトの描画------*/
 	Object3dCommon::GetInstance()->DrawSettings();
 	player_->Draw();
 
 	titleLogo_->Draw();
+
+	skydome_->Draw();
 }
 
 void TitleScene::Finalize()
@@ -79,6 +89,7 @@ void TitleScene::DrawImGui()
 	ImGui::DragFloat3("titlePosition", &titleLogoTransform_.translate_.x);
 	ImGui::SliderFloat3("titleRotate", &titleLogoTransform_.rotate_.x, -3.14f, 3.14f);
 	ImGui::SliderFloat3("titleScale", &titleLogoTransform_.scale_.x, 0.0f, 10.0f);
+	skydome_->DrawImGui();
 	ImGui::End();
 }
 
@@ -87,7 +98,7 @@ void TitleScene::CameraMove()
 	Vector3 playerPos = player_->GetCenterPosition();
 
 	static float theta = 0.0f;
-	theta += 0.02f; // 回転速度（ラジアン）
+	theta += 0.005f; // 回転速度（ラジアン）
 
 	float radius = 5.0f; // プレイヤーからの距離
 	float height = 2.0f; // カメラの高さ
@@ -103,6 +114,7 @@ void TitleScene::CameraMove()
 	
 	Vector3 cameraRotate = { 0, -yaw + 3.14159f / 2.0f, 0.0f }; // 必要に応じて符号やオフセット調整
 	player_->SetRotation(cameraRotate);
+	skydomeTransform_.rotate_.y = cameraRotate.y;
 	//camera_->SetTranslate(cameraPos);
 	//camera_->SetRotate(cameraRotate);
 	camera_->Update();

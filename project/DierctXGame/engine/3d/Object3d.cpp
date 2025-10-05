@@ -399,7 +399,7 @@ void Object3d::CreateMaterialData()
 	materialData->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
 
 	// 金属感
-	materialData->environmentCoefficient = 0.5f;
+	materialData->environmentCoefficient = 0.0f;
 }
 
 void Object3d::CreateDirectionalLightData()
@@ -412,7 +412,7 @@ void Object3d::CreateDirectionalLightData()
 	// 真上から白いライトで照らす
 	directionalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
 	directionalLightData->direction = { 0.0f,-1.0f,0.0f };
-	directionalLightData->intensity = 1.0f;
+	directionalLightData->intensity = 3.0f;
 
 
 	// 正規化

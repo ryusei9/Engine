@@ -7,6 +7,7 @@
 #include <Audio.h>
 #include <Vector2.h>
 #include <BaseScene.h>
+#include <Player.h>
 class TitleScene : public BaseScene
 {
 public:
@@ -25,6 +26,8 @@ public:
 	// ImGui描画
 	void DrawImGui() override;
 
+	void CameraMove();
+
 private:
 	// スプライトコモン
 	SpriteCommon* spriteCommon = nullptr;
@@ -42,5 +45,17 @@ private:
 	Vector2 spritePosition = { 100.0f,100.0f };
 
 	SoundData soundData1;
+
+	// プレイヤー
+	std::unique_ptr<Player> player_ = nullptr;
+
+	WorldTransform playerTransform_;
+
+	// タイトルロゴ
+	std::unique_ptr<Object3d> titleLogo_ = nullptr;
+
+	WorldTransform titleLogoTransform_;
+
+	std::unique_ptr<Camera> camera_ = std::make_unique<Camera>();
 };
 

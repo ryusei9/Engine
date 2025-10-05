@@ -40,6 +40,9 @@ public:
 	// 座標を取得
 	Vector3 GetPosition() { return  worldTransform_.translate_; }
 
+	// ワールド変換を取得
+	WorldTransform& GetWorldTransform() { return worldTransform_; }
+
 	// シリアルナンバーを取得
 	uint32_t GetSerialNumber() const { return serialNumber_; }
 

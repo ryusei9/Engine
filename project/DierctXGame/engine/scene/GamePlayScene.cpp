@@ -62,6 +62,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	playerBullet_->Initialize();
 	playerBullet_->SetPlayer(player_.get());*/
 
+
 	// 衝突マネージャの生成
 	collisionManager_ = std::make_unique<CollisionManager>();
 	collisionManager_->Initialize();

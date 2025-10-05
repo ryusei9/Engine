@@ -36,6 +36,7 @@ void SRFramework::Initialize()
 	TextureManager::GetInstance()->LoadTexture("resources/player.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Boss.png");
 	TextureManager::GetInstance()->LoadTexture("resources/player_bullet.png");
+	TextureManager::GetInstance()->LoadTexture("resources/white.png");
 	
 	// スプライト共通部の初期化
 	
@@ -91,12 +92,14 @@ void SRFramework::Initialize()
 
 	imGuiManager->Initialize(winApp.get(), dxCommon.get());
 
+	/*------パーティクルマネージャの初期化------*/
+	ParticleManager::GetInstance()->Initialize(dxCommon.get(), srvManager.get(), camera.get());
+
 	// シーンマネージャの初期化
 	sceneManager_ = std::make_unique<SceneManager>();
 	sceneManager_->Initialize(dxCommon.get(), winApp.get());
 
-	/*------パーティクルマネージャの初期化------*/
-	ParticleManager::GetInstance()->Initialize(dxCommon.get(), srvManager.get(),camera.get());
+	
 }
 
 void SRFramework::Finelize()

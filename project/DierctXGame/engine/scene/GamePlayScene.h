@@ -85,5 +85,6 @@ private:
 
 	// 敵
 	std::unique_ptr<Enemy> enemy_ = nullptr;
+
 };
 

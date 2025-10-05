@@ -52,7 +52,6 @@ void TitleScene::Update()
 	titleLogo_->Update();
 
 	CameraMove();
-	MoveLogo();
 }
 
 void TitleScene::Draw()

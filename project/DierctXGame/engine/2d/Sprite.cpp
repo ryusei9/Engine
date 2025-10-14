@@ -87,6 +87,9 @@ void Sprite::Draw()
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
 	// Spriteを常にuvCheckerにする
+	//auto handle = TextureManager::GetInstance()->GetSrvHandleGPU(filePath);
+	//printf("SRV Handle: %llu\n", handle.ptr);
+	
 	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(filePath));
 	// 描画
 	dxCommon_->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);

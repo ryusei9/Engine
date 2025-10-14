@@ -137,6 +137,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(const std::string& f
 	// テクスチャデータの参照を取得
 	TextureData& textureData = textureDatas[filePath];
 
+	textureData.srvHandleGPU = srvManager_->GetGPUDescriptorHandle(textureData.srvIndex);
 	// GPU ハンドルを返す
 	return textureData.srvHandleGPU;
 }

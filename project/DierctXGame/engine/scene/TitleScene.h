@@ -8,6 +8,7 @@
 #include <Vector2.h>
 #include <BaseScene.h>
 #include <Player.h>
+#include <FadeManager.h>
 class TitleScene : public BaseScene
 {
 public:
@@ -62,5 +63,14 @@ private:
 	std::unique_ptr<Object3d> skydome_ = nullptr;
 
 	WorldTransform skydomeTransform_;
+
+	// フェード演出管理
+	std::unique_ptr<FadeManager> fadeManager_;
+
+	std::unique_ptr<Object3d> titleGuide_ = nullptr;
+
+	Vector3 titleGuidePosition = { 0.0f, 0.0f, -6.000f };
+	Vector3 titleGuideRotate = { -1.387f, 0.0f, 0.0f };
+	Vector3 titleGuideScale = { 0.232f, 0.232f, 0.232f };
 };
 

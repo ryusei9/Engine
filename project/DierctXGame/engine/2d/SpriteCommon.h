@@ -1,6 +1,6 @@
 #pragma once
 #include "DirectXCommon.h"
-
+#include "SrvManager.h"
 // スプライト共通部
 class SpriteCommon
 {
@@ -13,7 +13,7 @@ public:
 	SpriteCommon& operator=(SpriteCommon&) = delete;
 
 	// 初期化
-	void Initialize();
+	void Initialize(SrvManager* srvManager);
 
 	// 共通描画設定
 	void DrawSettings();
@@ -58,5 +58,7 @@ private:	// メンバ変数
 
 	// グラフィックスパイプライン
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState;
+
+	SrvManager* srvManager_ = nullptr;
 };
 

@@ -58,6 +58,7 @@
     <ClCompile Include="DierctXGame\engine\posteffect\NoisePostEffect.cpp" />
     <ClCompile Include="DierctXGame\engine\posteffect\PostEffectManager.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="DierctXGame\engine\FadeEffect\FadeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DierctXGame\application\Object\BaseCharacter.cpp" />
@@ -255,6 +256,7 @@
     <ClInclude Include="DierctXGame\application\Object\EnemyBullet.h" />
     <ClInclude Include="DierctXGame\application\Object\EnemyAttack.h" />
     <ClInclude Include="DierctXGame\engine\3d\Skybox.h" />
+    <ClInclude Include="DierctXGame\engine\FadeEffect\FadeManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Particle.hlsli" />

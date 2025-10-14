@@ -14,10 +14,12 @@ std::shared_ptr<SpriteCommon> SpriteCommon::GetInstance()
 	return instance;
 	
 }
-void SpriteCommon::Initialize()
+void SpriteCommon::Initialize(SrvManager* srvManager)
 {
 	// 引数で受け取ってメンバ変数に記録する
 	dxCommon_ = DirectXCommon::GetInstance();
+
+	srvManager_ = srvManager;
 	
 	GraphicsPipelineInitialize();
 	
@@ -25,6 +27,9 @@ void SpriteCommon::Initialize()
 
 void SpriteCommon::DrawSettings()
 {
+	ID3D12DescriptorHeap* heaps[] = { srvManager_->GetDescriptorHeap() };
+	dxCommon_->GetCommandList()->SetDescriptorHeaps(_countof(heaps), heaps);
+
 	// RootSignatureを設定
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	// PSOを設定
@@ -143,6 +148,13 @@ void SpriteCommon::RootSignatureInitialize()
 	/*/// BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};*/
 	// すべての色要素を書きこむ
+	blendDesc.RenderTarget[0].BlendEnable = TRUE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
 	/*/// RasterizerState

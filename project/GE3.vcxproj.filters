@@ -252,12 +252,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DierctXGame\engine\scene\BaseScene.cpp" />
     <ClCompile Include="DierctXGame\engine\audio\Audio.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\Camera.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\D3DresourceLeakChecker.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\DirectXCommon.cpp" />
-    <ClCompile Include="DierctXGame\engine\scene\SceneManager.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
     <ClCompile Include="externals\imgui\imgui_draw.cpp" />
@@ -265,92 +260,16 @@
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\Input.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\Inverse.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\Logger.cpp" />
-    <ClCompile Include="DierctXGame\engine\scene\GamePlayScene.cpp" />
-    <ClCompile Include="DierctXGame\application\base\SRFramework.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\ImGuiManager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\MakeAffineMatrix.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\MakeIdentity4x4.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\MakeOrthographicMatrix.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\MakePerspectiveFovMatrix.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\MakeRotateXMatrix.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\MakeRotateYMatrix.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\MakeRotateZMatrix.cpp" />
     <ClCompile Include="DierctXGame\engine\3d\Model.cpp" />
     <ClCompile Include="DierctXGame\engine\3d\ModelCommon.cpp" />
     <ClCompile Include="DierctXGame\engine\3d\ModelManager.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\Multiply.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\Normalize.cpp" />
     <ClCompile Include="DierctXGame\engine\3d\Object3d.cpp" />
     <ClCompile Include="DierctXGame\engine\3d\Object3dCommon.cpp" />
     <ClCompile Include="DierctXGame\engine\2d\Sprite.cpp" />
     <ClCompile Include="DierctXGame\engine\2d\SpriteCommon.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\StringUtility.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\TextureManager.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\WinApp.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\SrvManager.cpp" />
-    <ClCompile Include="DierctXGame\application\base\MyGame.cpp" />
-    <ClCompile Include="DierctXGame\engine\scene\TitleScene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DierctXGame\engine\io\MakeTranslateMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\scene\BaseScene.h" />
-    <ClInclude Include="DierctXGame\engine\audio\Audio.h" />
-    <ClInclude Include="DierctXGame\engine\base\Camera.h" />
-    <ClInclude Include="DierctXGame\engine\base\D3DresourceLeakChecker.h" />
-    <ClInclude Include="DierctXGame\engine\io\DirectionalLight.h" />
-    <ClInclude Include="DierctXGame\engine\base\DirectXCommon.h" />
-    <ClInclude Include="DierctXGame\engine\scene\SceneManager.h" />
-    <ClInclude Include="externals\imgui\imconfig.h" />
-    <ClInclude Include="externals\imgui\imgui.h" />
-    <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
-    <ClInclude Include="externals\imgui\imgui_impl_win32.h" />
-    <ClInclude Include="externals\imgui\imgui_internal.h" />
-    <ClInclude Include="externals\imgui\imstb_rectpack.h" />
-    <ClInclude Include="externals\imgui\imstb_textedit.h" />
-    <ClInclude Include="externals\imgui\imstb_truetype.h" />
-    <ClInclude Include="DierctXGame\engine\base\Input.h" />
-    <ClInclude Include="DierctXGame\engine\io\Inverse.h" />
-    <ClInclude Include="DierctXGame\engine\base\Logger.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakeAffineMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakeIdentity4x4.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakeOrthographicMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakePerspectiveFovMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakeRotateXMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakeRotateYMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakeRotateZMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\Material.h" />
-    <ClInclude Include="DierctXGame\engine\io\MaterialData.h" />
-    <ClInclude Include="DierctXGame\engine\io\Matrix3x3.h" />
-    <ClInclude Include="DierctXGame\engine\io\Matrix4x4.h" />
-    <ClInclude Include="DierctXGame\engine\3d\Model.h" />
-    <ClInclude Include="DierctXGame\engine\3d\ModelCommon.h" />
-    <ClInclude Include="DierctXGame\engine\io\ModelData.h" />
-    <ClInclude Include="DierctXGame\engine\3d\ModelManager.h" />
-    <ClInclude Include="DierctXGame\engine\io\Multiply.h" />
-    <ClInclude Include="DierctXGame\engine\io\Normalize.h" />
-    <ClInclude Include="DierctXGame\engine\3d\Object3d.h" />
-    <ClInclude Include="DierctXGame\engine\3d\Object3dCommon.h" />
-    <ClInclude Include="DierctXGame\engine\2d\Sprite.h" />
-    <ClInclude Include="DierctXGame\engine\2d\SpriteCommon.h" />
-    <ClInclude Include="DierctXGame\engine\base\StringUtility.h" />
-    <ClInclude Include="DierctXGame\engine\base\TextureManager.h" />
-    <ClInclude Include="DierctXGame\engine\io\Transform.h" />
-    <ClInclude Include="DierctXGame\engine\io\TransformationMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\Vector2.h" />
-    <ClInclude Include="DierctXGame\engine\io\Vector3.h" />
-    <ClInclude Include="DierctXGame\engine\io\Vector4.h" />
-    <ClInclude Include="DierctXGame\engine\io\VertexData.h" />
-    <ClInclude Include="DierctXGame\engine\base\WinApp.h" />
-    <ClInclude Include="DierctXGame\engine\base\SrvManager.h" />
-    <ClInclude Include="DierctXGame\engine\scene\GamePlayScene.h" />
-    <ClInclude Include="DierctXGame\application\base\SRFramework.h" />
-    <ClInclude Include="DierctXGame\engine\base\ImGuiManager.h" />
-    <ClInclude Include="DierctXGame\application\base\MyGame.h" />
-    <ClInclude Include="DierctXGame\engine\scene\TitleScene.h" />
     <ClInclude Include="externals\imgui\imconfig.h">
       <Filter>externals\imgui</Filter>
     </ClInclude>
@@ -600,6 +519,54 @@
     <ClInclude Include="DierctXGame\engine\manager\ImGuiManager.h">
       <Filter>engine\manager</Filter>
     </ClInclude>
+    <ClInclude Include="DierctXGame\engine\audio\Audio.h">
+      <Filter>engine\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imconfig.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui_impl_dx12.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui_impl_win32.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui_internal.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imstb_rectpack.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imstb_textedit.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imstb_truetype.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="DierctXGame\engine\3d\Model.h">
+      <Filter>engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="DierctXGame\engine\3d\Object3d.h">
+      <Filter>engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="DierctXGame\engine\3d\ModelCommon.h">
+      <Filter>engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="DierctXGame\engine\3d\Object3dCommon.h">
+      <Filter>engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="DierctXGame\engine\3d\ModelManager.h">
+      <Filter>engine\manager</Filter>
+    </ClInclude>
+    <ClInclude Include="DierctXGame\engine\2d\Sprite.h">
+      <Filter>engine\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="DierctXGame\engine\2d\SpriteCommon.h">
+      <Filter>engine\2d</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\FullScreen.hlsli">
@@ -641,7 +608,9 @@
     <None Include="resources\shaders\Sprite.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="externals\imgui\LICENSE.txt" />
+    <Text Include="externals\imgui\LICENSE.txt">
+      <Filter>externals\imgui</Filter>
+    </Text>
     <Text Include="externals\imgui\LICENSE.txt">
       <Filter>externals\imgui</Filter>
     </Text>

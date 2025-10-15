@@ -12,7 +12,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	Audio::GetInstance()->Initialize();
 	soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
 	// 音声再生
-	Audio::GetInstance()->SoundPlayWave(soundData1);
+	//Audio::GetInstance()->SoundPlayWave(soundData1);
 
 	// パーティクルマネージャの初期化
 	particleManager = ParticleManager::GetInstance();
@@ -29,6 +29,11 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	//particleEmitter2 = std::make_unique<ParticleEmitter>(particleManager, "uv");
 
 	//particleEmitter2->SetUseRingParticle(false);
+
+	fadeManager_ = std::make_unique<FadeManager>();
+	fadeManager_->Initialize();
+
+	fadeManager_->FadeOutStart(0.01f);
 
 	// ボールの初期化
 	ball = std::make_unique<Object3d>();
@@ -119,6 +124,8 @@ void GamePlayScene::Update()
 	particleEmitter2->Update();*/
 	skybox_->Update();
 
+	fadeManager_->Update(2.0f);
+
 	// スプライトの更新
 	/*sprite->Update();
 	sprite->SetPosition(spritePosition);*/
@@ -133,9 +140,7 @@ void GamePlayScene::Update()
 
 void GamePlayScene::Draw()
 {
-	/*------スプライトの更新------*/
-	SpriteCommon::GetInstance()->DrawSettings();
-	//sprite->Draw();
+	
 
 	/*------オブジェクトの描画------*/
 	Object3dCommon::GetInstance()->DrawSettings();
@@ -156,6 +161,11 @@ void GamePlayScene::Draw()
 	/*------skyboxの描画------*/
 	skybox_->DrawSettings();
 	skybox_->Draw();
+
+	/*------スプライトの更新------*/
+	SpriteCommon::GetInstance()->DrawSettings();
+	//sprite->Draw();
+	fadeManager_->Draw();
 }
 
 void GamePlayScene::Finalize()

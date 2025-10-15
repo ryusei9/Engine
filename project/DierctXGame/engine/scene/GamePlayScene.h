@@ -17,6 +17,7 @@
 #include <LevelData.h>
 #include <JsonLoader.h>
 #include <Skybox.h>
+#include <FadeManager.h>
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 
@@ -104,5 +105,8 @@ private:
 
 	// スカイボックス
 	std::unique_ptr<Skybox> skybox_ = nullptr;
+
+	// フェード演出管理
+	std::unique_ptr<FadeManager> fadeManager_;
 };
 

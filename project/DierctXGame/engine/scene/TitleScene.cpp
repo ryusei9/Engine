@@ -33,6 +33,12 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	skydome_->Initialize("skydome.obj");
 	skydome_->SetPointLight(0.0f);
 	skydomeTransform_.Initialize();
+
+	fadeManager_ = std::make_unique<FadeManager>();
+	fadeManager_->Initialize();
+
+	titleGuide_ = std::make_unique<Object3d>();
+	titleGuide_->Initialize("titleGuide.obj");
 }
 
 void TitleScene::Update()
@@ -41,10 +47,15 @@ void TitleScene::Update()
 	input->Update();
 
 	// エンターキーでゲームシーンに切り替える
-	if (input->TriggerKey(DIK_RETURN))
+	if (input->TriggerKey(DIK_SPACE))
+	{
+		fadeManager_->FadeInStart(0.01f);
+	}
+	if(fadeManager_->GetFadeState() == FadeManager::EffectState::Finish)
 	{
 		SetSceneNo(GAMEPLAY);
 	}
+
 
 	player_->SetPosition(playerTransform_.translate_);
 	player_->Update();
@@ -59,14 +70,20 @@ void TitleScene::Update()
 	skydome_->SetWorldTransform(skydomeTransform_);
 	skydome_->Update();
 
+	fadeManager_->Update(2.0f);
+
+	titleGuide_->Update();
+	titleGuide_->SetTranslate(titleGuidePosition);
+	titleGuide_->SetRotate(titleGuideRotate);
+	titleGuide_->SetScale(titleGuideScale);
+
 	CameraMove();
 }
 
 void TitleScene::Draw()
 {
-	/*------スプライトの更新------*/
-	SpriteCommon::GetInstance()->DrawSettings();
-	//sprite->Draw();
+	
+
 	/*------オブジェクトの描画------*/
 	Object3dCommon::GetInstance()->DrawSettings();
 	player_->Draw();
@@ -74,6 +91,14 @@ void TitleScene::Draw()
 	titleLogo_->Draw();
 
 	skydome_->Draw();
+
+	titleGuide_->Draw();
+
+	/*------スプライトの更新------*/
+	SpriteCommon::GetInstance()->DrawSettings();
+	//sprite->Draw();
+	
+	fadeManager_->Draw();
 }
 
 void TitleScene::Finalize()
@@ -89,7 +114,12 @@ void TitleScene::DrawImGui()
 	ImGui::DragFloat3("titlePosition", &titleLogoTransform_.translate_.x);
 	ImGui::SliderFloat3("titleRotate", &titleLogoTransform_.rotate_.x, -3.14f, 3.14f);
 	ImGui::SliderFloat3("titleScale", &titleLogoTransform_.scale_.x, 0.0f, 10.0f);
+	// スプライトの位置
+	ImGui::DragFloat3("titleGuidePosition", &titleGuidePosition.x);
+	ImGui::SliderFloat3("titleGuideRotate", &titleGuideRotate.x, -3.14f, 3.14f);
+	ImGui::SliderFloat3("titleGuideScale", &titleGuideScale.x, 0.0f, 10.0f);
 	skydome_->DrawImGui();
+	fadeManager_->DrawImGui();
 	ImGui::End();
 }
 

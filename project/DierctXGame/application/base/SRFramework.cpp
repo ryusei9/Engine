@@ -38,10 +38,12 @@ void SRFramework::Initialize()
 	TextureManager::GetInstance()->LoadTexture("resources/player_bullet.png");
 	TextureManager::GetInstance()->LoadTexture("resources/white.png");
 	TextureManager::GetInstance()->LoadTexture("resources/backGround.png");
+	TextureManager::GetInstance()->LoadTexture("resources/fadeWhite.png");
+	
 	
 	// スプライト共通部の初期化
 	
-	SpriteCommon::GetInstance()->Initialize();
+	SpriteCommon::GetInstance()->Initialize(srvManager.get());
 
 
 	// 3Dオブジェクト共通部の初期化

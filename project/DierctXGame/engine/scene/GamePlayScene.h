@@ -41,6 +41,8 @@ public:
 	// ローダーから読み込んだレベルデータからオブジェクトを生成、配置する関数
 	void CreateObjectsFromLevelData();
 
+	void DrawImGuiImportObjectsFromJson();
+
 private:
 
 	// 衝突判定と応答
@@ -89,6 +91,8 @@ private:
 	// プレイヤーの弾
 	std::list<std::unique_ptr<PlayerBullet>>* playerBullets_;
 
+	std::list<std::unique_ptr<PlayerChargeBullet>>* playerChargeBullets_;
+
 	// 敵の弾
 	std::list<std::unique_ptr<EnemyBullet>>* enemyBullets_;
 
@@ -108,5 +112,8 @@ private:
 
 	// フェード演出管理
 	std::unique_ptr<FadeManager> fadeManager_;
+
+	// 複数の敵を管理するためのコンテナ
+	std::vector<std::unique_ptr<Enemy>> enemies_;
 };
 

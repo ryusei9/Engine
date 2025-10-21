@@ -1,7 +1,7 @@
 #include "GamePlayScene.h"
 #include "SRFramework.h"
 #include "Object3dCommon.h"
-
+#include "PlayerChargeBullet.h"
 void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
 	sprite = std::make_unique<Sprite>();
@@ -57,16 +57,26 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	player_ = std::make_unique<Player>();
 	player_->Initialize();
 	//player_->SetBullet(playerBullet_.get());
+	// レベルデータのロード
+	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
+
+	// プレイヤー配置データからプレイヤーを配置
+	if (!levelData_->players.empty()) {
+		auto& playerData = levelData_->players[0];
+		player_->SetPosition(playerData.translation);
+		player_->SetRotation(playerData.rotation);
+	}
 
 	// 敵の初期化
-	enemy_ = std::make_unique<Enemy>();
+	/*enemy_ = std::make_unique<Enemy>();
 	enemy_->Initialize();
-	enemy_->SetPlayer(player_.get());
+	enemy_->SetPlayer(player_.get());*/
 
 	playerBullets_ = &player_->GetBullets();
-
+	playerChargeBullets_ = &player_->GetChargeBullets();
+	
 	// 敵の弾の情報をセット
-	enemyBullets_ = &enemy_->GetBullets();
+	//enemyBullets_ = &enemy_->GetBullets();
 	// プレイヤーの弾の初期化
 	/*playerBullet_ = std::make_unique<PlayerBullet>();
 	playerBullet_->Initialize();
@@ -74,11 +84,6 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	skybox_ = std::make_unique<Skybox>();
 	skybox_->Initialize("resources/rostock_laage_airport_4k.dds");
-
-	
-	
-	// レベルデータのロード
-	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
 
 	// オブジェクト生成
 	CreateObjectsFromLevelData();
@@ -101,13 +106,18 @@ void GamePlayScene::Update()
 	// プレイヤーの更新
 	player_->Update();
 
-	enemy_->SetPlayer(player_.get());
+	//enemy_->SetPlayer(player_.get());
 	// 敵の更新
-	enemy_->Update();
+	//enemy_->Update();
 
 	// 読み込んだ全オブジェクトの更新
 	for (auto& obj : objects) {
-		//obj->Update();
+		obj->Update();
+	}
+
+	for (auto& enemy : enemies_) {
+		enemy->SetPlayer(player_.get());
+		enemy->Update();
 	}
 
 	// パーティクルグループ"モリ"の更新
@@ -147,14 +157,17 @@ void GamePlayScene::Draw()
 
 	// 読み込んだ全オブジェクトの描画
 	for (auto& obj : objects) {
-		//obj->Draw();
+		obj->Draw();
 	}
 	//ground->Draw();
 	// プレイヤーの描画
 	player_->Draw();
 
 	// 敵の描画
-	enemy_->Draw();
+	//enemy_->Draw();
+	for (auto& enemy : enemies_) {
+		enemy->Draw();
+	}
 	// ボールの描画
 	//ball->Draw();
 
@@ -182,30 +195,14 @@ void GamePlayScene::DrawImGui()
 	// パーティクルエミッター1の位置
 	ImGui::SliderFloat3("ParticleEmitter1 Position", &particlePosition1.x, -10.0f, 50.0f);
 	// レベルデータから生成したオブジェクトのImGui調整
-	for (size_t i = 0; i < objects.size(); ++i) {
-		auto& obj = objects[i];
-		ImGui::PushID(static_cast<int>(i)); // 複数オブジェクト対応
-
-		// 位置・回転・スケールの取得
-		Vector3 pos = obj->GetTranslate();
-		Vector3 rot = obj->GetRotate();
-		Vector3 scale = obj->GetScale();
-
-		if (ImGui::SliderFloat3("position", &pos.x, -10.0f, 10.0f)) {
-			obj->SetTranslate(pos);
-		}
-		if (ImGui::SliderFloat3("Rotation", &rot.x, -180.0f, 180.0f)) {
-			obj->SetRotate(rot);
-		}
-		if (ImGui::SliderFloat3("Scale", &scale.x, 0.01f, 10.0f)) {
-			obj->SetScale(scale);
-		}
-
-		ImGui::PopID();
-	}
+	DrawImGuiImportObjectsFromJson();
 	ImGui::End();
 	player_->DrawImGui();
-	enemy_->DrawImGui();
+	
+	for (auto& enemy : enemies_) {
+		enemy->DrawImGui();
+	}
+
 	skybox_->DrawImGui();
 	//ball->DrawImGui();
 }
@@ -233,6 +230,75 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		newObject->SetScale(objectData.scaling);
 		objects.push_back(std::move(newObject));
 	}
+
+	// レベルデータから敵を生成、配置
+	for (auto& enemyData : levelData_->enemies) {
+		
+		// ファイル名から登録済みモデルを検索
+		Model* model = nullptr;
+		auto it = models.find(enemyData.fileName);
+		if (it != models.end()) { model = it->second.get(); }
+		// 敵オブジェクトの生成
+		auto newEnemy = std::make_unique<Enemy>();
+		newEnemy->Initialize();
+		newEnemy->SetPosition(enemyData.translation);
+		newEnemy->SetRotation(enemyData.rotation);
+		newEnemy->SetPlayer(player_.get());
+		enemyBullets_ = &newEnemy->GetBullets();
+		enemies_.push_back(std::move(newEnemy));
+	}
+}
+
+void GamePlayScene::DrawImGuiImportObjectsFromJson()
+{
+	// レベルデータから生成したオブジェクトのImGui調整
+	for (size_t i = 0; i < objects.size(); ++i) {
+		auto& obj = objects[i];
+		ImGui::PushID(static_cast<int>(i)); // 複数オブジェクト対応
+
+		// 位置・回転・スケールの取得
+		Vector3 pos = obj->GetTranslate();
+		Vector3 rot = obj->GetRotate();
+		Vector3 scale = obj->GetScale();
+
+		if (ImGui::SliderFloat3("position", &pos.x, -10.0f, 10.0f)) {
+			obj->SetTranslate(pos);
+		}
+		if (ImGui::SliderFloat3("Rotation", &rot.x, -180.0f, 180.0f)) {
+			obj->SetRotate(rot);
+		}
+		if (ImGui::SliderFloat3("Scale", &scale.x, 0.01f, 10.0f)) {
+			obj->SetScale(scale);
+		}
+
+		ImGui::PopID();
+	}
+	// レベルデータから生成した敵のImGui調整
+	for (size_t i = 0;i < enemies_.size();++i) {
+		auto& enemy = enemies_[i];
+		ImGui::Begin("Enemy");
+		ImGui::Text("Enemy %d", static_cast<int>(i + 1));
+		ImGui::PushID(static_cast<int>(i)); // 複数オブジェクト対応
+
+		// 位置・回転・スケールの取得
+		Vector3 pos = enemy->GetPosition();
+		Vector3 rot = enemy->GetRotation();
+		Vector3 scale = enemy->GetScale();
+		
+
+		if (ImGui::SliderFloat3("position", &pos.x, -10.0f, 10.0f)) {
+			enemy->SetPosition(pos);
+		}
+		if (ImGui::SliderFloat3("Rotation", &rot.x, -180.0f, 180.0f)) {
+			enemy->SetRotation(rot);
+		}
+		if (ImGui::SliderFloat3("Scale", &scale.x, 0.01f, 10.0f)) {
+			enemy->SetScale(scale);
+		}
+
+		ImGui::PopID();
+		ImGui::End();
+	}
 }
 
 void GamePlayScene::CheckAllCollisions()
@@ -242,12 +308,18 @@ void GamePlayScene::CheckAllCollisions()
 
 	// コライダーをリストに登録
 	collisionManager_->AddCollider(player_.get());
-	collisionManager_->AddCollider(enemy_.get());
+	
+	for (auto& enemy : enemies_) {
+		collisionManager_->AddCollider(enemy.get());
+	}
 
 	// 複数についてコライダーをリストに登録
 	for (const auto& bullet : *playerBullets_)
 	{
 		collisionManager_->AddCollider(bullet.get());
+	}
+	for (const auto& chargeBullet : *playerChargeBullets_) {
+		collisionManager_->AddCollider(chargeBullet.get());
 	}
 	// 敵の弾
 	for (const auto& bullet : *enemyBullets_) {

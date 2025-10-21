@@ -59,6 +59,7 @@
     <ClCompile Include="DierctXGame\engine\posteffect\PostEffectManager.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="DierctXGame\engine\FadeEffect\FadeManager.cpp" />
+	  <ClCompile Include="DierctXGame\application\Object\PlayerChargeBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DierctXGame\application\Object\BaseCharacter.cpp" />
@@ -174,9 +175,9 @@
     <ClInclude Include="DierctXGame\engine\scene\TitleScene.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\NoisePostEffect.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\PostEffectManager.h" />
-    <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="DierctXGame\engine\base\ResourceManager.h" />
     <ClInclude Include="DierctXGame\engine\io\GetNowTimeInSeconds.h" />
-    <ClInclude Include="DepthMaterial.h" />
+    <ClInclude Include="DierctXGame\engine\io\DepthMaterial.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\GrayscalePostEffect.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\PostEffectBase.h" />
   </ItemGroup>
@@ -257,6 +258,7 @@
     <ClInclude Include="DierctXGame\application\Object\EnemyAttack.h" />
     <ClInclude Include="DierctXGame\engine\3d\Skybox.h" />
     <ClInclude Include="DierctXGame\engine\FadeEffect\FadeManager.h" />
+	  <ClCompile Include="DierctXGame\application\Object\PlayerChargeBullet.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Particle.hlsli" />

@@ -44,8 +44,8 @@
             }
         },
         {
-            "type": "MESH",
-            "name": "球.002",
+            "type": "PlayerSpawn",
+            "name": "PlayerSpawn.001",
             "transform": {
                 "translation": [
                     0.0,
@@ -62,78 +62,70 @@
                     1.0,
                     1.0
                 ]
-            },
-            "disabled": true,
-            "file_name": "Boss"
+            }
         },
         {
-            "type": "MESH",
-            "name": "球",
+            "type": "EnemySpawn",
+            "name": "EnemySpawn.001",
             "transform": {
                 "translation": [
+                    3.4904253482818604,
                     0.0,
-                    4.707972049713135,
-                    1.8335504531860352
+                    0.0
                 ],
                 "rotation": [
                     0.0,
                     -0.0,
-                    0.0
+                    -170.84857177734375
                 ],
                 "scale": [
                     1.0,
                     1.0,
                     1.0
                 ]
-            },
-            "disabled": false,
-            "file_name": "monsterBall"
+            }
         },
         {
-            "type": "MESH",
-            "name": "球.001",
+            "type": "EnemySpawn",
+            "name": "EnemySpawn.002",
             "transform": {
                 "translation": [
-                    2.5912232398986816,
-                    4.707972049713135,
-                    0.0748034119606018
+                    3.4904253482818604,
+                    0.0,
+                    1.3507691621780396
                 ],
                 "rotation": [
                     0.0,
                     -0.0,
-                    0.0
+                    -170.84857177734375
                 ],
                 "scale": [
                     1.0,
                     1.0,
                     1.0
                 ]
-            },
-            "disabled": false,
-            "file_name": "monsterBall"
+            }
         },
         {
-            "type": "MESH",
-            "name": "球.003",
+            "type": "EnemySpawn",
+            "name": "EnemySpawn.003",
             "transform": {
                 "translation": [
-                    -2.9382431507110596,
-                    4.707972049713135,
-                    -1.2280365228652954
+                    3.4904253482818604,
+                    0.0,
+                    -1.4683895111083984
                 ],
                 "rotation": [
                     0.0,
                     -0.0,
-                    0.0
+                    -170.84857177734375
                 ],
                 "scale": [
                     1.0,
                     1.0,
                     1.0
                 ]
-            },
-            "disabled": false,
-            "file_name": "monsterBall"
+            }
         }
     ]
 }

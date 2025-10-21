@@ -25,13 +25,13 @@ void MyGame::Update()
 	SRFramework::Update();
 	// ImGuiの更新
 	imGuiManager->Begin();
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	// ゲームプレイシーンの更新
 	sceneManager_->DrawImGui();
-	postEffectManager_->DrawImGui();
-	ParticleManager::GetInstance()->DrawImGui();
+	//postEffectManager_->DrawImGui();
+	//ParticleManager::GetInstance()->DrawImGui();
 
-#endif
+//#endif
 	imGuiManager->End();
 	
 }

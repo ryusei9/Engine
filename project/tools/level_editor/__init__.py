@@ -13,6 +13,11 @@ from .export_scene import MYADDON_OT_export_scene
 from .editor_menu import TOPBAR_MT_editor_menu
 from .disabled import MYADDON_OT_disabled
 from .disabled import OBJECT_PT_disabled
+from .spawn import MYADDON_OT_spawn_import_symbol
+from .spawn import MYADDON_OT_spawn_create_symbol
+from .spawn import SpawnNames
+from .spawn import PlayerSpawnCreateSymbol
+from .spawn import EnemySpawnCreateSymbol
 
 #Blenderに登録するクラスリスト
 classes = (
@@ -26,6 +31,10 @@ classes = (
     OBJECT_PT_collider,
     MYADDON_OT_disabled,
     OBJECT_PT_disabled,
+    MYADDON_OT_spawn_import_symbol,
+    MYADDON_OT_spawn_create_symbol,
+    PlayerSpawnCreateSymbol,
+    EnemySpawnCreateSymbol
 )
 #メニュー項目描画
 def draw_menu_manual(self, context):

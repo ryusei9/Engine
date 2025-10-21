@@ -46,3 +46,12 @@ void ModelManager::Finalize()
 {
 	
 }
+
+Model* ModelManager::GetModel(const std::string& fileName)
+{
+	auto it = models.find(fileName);
+	if (it != models.end()) {
+		return it->second.get();
+	}
+	return nullptr;
+}

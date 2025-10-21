@@ -13,13 +13,13 @@ public:
 	PlayerBullet();
 
 	// 初期化
-	void Initialize(const Vector3& position);
+	virtual void Initialize(const Vector3& position);
 
 	// 更新
-	void Update();
+	virtual void Update();
 
 	// 描画
-	void Draw();
+	virtual void Draw();
 
 	// プレイヤー弾の移動
 	void Move();
@@ -42,7 +42,7 @@ public:
 	float GetRadius() const { return radius_; } // 半径の取得
 
 
-private:
+protected:
 	/*------メンバ変数------*/
 	WorldTransform worldTransform_;
 

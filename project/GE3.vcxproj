@@ -66,7 +66,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\engine\posteffect;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\application\Object;$(ProjectDir)DierctXGame\engine\util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\application\Object;$(ProjectDir)DierctXGame\engine\util;$(ProjectDir)DierctXGame\engine\FadeEffect;$(ProjectDir)DierctXGame\engine\FadeEffect\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -94,7 +94,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <TreatWarningAsError>true</TreatWarningAsError>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\engine\posteffect;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\application\Object;$(ProjectDir)DierctXGame\engine\util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\application\Object;$(ProjectDir)DierctXGame\engine\util;$(ProjectDir)DierctXGame\engine\FadeEffect;$(ProjectDir)DierctXGame\engine\FadeEffect\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -139,6 +139,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\scene\GamePlayScene.cpp" />
     <ClCompile Include="DierctXGame\application\base\SRFramework.cpp" />
     <ClCompile Include="DierctXGame\engine\base\ImGuiManager.cpp" />
+    <ClCompile Include="DierctXGame\engine\FadeEffect\FadeManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="DierctXGame\engine\io\MakeAffineMatrix.cpp" />
     <ClCompile Include="DierctXGame\engine\io\MakeIdentity4x4.cpp" />
@@ -245,7 +246,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\scene\TitleScene.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\NoisePostEffect.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\PostEffectManager.h" />
-    <ClInclude Include="DierctXGame\engine\base\ResourceManager.h" />
+    <ClInclude Include="DierctXGame\engine\FadeEffect\FadeManager.h" />
+    <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="DierctXGame\engine\io\GetNowTimeInSeconds.h" />
     <ClInclude Include="DierctXGame\engine\io\Lerp.h" />
     <ClInclude Include="DierctXGame\engine\io\MakeRotateXYZMatrix.h" />

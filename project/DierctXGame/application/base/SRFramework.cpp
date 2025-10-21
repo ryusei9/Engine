@@ -36,10 +36,14 @@ void SRFramework::Initialize()
 	TextureManager::GetInstance()->LoadTexture("resources/player.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Boss.png");
 	TextureManager::GetInstance()->LoadTexture("resources/player_bullet.png");
+	TextureManager::GetInstance()->LoadTexture("resources/white.png");
+	TextureManager::GetInstance()->LoadTexture("resources/backGround.png");
+	TextureManager::GetInstance()->LoadTexture("resources/fadeWhite.png");
+	
 	
 	// スプライト共通部の初期化
 	
-	SpriteCommon::GetInstance()->Initialize();
+	SpriteCommon::GetInstance()->Initialize(srvManager.get());
 
 
 	// 3Dオブジェクト共通部の初期化
@@ -85,6 +89,9 @@ void SRFramework::Initialize()
 	postEffectManager_->SetEffectEnabled(1, false);
 
 	imGuiManager->Initialize(winApp.get());
+
+	/*------パーティクルマネージャの初期化------*/
+	ParticleManager::GetInstance()->Initialize(srvManager.get(), camera.get());
 
 	// シーンマネージャの初期化
 	sceneManager_ = std::make_unique<SceneManager>();

@@ -84,8 +84,10 @@ void Player::Update()
 	}
 
 	// プレイヤーの移動
-	Move();
-	Attack();
+	if (controlEnabled_) {
+		Move();
+		Attack();
+	}
 	worldTransform_.Update();
 
 	

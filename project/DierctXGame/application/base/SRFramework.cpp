@@ -39,7 +39,8 @@ void SRFramework::Initialize()
 	TextureManager::GetInstance()->LoadTexture("resources/white.png");
 	TextureManager::GetInstance()->LoadTexture("resources/backGround.png");
 	TextureManager::GetInstance()->LoadTexture("resources/fadeWhite.png");
-	
+	TextureManager::GetInstance()->LoadTexture("resources/BackToTitle.png");
+	TextureManager::GetInstance()->LoadTexture("resources/Black.png");
 	
 	// スプライト共通部の初期化
 	
@@ -56,9 +57,10 @@ void SRFramework::Initialize()
 	// .objファイルからモデルを読み込む
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
-
+	ModelManager::GetInstance()->LoadModel("BackToTitle.obj"); // ←追加
 	// 弾用モデルを事前にロード
 	ModelManager::GetInstance()->LoadModel("player_bullet.obj"); // ←追加
+
 
 	Input::GetInstance()->Initialize(winApp.get());
 

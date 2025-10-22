@@ -44,9 +44,14 @@ public:
 
 	std::list<std::unique_ptr<PlayerChargeBullet>>& GetChargeBullets() { return chargeBullets_; }
 
+	bool GetPlayerControlEnabled() const { return controlEnabled_; } // プレイヤー操作有効化フラグの取得
+
 	//void SetBullet(PlayerBullet* bullet) { bullet_ = bullet; } // 武器の設定
 
 	//void SetAttack(bool attack) { isAttack_ = attack; } // 攻撃フラグの設定
+
+	/*------セッター------*/
+	void SetPlayerControlEnabled(bool enabled) { controlEnabled_ = enabled; } // プレイヤー操作有効化フラグの設定
 
 private:
 	/*------メンバ変数------*/
@@ -83,5 +88,8 @@ private:
 	float chargeTime_ = 0.0f;
 	bool isCharging_ = false;
 	bool chargeReady_ = false;
+
+	// 演出用プレイヤーが動かないフラグ
+	bool controlEnabled_ = true;
 };
 

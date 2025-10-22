@@ -18,6 +18,7 @@
 #include <JsonLoader.h>
 #include <Skybox.h>
 #include <FadeManager.h>
+#include <CameraManager.h>
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 
@@ -43,6 +44,24 @@ public:
 
 	void DrawImGuiImportObjectsFromJson();
 
+	void UpdateStartCameraEasing();
+
+public:
+	// ステート
+	enum class GameSceneState {
+		Start,
+		Play,
+		GameClear,
+		GameOver,
+		Pause
+	};
+
+
+	enum class CameraMode {
+		Free,
+		FollowPlayer,
+		DynamicFollow
+	};
 private:
 
 	// 衝突判定と応答
@@ -115,5 +134,23 @@ private:
 
 	// 複数の敵を管理するためのコンテナ
 	std::vector<std::unique_ptr<Enemy>> enemies_;
+
+	// カメラマネージャー
+	std::unique_ptr<CameraManager> cameraManager_;
+
+	CameraMode cameraMode_ = CameraMode::DynamicFollow;
+
+	// --- スタート演出用 ---
+	bool isStartCameraEasing_ = true;
+	float startCameraTimer_ = 0.0f;
+	const float startCameraDuration_ = 5.0f;
+	Vector3 startCameraPos_ = { 70.0f,-10.0f, -20.0f };
+	Vector3 startCameraRot_ = { 0.0f, 0.0f, 0.0f };
+	Vector3 endCameraPos_ = { 0.0f, 1.0f, -10.0f };
+	Vector3 endCameraRot_ = { 0.1f, 0.0f, 0.0f };
+
+	std::unique_ptr<Object3d> BackToTitle;
+
+	WorldTransform textTitle;
 };
 

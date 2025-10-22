@@ -36,6 +36,7 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	fadeManager_ = std::make_unique<FadeManager>();
 	fadeManager_->Initialize();
+	
 
 	titleGuide_ = std::make_unique<Object3d>();
 	titleGuide_->Initialize("titleGuide.obj");

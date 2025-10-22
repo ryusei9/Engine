@@ -32,6 +32,7 @@ public:
 	// setter
 	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
 	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
+	void SetXPosition(const float& x) { transform.translate.x = x; }
 	void SetFovY(const float& fovY) { this->fovY = fovY; }
 	void SetAspectRatio(const float& aspectRatio) { this->aspectRatio = aspectRatio; }
 	void SetNearClip(const float& nearClip) { this->nearClip = nearClip; }

@@ -7,7 +7,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	sprite = std::make_unique<Sprite>();
 	input = Input::GetInstance();
 	// テクスチャ"モリ"を使用
-	sprite->Initialize(directXCommon, "resources/gradationLine.png");
+	sprite->Initialize(directXCommon, "resources/BackToTitle.png");
 
 	Audio::GetInstance()->Initialize();
 	soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
@@ -53,6 +53,14 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	groundTransform.translate_ = { 0.0f,0.0f,5.0f }; // 座標
 	ground->SetWorldTransform(groundTransform);
 
+	textTitle.Initialize();
+	textTitle.translate_ = { 3.333f,2.857f,10.000f };
+	textTitle.rotate_ = { -1.495f,0.0f,0.0f };
+
+	BackToTitle = std::make_unique<Object3d>();
+	BackToTitle->Initialize("BackToTitle.obj");
+	BackToTitle->SetWorldTransform(textTitle);
+
 	// プレイヤーの初期化
 	player_ = std::make_unique<Player>();
 	player_->Initialize();
@@ -91,6 +99,15 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	// 衝突マネージャの生成
 	collisionManager_ = std::make_unique<CollisionManager>();
 	collisionManager_->Initialize();
+
+	cameraManager_ = std::make_unique<CameraManager>();
+	cameraManager_->Initialize(Object3dCommon::GetInstance()->GetDefaultCamera());
+
+	// スタート演出用カメラ初期化
+	isStartCameraEasing_ = true;
+	startCameraTimer_ = 0.0f;
+	cameraManager_->SetCameraPosition(startCameraPos_);
+	cameraManager_->SetCameraRotation(startCameraRot_);
 }
 
 void GamePlayScene::Update()
@@ -98,11 +115,12 @@ void GamePlayScene::Update()
 	// 入力の更新
 	input->Update();
 
-	// エンターキーでタイトルシーンに切り替える
-	/*if (input->TriggerKey(DIK_RETURN))
+	// Tキーでタイトルシーンに切り替える
+	if (input->TriggerKey(DIK_T))
 	{
 		SetSceneNo(TITLE);
-	}*/
+	}
+	
 	// プレイヤーの更新
 	player_->Update();
 
@@ -116,8 +134,8 @@ void GamePlayScene::Update()
 	}
 
 	for (auto& enemy : enemies_) {
-		enemy->SetPlayer(player_.get());
-		enemy->Update();
+		//enemy->SetPlayer(player_.get());
+		//enemy->Update();
 	}
 
 	// パーティクルグループ"モリ"の更新
@@ -133,12 +151,46 @@ void GamePlayScene::Update()
 	particleEmitter2->SetParticleRate(8);
 	particleEmitter2->Update();*/
 	skybox_->Update();
-
+	BackToTitle->SetWorldTransform(textTitle);
+	BackToTitle->Update();
 	fadeManager_->Update(2.0f);
 
+	
+
+
+	// カメラの更新
+	switch (cameraMode_) {
+		case CameraMode::Free:
+			// なにもしない
+			break;
+		case CameraMode::FollowPlayer:
+			//cameraManager_->MoveTargetAndCamera(player_->GetWorldTransform(), Vector3{ 0.0f,1.0f,-10.0f });
+			//cameraManager_->LookAtTarget(player_->GetPosition());
+			cameraManager_->SetCameraPosition(Vector3{ 0.0f,1.0f,-10.0f });
+			cameraManager_->SetCameraRotation(Vector3{ 0.1f,0.0f,0.0f });
+			break;
+		case CameraMode::DynamicFollow:
+			cameraManager_->MoveTargetAndCamera(player_->GetWorldTransform(), Vector3{0.0f,1.0f,-10.0f});
+			cameraManager_->LookAtTarget(player_->GetPosition());
+			break;
+	}
+
+	// スタート演出カメライージング
+	if (isStartCameraEasing_) {
+		player_->SetPlayerControlEnabled(false); // プレイヤー操作無効化
+		UpdateStartCameraEasing();
+		cameraManager_->Update();
+		Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
+		return; // 他の更新をスキップ（必要に応じて調整）
+	}
+
+	cameraManager_->Update();
+	Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
+
 	// スプライトの更新
-	/*sprite->Update();
-	sprite->SetPosition(spritePosition);*/
+	sprite->SetPosition(spritePosition);
+	sprite->Update();
+	
 
 	/*------オブジェクトの更新------*/
 	// ボールの更新
@@ -150,7 +202,9 @@ void GamePlayScene::Update()
 
 void GamePlayScene::Draw()
 {
-	
+	/*------UIの描画------*/
+	SpriteCommon::GetInstance()->DrawSettings();
+	//sprite->Draw();
 
 	/*------オブジェクトの描画------*/
 	Object3dCommon::GetInstance()->DrawSettings();
@@ -166,18 +220,20 @@ void GamePlayScene::Draw()
 	// 敵の描画
 	//enemy_->Draw();
 	for (auto& enemy : enemies_) {
-		enemy->Draw();
+		//enemy->Draw();
 	}
 	// ボールの描画
 	//ball->Draw();
-
+	if (!isStartCameraEasing_) {
+		BackToTitle->Draw();
+	}
 	/*------skyboxの描画------*/
 	skybox_->DrawSettings();
 	skybox_->Draw();
 
 	/*------スプライトの更新------*/
 	SpriteCommon::GetInstance()->DrawSettings();
-	//sprite->Draw();
+	
 	fadeManager_->Draw();
 }
 
@@ -193,7 +249,15 @@ void GamePlayScene::DrawImGui()
 	ImGui::Text("SPACE : Shot Bullet");
 	ImGui::Text("WASD : Move Player");
 	// パーティクルエミッター1の位置
-	ImGui::SliderFloat3("ParticleEmitter1 Position", &particlePosition1.x, -10.0f, 50.0f);
+	ImGui::SliderFloat3("sprite Position", &spritePosition.x, 1.0f, 50.0f);
+	// CameraMode選択用Combo
+	static const char* cameraModeItems[] = { "Free", "FollowPlayer", "DynamicFollow" };
+	int cameraModeIndex = static_cast<int>(cameraMode_);
+	if (ImGui::Combo("Camera Mode", &cameraModeIndex, cameraModeItems, IM_ARRAYSIZE(cameraModeItems))) {
+		cameraMode_ = static_cast<CameraMode>(cameraModeIndex);
+	}
+	ImGui::SliderFloat3("text Position", &textTitle.translate_.x, -10.0f, 10.0f);
+	ImGui::SliderFloat3("text rotation", &textTitle.rotate_.x, -3.14f, 3.14f);
 	// レベルデータから生成したオブジェクトのImGui調整
 	DrawImGuiImportObjectsFromJson();
 	ImGui::End();
@@ -204,6 +268,7 @@ void GamePlayScene::DrawImGui()
 	}
 
 	skybox_->DrawImGui();
+	cameraManager_->DrawImGui();
 	//ball->DrawImGui();
 }
 
@@ -310,7 +375,7 @@ void GamePlayScene::CheckAllCollisions()
 	collisionManager_->AddCollider(player_.get());
 	
 	for (auto& enemy : enemies_) {
-		collisionManager_->AddCollider(enemy.get());
+		//collisionManager_->AddCollider(enemy.get());
 	}
 
 	// 複数についてコライダーをリストに登録
@@ -328,4 +393,40 @@ void GamePlayScene::CheckAllCollisions()
 	
 	// 衝突判定と応答
 	collisionManager_->CheckCollision();
+}
+
+void GamePlayScene::UpdateStartCameraEasing()
+{
+	startCameraTimer_ += 1.0f / 60.0f; // フレームレート固定なら
+	float t = std::clamp(startCameraTimer_ / startCameraDuration_, 0.0f, 1.0f);
+
+	// イージング（easeInOutCubic）
+	float easeT;
+	if (t < 0.5f) {
+		easeT = 4.0f * t * t * t;
+	} else {
+		float p = (t - 1.0f);
+		easeT = 1.0f + 4.0f * p * p * p;
+	}
+
+	Vector3 pos = {
+		std::lerp(startCameraPos_.x, endCameraPos_.x, easeT),
+		std::lerp(startCameraPos_.y, endCameraPos_.y, easeT),
+		std::lerp(startCameraPos_.z, endCameraPos_.z, easeT)
+	};
+	Vector3 rot = {
+		std::lerp(startCameraRot_.x, endCameraRot_.x, easeT),
+		std::lerp(startCameraRot_.y, endCameraRot_.y, easeT),
+		std::lerp(startCameraRot_.z, endCameraRot_.z, easeT)
+	};
+
+	cameraManager_->SetCameraPosition(pos);
+	//cameraManager_->SetCameraRotation(rot);
+
+	if (t >= 1.0f) {
+		isStartCameraEasing_ = false;
+		player_->SetPlayerControlEnabled(true); // プレイヤー操作有効化
+		// 必要ならここでカメラモードを切り替え
+		cameraMode_ = CameraMode::FollowPlayer;
+	}
 }

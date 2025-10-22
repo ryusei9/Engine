@@ -109,6 +109,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="DierctXGame\application\Object\PlayerChargeBullet.cpp" />
     <ClCompile Include="DierctXGame\engine\posteffect\GrayscalePostEffect.cpp" />
     <ClCompile Include="DierctXGame\engine\posteffect\PostEffectBase.cpp" />
@@ -176,6 +177,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\application\Object\PlayerBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CameraManager.h" />
     <ClInclude Include="DierctXGame\application\Object\BaseCharacter.h" />
     <ClInclude Include="DierctXGame\application\Object\Collider.h" />
     <ClInclude Include="DierctXGame\application\Object\EnemyAttack.h" />
@@ -247,7 +249,6 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\posteffect\NoisePostEffect.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\PostEffectManager.h" />
     <ClInclude Include="DierctXGame\engine\FadeEffect\FadeManager.h" />
-    <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="DierctXGame\engine\io\GetNowTimeInSeconds.h" />
     <ClInclude Include="DierctXGame\engine\io\Lerp.h" />
     <ClInclude Include="DierctXGame\engine\io\MakeRotateXYZMatrix.h" />

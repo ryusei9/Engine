@@ -6,22 +6,32 @@
 #include <unordered_map>
 #include "ModelCommon.h"
 #include "DirectXCommon.h"
-// textureマネージャー
+
+/// <summary>
+/// モデルマネージャー
+/// </summary>
 class ModelManager
 {
 public:
     // シングルトンインスタンスの取得
+    static std::shared_ptr<ModelManager> GetInstance();
     ModelManager() = default;
     ~ModelManager() = default;
     ModelManager(const ModelManager&) = delete;
     ModelManager& operator=(const ModelManager&) = delete;
 
-    static std::shared_ptr<ModelManager> GetInstance();
+    
+
+	// 初期化
     void Initialize();
+
+	// モデルの読み込み
     void LoadModel(const std::string& filePath);
    
+	// 終了
     void Finalize();
 
+	// モデルの取得
     Model* GetModel(const std::string& fileName);
 
 	// モデルの検索

@@ -7,6 +7,10 @@
 #include <Audio.h>
 #include <Vector2.h>
 #include <BaseScene.h>
+
+/// <summary>
+/// タイトルシーン	
+/// </summary>
 class TitleScene : public BaseScene
 {
 public:

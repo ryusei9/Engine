@@ -1,10 +1,13 @@
 #pragma once
 #include "DirectXCommon.h"
 
-// スプライト共通部
+/// <summary>
+/// スプライト共通部
+/// </summary>
 class SpriteCommon
 {
 public:
+	/*------メンバ関数------*/
 	// シングルトンインスタンスの取得
 	static std::shared_ptr<SpriteCommon> GetInstance();
 	SpriteCommon() = default;
@@ -17,11 +20,11 @@ public:
 
 	// 共通描画設定
 	void DrawSettings();
-	/// <summary>
-	/// ゲッター
-	/// </summary>
+	/*------ゲッター------*/
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
-private:	// メンバ関数
+
+private:
+	
 	// シングルトンインスタンス
 	static std::shared_ptr<SpriteCommon> instance;
 	

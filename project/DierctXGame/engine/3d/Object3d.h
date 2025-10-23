@@ -15,21 +15,18 @@
 #include <numbers>
 #include <MaterialData.h>
 #include <Material.h>
+#include <VertexData.h>
+#include <ModelData.h>
 
+// 前方宣言
 class Object3dCommon;
 
-
-// 3Dオブジェクト
+/// <summary>
+/// 3Dオブジェクト
+/// </summary>
 class Object3d
 {
 public:
-
-	
-	struct VertexData {
-		Vector4 position;
-		Vector2 texcoord;
-		Vector3 normal;
-	};
 
 
 	// 座標変換行列データ
@@ -39,22 +36,19 @@ public:
 		Matrix4x4 WorldInverseTranspose;
 	};
 
+	// ディレクショナルライトデータ
 	struct DirectionalLight {
 		Vector4 color; // ライトの色
 		Vector3 direction; // ライトの向き
 		float intensity; // 輝度
 	};
 
-	
-	struct ModelData {
-		std::vector<VertexData> vertices;
-		MaterialData material;
-	};
 
 	struct CameraForGPU {
 		Vector3 worldPosition; // カメラのワールド座標
 	};
 
+	// ポイントライトデータ
 	struct PointLight {
 		Vector4 color; // ライトの色
 		Vector3 position; // ライトの位置
@@ -63,6 +57,7 @@ public:
 		float decay; // 減衰率
 	};
 
+	// スポットライトデータ
 	struct SpotLight {
 		Vector4 color; // ライトの色
 		Vector3 position; // ライトの位置
@@ -99,21 +94,44 @@ public:
 	// スポットライトの作成
 	void CreateSpotLightResource();
 
+	// ImGui描画
 	void DrawImGui();
 
-	// ゲッター
+	/*------ゲッター------*/
+
+	// スケールの取得
 	const Vector3& GetScale() const { return worldTransform.scale_; }
+
+	// 回転の取得
 	const Vector3& GetRotate() const { return worldTransform.rotate_; }
+
+	// 座標の取得
 	const Vector3& GetTranslate() const { return worldTransform.translate_; }
 
-	// セッター
+	/*------セッター------*/
+
+	// モデルの設定
 	void SetModel(Model* model) { this->model = model; }
+
+	// モデルの設定（ファイルパスから読み込み）
 	void SetModel(const std::string& filePath);
+
+	// スケールの設定
 	void SetScale(const Vector3& scale) { worldTransform.scale_ = scale; }
+
+	// 回転の設定
 	void SetRotate(const Vector3& rotate) { worldTransform.rotate_ = rotate; }
+
+	// 座標の設定
 	void SetTranslate(const Vector3& translate) { worldTransform.translate_ = translate; }
+
+	// ワールド変換の設定
 	void SetWorldTransform(const WorldTransform& worldTransform) { this->worldTransform = worldTransform; }
+
+	// カメラの設定
 	void SetCamera(Camera* camera) { this->camera = camera; }
+
+	// スカイボックスのファイルパス設定
 	void SetSkyboxFilePath(std::string filePath);
 private:
 	// BufferResourceの作成

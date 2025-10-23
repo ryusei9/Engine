@@ -4,14 +4,19 @@
 #include <Camera.h>
 #include <Collider.h>
 #include <WorldTransform.h>
-// キャラクターの基底クラス
+/// <sumary>
+/// キャラクターの基底クラス
+/// <sumary>
 class BaseCharacter : public Collider
 {
 public:
+	// 初期化
 	virtual void Initialize();
 
+	// 更新
 	virtual void Update();
 
+	// 描画
 	virtual void Draw();
 
 	// キャラクターの移動

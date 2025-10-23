@@ -1,6 +1,7 @@
 #pragma once
 #include <corecrt_math.h>
 
+// 3次元ベクトル構造体
 struct Vector3 {
 	float x;
 	float y;

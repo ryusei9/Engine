@@ -12,9 +12,12 @@ public:	// 静的メンバ関数
 	void Initialize();
 	
 
-	// getter
+	/*------ゲッター------*/
+
+	// ウィンドウハンドルの取得
 	HWND GetHwnd() const { return hwnd; }
 
+	// HINSTANCEの取得
 	HINSTANCE GetHInstance() const { return wc.hInstance; }
 
 	// 終了

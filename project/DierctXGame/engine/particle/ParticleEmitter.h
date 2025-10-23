@@ -2,7 +2,7 @@
 #include <string>
 #include <Vector3.h>
 
-class ParticleManager;
+class ParticleManager;// 前方宣言
 /*------パーティクル発生器------*/
 class ParticleEmitter
 {
@@ -34,9 +34,13 @@ public:
 	// リングパーティクルを使うか
 	void SetUseRingParticle(bool use) { useRingParticle_ = use; }
 
+	// 爆発用かどうか
 	void SetExplosion(bool isExplosion) { isExplosion_ = isExplosion; }
 
+	// スラスター用かどうか
 	void SetThruster(bool isThruster) { isThruster_ = isThruster; }
+
+	// 爆発用かどうかの取得
 	bool IsExplosion() const { return isExplosion_; }
 private:
 	/*------メンバ変数------*/

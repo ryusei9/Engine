@@ -54,10 +54,14 @@
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"dxcompiler.lib")
 using namespace std;
-// ゲーム全体
+
+/// <summary>
+/// ゲーム全体
+/// </summary>
 class SRFramework
 {
 public:
+	// デストラクタ
 	virtual ~SRFramework() = default;
 
 	// 初期化
@@ -84,11 +88,15 @@ public:
 	// PreDrawを行う前の処理
 	void PrePostEffect();
 
+	// PostDrawを行う後の処理
 	void DrawPostEffect();
 
 	// 実行
 	void Run();
 
+	// ゲッター
+
+	// winappの取得
 	WinApp* GetWinApp() const { return winApp.get(); }
 protected:
 	// メンバ変数

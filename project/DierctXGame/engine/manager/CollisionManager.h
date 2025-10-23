@@ -2,7 +2,11 @@
 #include <list>
 #include <memory>
 #include "Vector3.h"
-class Collider;
+class Collider;// 前方宣言
+
+/// <summary>
+///	当たり判定管理クラス
+/// </summary>
 class CollisionManager
 {
 public:

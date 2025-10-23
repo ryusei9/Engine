@@ -4,7 +4,9 @@
 #include "TitleScene.h"
 #include "ImGuiManager.h"
 
-// ゲーム全体
+/// <summary>
+/// ゲーム全体
+/// </summary>
 class MyGame : public SRFramework
 {
 public:

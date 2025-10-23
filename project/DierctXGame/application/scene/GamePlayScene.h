@@ -17,7 +17,9 @@
 #include <LevelData.h>
 #include <JsonLoader.h>
 #include <Skybox.h>
-// ゲームプレイシーン
+/// <summary>
+/// ゲームプレイシーン
+/// </summary>
 class GamePlayScene : public BaseScene
 
 {
@@ -40,6 +42,7 @@ public:
 	// ローダーから読み込んだレベルデータからオブジェクトを生成、配置する関数
 	void CreateObjectsFromLevelData();
 
+	// JSONから読み込んだオブジェクトのImGui調整
 	void DrawImGuiImportObjectsFromJson();
 
 private:

@@ -4,10 +4,13 @@
 #include <WinApp.h>
 // シーンの種類
 enum SCENE { TITLE, GAMEPLAY };
-// シーン基底クラス
+/// <summary>
+/// シーン基底クラス
+/// </summary>
 class BaseScene
 {
 public:
+	// デストラクタ
 	virtual ~BaseScene() = default;
 
 	// 初期化
@@ -25,8 +28,10 @@ public:
 	// ImGui描画
 	virtual void DrawImGui() = 0;
 
+	// シーン番号の取得
 	int GetSceneNo() { return sceneNo; }
 
+	// シーン番号の設定
 	void SetSceneNo(int sceneNo) { this->sceneNo = sceneNo; }
 
 public:

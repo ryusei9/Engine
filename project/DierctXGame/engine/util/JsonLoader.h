@@ -4,15 +4,21 @@
 #include <json.hpp>
 #include <LevelData.h>
 
+// プレイヤースポーンデータ構造体
 struct PlayerSpawnData {
 	Vector3 translation; // プレイヤーの位置
     Vector3 rotation;    // プレイヤーの回転
 };
+// 敵スポーンデータ構造体
 struct EnemySpawnData {
     std::string fileName;   // ファイル名
 	Vector3 translation; // 位置
     Vector3 rotation;   // 回転
 };
+
+/// <summary>
+/// Jsonファイルを読み込むクラス
+/// </summary>
 class JsonLoader {
 public:
     // JSONファイルを読み込む

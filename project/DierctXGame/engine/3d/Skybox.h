@@ -7,42 +7,70 @@
 #include <Vector2.h>
 #include <Vector4.h>
 #include <string>
+
+/// <summary>
+/// スカイボックス
+/// </summary>
 class Skybox
 {
 public:
+	// 頂点データ構造体
     struct Vertex {
         Vector4 position;
         Vector3 texcoord;
     };
+	// マテリアル構造体
     struct Material {
 		Vector4 color; // 色
 		Matrix4x4 uvTransform; // UV変換行列
 		float padding[3]; // パディング
     };
    
-
+	// 初期化
     void Initialize(const std::string& texturePath);
 
+	// 更新
     void Update();
 
+    // 描画
     void Draw();
 
+	// ImGui描画
 	void DrawImGui();
 
-    void SetCamera(Camera* camera);
-
+	// スカイボックス描画準備
 	void DrawSettings();
 
+    /*------ゲッター------*/
+
+	// ワールド変換行列の取得
 	WorldTransform& GetWorldTransform() { return worldTransform_; }
 
+	// ファイルパスの取得
     std::string GetFilePath() const { return filePath_; }
-	
+
+	/*------セッター------*/
+
+	// カメラ設定
+    void SetCamera(Camera* camera);
+
 private:
+	// 頂点バッファ作成
     void CreateVertexBuffer();
+
+	// テクスチャ作成
     void CreateTexture(const std::string& texturePath);
+
+	// マテリアルリソース作成
     void CreateMaterialResource();
+
+	// ルートシグネチャ作成
     void CreateRootSignature();
+
+	// パイプラインステート作成
     void CreatePipelineState();
+
+	// インデックスバッファ作成
 	void CreateIndexBuffer();
 
 	const UINT kNumIndex = 36; // 6面の立方体、各面4頂点、2つの三角形で構成

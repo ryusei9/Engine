@@ -1,5 +1,7 @@
 #pragma once
 #include "Matrix4x4.h"
+
+// 正射影行列作成
 namespace MakeOrthographicMatrix
 {
 	// 正射影行列

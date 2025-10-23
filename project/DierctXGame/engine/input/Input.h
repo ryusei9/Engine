@@ -5,7 +5,9 @@
 #include <dinput.h>
 #include "WinApp.h"
 
-// 入力
+/// <summary>
+/// 入力
+/// </summary>
 class Input{
 public:
 	// namespace省略
@@ -17,13 +19,15 @@ public:
 		return &instance;
 	}
 
+	// コンストラクタ・デストラクタ
 	Input() = default;
 	~Input() = default;
 
-
 	Input(const Input&) = delete;
 	Input& operator=(const Input&) = delete;
-	// メンバ変数
+
+
+	/*-------メンバ変数------*/
 	// 初期化
 	void Initialize(WinApp* winApp);
 	// 更新

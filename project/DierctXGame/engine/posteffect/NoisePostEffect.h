@@ -1,20 +1,37 @@
 #pragma once
 #include "PostEffectBase.h"
 
+/// <summary>
+/// Noiseポストエフェクト
+/// </summary>
 class NoisePostEffect : public PostEffectBase
 {
 public:
+	// 初期化
     void Initialize(DirectXCommon* dxCommon) override;
 
+	// ルートシグネチャの作成
 	void CreateRootSignature() override;
+
+	// パイプラインステートオブジェクトの作成
 	void CreatePipelineStateObject() override;
+
+	// 描画前処理
     void PreRender() override;
+
+	// 描画
     void Draw() override;
+
+	// 描画後処理
     void PostRender() override;
+
+	// エフェクト名の取得
     const char* GetName() const override { return "Noise"; }
 
+	// OutputSRVの取得
     D3D12_GPU_DESCRIPTOR_HANDLE GetOutputSRV() const override;
 
+	// 時間パラメータの設定
     void SetTimeParams(float time) override { timeParams_->time = time; }
 
 private:

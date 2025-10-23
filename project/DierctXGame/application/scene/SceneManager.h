@@ -5,7 +5,10 @@
 #include <WinApp.h>
 #include <TitleScene.h>
 #include <GamePlayScene.h>
+
+/// <summary>
 // シーン管理
+/// </summary>
 class SceneManager
 {
 public:

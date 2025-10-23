@@ -2,6 +2,8 @@
 #include "Vector4.h"
 #include <cstdint>
 #include "Matrix4x4.h"
+
+// マテリアルデータ構造体
 struct Material {
 	Vector4 color;
 	int32_t enableLighting;

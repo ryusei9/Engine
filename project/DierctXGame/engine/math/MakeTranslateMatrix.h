@@ -2,6 +2,8 @@
 #include <Matrix4x4.h>
 #include <Vector3.h>
 
+
+// 平行移動行列の作成
 namespace MakeTranslateMatrix {
 	Matrix4x4 MakeTranslateMatrix(const Vector3& translate)
 	{

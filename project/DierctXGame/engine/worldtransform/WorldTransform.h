@@ -5,6 +5,10 @@
 #include <d3d12.h>
 
 class Camera; // 前方宣言
+
+/// <summary>
+/// ワールド変換クラス
+/// </summary>
 class WorldTransform
 {
 public:
@@ -16,11 +20,15 @@ public:
 	};
 
 	/*------メンバ関数------*/
-	void Initialize(); // 初期化
 
-	void Update(); // 更新
+	// 初期化
+	void Initialize();
 
-	void SetPipeline(); // パイプラインの設定
+	// 更新
+	void Update();
+
+	// パイプラインの設定
+	void SetPipeline();
 
 	// BufferResourceの作成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes);

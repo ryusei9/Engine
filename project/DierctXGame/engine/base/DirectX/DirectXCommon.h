@@ -12,6 +12,7 @@
 #include <DepthMaterial.h>
 #include <ResourceManager.h>
 
+// 定数バッファ用データ構造体
 struct DissolveParams
 {
 	float threshold;
@@ -20,12 +21,16 @@ struct DissolveParams
 	float edgeColor[3];
 	float pad; // 16バイトアライメント用
 };
+
+// 時間用定数バッファ
 struct TimeParams
 {
 	float time;
 	float pad[3]; // 16バイトアライメント
 };
-// DirectX基盤
+/// <summary>
+/// DirectX基盤
+/// </summary>
 class DirectXCommon
 {
 public: // メンバ関数
@@ -72,6 +77,7 @@ public: // メンバ関数
 	// 深度ステンシルビューの初期化
 	void DepthStencilViewInitialize();
 
+	// 深度ステンシルテクスチャリソースの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, int32_t width, int32_t height);
 
 	// フェンスの生成
@@ -117,7 +123,10 @@ public: // メンバ関数
 	// TextureResourceにデータを転送する
 	Microsoft::WRL::ComPtr <ID3D12Resource> UploadTextureData(const Microsoft::WRL::ComPtr<ID3D12Resource>& texture, const DirectX::ScratchImage& mipImages);
 	
+	// 深度ステンシルビューの指定番号のCPUデスクリプタハンドルを取得する
 	D3D12_CPU_DESCRIPTOR_HANDLE GetDSVCPUDescriptorHandle(uint32_t index);
+
+	// 深度ステンシルビューの指定番号のGPUデスクリプタハンドルを取得する
 	D3D12_GPU_DESCRIPTOR_HANDLE GetDSVGPUDescriptorHandle(uint32_t index);
 
 	// FPS固定初期化
@@ -156,13 +165,16 @@ public: // メンバ関数
 	// depth用のリソースの作成
 	void CreateDepthResource(Camera* camera);
 
+	// depth用のSRVを作成
 	void TransitionDepthBufferToSRV();
 
+	// depth用の書き込み状態に遷移
 	void TransitionDepthBufferToWrite();
 
 	// mask用のSRVディスクリプタヒープを作成
 	void CreateMaskSRVDescriptorHeap();
 
+	// dissolve用の定数バッファを作成
 	void CreateDissolveParamBuffer();
 	
 	// 記録時間
@@ -170,34 +182,48 @@ public: // メンバ関数
 	/// <summary>
 	/// ゲッター
 	/// </summary>
+	 
+	// DirectX12デバイスを取得する関数
 	Microsoft::WRL::ComPtr<ID3D12Device> GetDevice() const{ return device.Get(); }
 
+	// コマンドキューを取得する関数
 	IDxcUtils* GetDxcUtils() { return dxcUtils; }
 
+	// DXCコンパイラを取得する関数
 	IDxcCompiler3* GetDxcCompiler() { return dxcCompiler; }
 
+	// DXCインクルードハンドラを取得する関数
 	IDxcIncludeHandler* GetIncludeHandler() { return includeHandler; }
 
+	// SRVデスクリプタヒープを取得する関数
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetSRVDescriptorHeap() { return srvDescriptorHeap; }
+
+	// DSVデスクリプタヒープを取得する関数
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetDSVDescriptorHeap() { return dsvDescriptorHeap; }
 
 	// ディスクリプタヒープを取得する関数
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetCBVSRVUAVDescriptorHeap() const {return cbvSrvUavDescriptorHeap;}
 
+	// デスクリプタサイズ取得関数
 	uint32_t GetDescriptorSizeSRV() { return descriptorSizeSRV; }
 	uint32_t GetDescriptorSizeDSV() { return descriptorSizeDSV; }
 
+	// スワップチェーンを取得する関数
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> GetSwapChain() { return swapChain; }
-
-	//std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> GetSwapChainResources(){return swapChainResources[0] }
+	
+	// フェンスを取得する関数
 	HANDLE GetFenceEvent() { return fenceEvent; }
 
+	// コマンドリストを取得する関数
 	ID3D12GraphicsCommandList* GetCommandList() const { return commandList.Get(); }
 
+	// RTVハンドルを取得する関数
 	D3D12_CPU_DESCRIPTOR_HANDLE(&GetRtvHandles())[2] {return rtvHandles; }
 
+	// 現在のバックバッファのインデックスを取得する関数
 	UINT GetBackBufferIndex() { return backBufferIndex; }
 
+	// バックバッファの数を取得する関数
 	UINT GetBackBufferCount() const { return backBufferCount; }
 
 	// 最大SRV数(最大テクスチャ枚数)

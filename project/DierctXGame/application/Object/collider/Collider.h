@@ -1,6 +1,10 @@
 #pragma once
 #include <cstdint>
 #include "Vector3.h"
+
+/// <summary>
+/// コライダー基底クラス
+/// </summary>
 class Collider
 {
 public:

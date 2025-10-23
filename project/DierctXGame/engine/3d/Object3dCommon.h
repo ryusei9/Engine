@@ -7,9 +7,12 @@
 
 
 
-class SrvManager;
-class DirectXCommon;
-// 3Dオブジェクト共通部
+class SrvManager;// 前方宣言
+class DirectXCommon;// 前方宣言
+
+/// <summary>
+/// 3Dオブジェクト共通部
+/// </summary>
 class Object3dCommon
 {
 public:
@@ -33,8 +36,11 @@ public:
 	/// <summary>
 	/// ゲッター
 	/// </summary>
+	
+	//  DirectXCommonの取得
 	DirectXCommon* GetDxCommon()const { return dxCommon_; }
 
+	// デフォルトカメラの取得
 	Camera* GetDefaultCamera()const { return defaultCamera; }
 private:
 	static std::shared_ptr<Object3dCommon> instance;

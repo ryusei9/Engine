@@ -1,5 +1,6 @@
 #pragma once
 
+// パーティクルタイプ
 enum class ParticleType {
 	Normal,
 	Plane,

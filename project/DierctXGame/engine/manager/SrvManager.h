@@ -3,7 +3,9 @@
 #include <queue>
 #include "DirectXCommon.h"
 
-// SRV管理
+/// <summary>
+/// SRV管理
+/// </summary>
 class SrvManager
 {
 
@@ -12,8 +14,10 @@ public:
 	// 初期化
 	void Initialize();
 
+	// SRV確保
 	uint32_t Allocate();
 
+	// SRV解放
 	void Free(uint32_t srvIndex);
 
 	// SRV生成(texture用)
@@ -22,8 +26,10 @@ public:
 	// SRV生成(Structured Buffer用)
 	void CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structuredByteStride);
 
+	// 描画前処理
 	void PreDraw();
 
+	// グラフィックスルートデスクリプタテーブル設定
 	void SetGraphicsRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex);
 
 	/// <summary>

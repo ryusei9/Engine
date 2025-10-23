@@ -33,9 +33,15 @@ struct SoundData {
 	// バッファのサイズ
 	unsigned int bufferSize;
 };
+
+/// <summary>
+/// オーディオ管理クラス
+/// </summary>
 class Audio
 {
 public:
+
+	// コンストラクタ・デストラクタ
 	Audio() = default;
 	~Audio() = default;
 	// コピーコンストラクタ

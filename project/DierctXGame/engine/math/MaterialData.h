@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 
+// マテリアルデータ構造体
 struct MaterialData {
 	std::string textureFilePath;
 	uint32_t textureIndex = 0;

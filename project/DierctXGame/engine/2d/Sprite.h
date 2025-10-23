@@ -18,7 +18,9 @@ struct TransformationMatrix {
 	Matrix4x4 WVP;
 	Matrix4x4 World;
 };
-// スプライト
+/// <summary>
+/// スプライト
+/// </summary>
 class Sprite
 {
 public:
@@ -28,45 +30,66 @@ public:
 	// 更新
 	void Update();
 
+	// 描画
 	void Draw();
 
-	// getter
+	/*------ゲッター------*/
+
+	// スプライト個々の座標の取得
 	const Vector2& GetPosition() const { return position; }
 
+	// スプライト個々の回転角の取得
 	float GetRotation()const { return rotation; }
 
+	// スプライト個々の色の取得
 	const Vector4& GetColor()const { return materialData->color; }
 
+	// スプライト個々のサイズの取得
 	const Vector2& GetSize() const { return size; }
 
+	// アンカーポイントの取得
 	const Vector2& GetAnchorPoint() const { return anchorPoint; }
 
+	// 左右フリップの取得
 	const bool& GetIsFlipX() const { return isFlipX_; }
 
+	// 上下フリップの取得
 	const bool& GetIsFlipY() const { return isFlipY_; }
 
+	// テクスチャ左上座標の取得
 	const Vector2& GetTextureLeftTop()const { return textureLeftTop; }
 
+	// テクスチャ切り出しサイズの取得
 	const Vector2& GetTextureSize()const { return textureSize; }
 
 
-	// setter
+	/*------セッター------*/
+
+	// スプライト個々の座標の設定
 	void SetPosition(const Vector2& position) { this->position = position; }
 
+	// スプライト個々の回転角の設定
 	void SetRotation(float rotation) { this->rotation = rotation; }
 
+	// スプライト個々の色の設定
 	void SetColor(const Vector4& color) { materialData->color = color; }
 
+	// スプライト個々のサイズの設定
 	void SetSize(const Vector2& size) { this->size = size; }
 
+	// アンカーポイントの設定
 	void SetAnchorPoint(const Vector2& anchorPoint) { this->anchorPoint = anchorPoint; }
 
+	// 左右フリップの設定
 	void SetIsFlipX(const bool& isFlipX_) { this->isFlipX_ = isFlipX_; }
 
+	// 上下フリップの設定
 	void SetIsFlipY(const bool& isFlipY_) { this->isFlipY_ = isFlipY_; }
 
+	// テクスチャ左上座標の設定
 	void SetTextureLeftTop(const Vector2& textureLeftTop) { this->textureLeftTop = textureLeftTop; }
 
+	// テクスチャ切り出しサイズの設定
 	void SetTextureSize(const Vector2& textureSize) { this->textureSize = textureSize; }
 private:
 	// BufferResourceの作成

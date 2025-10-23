@@ -9,8 +9,8 @@
 #include "Material.h"
 #include <ParticleType.h>
 
-class DirectXCommon;
-class Camera;
+class DirectXCommon;// 前方宣言
+class Camera;// 前方宣言
 /*------パーティクルを管理するクラス------*/
 class ParticleManager
 {
@@ -28,27 +28,32 @@ public:
 		float maxScale = 1.0f; // 追加: 最大スケール
 	};
 
+	// GPU用パーティクル構造体
 	struct ParticleForGPU {
 		Matrix4x4 WVP;
 		Matrix4x4 World;
 		Vector4 color;
 	};
 
+	// 軸合わせ用AABB構造体
 	struct AABB {
 		Vector3 min;
 		Vector3 max;
 	};
 
+	// 加速度フィールドの構造体
 	struct AccelerationField {
 		Vector3 acceleration;	// 加速度
 		AABB area;	// 範囲
 	};
 
+	// 風エリアの構造体
 	struct WindZone{
 		AABB area;		  // 風が吹くエリア
 		Vector3 strength; // 風の強さ
 	};
 
+	// エミッターの構造体
 	struct Emitter {
 		Transform transform;
 		uint32_t count;
@@ -150,6 +155,7 @@ public:
 	// リング型の頂点を使うか
 	bool GetUseRingVertex() const { return useRingVertex; }
 
+	// パーティクルタイプの取得
 	ParticleType GetParticleType() const { return particleType_; }
 
 	/*------セッター------*/
@@ -159,12 +165,15 @@ public:
 	// リング型の頂点を使うか
 	void SetUseRingVertex(bool useRingVertex) { this->useRingVertex = useRingVertex; }
 
+	// パーティクルタイプの設定
 	void SetParticleType(ParticleType type);
 private:
 	static ParticleManager* instance;
 
+	// ルートシグネイチャの作成
 	void CreateRootSignature();
 
+	// パイプラインステートオブジェクトの作成
 	void CreatePSO();
 
 	// AABBとVector3の当たり判定

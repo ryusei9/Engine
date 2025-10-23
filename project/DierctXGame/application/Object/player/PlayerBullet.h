@@ -32,13 +32,17 @@ public:
 	/*------ゲッター------*/
 
 	/*------セッター------*/
+
 	// プレイヤーの設定
 	void SetPlayer(Player* player) { player_ = player; }
 
+	// 座標の設定
 	void SetTranslate(const Vector3& translate) { worldTransform_.translate_ = translate; } // 座標の設定
 
+	// 生存フラグの設定
 	bool IsAlive() const { return isAlive_; } // 生存フラグの取得
 
+	// 半径の取得
 	float GetRadius() const { return radius_; } // 半径の取得
 
 

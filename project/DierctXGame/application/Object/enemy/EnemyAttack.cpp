@@ -5,6 +5,7 @@
 #include <Enemy.h>
 #include <Player.h>
 
+// 円周率
 constexpr float PI = 3.1415926535f;
 
 // パターン1: 画面右側で上下移動しつつ2秒ごとに扇形弾
@@ -31,6 +32,7 @@ void EnemyAttackPatternFan::Update(Enemy* enemy, Player*, std::list<std::unique_
 		shotTimer_ = 0.0f;
 	}
 }
+// ImGui描画
 void EnemyAttackPatternFan::DrawImGui(int idx, bool selected) {
 	if (ImGui::Selectable(GetName(), selected)) {}
 }
@@ -54,6 +56,8 @@ void EnemyAttackPatternAimed::Update(Enemy* enemy, Player* player, std::list<std
 		shotTimer_ = 0.0f;
 	}
 }
+
+// ImGui描画
 void EnemyAttackPatternAimed::DrawImGui(int idx, bool selected) {
 	if (ImGui::Selectable(GetName(), selected)) {}
 }
@@ -84,35 +88,16 @@ void EnemyAttackPatternRush::Update(Enemy* enemy, Player*, std::list<std::unique
 }
 
 void EnemyAttackPatternWait::Update(Enemy* enemy, Player*, std::list<std::unique_ptr<EnemyBullet>>&,float deltaTime) {
-	//static const Vector3 target = { 3.0f, 0.0f, 0.0f };
-
-	//// イージング開始判定
-	//if (!easing_) {
-
-	//	easing_ = true;
-	//	easingTime_ = 0.0f;
-	//	startPos_ = enemy->GetWorldTransform().translate_;
-
-	//}
-
-	//if (easing_) {
-	//	easingTime_ += deltaTime;
-	//	float t = std::clamp(easingTime_ / easingDuration_, 0.0f, 1.0f);
-	//	// イージング（イーズアウト・クワッド）
-	//	float ease = 1.0f - (1.0f - t) * (1.0f - t);
-	//	enemy->GetWorldTransform().translate_ =
-	//		startPos_ * (1.0f - ease) + target * ease;
-
-	//	if (t >= 1.0f) {
-	//		enemy->GetWorldTransform().translate_ = target;
-	//		easing_ = false;
-	//	}
-	//}
+	
 }
+
+// ImGui描画
 void EnemyAttackPatternWait::DrawImGui(int idx, bool selected) {
 	if (ImGui::Selectable(GetName(), selected)) {}
 }
 
+
+// ImGui描画
 void EnemyAttackPatternRush::DrawImGui(int idx, bool selected) {
 	if (ImGui::Selectable(GetName(), selected)) {}
 }
@@ -159,6 +144,8 @@ void EnemyAttack::Update(Enemy* enemy, Player* player, std::list<std::unique_ptr
 		patterns_[currentPattern_]->Update(enemy, player, bullets, deltaTime);
 	}
 }
+
+// ImGui描画
 void EnemyAttack::DrawImGui() {
 	for (int i = 0; i < int(patterns_.size()); ++i) {
 		bool selected = (i == currentPattern_);
@@ -167,6 +154,8 @@ void EnemyAttack::DrawImGui() {
 		}
 	}
 }
+
+// パターン設定
 void EnemyAttack::SetPattern(int idx) {
 	if (idx >= 0 && idx < int(patterns_.size())) currentPattern_ = idx;
 }

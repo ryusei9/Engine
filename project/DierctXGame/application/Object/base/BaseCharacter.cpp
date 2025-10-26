@@ -2,8 +2,10 @@
 #include <Object3DCommon.h>
 void BaseCharacter::Initialize()
 {
-
+	// インプットの初期化
 	input_ = Input::GetInstance();
+
+	// カメラの初期化
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
 
 	// ワールド変換の初期化

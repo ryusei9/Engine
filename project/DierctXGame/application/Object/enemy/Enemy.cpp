@@ -18,6 +18,7 @@ void Enemy::Initialize()
 	// 敵のコライダーの設定
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kEnemy));
 
+	// 敵のワールド変換を初期化
 	worldTransform_.Initialize();
 	// 敵のワールド変換を初期化
 	worldTransform_.scale_ = { 1.0f,1.0f,1.0f };
@@ -25,24 +26,29 @@ void Enemy::Initialize()
 	worldTransform_.translate_ = { 3.0f,0.0f,0.0f };
 	// 敵のカメラを取得
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
+
+	// 敵の3Dオブジェクトを生成
 	object3d_ = std::make_unique<Object3d>();
 	// 敵の3Dオブジェクトを初期化
 	object3d_->Initialize("enemy.obj");
 
 	// パーティクルマネージャの初期化
 	particleManager = ParticleManager::GetInstance();
+
+	// 敵死亡時のパーティクル設定
 	particleManager->GetInstance()->SetParticleType(ParticleType::Explosion);
 	// テクスチャ"circle2"を使用
 	particleManager->GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
 
 	// 敵死亡時のパーティクルエミッターを初期化
 	enemyDeathEmitter_ = std::make_unique<ParticleEmitter>(particleManager, "explosion");
-	enemyDeathEmitter_->SetUseRingParticle(true); // 必要に
+	enemyDeathEmitter_->SetUseRingParticle(true);
 	enemyDeathEmitter_->SetExplosion(true); // 爆発エミッターに設定
 	SetRadius(0.4f); // コライダーの半径を設定
 
+	// 敵の攻撃パターンを初期化
 	attack_ = std::make_unique<EnemyAttack>();
-
+	// デフォルトの攻撃パターンを設定
 	attack_->SetPattern(3);
 }
 
@@ -63,6 +69,7 @@ void Enemy::Update()
 	}
 	// 敵の更新
 	BaseCharacter::Update();
+	// ワールド変換の更新
 	worldTransform_.Update();
 	// 敵のワールド変換を更新
 	object3d_->SetCamera(camera_);
@@ -72,9 +79,11 @@ void Enemy::Update()
 	object3d_->Update();
 	// 敵の移動
 	Move();
+	
 	// 敵の攻撃
-	//Attack();
 	attack_->Update(this, player_, bullets_, 1.0f / 60.0f);
+
+	// 敵の死亡条件
 	if (hp_ <= 0)
 	{
 		// 敵のHPが0以下になったら
@@ -97,9 +106,11 @@ void Enemy::Update()
 
 void Enemy::Draw()
 {
+	// 敵が生きている場合のみ描画
 	if (isAlive_) {
 		// 敵の描画
 		BaseCharacter::Draw();
+		// 弾の描画
 		for (auto& bullet : bullets_) {
 			bullet->Draw();
 		}
@@ -127,8 +138,10 @@ void Enemy::Move()
 
 void Enemy::Attack()
 {
+	// 敵の攻撃処理
 	if (!isAlive_) return;
 	shotTimer_ -= 1.0f / 60.0f;
+	// 一定時間ごとに弾を発射
 	if (shotTimer_ <= 0.0f) {
 		// プレイヤーの方向に発射（例：X軸負方向に発射）
 		Vector3 velocity = { -0.1f, 0.0f, 0.0f };
@@ -143,6 +156,7 @@ void Enemy::Attack()
 void Enemy::OnCollision(Collider* other)
 {
 	// 敵の衝突判定
+	// チャージ弾と衝突した場合
 	if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerChargeBullet))
 	{
 		auto* chargeBullet = dynamic_cast<PlayerChargeBullet*>(other);
@@ -161,6 +175,7 @@ void Enemy::OnCollision(Collider* other)
 
 void Enemy::PlayDeathParticleOnce()
 {
+	// 敵死亡時に一度だけパーティクルを出す
 	if (!hasPlayedDeathParticle_) {
 		if (enemyDeathEmitter_) {
 			enemyDeathEmitter_->SetPosition(worldTransform_.translate_); // 位置をセット

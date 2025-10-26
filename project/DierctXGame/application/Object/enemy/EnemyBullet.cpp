@@ -5,6 +5,8 @@ void EnemyBullet::Initialize(const Vector3& position, const Vector3& velocity)
 {
     // ColliderにIDをセット
     Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kEnemyBullet));
+
+	// 初期化処理
     isAlive_ = true;
     lifeFrame_ = 180;
     worldTransform_.Initialize();
@@ -16,9 +18,6 @@ void EnemyBullet::Initialize(const Vector3& position, const Vector3& velocity)
     // オブジェクトを設定
     objectBullet_ = std::make_unique<Object3d>();
     objectBullet_->Initialize("player_bullet.obj");
-
-
-
     objectBullet_->SetScale(worldTransform_.scale_);
     objectBullet_->SetTranslate(worldTransform_.translate_);
 
@@ -28,9 +27,14 @@ void EnemyBullet::Initialize(const Vector3& position, const Vector3& velocity)
 
 void EnemyBullet::Update()
 {
+	// 移動処理
     Move();
+
+	// 生存フレームのカウントダウン
     if (lifeFrame_ > 0) lifeFrame_--;
+	// 生存フレームが0になったら消滅
     else isAlive_ = false;
+	// 更新処理
     worldTransform_.Update();
     objectBullet_->SetScale(worldTransform_.scale_);
     objectBullet_->SetTranslate(worldTransform_.translate_);
@@ -39,16 +43,19 @@ void EnemyBullet::Update()
 
 void EnemyBullet::Draw()
 {
+	// 描画処理
     objectBullet_->Draw();
 }
 
 void EnemyBullet::Move()
 {
+	// 速度ベクトルに基づいて位置を更新
     worldTransform_.translate_ += velocity_;
 }
 
 void EnemyBullet::OnCollision(Collider* other)
 {
+	// プレイヤーと衝突した場合に消滅
     if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayer)) {
         isAlive_ = false;
     }

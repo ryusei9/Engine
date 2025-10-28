@@ -23,7 +23,7 @@ void Player::Initialize()
 	// プレイヤーのワールド変換を初期化
 	worldTransform_.scale_ = { 1.0f,1.0f,1.0f };
 	worldTransform_.rotate_ = { 0.0f,0.0f,0.0f };
-	worldTransform_.translate_ = { 0.0f,1.0f,0.0f };
+	worldTransform_.translate_ = { 0.0f,0.0f,0.0f };
 
 	// プレイヤーのカメラを取得
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
@@ -85,7 +85,7 @@ void Player::Update()
 
 	// プレイヤーの移動
 	if (controlEnabled_) {
-		Move();
+		//Move();
 		Attack();
 	}
 	worldTransform_.Update();

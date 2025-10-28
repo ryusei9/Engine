@@ -67,6 +67,12 @@ private:
 	// 衝突判定と応答
 	void CheckAllCollisions();
 
+	// 
+	void LoadLevel(const LevelData* levelData);
+
+	// カーブに沿ってプレイヤーを移動させる
+	void UpdatePlayerOnCurve();
+
 	// スプライトコモン
 	SpriteCommon* spriteCommon = nullptr;
 	// ダイレクトXコモン
@@ -152,5 +158,15 @@ private:
 	std::unique_ptr<Object3d> BackToTitle;
 
 	WorldTransform textTitle;
+
+	// カーブ座標リスト
+	std::vector<Vector3> curvePoints_;
+	// カーブ進行度（0.0～1.0）
+	float curveProgress_ = 0.0f;
+	// カーブの現在インデックス
+	size_t curveIndex_ = 0;
+	// プレイヤー移動速度
+	float curveSpeed_ = 0.01f; // 1フレームあたりの進行度
+
 };
 

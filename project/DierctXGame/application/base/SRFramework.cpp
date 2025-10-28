@@ -58,8 +58,11 @@ void SRFramework::Initialize()
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
 	ModelManager::GetInstance()->LoadModel("BackToTitle.obj"); // ←追加
+	ModelManager::GetInstance()->LoadModel("testCube.obj");
+	ModelManager::GetInstance()->LoadModel("testGround.obj");
 	// 弾用モデルを事前にロード
 	ModelManager::GetInstance()->LoadModel("player_bullet.obj"); // ←追加
+
 
 
 	Input::GetInstance()->Initialize(winApp.get());

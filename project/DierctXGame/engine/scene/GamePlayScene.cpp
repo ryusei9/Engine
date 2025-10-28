@@ -33,7 +33,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	fadeManager_ = std::make_unique<FadeManager>();
 	fadeManager_->Initialize();
 
-	fadeManager_->FadeOutStart(0.01f);
+	//fadeManager_->FadeOutStart(0.01f);
 
 	// ボールの初期化
 	ball = std::make_unique<Object3d>();
@@ -67,6 +67,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	//player_->SetBullet(playerBullet_.get());
 	// レベルデータのロード
 	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
+	LoadLevel(levelData_);
 
 	// プレイヤー配置データからプレイヤーを配置
 	if (!levelData_->players.empty()) {
@@ -108,6 +109,11 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	startCameraTimer_ = 0.0f;
 	cameraManager_->SetCameraPosition(startCameraPos_);
 	cameraManager_->SetCameraRotation(startCameraRot_);
+
+#ifdef _DEBUG
+	isStartCameraEasing_ = false; // デバッグ時はスタート演出をスキップ
+	cameraMode_ = CameraMode::FollowPlayer;
+#endif
 }
 
 void GamePlayScene::Update()
@@ -145,7 +151,7 @@ void GamePlayScene::Update()
 
 	// 衝突マネージャの更新
 	collisionManager_->Update();
-	CheckAllCollisions();// 衝突判定と応答
+	//CheckAllCollisions();// 衝突判定と応答
 	//// パーティクルグループ"UV"の更新
 	/*particleEmitter2->SetPosition(particlePosition2);
 	particleEmitter2->SetParticleRate(8);
@@ -166,7 +172,7 @@ void GamePlayScene::Update()
 		case CameraMode::FollowPlayer:
 			//cameraManager_->MoveTargetAndCamera(player_->GetWorldTransform(), Vector3{ 0.0f,1.0f,-10.0f });
 			//cameraManager_->LookAtTarget(player_->GetPosition());
-			cameraManager_->SetCameraPosition(Vector3{ 0.0f,1.0f,-10.0f });
+			cameraManager_->SetCameraPosition(player_->GetWorldTransform().translate_ + Vector3{ 0.0f,1.0f,-10.0f });
 			cameraManager_->SetCameraRotation(Vector3{ 0.1f,0.0f,0.0f });
 			break;
 		case CameraMode::DynamicFollow:
@@ -175,7 +181,7 @@ void GamePlayScene::Update()
 			break;
 	}
 
-	// スタート演出カメライージング
+	// スタート演出カメラ初期化
 	if (isStartCameraEasing_) {
 		player_->SetPlayerControlEnabled(false); // プレイヤー操作無効化
 		UpdateStartCameraEasing();
@@ -191,7 +197,8 @@ void GamePlayScene::Update()
 	sprite->SetPosition(spritePosition);
 	sprite->Update();
 	
-
+	// プレイヤーをカーブに沿って移動
+	UpdatePlayerOnCurve();
 	/*------オブジェクトの更新------*/
 	// ボールの更新
 	//ball->Update();
@@ -225,7 +232,7 @@ void GamePlayScene::Draw()
 	// ボールの描画
 	//ball->Draw();
 	if (!isStartCameraEasing_) {
-		BackToTitle->Draw();
+		//BackToTitle->Draw();
 	}
 	/*------skyboxの描画------*/
 	skybox_->DrawSettings();
@@ -395,6 +402,18 @@ void GamePlayScene::CheckAllCollisions()
 	collisionManager_->CheckCollision();
 }
 
+void GamePlayScene::LoadLevel(const LevelData* levelData)
+{
+	// カーブ座標を保存
+	curvePoints_.clear();
+	if (!levelData->curves.empty()) {
+		// 例: 最初のカーブのみ使用
+		curvePoints_ = levelData->curves[0].points;
+	}
+	curveProgress_ = 0.0f;
+	curveIndex_ = 0;
+}
+
 void GamePlayScene::UpdateStartCameraEasing()
 {
 	startCameraTimer_ += 1.0f / 60.0f; // フレームレート固定なら
@@ -429,4 +448,42 @@ void GamePlayScene::UpdateStartCameraEasing()
 		// 必要ならここでカメラモードを切り替え
 		cameraMode_ = CameraMode::FollowPlayer;
 	}
+}
+
+void GamePlayScene::UpdatePlayerOnCurve()
+{
+    // カーブ座標が2点以上ある場合のみ移動
+    if (curvePoints_.size() >= 2) {
+        // 最後まで到達したら停止
+        if (curveIndex_ >= curvePoints_.size() - 1) {
+            // 最終座標で停止
+            player_->SetPosition(curvePoints_.back());
+            return;
+        }
+
+        // 現在の区間の始点・終点
+        const Vector3& start = curvePoints_[curveIndex_];
+        const Vector3& end = curvePoints_[curveIndex_ + 1];
+
+        // 線形補間
+        Vector3 lerpPos;
+        lerpPos.x = std::lerp(start.x, end.x, curveProgress_);
+        lerpPos.y = std::lerp(start.y, end.y, curveProgress_);
+        lerpPos.z = std::lerp(start.z, end.z, curveProgress_);
+
+        // プレイヤー座標を更新
+        player_->SetPosition(lerpPos);
+
+        // 進行度を進める
+        curveProgress_ += curveSpeed_;
+        if (curveProgress_ >= 1.0f) {
+            curveProgress_ = 0.0f;
+            curveIndex_++;
+            // 次の区間がなければ停止
+            if (curveIndex_ >= curvePoints_.size() - 1) {
+                // 最終座標で停止
+                player_->SetPosition(curvePoints_.back());
+            }
+        }
+    }
 }

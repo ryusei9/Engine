@@ -52,17 +52,17 @@ void Player::Initialize()
 
 void Player::Update()
 {// プレイヤーの更新
-	if (!isAlive_) {
-		respawnTimer_ -= 1.0f / 60.0f;
-		if (respawnTimer_ <= 0.0f) {
-			// 復活
-			isAlive_ = true;
-			worldTransform_.translate_ = { 0.0f, 0.0f, 0.0f }; // 初期位置に戻す
-			hp_ = 1;
-			hasPlayedDeathParticle_ = false;
-		}
-		return; // 死亡中は何もしない
-	}
+	//if (!isAlive_) {
+	//	respawnTimer_ -= 1.0f / 60.0f;
+	//	if (respawnTimer_ <= 0.0f) {
+	//		// 復活
+	//		isAlive_ = true;
+	//		worldTransform_.translate_ = { 0.0f, 0.0f, 0.0f }; // 初期位置に戻す
+	//		hp_ = 1;
+	//		hasPlayedDeathParticle_ = false;
+	//	}
+	//	return; // 死亡中は何もしない
+	//}
 	BaseCharacter::Update();
 
 	// 弾の削除
@@ -85,7 +85,7 @@ void Player::Update()
 
 	// プレイヤーの移動
 	if (controlEnabled_) {
-		//Move();
+		Move();
 		Attack();
 	}
 	worldTransform_.Update();

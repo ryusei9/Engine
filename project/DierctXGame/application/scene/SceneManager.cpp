@@ -43,6 +43,8 @@ void SceneManager::Update()
 			nowScene_ = std::make_unique<GamePlayScene>();
 		} else if (currentSceneNo_ == TITLE) {
 			nowScene_ = std::make_unique<TitleScene>();
+		}else if(currentSceneNo_ == GAMEOVER) {
+			nowScene_ = std::make_unique<GameOverScene>();
 		}
 		// シーンの初期化
 		nowScene_->Initialize(directXCommon_, winApp_);

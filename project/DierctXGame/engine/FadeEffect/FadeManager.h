@@ -16,13 +16,13 @@ public:
     };
     void Initialize();
 
-    void Update(float deltaTime);
+    void Update();
 
     void Draw();
 
-    void FadeInStart(float fadeSpeed);
+    void FadeInStart(float fadeSpeed, std::function<void()> onFinished = nullptr);
 
-	void FadeOutStart(float fadeSpeed);
+	void FadeOutStart(float fadeSpeed, std::function<void()> onFinished = nullptr);
 
 	void DrawImGui();
 
@@ -35,7 +35,7 @@ private:
 
 	float alpha_ = 0.0f;
 
-	float fadeSpeed_ = 0.5f; // フェード速度
+	float fadeSpeed_ = 0.02f; // フェード速度
 
     std::function<void()> onFinished_ = nullptr;
 

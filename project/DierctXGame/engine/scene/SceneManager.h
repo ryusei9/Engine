@@ -5,6 +5,7 @@
 #include <WinApp.h>
 #include <TitleScene.h>
 #include <GamePlayScene.h>
+#include <GameOverScene.h>
 // シーン管理
 class SceneManager
 {

@@ -10,26 +10,22 @@ void FadeManager::Initialize()
 }
 
 
-void FadeManager::Update(float deltaTime)
+void FadeManager::Update()
 {
 	// Fadeの状態に応じて処理を行う
 	if (fadeState_ == EffectState::FadeIn) {
-		alpha_ += deltaTime * fadeSpeed_;
+		alpha_ += fadeSpeed_;
 		if (alpha_ >= 1.0f) {
 			alpha_ = 1.0f;
 			fadeState_ = EffectState::Finish;
-			if (onFinished_) {
-				onFinished_();
-			}
+			if (onFinished_)onFinished_();
 		}
 	} else if (fadeState_ == EffectState::FadeOut) {
-		alpha_ -= deltaTime * fadeSpeed_;
+		alpha_ -= fadeSpeed_;
 		if (alpha_ <= 0.0f) {
 			alpha_ = 0.0f;
 			fadeState_ = EffectState::Finish;
-			if (onFinished_) {
-				onFinished_();
-			}
+			if (onFinished_) onFinished_();
 		}
 	}
 	fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, alpha_ });
@@ -46,18 +42,20 @@ void FadeManager::Draw()
 	}
 }
 
-void FadeManager::FadeInStart(float fadeSpeed)
+void FadeManager::FadeInStart(float fadeSpeed, std::function<void()> onFinished)
 {
 	fadeState_ = EffectState::FadeIn;
 	fadeSpeed_ = fadeSpeed;
 	alpha_ = 0.0f;
+	onFinished_ = onFinished;
 }
 
-void FadeManager::FadeOutStart(float fadeSpeed)
+void FadeManager::FadeOutStart(float fadeSpeed, std::function<void()> onFinished)
 {
 	fadeState_ = EffectState::FadeOut;
 	fadeSpeed_ = fadeSpeed;
 	alpha_ = 1.0f;
+	onFinished_ = onFinished;
 }
 
 void FadeManager::DrawImGui()

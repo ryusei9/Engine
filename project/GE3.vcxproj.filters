@@ -61,6 +61,7 @@
     <ClCompile Include="DierctXGame\application\Object\PlayerChargeBullet.cpp" />
     <ClCompile Include="DierctXGame\engine\base\ResourceManager.cpp" />
     <ClCompile Include="CameraManager.cpp" />
+    <ClCompile Include="DierctXGame\engine\scene\GameOverScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DierctXGame\application\Object\BaseCharacter.cpp" />
@@ -260,6 +261,7 @@
     <ClInclude Include="DierctXGame\engine\FadeEffect\FadeManager.h" />
     <ClInclude Include="DierctXGame\application\Object\PlayerChargeBullet.h" />
     <ClInclude Include="CameraManager.h" />
+    <ClInclude Include="DierctXGame\engine\scene\GameOverScene.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Particle.hlsli" />

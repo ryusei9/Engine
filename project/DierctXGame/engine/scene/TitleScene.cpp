@@ -7,7 +7,12 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	sprite = std::make_unique<Sprite>();
 	sprite->Initialize(directXCommon, "resources/mori_Red.png");
 
-	//Object3dCommon::GetInstance()->SetDefaultCamera(camera_.get());
+
+	cameraManager_ = std::make_unique<CameraManager>();
+	cameraManager_->Initialize(Object3dCommon::GetInstance()->GetDefaultCamera());
+
+	cameraManager_->SetCameraPosition({ 0.0f,1.0f,-10.0f });
+	cameraManager_->SetCameraRotation({ 0.1f,0.0f,0.0f });
 	
 	input = std::make_unique<Input>();
 	input->Initialize(winApp);
@@ -50,7 +55,7 @@ void TitleScene::Update()
 	// エンターキーでゲームシーンに切り替える
 	if (input->TriggerKey(DIK_SPACE))
 	{
-		fadeManager_->FadeInStart(0.01f);
+		fadeManager_->FadeInStart(0.02f);
 	}
 	if(fadeManager_->GetFadeState() == FadeManager::EffectState::Finish)
 	{
@@ -71,7 +76,7 @@ void TitleScene::Update()
 	skydome_->SetWorldTransform(skydomeTransform_);
 	skydome_->Update();
 
-	fadeManager_->Update(2.0f);
+	fadeManager_->Update();
 
 	titleGuide_->Update();
 	titleGuide_->SetTranslate(titleGuidePosition);
@@ -79,6 +84,8 @@ void TitleScene::Update()
 	titleGuide_->SetScale(titleGuideScale);
 
 	CameraMove();
+	cameraManager_->Update();
+	Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
 }
 
 void TitleScene::Draw()
@@ -121,6 +128,7 @@ void TitleScene::DrawImGui()
 	ImGui::SliderFloat3("titleGuideScale", &titleGuideScale.x, 0.0f, 10.0f);
 	skydome_->DrawImGui();
 	fadeManager_->DrawImGui();
+	cameraManager_->DrawImGui();
 	ImGui::End();
 }
 
@@ -148,7 +156,7 @@ void TitleScene::CameraMove()
 	skydomeTransform_.rotate_.y = cameraRotate.y;
 	//camera_->SetTranslate(cameraPos);
 	//camera_->SetRotate(cameraRotate);
-	camera_->Update();
+	//camera_->Update();
 	titleLogoTransform_.rotate_.y = camera_->GetRotate().y;
 	//Object3dCommon::GetInstance()->SetDefaultCamera(camera_.get());
 }

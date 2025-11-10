@@ -168,5 +168,12 @@ private:
 	// プレイヤー移動速度
 	float curveSpeed_ = 0.01f; // 1フレームあたりの進行度
 
+	float gameOverTimer_ = 2.0f;
+
+	bool isGameOver_ = false;
+
+	bool fadeStarted_ = false;
+
+	std::unique_ptr<Camera> camera_;
 };
 

@@ -33,7 +33,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	fadeManager_ = std::make_unique<FadeManager>();
 	fadeManager_->Initialize();
 
-	//fadeManager_->FadeOutStart(0.01f);
+	fadeManager_->FadeOutStart(0.02f);
 
 	// ボールの初期化
 	ball = std::make_unique<Object3d>();
@@ -42,7 +42,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	ballTransform.Initialize();
 	ball->SetSkyboxFilePath("resources/skybox.dds");
 	ballTransform.translate_ = { 0.0f,0.0f,5.0f };  // 座標
-	
+
 	ball->SetWorldTransform(ballTransform);
 
 	// ボールの初期化
@@ -76,20 +76,8 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 		player_->SetRotation(playerData.rotation);
 	}
 
-	// 敵の初期化
-	/*enemy_ = std::make_unique<Enemy>();
-	enemy_->Initialize();
-	enemy_->SetPlayer(player_.get());*/
-
 	playerBullets_ = &player_->GetBullets();
 	playerChargeBullets_ = &player_->GetChargeBullets();
-	
-	// 敵の弾の情報をセット
-	//enemyBullets_ = &enemy_->GetBullets();
-	// プレイヤーの弾の初期化
-	/*playerBullet_ = std::make_unique<PlayerBullet>();
-	playerBullet_->Initialize();
-	playerBullet_->SetPlayer(player_.get());*/
 
 	skybox_ = std::make_unique<Skybox>();
 	skybox_->Initialize("resources/rostock_laage_airport_4k.dds");
@@ -103,16 +91,18 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(Object3dCommon::GetInstance()->GetDefaultCamera());
-
+	
 	// スタート演出用カメラ初期化
 	isStartCameraEasing_ = true;
 	startCameraTimer_ = 0.0f;
 	cameraManager_->SetCameraPosition(startCameraPos_);
 	cameraManager_->SetCameraRotation(startCameraRot_);
 
+	gameOverTimer_ = 2.0f;
+	
 #ifdef _DEBUG
 	isStartCameraEasing_ = false; // デバッグ時はスタート演出をスキップ
-	cameraMode_ = CameraMode::FollowPlayer;
+	cameraMode_ = CameraMode::Free;
 #endif
 }
 
@@ -126,9 +116,27 @@ void GamePlayScene::Update()
 	{
 		SetSceneNo(TITLE);
 	}
-	
-	// プレイヤーの更新
-	player_->Update();
+
+	if (!player_->GetIsAlive()) {
+		isGameOver_ = true;
+	}
+
+	if (isGameOver_ && !fadeStarted_) {
+		gameOverTimer_ -= 1.0f / 60.0f; // 60FPS想定
+		if (gameOverTimer_ <= 0.0f) {
+			fadeManager_->FadeInStart(0.02f, [this]() {
+				SetSceneNo(GAMEOVER);
+				});
+			fadeStarted_ = true;
+		}
+	}
+
+	// ゲームオーバーじゃないとき
+	if (!isGameOver_) {
+		// プレイヤーの更新
+		player_->Update();
+	}
+
 
 	//enemy_->SetPlayer(player_.get());
 	// 敵の更新
@@ -140,8 +148,8 @@ void GamePlayScene::Update()
 	}
 
 	for (auto& enemy : enemies_) {
-		//enemy->SetPlayer(player_.get());
-		//enemy->Update();
+		enemy->SetPlayer(player_.get());
+		enemy->Update();
 	}
 
 	// パーティクルグループ"モリ"の更新
@@ -151,7 +159,7 @@ void GamePlayScene::Update()
 
 	// 衝突マネージャの更新
 	collisionManager_->Update();
-	//CheckAllCollisions();// 衝突判定と応答
+	CheckAllCollisions();// 衝突判定と応答
 	//// パーティクルグループ"UV"の更新
 	/*particleEmitter2->SetPosition(particlePosition2);
 	particleEmitter2->SetParticleRate(8);
@@ -159,26 +167,24 @@ void GamePlayScene::Update()
 	skybox_->Update();
 	BackToTitle->SetWorldTransform(textTitle);
 	BackToTitle->Update();
-	fadeManager_->Update(2.0f);
-
-	
+	fadeManager_->Update();
 
 
 	// カメラの更新
 	switch (cameraMode_) {
-		case CameraMode::Free:
-			// なにもしない
-			break;
-		case CameraMode::FollowPlayer:
-			//cameraManager_->MoveTargetAndCamera(player_->GetWorldTransform(), Vector3{ 0.0f,1.0f,-10.0f });
-			//cameraManager_->LookAtTarget(player_->GetPosition());
-			cameraManager_->SetCameraPosition(player_->GetWorldTransform().translate_ + Vector3{ 0.0f,1.0f,-10.0f });
-			cameraManager_->SetCameraRotation(Vector3{ 0.1f,0.0f,0.0f });
-			break;
-		case CameraMode::DynamicFollow:
-			cameraManager_->MoveTargetAndCamera(player_->GetWorldTransform(), Vector3{0.0f,1.0f,-10.0f});
-			cameraManager_->LookAtTarget(player_->GetPosition());
-			break;
+	case CameraMode::Free:
+		// なにもしない
+		break;
+	case CameraMode::FollowPlayer:
+		//cameraManager_->MoveTargetAndCamera(player_->GetWorldTransform(), Vector3{ 0.0f,1.0f,-10.0f });
+		//cameraManager_->LookAtTarget(player_->GetPosition());
+		cameraManager_->SetCameraPosition(player_->GetWorldTransform().translate_ + Vector3{ 0.0f,1.0f,-10.0f });
+		cameraManager_->SetCameraRotation(Vector3{ 0.1f,0.0f,0.0f });
+		break;
+	case CameraMode::DynamicFollow:
+		cameraManager_->MoveTargetAndCamera(player_->GetWorldTransform(), Vector3{ 0.0f,1.0f,-10.0f });
+		cameraManager_->LookAtTarget(player_->GetPosition());
+		break;
 	}
 
 	// スタート演出カメラ初期化
@@ -188,6 +194,10 @@ void GamePlayScene::Update()
 		cameraManager_->Update();
 		Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
 		return; // 他の更新をスキップ（必要に応じて調整）
+	} else {
+
+		// プレイヤーをカーブに沿って移動
+		UpdatePlayerOnCurve();
 	}
 
 	cameraManager_->Update();
@@ -196,9 +206,7 @@ void GamePlayScene::Update()
 	// スプライトの更新
 	sprite->SetPosition(spritePosition);
 	sprite->Update();
-	
-	// プレイヤーをカーブに沿って移動
-	UpdatePlayerOnCurve();
+
 	/*------オブジェクトの更新------*/
 	// ボールの更新
 	//ball->Update();
@@ -221,13 +229,17 @@ void GamePlayScene::Draw()
 		obj->Draw();
 	}
 	//ground->Draw();
-	// プレイヤーの描画
-	player_->Draw();
+	if (!isGameOver_) {
+		// プレイヤーの描画
+		player_->Draw();
+	} else {
+
+	}
 
 	// 敵の描画
 	//enemy_->Draw();
 	for (auto& enemy : enemies_) {
-		//enemy->Draw();
+		enemy->Draw();
 	}
 	// ボールの描画
 	//ball->Draw();
@@ -240,7 +252,7 @@ void GamePlayScene::Draw()
 
 	/*------スプライトの更新------*/
 	SpriteCommon::GetInstance()->DrawSettings();
-	
+
 	fadeManager_->Draw();
 }
 
@@ -269,13 +281,14 @@ void GamePlayScene::DrawImGui()
 	DrawImGuiImportObjectsFromJson();
 	ImGui::End();
 	player_->DrawImGui();
-	
+
 	for (auto& enemy : enemies_) {
 		enemy->DrawImGui();
 	}
 
 	skybox_->DrawImGui();
 	cameraManager_->DrawImGui();
+	fadeManager_->DrawImGui();
 	//ball->DrawImGui();
 }
 
@@ -283,7 +296,7 @@ void GamePlayScene::CreateObjectsFromLevelData()
 {
 	// レベルデータからオブジェクトを生成、配置
 	for (auto& objectData : levelData_->objects) {
-		if( objectData.disabled) {
+		if (objectData.disabled) {
 			// 無効なオブジェクトはスキップ
 			continue;
 		}
@@ -305,7 +318,7 @@ void GamePlayScene::CreateObjectsFromLevelData()
 
 	// レベルデータから敵を生成、配置
 	for (auto& enemyData : levelData_->enemies) {
-		
+
 		// ファイル名から登録済みモデルを検索
 		Model* model = nullptr;
 		auto it = models.find(enemyData.fileName);
@@ -356,7 +369,7 @@ void GamePlayScene::DrawImGuiImportObjectsFromJson()
 		Vector3 pos = enemy->GetPosition();
 		Vector3 rot = enemy->GetRotation();
 		Vector3 scale = enemy->GetScale();
-		
+
 
 		if (ImGui::SliderFloat3("position", &pos.x, -10.0f, 10.0f)) {
 			enemy->SetPosition(pos);
@@ -380,9 +393,9 @@ void GamePlayScene::CheckAllCollisions()
 
 	// コライダーをリストに登録
 	collisionManager_->AddCollider(player_.get());
-	
+
 	for (auto& enemy : enemies_) {
-		//collisionManager_->AddCollider(enemy.get());
+		collisionManager_->AddCollider(enemy.get());
 	}
 
 	// 複数についてコライダーをリストに登録
@@ -397,7 +410,7 @@ void GamePlayScene::CheckAllCollisions()
 	for (const auto& bullet : *enemyBullets_) {
 		collisionManager_->AddCollider(bullet.get());
 	}
-	
+
 	// 衝突判定と応答
 	collisionManager_->CheckCollision();
 }
@@ -452,38 +465,38 @@ void GamePlayScene::UpdateStartCameraEasing()
 
 void GamePlayScene::UpdatePlayerOnCurve()
 {
-    // カーブ座標が2点以上ある場合のみ移動
-    if (curvePoints_.size() >= 2) {
-        // 最後まで到達したら停止
-        if (curveIndex_ >= curvePoints_.size() - 1) {
-            // 最終座標で停止
-            player_->SetPosition(curvePoints_.back());
-            return;
-        }
+	// カーブ座標が2点以上ある場合のみ移動
+	if (curvePoints_.size() >= 2) {
+		// 最後まで到達したら停止
+		if (curveIndex_ >= curvePoints_.size() - 1) {
+			// 最終座標で停止
+			player_->SetPosition(curvePoints_.back());
+			return;
+		}
 
-        // 現在の区間の始点・終点
-        const Vector3& start = curvePoints_[curveIndex_];
-        const Vector3& end = curvePoints_[curveIndex_ + 1];
+		// 現在の区間の始点・終点
+		const Vector3& start = curvePoints_[curveIndex_];
+		const Vector3& end = curvePoints_[curveIndex_ + 1];
 
-        // 線形補間
-        Vector3 lerpPos;
-        lerpPos.x = std::lerp(start.x, end.x, curveProgress_);
-        lerpPos.y = std::lerp(start.y, end.y, curveProgress_);
-        lerpPos.z = std::lerp(start.z, end.z, curveProgress_);
+		// 線形補間
+		Vector3 lerpPos;
+		lerpPos.x = std::lerp(start.x, end.x, curveProgress_);
+		lerpPos.y = std::lerp(start.y, end.y, curveProgress_);
+		lerpPos.z = std::lerp(start.z, end.z, curveProgress_);
 
-        // プレイヤー座標を更新
-        player_->SetPosition(lerpPos);
+		// プレイヤー座標を更新
+		player_->SetPosition(lerpPos);
 
-        // 進行度を進める
-        curveProgress_ += curveSpeed_;
-        if (curveProgress_ >= 1.0f) {
-            curveProgress_ = 0.0f;
-            curveIndex_++;
-            // 次の区間がなければ停止
-            if (curveIndex_ >= curvePoints_.size() - 1) {
-                // 最終座標で停止
-                player_->SetPosition(curvePoints_.back());
-            }
-        }
-    }
+		// 進行度を進める
+		curveProgress_ += curveSpeed_;
+		if (curveProgress_ >= 1.0f) {
+			curveProgress_ = 0.0f;
+			curveIndex_++;
+			// 次の区間がなければ停止
+			if (curveIndex_ >= curvePoints_.size() - 1) {
+				// 最終座標で停止
+				player_->SetPosition(curvePoints_.back());
+			}
+		}
+	}
 }

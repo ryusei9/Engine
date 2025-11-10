@@ -3,7 +3,7 @@
 #include <DirectXCommon.h>
 #include <WinApp.h>
 // シーンの種類
-enum SCENE { TITLE, GAMEPLAY };
+enum SCENE { TITLE, GAMEPLAY,GAMEOVER };
 // シーン基底クラス
 class BaseScene
 {

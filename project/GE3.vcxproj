@@ -141,6 +141,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\application\base\SRFramework.cpp" />
     <ClCompile Include="DierctXGame\engine\base\ImGuiManager.cpp" />
     <ClCompile Include="DierctXGame\engine\FadeEffect\FadeManager.cpp" />
+    <ClCompile Include="DierctXGame\engine\scene\GameOverScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="DierctXGame\engine\io\MakeAffineMatrix.cpp" />
     <ClCompile Include="DierctXGame\engine\io\MakeIdentity4x4.cpp" />
@@ -257,6 +258,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\base\WorldTransform.h" />
     <ClInclude Include="DierctXGame\application\Object\Player.h" />
     <ClInclude Include="DierctXGame\application\Object\PlayerBullet.h" />
+    <ClInclude Include="DierctXGame\engine\scene\GameOverScene.h" />
     <ClInclude Include="tools\json.hpp" />
     <ClInclude Include="DierctXGame\engine\io\DepthMaterial.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\GrayscalePostEffect.h" />

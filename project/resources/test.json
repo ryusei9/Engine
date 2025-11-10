@@ -45,29 +45,6 @@
         },
         {
             "type": "MESH",
-            "name": "球",
-            "transform": {
-                "translation": [
-                    -0.009288787841796875,
-                    -0.15225887298583984,
-                    0.0
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    -90.67843627929688
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "File_name": "Player",
-            "disabled": true
-        },
-        {
-            "type": "MESH",
             "name": "Cube",
             "transform": {
                 "translation": [
@@ -498,6 +475,48 @@
                             }
                         ]
                     }
+                ]
+            }
+        },
+        {
+            "type": "EnemySpawn",
+            "name": "EnemySpawn.001",
+            "transform": {
+                "translation": [
+                    2.8519656658172607,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    -173.4488067626953
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "type": "PlayerSpawn",
+            "name": "PlayerSpawn.001",
+            "transform": {
+                "translation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
                 ]
             }
         }

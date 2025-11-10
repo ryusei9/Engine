@@ -9,6 +9,7 @@
 #include <BaseScene.h>
 #include <Player.h>
 #include <FadeManager.h>
+#include <CameraManager.h>
 class TitleScene : public BaseScene
 {
 public:
@@ -72,5 +73,7 @@ private:
 	Vector3 titleGuidePosition = { 0.0f, 0.0f, -6.000f };
 	Vector3 titleGuideRotate = { -1.387f, 0.0f, 0.0f };
 	Vector3 titleGuideScale = { 0.232f, 0.232f, 0.232f };
+
+	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
 };
 

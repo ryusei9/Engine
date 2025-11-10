@@ -46,9 +46,8 @@ public:
 
 	bool GetPlayerControlEnabled() const { return controlEnabled_; } // プレイヤー操作有効化フラグの取得
 
-	//void SetBullet(PlayerBullet* bullet) { bullet_ = bullet; } // 武器の設定
-
-	//void SetAttack(bool attack) { isAttack_ = attack; } // 攻撃フラグの設定
+	// プレイヤーの死亡フラグの取得
+	bool GetIsAlive() const { return isAlive_; }
 
 	/*------セッター------*/
 	void SetPlayerControlEnabled(bool enabled) { controlEnabled_ = enabled; } // プレイヤー操作有効化フラグの設定

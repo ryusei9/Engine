@@ -45,6 +45,8 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	titleGuide_ = std::make_unique<Object3d>();
 	titleGuide_->Initialize("titleGuide.obj");
+
+	//textureHandle_ = TextureManager::GetInstance()->LoadTexture("resources/Voxel_Enemy_Body.dds");
 }
 
 void TitleScene::Update()

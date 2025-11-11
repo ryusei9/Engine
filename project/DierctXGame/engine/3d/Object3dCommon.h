@@ -36,6 +36,8 @@ public:
 	DirectXCommon* GetDxCommon()const { return dxCommon_; }
 
 	Camera* GetDefaultCamera()const { return defaultCamera; }
+
+	SrvManager* GetSrvManager()const { return srvManager_; }
 private:
 	static std::shared_ptr<Object3dCommon> instance;
 

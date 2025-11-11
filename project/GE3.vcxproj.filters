@@ -62,6 +62,7 @@
     <ClCompile Include="DierctXGame\engine\base\ResourceManager.cpp" />
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="DierctXGame\engine\scene\GameOverScene.cpp" />
+    <ClCompile Include="DierctXGame\engine\3d\Cube.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DierctXGame\application\Object\BaseCharacter.cpp" />
@@ -262,6 +263,7 @@
     <ClInclude Include="DierctXGame\application\Object\PlayerChargeBullet.h" />
     <ClInclude Include="CameraManager.h" />
     <ClInclude Include="DierctXGame\engine\scene\GameOverScene.h" />
+    <ClInclude Include="DierctXGame\engine\3d\Cube.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Particle.hlsli" />

@@ -111,6 +111,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="DierctXGame\application\Object\PlayerChargeBullet.cpp" />
+    <ClCompile Include="DierctXGame\engine\3d\Cube.cpp" />
     <ClCompile Include="DierctXGame\engine\posteffect\GrayscalePostEffect.cpp" />
     <ClCompile Include="DierctXGame\engine\posteffect\PostEffectBase.cpp" />
     <ClCompile Include="DierctXGame\application\Object\BaseCharacter.cpp" />
@@ -183,6 +184,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\application\Object\Collider.h" />
     <ClInclude Include="DierctXGame\application\Object\EnemyAttack.h" />
     <ClInclude Include="DierctXGame\application\Object\PlayerChargeBullet.h" />
+    <ClInclude Include="DierctXGame\engine\3d\Cube.h" />
     <ClInclude Include="DierctXGame\engine\3d\Skybox.h" />
     <ClInclude Include="DierctXGame\engine\base\CollisionManager.h" />
     <ClInclude Include="DierctXGame\application\Object\CollisionTypeIdDef.h" />

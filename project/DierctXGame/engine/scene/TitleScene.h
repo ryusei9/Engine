@@ -75,5 +75,8 @@ private:
 	Vector3 titleGuideScale = { 0.232f, 0.232f, 0.232f };
 
 	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
+
+	// ddsファイル用のテクスチャハンドル
+	UINT textureHandle_ = 0;
 };
 

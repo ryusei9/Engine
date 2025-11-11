@@ -101,8 +101,8 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	gameOverTimer_ = 2.0f;
 	
 #ifdef _DEBUG
-	isStartCameraEasing_ = false; // デバッグ時はスタート演出をスキップ
-	cameraMode_ = CameraMode::Free;
+	//isStartCameraEasing_ = false; // デバッグ時はスタート演出をスキップ
+	//cameraMode_ = CameraMode::Free;
 #endif
 }
 

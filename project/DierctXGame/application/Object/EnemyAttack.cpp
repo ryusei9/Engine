@@ -7,6 +7,8 @@
 
 constexpr float PI = 3.1415926535f;
 
+// 追加: 弾速スケール（0.5で半分）
+constexpr float BULLET_SPEED_SCALE = 0.5f;
 // パターン1: 画面右側で上下移動しつつ2秒ごとに扇形弾
 void EnemyAttackPatternFan::Update(Enemy* enemy, Player*, std::list<std::unique_ptr<EnemyBullet>>& bullets, float deltaTime) {
 	// 上下移動
@@ -38,14 +40,17 @@ void EnemyAttackPatternFan::DrawImGui(int idx, bool selected) {
 // パターン2: 右側中央で自機狙い弾連射
 void EnemyAttackPatternAimed::Update(Enemy* enemy, Player* player, std::list<std::unique_ptr<EnemyBullet>>& bullets, float deltaTime) {
 	// 位置固定
-	enemy->GetWorldTransform().translate_ = { 3.0f, 0.0f, 0.0f };
+	//enemy->GetWorldTransform().translate_ = { 3.0f, 0.0f, 0.0f };
 	// 0.2秒ごとに自機狙い弾
 	shotTimer_ += deltaTime;
-	if (shotTimer_ >= 0.2f && player) {
+	if (shotTimer_ >= 2.0f && player) {
 		Vector3 toPlayer = player->GetCenterPosition() - enemy->GetWorldTransform().translate_;
 		float len = std::sqrt(toPlayer.x * toPlayer.x + toPlayer.y * toPlayer.y + toPlayer.z * toPlayer.z);
 		if (len > 0.01f) {
-			Vector3 v = { toPlayer.x / len * 0.18f, toPlayer.y / len * 0.18f, 0.0f };
+			float speed = 0.18f * BULLET_SPEED_SCALE;
+			Vector3 v = { toPlayer.x / len * speed,
+						  toPlayer.y / len * speed,
+						  0.0f };
 			auto bullet = std::make_unique<EnemyBullet>();
 			bullet->Initialize(enemy->GetWorldTransform().translate_, v);
 			bullet->Update();
@@ -135,11 +140,11 @@ void EnemyAttack::Update(Enemy* enemy, Player* player, std::list<std::unique_ptr
 		return;
 	}
 	// パターン2→待機
-	if (currentPattern_ == 1 && patternTimer_ >= 10.0f) {
+	/*if (currentPattern_ == 1 && patternTimer_ >= 10.0f) {
 		SetPattern(3);
 		patternTimer_ = 0.0f;
 		return;
-	}
+	}*/
 	// パターン3→待機（突進しきったら）
 	if (currentPattern_ == 2) {
 		if (!pattern3Rushed_ && enemy->GetWorldTransform().translate_.x < -4.0f) {

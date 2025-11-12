@@ -2,6 +2,10 @@
 #include "SRFramework.h"
 #include "Object3dCommon.h"
 #include "PlayerChargeBullet.h"
+#include "Vector3.h"
+#include "Inverse.h"
+#include <iostream>
+#include <Multiply.h>
 void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
 	sprite = std::make_unique<Sprite>();
@@ -130,11 +134,26 @@ void GamePlayScene::Update()
 			fadeStarted_ = true;
 		}
 	}
-
+	if (isEnd && !fadeStarted_) {
+		gameOverTimer_ -= 1.0f / 60.0f; // 60FPS想定
+		if (gameOverTimer_ <= 0.0f) {
+			fadeManager_->FadeInStart(0.02f, [this]() {
+				SetSceneNo(TITLE);
+				});
+			fadeStarted_ = true;
+		}
+	}
 	// ゲームオーバーじゃないとき
 	if (!isGameOver_) {
 		// プレイヤーの更新
 		player_->Update();
+
+		
+		if (!isStartCameraEasing_) {
+			UpdatePlayerFollowCamera();
+			// プレイヤーの移動制限
+			RestrictPlayerInsideCameraView();
+		}
 	}
 
 
@@ -150,6 +169,24 @@ void GamePlayScene::Update()
 	for (auto& enemy : enemies_) {
 		enemy->SetPlayer(player_.get());
 		enemy->Update();
+		if (!isStartCameraEasing_) {
+			Camera* cam = cameraManager_->GetMainCamera();
+
+			// 敵の奥行き調整
+			Vector3 enemyPos = enemy->GetPosition();
+			bool inView = IsInCameraView(enemyPos);
+			enemy->SetControlEnabled(inView);
+			enemy->SetZ(cam->GetTranslate().z + 10.0f);
+
+			// 敵の弾の奥行き調整（★ここを追加★）
+			for (auto& bullet : enemy->GetBullets()) {
+				if (bullet && bullet->IsAlive()) {
+					Vector3 bulletPos = bullet->GetPosition();
+					bulletPos.z = cam->GetTranslate().z + 10.0f; // プレイヤーと同じ奥行
+					bullet->SetPosition(bulletPos);
+				}
+			}
+		}
 	}
 
 	// パーティクルグループ"モリ"の更新
@@ -157,9 +194,7 @@ void GamePlayScene::Update()
 	//particleEmitter1->SetParticleRate(1);
 	//particleEmitter1->Update();
 
-	// 衝突マネージャの更新
-	collisionManager_->Update();
-	CheckAllCollisions();// 衝突判定と応答
+	
 	//// パーティクルグループ"UV"の更新
 	/*particleEmitter2->SetPosition(particlePosition2);
 	particleEmitter2->SetParticleRate(8);
@@ -196,8 +231,8 @@ void GamePlayScene::Update()
 		return; // 他の更新をスキップ（必要に応じて調整）
 	} else {
 
-		// プレイヤーをカーブに沿って移動
-		UpdatePlayerOnCurve();
+		// カメラをカーブに沿って移動
+		//UpdateCameraOnCurve();
 	}
 
 	cameraManager_->Update();
@@ -206,6 +241,50 @@ void GamePlayScene::Update()
 	// スプライトの更新
 	sprite->SetPosition(spritePosition);
 	sprite->Update();
+
+	// 衝突マネージャの更新
+	collisionManager_->Update();
+	CheckAllCollisions();// 衝突判定と応答
+
+	// 敵
+	enemies_.erase(
+		std::remove_if(enemies_.begin(), enemies_.end(),
+			[&](const std::unique_ptr<Enemy>& e) {
+				if (!e->IsAlive()) {
+					collisionManager_->RemoveCollider(e.get());
+					return true;
+				}
+				return false;
+			}),
+		enemies_.end()
+	);
+
+	// 敵弾
+	/*enemyBullets_->erase(
+		std::remove_if(enemyBullets_->begin(), enemyBullets_->end(),
+			[](const std::unique_ptr<EnemyBullet>& b) {
+				return !b->IsAlive();
+			}),
+		enemyBullets_->end()
+	);*/
+
+	// プレイヤー弾
+	playerBullets_->erase(
+		std::remove_if(playerBullets_->begin(), playerBullets_->end(),
+			[](const std::unique_ptr<PlayerBullet>& b) {
+				return !b->IsAlive();
+			}),
+		playerBullets_->end()
+	);
+
+	// チャージ弾
+	playerChargeBullets_->erase(
+		std::remove_if(playerChargeBullets_->begin(), playerChargeBullets_->end(),
+			[](const std::unique_ptr<PlayerChargeBullet>& b) {
+				return !b->IsAlive();
+			}),
+		playerChargeBullets_->end()
+	);
 
 	/*------オブジェクトの更新------*/
 	// ボールの更新
@@ -329,7 +408,7 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		newEnemy->SetPosition(enemyData.translation);
 		newEnemy->SetRotation(enemyData.rotation);
 		newEnemy->SetPlayer(player_.get());
-		enemyBullets_ = &newEnemy->GetBullets();
+		//enemyBullets_ = &newEnemy->GetBullets();
 		enemies_.push_back(std::move(newEnemy));
 	}
 }
@@ -394,21 +473,32 @@ void GamePlayScene::CheckAllCollisions()
 	// コライダーをリストに登録
 	collisionManager_->AddCollider(player_.get());
 
+	// 敵とその弾を登録
 	for (auto& enemy : enemies_) {
-		collisionManager_->AddCollider(enemy.get());
+		if (enemy && enemy->IsAlive()) {
+			collisionManager_->AddCollider(enemy.get());
+
+			// 敵の弾も登録
+			for (const auto& bullet : enemy->GetBullets()) {
+				if (bullet) { // ← isAlive_ チェックを外す
+					collisionManager_->AddCollider(bullet.get());
+				}
+			}
+		}
 	}
 
-	// 複数についてコライダーをリストに登録
-	for (const auto& bullet : *playerBullets_)
-	{
-		collisionManager_->AddCollider(bullet.get());
+	// プレイヤー弾
+	for (const auto& bullet : *playerBullets_) {
+		if (bullet && bullet->IsAlive()) {
+			collisionManager_->AddCollider(bullet.get());
+		}
 	}
+
+	// チャージ弾
 	for (const auto& chargeBullet : *playerChargeBullets_) {
-		collisionManager_->AddCollider(chargeBullet.get());
-	}
-	// 敵の弾
-	for (const auto& bullet : *enemyBullets_) {
-		collisionManager_->AddCollider(bullet.get());
+		if (chargeBullet && chargeBullet->IsAlive()) {
+			collisionManager_->AddCollider(chargeBullet.get());
+		}
 	}
 
 	// 衝突判定と応答
@@ -458,45 +548,140 @@ void GamePlayScene::UpdateStartCameraEasing()
 	if (t >= 1.0f) {
 		isStartCameraEasing_ = false;
 		player_->SetPlayerControlEnabled(true); // プレイヤー操作有効化
+		for (auto& enemy : enemies_) {
+			enemy->SetControlEnabled(true);
+		}
 		// 必要ならここでカメラモードを切り替え
-		cameraMode_ = CameraMode::FollowPlayer;
+		cameraMode_ = CameraMode::Free;
 	}
 }
 
-void GamePlayScene::UpdatePlayerOnCurve()
+void GamePlayScene::UpdateCameraOnCurve()
 {
-	// カーブ座標が2点以上ある場合のみ移動
-	if (curvePoints_.size() >= 2) {
-		// 最後まで到達したら停止
-		if (curveIndex_ >= curvePoints_.size() - 1) {
-			// 最終座標で停止
-			player_->SetPosition(curvePoints_.back());
-			return;
-		}
+    // カーブ座標が2点以上ある場合のみ移動
+    if (curvePoints_.size() >= 2) {
+        // 最後まで到達したら停止
+        if (curveIndex_ >= curvePoints_.size() - 1) {
+            // 最終座標で停止
+            cameraManager_->SetCameraPosition(curvePoints_.back());
+			isEnd = true;
+            return;
+        }
 
-		// 現在の区間の始点・終点
-		const Vector3& start = curvePoints_[curveIndex_];
-		const Vector3& end = curvePoints_[curveIndex_ + 1];
+        // 現在の区間の始点・終点
+        const Vector3& start = curvePoints_[curveIndex_];
+        const Vector3& end = curvePoints_[curveIndex_ + 1];
 
-		// 線形補間
-		Vector3 lerpPos;
-		lerpPos.x = std::lerp(start.x, end.x, curveProgress_);
-		lerpPos.y = std::lerp(start.y, end.y, curveProgress_);
-		lerpPos.z = std::lerp(start.z, end.z, curveProgress_);
+        // 線形補間
+        Vector3 lerpPos;
+        lerpPos.x = std::lerp(start.x, end.x, curveProgress_);
+        lerpPos.y = std::lerp(start.y, end.y, curveProgress_);
+        lerpPos.z = std::lerp(start.z, end.z, curveProgress_);
 
-		// プレイヤー座標を更新
-		player_->SetPosition(lerpPos);
+        // カメラ座標を更新
+        cameraManager_->SetCameraPosition(lerpPos);
 
-		// 進行度を進める
-		curveProgress_ += curveSpeed_;
-		if (curveProgress_ >= 1.0f) {
-			curveProgress_ = 0.0f;
-			curveIndex_++;
-			// 次の区間がなければ停止
-			if (curveIndex_ >= curvePoints_.size() - 1) {
-				// 最終座標で停止
-				player_->SetPosition(curvePoints_.back());
-			}
-		}
+        // 進行度を進める
+        curveProgress_ += curveSpeed_;
+        if (curveProgress_ >= 1.0f) {
+            curveProgress_ = 0.0f;
+            curveIndex_++;
+            // 次の区間がなければ停止
+            if (curveIndex_ >= curvePoints_.size() - 1) {
+                cameraManager_->SetCameraPosition(curvePoints_.back());
+            }
+        }
+    }
+}
+
+void GamePlayScene::RestrictPlayerInsideCameraView() {
+	Camera* cam = cameraManager_->GetMainCamera();
+	Matrix4x4 viewProj = cam->GetViewProjectionMatrix();
+
+	Vector3 playerPos = player_->GetPosition();
+
+	// ワールド座標 → クリップ座標
+	Vector4 clipPos = Multiply::Multiply(viewProj, Vector4{ playerPos.x, playerPos.y, playerPos.z, 1.0f });
+
+	// NDC座標へ変換
+	Vector3 ndcPos = {
+		clipPos.x / clipPos.w,
+		clipPos.y / clipPos.w,
+		clipPos.z / clipPos.w
+	};
+
+	// NDC空間でプレイヤーが -1～1 に収まるように制限
+	ndcPos.x = std::clamp(ndcPos.x, -0.9f, 0.9f);  // 少し余裕を持たせる
+	ndcPos.y = std::clamp(ndcPos.y, -0.9f, 0.9f);
+
+	// NDC → クリップ座標へ戻す
+	Vector4 newClipPos = { ndcPos.x * clipPos.w, ndcPos.y * clipPos.w, ndcPos.z * clipPos.w, clipPos.w };
+
+	// ワールド座標に戻す（逆行列で）
+	Matrix4x4 invViewProj = Inverse::Inverse(viewProj);
+	Vector4 newWorldPos = Multiply::Multiply(invViewProj, newClipPos);
+
+	// プレイヤー位置を更新
+	Vector3 clampedWorldPos = {
+		newWorldPos.x / newWorldPos.w,
+		newWorldPos.y / newWorldPos.w,
+		newWorldPos.z / newWorldPos.w
+	};
+	player_->SetPosition(clampedWorldPos);
+}
+
+void GamePlayScene::UpdatePlayerFollowCamera()
+{
+	Vector3 prevCamPos = cameraManager_->GetMainCamera()->GetTranslate();
+
+	if(!isStartCameraEasing_){
+		// カメラをカーブに沿って移動
+		UpdateCameraOnCurve();
 	}
+	Camera* cam = cameraManager_->GetMainCamera();
+	Vector3 camPos = cam->GetTranslate();
+
+	// カメラの移動量（前フレームとの差）
+	Vector3 camMove = {
+		camPos.x - prevCamPos.x,
+		camPos.y - prevCamPos.y,
+		camPos.z - prevCamPos.z
+	};
+
+	// プレイヤーの位置を更新（カメラ移動分を打ち消す）
+	Vector3 playerPos = player_->GetPosition();
+	playerPos.x += camMove.x;   // ← X/Y軸で追従
+	playerPos.y += camMove.y;
+
+	// カメラから一定距離に固定（例: +10）
+	playerPos.z = camPos.z + 10.0f;
+
+	player_->SetPosition(playerPos);
+
+	// ここで入力処理を反映（例: WASDで相対移動）
+	//player_->Update();
+
+	
+}
+
+bool GamePlayScene::IsInCameraView(const Vector3& worldPos)
+{
+	Camera* cam = cameraManager_->GetMainCamera();
+	Matrix4x4 viewProj = cam->GetViewProjectionMatrix();
+
+	// ワールド → クリップ
+	Vector4 clip = Multiply::Multiply(viewProj, Vector4{ worldPos.x, worldPos.y, worldPos.z, 1.0f });
+	if (clip.w == 0.0f) return false;
+
+	// NDCへ変換
+	Vector3 ndc = {
+		clip.x / clip.w,
+		clip.y / clip.w,
+		clip.z / clip.w
+	};
+
+	// NDCが -1～1 の範囲なら画面内
+	return (ndc.x >= -1.0f && ndc.x <= 1.0f &&
+		ndc.y >= -1.0f && ndc.y <= 1.0f &&
+		ndc.z >= 0.0f && ndc.z <= 1.0f);
 }

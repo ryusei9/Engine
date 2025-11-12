@@ -44,6 +44,9 @@ public:
 
 	// シリアルナンバーを取得
 	uint32_t GetSerialNumber() const { return serialNumber_; }
+	
+	// 生存状態を取得
+	bool IsAlive() const { return isAlive_; }
 
 	/*------セッター------*/
 	// ヒットポイントを設定

@@ -22,7 +22,7 @@ void Enemy::Initialize()
 	// 敵のワールド変換を初期化
 	worldTransform_.scale_ = { 1.0f,1.0f,1.0f };
 	worldTransform_.rotate_ = { 0.0f,0.0f,0.0f };
-	worldTransform_.translate_ = { 3.0f,0.0f,0.0f };
+	worldTransform_.translate_ = { 10.0f,0.0f,0.0f };
 	// 敵のカメラを取得
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
 	object3d_ = std::make_unique<Object3d>();
@@ -40,21 +40,17 @@ void Enemy::Initialize()
 	enemyDeathEmitter_->SetUseRingParticle(true); // 必要に
 	enemyDeathEmitter_->SetExplosion(true); // 爆発エミッターに設定
 	SetRadius(0.4f); // コライダーの半径を設定
-
+	
 	attack_ = std::make_unique<EnemyAttack>();
 
-	attack_->SetPattern(3);
+	attack_->SetPattern(1);
 }
 
 void Enemy::Update()
 {
 	// 弾の削除
 	bullets_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) {
-		if (!bullet->IsAlive()) {
-			bullet.reset();
-			return true;
-		}
-		return false;
+		return !bullet->IsAlive();
 		});
 
 	// 弾の更新
@@ -74,13 +70,16 @@ void Enemy::Update()
 	Move();
 	// 敵の攻撃
 	//Attack();
-	attack_->Update(this, player_, bullets_, 1.0f / 60.0f);
+	if (controlEnabled_) {
+		attack_->Update(this, player_, bullets_, 1.0f / 60.0f);
+	}
 	if (hp_ <= 0)
 	{
 		// 敵のHPが0以下になったら
 		isAlive_ = false;
 	}
 	if (!isAlive_) {
+#ifdef _DEBUG
 		// 敵が死んでいる場合
 		// 敵のリスポーンタイムを減少
 		respawnTime_ -= 1.0f / 60.0f;
@@ -92,12 +91,13 @@ void Enemy::Update()
 			respawnTime_ = 3.0f; // リスポーンタイムを3秒に設定
 			hasPlayedDeathParticle_ = false;
 		}
+#endif
 	}
 }
 
 void Enemy::Draw()
 {
-	if (isAlive_) {
+	if (isAlive_ || controlEnabled_) {
 		// 敵の描画
 		BaseCharacter::Draw();
 		for (auto& bullet : bullets_) {
@@ -127,17 +127,17 @@ void Enemy::Move()
 
 void Enemy::Attack()
 {
-	if (!isAlive_) return;
-	shotTimer_ -= 1.0f / 60.0f;
-	if (shotTimer_ <= 0.0f) {
-		// プレイヤーの方向に発射（例：X軸負方向に発射）
-		Vector3 velocity = { -0.1f, 0.0f, 0.0f };
-		auto bullet = std::make_unique<EnemyBullet>();
-		bullet->Initialize(worldTransform_.translate_, velocity);
-		bullet->Update();
-		bullets_.push_back(std::move(bullet));
-		shotTimer_ = shotInterval_;
-	}
+	//if (!isAlive_) return;
+	//shotTimer_ -= 1.0f / 60.0f;
+	//if (shotTimer_ <= 0.0f) {
+	//	// プレイヤーの方向に発射（例：X軸負方向に発射）
+	//	Vector3 velocity = { -0.1f, 0.0f, 0.0f };
+	//	auto bullet = std::make_unique<EnemyBullet>();
+	//	bullet->Initialize(worldTransform_.translate_, velocity);
+	//	bullet->Update();
+	//	bullets_.push_back(std::move(bullet));
+	//	shotTimer_ = shotInterval_;
+	//}
 }
 
 void Enemy::OnCollision(Collider* other)

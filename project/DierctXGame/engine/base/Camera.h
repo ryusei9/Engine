@@ -46,5 +46,6 @@ public:
 	const Vector3& GetRotate()const { return transform.rotate; }
 	const Vector3& GetTranslate()const { return transform.translate; }
 	const float& GetFovY()const { return fovY; }
+	const float& GetAspectRatio()const { return aspectRatio; }
 };
 

@@ -518,8 +518,7 @@
                     1.0,
                     1.0
                 ]
-            },
-            "disabled": true
+            }
         },
         {
             "type": "EnemySpawn",

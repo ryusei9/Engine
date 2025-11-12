@@ -71,7 +71,16 @@ private:
 	void LoadLevel(const LevelData* levelData);
 
 	// カーブに沿ってプレイヤーを移動させる
-	void UpdatePlayerOnCurve();
+	void UpdateCameraOnCurve();
+
+	// プレイヤーがカメラの視界内に収まるように制限する
+	void RestrictPlayerInsideCameraView();
+
+	// プレイヤーがカメラに追従する
+	void UpdatePlayerFollowCamera();
+
+	// カメラの中に入っているか
+	bool IsInCameraView(const Vector3& worldPos);
 
 	// スプライトコモン
 	SpriteCommon* spriteCommon = nullptr;
@@ -166,7 +175,7 @@ private:
 	// カーブの現在インデックス
 	size_t curveIndex_ = 0;
 	// プレイヤー移動速度
-	float curveSpeed_ = 0.01f; // 1フレームあたりの進行度
+	float curveSpeed_ = 0.004f; // 1フレームあたりの進行度
 
 	float gameOverTimer_ = 2.0f;
 
@@ -175,5 +184,7 @@ private:
 	bool fadeStarted_ = false;
 
 	std::unique_ptr<Camera> camera_;
+
+	bool isEnd = false;
 };
 

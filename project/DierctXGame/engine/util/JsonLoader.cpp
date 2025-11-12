@@ -42,14 +42,20 @@ LevelData* JsonLoader::Load(const std::string& fileName)
                 if (objectJson.contains("name")) {
                     curveData.fileName = objectJson["name"].get<std::string>();
                 }
+                // 親CURVEのy座標
+                float parentY = 0.0f;
+                if (objectJson.contains("transform") && objectJson["transform"].contains("translation")) {
+                    parentY = objectJson["transform"]["translation"][1].get<float>();
+                }
                 if (objectJson.contains("curve")) {
                     const auto& curve = objectJson["curve"];
                     for (const auto& spline : curve["splines"]) {
                         for (const auto& point : spline["points"]) {
                             Vector3 v;
+                            // coのy座標に親CURVEのy座標を加算
                             v.x = point["co"][0].get<float>();
                             v.y = point["co"][2].get<float>();
-                            v.z = point["co"][1].get<float>();
+                            v.z = point["co"][1].get<float>() + parentY;
                             curveData.points.push_back(v);
                         }
                     }

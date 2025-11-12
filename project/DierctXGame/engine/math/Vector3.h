@@ -1,5 +1,8 @@
 #pragma once
 #include <corecrt_math.h>
+#include <Vector4.h>
+#include <Matrix4x4.h>
+#include <Multiply.h>
 
 // 3次元ベクトル構造体
 struct Vector3 {
@@ -80,6 +83,22 @@ struct Vector3 {
 	// ベクトルの長さを計算する関数
 	static float Length(const Vector3& vec) {
 		return sqrtf(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+	}
+
+	template<typename T>
+	T Clamp(const T& v, const T& lo, const T& hi) {
+		return (v < lo) ? lo : (hi < v) ? hi : v;
+	}
+
+	static Vector3 TransformCoord(const Vector3& v, const Matrix4x4& m) {
+		Vector4 tmp = { v.x, v.y, v.z, 1.0f };
+		Vector4 result = Multiply::Multiply(m, tmp);
+		if (result.w != 0.0f) {
+			result.x /= result.w;
+			result.y /= result.w;
+			result.z /= result.w;
+		}
+		return { result.x, result.y, result.z };
 	}
 };
 

@@ -77,6 +77,7 @@ void PostEffectManager::PostBarrierAll()
 }
 
 void PostEffectManager::DrawImGui() {  
+#ifdef USE_IMGUI
     ImGui::Begin("Post Effects");
     for (size_t i = 0; i < effects_.size(); ++i) {
         if (effects_[i]) {
@@ -95,4 +96,5 @@ void PostEffectManager::DrawImGui() {
         }
     }
     ImGui::End();
+#endif
 }

@@ -117,6 +117,7 @@ void TitleScene::Finalize()
 
 void TitleScene::DrawImGui()
 {
+#ifdef USE_IMGUI
 	ImGui::Begin("TitleScene");
 	ImGui::DragFloat3("playerTranslate", &playerTransform_.translate_.x);
 	ImGui::DragFloat3("titlePosition", &titleLogoTransform_.translate_.x);
@@ -130,6 +131,7 @@ void TitleScene::DrawImGui()
 	fadeManager_->DrawImGui();
 	cameraManager_->DrawImGui();
 	ImGui::End();
+#endif
 }
 
 void TitleScene::CameraMove()

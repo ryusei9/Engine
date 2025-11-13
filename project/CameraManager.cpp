@@ -15,6 +15,7 @@ void CameraManager::Update()
 }
 
 void CameraManager::DrawImGui() {
+#ifdef USE_IMGUI
     ImGui::Begin("Camera Manager");
     Vector3 camPos = mainCamera_->GetTranslate();
     Vector3 camRot = mainCamera_->GetRotate();
@@ -49,6 +50,7 @@ void CameraManager::DrawImGui() {
 		ImGui::Text("| %.2f %.2f %.2f %.2f |", camViewProjMat.m[i][0], camViewProjMat.m[i][1], camViewProjMat.m[i][2], camViewProjMat.m[i][3]);
 	}
     ImGui::End();
+#endif
 }
 
 void CameraManager::MoveTargetAndCamera(WorldTransform target, const Vector3& delta) {

@@ -60,6 +60,7 @@ void FadeManager::FadeOutStart(float fadeSpeed, std::function<void()> onFinished
 
 void FadeManager::DrawImGui()
 {
+#ifdef USE_IMGUI
 	ImGui::Begin("FadeManager");
 	const char* stateStr = "";
 	switch (fadeState_) {
@@ -72,4 +73,5 @@ void FadeManager::DrawImGui()
 	ImGui::SliderFloat("Alpha", &alpha_, 0.0f, 1.0f);
 	ImGui::SliderFloat("Fade Speed", &fadeSpeed_, 0.01f, 1.0f);
 	ImGui::End();
+#endif
 }

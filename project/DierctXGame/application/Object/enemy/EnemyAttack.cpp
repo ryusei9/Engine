@@ -36,7 +36,9 @@ void EnemyAttackPatternFan::Update(Enemy* enemy, Player*, std::list<std::unique_
 }
 // ImGui描画
 void EnemyAttackPatternFan::DrawImGui(int idx, bool selected) {
+#ifdef USE_IMGUI
 	if (ImGui::Selectable(GetName(), selected)) {}
+#endif
 }
 
 // パターン2: 右側中央で自機狙い弾連射
@@ -64,7 +66,9 @@ void EnemyAttackPatternAimed::Update(Enemy* enemy, Player* player, std::list<std
 
 // ImGui描画
 void EnemyAttackPatternAimed::DrawImGui(int idx, bool selected) {
+#ifdef USE_IMGUI
 	if (ImGui::Selectable(GetName(), selected)) {}
+#endif
 }
 
 // パターン3: 全方位弾+左突進→左で消えて右から復活
@@ -98,13 +102,17 @@ void EnemyAttackPatternWait::Update(Enemy* enemy, Player*, std::list<std::unique
 
 // ImGui描画
 void EnemyAttackPatternWait::DrawImGui(int idx, bool selected) {
+#ifdef USE_IMGUI
 	if (ImGui::Selectable(GetName(), selected)) {}
+#endif
 }
 
 
 // ImGui描画
 void EnemyAttackPatternRush::DrawImGui(int idx, bool selected) {
+#ifdef USE_IMGUI
 	if (ImGui::Selectable(GetName(), selected)) {}
+#endif
 }
 
 // EnemyAttack本体
@@ -152,12 +160,14 @@ void EnemyAttack::Update(Enemy* enemy, Player* player, std::list<std::unique_ptr
 
 // ImGui描画
 void EnemyAttack::DrawImGui() {
+#ifdef USE_IMGUI
 	for (int i = 0; i < int(patterns_.size()); ++i) {
 		bool selected = (i == currentPattern_);
 		if (ImGui::Selectable(patterns_[i]->GetName(), selected)) {
 			currentPattern_ = i;
 		}
 	}
+#endif
 }
 
 // パターン設定

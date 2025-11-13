@@ -5,7 +5,7 @@
 #include "WinApp.h"
 #include <array>
 #include <dxcapi.h>
-#include "externals/DirectXTex/DirectXTex.h"
+#include <DirectXTex.h>
 #include "string"
 #include "chrono"
 #include <Vector4.h>

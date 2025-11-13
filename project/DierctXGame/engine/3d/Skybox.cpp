@@ -312,6 +312,7 @@ void Skybox::Draw()
 
 void Skybox::DrawImGui()
 {
+#ifdef USE_IMGUI
 	ImGui::Begin("Skybox");
 	ImGui::ColorEdit4("Color", &materialData_->color.x);
 	ImGui::SliderFloat3("Position", &worldTransform_.translate_.x, -10.0f, 10.0f);
@@ -320,6 +321,7 @@ void Skybox::DrawImGui()
 	ImGui::SliderAngle("Rotation.z", &worldTransform_.rotate_.z);
 	ImGui::SliderFloat3("Scale", &worldTransform_.scale_.x, 0.1f, 50.0f);
 	ImGui::End();
+#endif
 }
 
 void Skybox::DrawSettings() {

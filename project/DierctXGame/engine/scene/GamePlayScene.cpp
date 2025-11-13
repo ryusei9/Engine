@@ -343,6 +343,7 @@ void GamePlayScene::Finalize()
 
 void GamePlayScene::DrawImGui()
 {
+#ifdef USE_IMGUI
 	ImGui::Begin("GamePlayScene");
 	ImGui::Text("SPACE : Shot Bullet");
 	ImGui::Text("WASD : Move Player");
@@ -369,6 +370,7 @@ void GamePlayScene::DrawImGui()
 	cameraManager_->DrawImGui();
 	fadeManager_->DrawImGui();
 	//ball->DrawImGui();
+#endif
 }
 
 void GamePlayScene::CreateObjectsFromLevelData()
@@ -415,6 +417,7 @@ void GamePlayScene::CreateObjectsFromLevelData()
 
 void GamePlayScene::DrawImGuiImportObjectsFromJson()
 {
+#ifdef USE_IMGUI
 	// レベルデータから生成したオブジェクトのImGui調整
 	for (size_t i = 0; i < objects.size(); ++i) {
 		auto& obj = objects[i];
@@ -463,6 +466,7 @@ void GamePlayScene::DrawImGuiImportObjectsFromJson()
 		ImGui::PopID();
 		ImGui::End();
 	}
+#endif
 }
 
 void GamePlayScene::CheckAllCollisions()

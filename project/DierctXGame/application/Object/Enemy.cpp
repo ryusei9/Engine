@@ -108,6 +108,7 @@ void Enemy::Draw()
 
 void Enemy::DrawImGui()
 {
+#ifdef USE_IMGUI
 	ImGui::Begin("enemy");
 	// ImGuiで敵の情報を表示
 	ImGui::Text("Enemy Serial Number: %u", serialNumber_);
@@ -119,6 +120,7 @@ void Enemy::DrawImGui()
 	attack_->DrawImGui();
 	object3d_->DrawImGui();
 	ImGui::End();
+#endif
 }
 
 void Enemy::Move()

@@ -9,7 +9,7 @@
 #include <dxgidebug.h>
 #include <dxcapi.h>
 
-#include "externals/DirectXTex/DirectXTex.h"
+#include <DirectXTex.h>
 #include <numbers>
 #include <fstream>
 #include <sstream>

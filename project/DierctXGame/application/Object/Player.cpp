@@ -203,12 +203,14 @@ void Player::OnCollision(Collider* other)
 }
 
 void Player::DrawImGui() {
+#ifdef USE_IMGUI
 	object3d_->DrawImGui();
 	ImGui::Begin("Player Info");
 	ImGui::Text("Charge Time: %.2f seconds", chargeTime_);
 	ImGui::Text("Is Charging: %s", isCharging_ ? "Yes" : "No");
 	ImGui::Text("Charge Ready: %s", chargeReady_ ? "Yes" : "No");
 	ImGui::End();
+#endif
 }
 
 Vector3 Player::GetCenterPosition() const

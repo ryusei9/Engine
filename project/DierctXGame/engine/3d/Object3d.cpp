@@ -247,6 +247,7 @@ void Object3d::CreateSpotLightResource()
 
 void Object3d::DrawImGui()
 {
+#ifdef USE_IMGUI
 	// ImGuiのウィンドウを作成
 	ImGui::Begin("Object3d");
 	ImGui::DragFloat3("position", &worldTransform.translate_.x, 0.01f);
@@ -277,6 +278,7 @@ void Object3d::DrawImGui()
 
 	// ウィンドウを閉じる
 	ImGui::End();
+#endif
 }
 
 void Object3d::SetModel(const std::string& filePath)

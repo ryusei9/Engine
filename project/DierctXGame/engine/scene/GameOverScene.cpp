@@ -111,6 +111,7 @@ void GameOverScene::Finalize()
 
 void GameOverScene::DrawImGui()
 {
+#ifdef USE_IMGUI
 	ImGui::Begin("GameOverScene");
 	ImGui::DragFloat3("text_translate_", &gameOverTextTransform_.translate_.x);
 	ImGui::DragFloat3("text_rotate_", &gameOverTextTransform_.rotate_.x);
@@ -121,4 +122,5 @@ void GameOverScene::DrawImGui()
 	ImGui::DragFloat3("player_rotate_", &playerTransform_.rotate_.x);
 	ImGui::End();
 	cameraManager_->DrawImGui();
+#endif
 }

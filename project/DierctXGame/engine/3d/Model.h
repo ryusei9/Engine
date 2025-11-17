@@ -5,16 +5,14 @@
 #include <vector>
 #include "string"
 #include "fstream"
-// 3Dモデル
+#include "Material.h"
+/// <summary>
+/// 3Dモデル
+/// </summary>
 class Model
 {
 public:
-	struct Material {
-		Vector4 color;
-		int32_t enableLighting;
-		float padding[3];
-		Matrix4x4 uvTransform;
-	};
+	
 	// 初期化
 	void Initialize(ModelCommon* modelCommon,const std::string& directorypath,const std::string& filename);
 

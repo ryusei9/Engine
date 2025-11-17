@@ -2,9 +2,12 @@
 #include "DirectXCommon.h"
 #include <wrl.h>
 #include "SrvManager.h"
-// ポストエフェクト用のベースクラス
+/// <summary>
+/// ポストエフェクト用のベースクラス
+/// </summary>
 class PostEffectBase {
 public:
+	// デストラクタ
     virtual ~PostEffectBase() = default;
 
     // 初期化（リソース生成など）
@@ -25,14 +28,19 @@ public:
     // 描画後の後始末（バリア戻しなど）
     virtual void PostRender() = 0;
 
+	// ビューポートの初期化
     virtual void ViewPortInitialize();
 
+	// シザー矩形の初期化
 	virtual void ScissorRectInitialize();
 
+	// レンダーターゲットからレンダーターゲットへ遷移
     virtual void TransitionRenderTextureToRenderTarget();
 
+	// レンダーターゲットからシェーダーリソースへ遷移
 	virtual void TransitionRenderTextureToShaderResource();
 
+	// レンダーターゲットの作成
     virtual void CreateRenderTexture(UINT width, UINT height, DXGI_FORMAT format, const Vector4& clearColor);
 
     // 名前や種類を返す（切り替えUI用）
@@ -41,6 +49,7 @@ public:
     // 出力SRVハンドルを取得
     virtual D3D12_GPU_DESCRIPTOR_HANDLE GetOutputSRV() const = 0;
 
+	// 時間パラメータをセット
     virtual void SetTimeParams(float) {};
 
     // 入力テクスチャをセット

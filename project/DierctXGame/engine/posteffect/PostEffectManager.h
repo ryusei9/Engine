@@ -2,6 +2,10 @@
 #include <memory>
 #include <PostEffectBase.h>
 #include <SrvManager.h>
+
+/// <summary>
+/// ポストエフェクトマネージャー
+/// </summary>
 class PostEffectManager
 {
 public:
@@ -23,6 +27,7 @@ public:
 	// 有効なエフェクトだけ順番にPostRender
 	void PostRenderAll();
 
+	// 時間パラメータを設定
 	void SetTimeParams(float time);
 
 	// 有効なエフェクトだけ順番にPreBarrier
@@ -31,6 +36,7 @@ public:
 	// 有効なエフェクトだけ順番にPostBarrier
 	void PostBarrierAll();
 
+	// ImGui描画
 	void DrawImGui();
 
 private:

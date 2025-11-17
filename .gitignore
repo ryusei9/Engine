@@ -317,3 +317,7 @@ DirectXGame/imgui.ini
 
 # DirectXTex Compiled Shaders
 **/DirectXTex/Shaders/Compiled/
+
+x64/
+imgui.ini
+.vsix/

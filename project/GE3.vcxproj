@@ -67,6 +67,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\engine\posteffect;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\application\Object;$(ProjectDir)DierctXGame\engine\util;$(ProjectDir)DierctXGame\engine\FadeEffect;$(ProjectDir)DierctXGame\engine\FadeEffect\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base\DirectX;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\math;$(ProjectDir)DierctXGame\application\scene;$(ProjectDir)DierctXGame\application\Object\base;$(ProjectDir)DierctXGame\application\Object;$(ProjectDir)DierctXGame\engine\util;$(ProjectDir)DierctXGame\application\Object\collider;$(ProjectDir)DierctXGame\application\Object\enemy;$(ProjectDir)DierctXGame\application\Object\player;$(ProjectDir)DierctXGame\engine\base\framework;$(ProjectDir)DierctXGame\engine\base\winapp;$(ProjectDir)DierctXGame\engine\camera;$(ProjectDir)DierctXGame\engine\input;$(ProjectDir)DierctXGame\engine\manager;$(ProjectDir)DierctXGame\engine\particle;$(ProjectDir)DierctXGame\engine\worldtransform;$(ProjectDir)DierctXGame\application\scene\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -97,6 +98,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\engine\posteffect;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\application\Object;$(ProjectDir)DierctXGame\engine\util;$(ProjectDir)DierctXGame\engine\FadeEffect;$(ProjectDir)DierctXGame\engine\FadeEffect\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base\DirectX;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\math;$(ProjectDir)DierctXGame\application\scene;$(ProjectDir)DierctXGame\application\Object\base;$(ProjectDir)DierctXGame\application\Object;$(ProjectDir)DierctXGame\engine\util;$(ProjectDir)DierctXGame\application\Object\collider;$(ProjectDir)DierctXGame\application\Object\enemy;$(ProjectDir)DierctXGame\application\Object\player;$(ProjectDir)DierctXGame\engine\base\framework;$(ProjectDir)DierctXGame\engine\base\winapp;$(ProjectDir)DierctXGame\engine\camera;$(ProjectDir)DierctXGame\engine\input;$(ProjectDir)DierctXGame\engine\manager;$(ProjectDir)DierctXGame\engine\particle;$(ProjectDir)DierctXGame\engine\worldtransform;$(ProjectDir)DierctXGame\application\scene\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -114,20 +116,21 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="DierctXGame\application\Object\PlayerChargeBullet.cpp" />
+    <ClCompile Include="DierctXGame\application\Object\player\PlayerChargeBullet.cpp" />
     <ClCompile Include="DierctXGame\engine\posteffect\GrayscalePostEffect.cpp" />
     <ClCompile Include="DierctXGame\engine\posteffect\PostEffectBase.cpp" />
-    <ClCompile Include="DierctXGame\application\Object\BaseCharacter.cpp" />
-    <ClCompile Include="DierctXGame\application\Object\Collider.cpp" />
-    <ClCompile Include="DierctXGame\application\Object\EnemyAttack.cpp" />
+    <ClCompile Include="DierctXGame\application\Object\base\BaseCharacter.cpp" />
+    <ClCompile Include="DierctXGame\application\Object\collider\Collider.cpp" />
+    <ClCompile Include="DierctXGame\application\Object\enemy\EnemyAttack.cpp" />
     <ClCompile Include="DierctXGame\engine\3d\Skybox.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\CollisionManager.cpp" />
-    <ClCompile Include="DierctXGame\engine\scene\BaseScene.cpp" />
+    <ClCompile Include="DierctXGame\engine\manager\CollisionManager.cpp" />
+    <ClCompile Include="DierctXGame\application\scene\base\BaseScene.cpp" />
     <ClCompile Include="DierctXGame\engine\audio\Audio.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\Camera.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\D3DresourceLeakChecker.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\DirectXCommon.cpp" />
-    <ClCompile Include="DierctXGame\engine\scene\SceneManager.cpp" />
-    <ClCompile Include="DierctXGame\application\Object\Enemy.cpp" />
+    <ClCompile Include="DierctXGame\engine\camera\Camera.cpp" />
+    <ClCompile Include="DierctXGame\engine\math\D3DresourceLeakChecker.cpp" />
+    <ClCompile Include="DierctXGame\engine\base\DirectX\DirectXCommon.cpp" />
+    <ClCompile Include="DierctXGame\application\scene\SceneManager.cpp" />
+    <ClCompile Include="DierctXGame\application\Object\enemy\Enemy.cpp" />
     <ClCompile Include="DierctXGame\engine\util\JsonLoader.cpp" />
     <ClCompile Include="DierctXGame\application\Object\EnemyBullet.cpp" />
     <ClCompile Include="DierctXGame\engine\base\Input.cpp" />
@@ -138,40 +141,47 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\engine\base\ImGuiManager.cpp" />
     <ClCompile Include="DierctXGame\engine\FadeEffect\FadeManager.cpp" />
     <ClCompile Include="DierctXGame\engine\scene\GameOverScene.cpp" />
+    <ClCompile Include="DierctXGame\application\Object\enemy\EnemyBullet.cpp" />
+    <ClCompile Include="DierctXGame\engine\input\Input.cpp" />
+    <ClCompile Include="DierctXGame\engine\math\Inverse.cpp" />
+    <ClCompile Include="DierctXGame\engine\math\Logger.cpp" />
+    <ClCompile Include="DierctXGame\application\scene\GamePlayScene.cpp" />
+    <ClCompile Include="DierctXGame\engine\base\framework\SRFramework.cpp" />
+    <ClCompile Include="DierctXGame\engine\manager\ImGuiManager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\MakeAffineMatrix.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\MakeIdentity4x4.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\MakeOrthographicMatrix.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\MakePerspectiveFovMatrix.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\MakeRotateXMatrix.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\MakeRotateYMatrix.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\MakeRotateZMatrix.cpp" />
+    <ClCompile Include="DierctXGame\engine\math\MakeAffineMatrix.cpp" />
+    <ClCompile Include="DierctXGame\engine\math\MakeIdentity4x4.cpp" />
+    <ClCompile Include="DierctXGame\engine\math\MakeOrthographicMatrix.cpp" />
+    <ClCompile Include="DierctXGame\engine\math\MakePerspectiveFovMatrix.cpp" />
+    <ClCompile Include="DierctXGame\engine\math\MakeRotateXMatrix.cpp" />
+    <ClCompile Include="DierctXGame\engine\math\MakeRotateYMatrix.cpp" />
+    <ClCompile Include="DierctXGame\engine\math\MakeRotateZMatrix.cpp" />
     <ClCompile Include="DierctXGame\engine\3d\Model.cpp" />
     <ClCompile Include="DierctXGame\engine\3d\ModelCommon.cpp" />
     <ClCompile Include="DierctXGame\engine\3d\ModelManager.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\Multiply.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\Normalize.cpp" />
+    <ClCompile Include="DierctXGame\engine\math\Multiply.cpp" />
+    <ClCompile Include="DierctXGame\engine\math\Normalize.cpp" />
     <ClCompile Include="DierctXGame\engine\3d\Object3d.cpp" />
     <ClCompile Include="DierctXGame\engine\3d\Object3dCommon.cpp" />
     <ClCompile Include="DierctXGame\engine\2d\Sprite.cpp" />
     <ClCompile Include="DierctXGame\engine\2d\SpriteCommon.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\StringUtility.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\TextureManager.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\WinApp.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\SrvManager.cpp" />
-    <ClCompile Include="DierctXGame\application\base\MyGame.cpp" />
-    <ClCompile Include="DierctXGame\engine\scene\TitleScene.cpp" />
+    <ClCompile Include="DierctXGame\engine\math\StringUtility.cpp" />
+    <ClCompile Include="DierctXGame\engine\manager\TextureManager.cpp" />
+    <ClCompile Include="DierctXGame\engine\base\winapp\WinApp.cpp" />
+    <ClCompile Include="DierctXGame\engine\manager\SrvManager.cpp" />
+    <ClCompile Include="DierctXGame\engine\base\framework\MyGame.cpp" />
+    <ClCompile Include="DierctXGame\application\scene\TitleScene.cpp" />
     <ClCompile Include="DierctXGame\engine\posteffect\NoisePostEffect.cpp" />
     <ClCompile Include="DierctXGame\engine\posteffect\PostEffectManager.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\ResourceManager.cpp" />
+    <ClCompile Include="DierctXGame\engine\manager\ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DierctXGame\engine\io\MakeRotateXYZMatrix.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\ParticleEmitter.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\ParticleManager.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\WorldTransform.cpp" />
-    <ClCompile Include="DierctXGame\application\Object\Player.cpp" />
-    <ClCompile Include="DierctXGame\application\Object\PlayerBullet.cpp" />
+    <ClCompile Include="DierctXGame\engine\math\MakeRotateXYZMatrix.cpp" />
+    <ClCompile Include="DierctXGame\engine\particle\ParticleEmitter.cpp" />
+    <ClCompile Include="DierctXGame\engine\manager\ParticleManager.cpp" />
+    <ClCompile Include="DierctXGame\engine\worldtransform\WorldTransform.cpp" />
+    <ClCompile Include="DierctXGame\application\Object\player\Player.cpp" />
+    <ClCompile Include="DierctXGame\application\Object\player\PlayerBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraManager.h" />
@@ -179,21 +189,25 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\application\Object\Collider.h" />
     <ClInclude Include="DierctXGame\application\Object\EnemyAttack.h" />
     <ClInclude Include="DierctXGame\application\Object\PlayerChargeBullet.h" />
+    <ClInclude Include="DierctXGame\application\Object\base\BaseCharacter.h" />
+    <ClInclude Include="DierctXGame\application\Object\collider\Collider.h" />
+    <ClInclude Include="DierctXGame\application\Object\enemy\EnemyAttack.h" />
+    <ClInclude Include="DierctXGame\application\Object\player\PlayerChargeBullet.h" />
     <ClInclude Include="DierctXGame\engine\3d\Skybox.h" />
-    <ClInclude Include="DierctXGame\engine\base\CollisionManager.h" />
-    <ClInclude Include="DierctXGame\application\Object\CollisionTypeIdDef.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakeScaleMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakeTranslateMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\ParticleType.h" />
-    <ClInclude Include="DierctXGame\engine\scene\BaseScene.h" />
+    <ClInclude Include="DierctXGame\engine\manager\CollisionManager.h" />
+    <ClInclude Include="DierctXGame\application\Object\collider\CollisionTypeIdDef.h" />
+    <ClInclude Include="DierctXGame\engine\math\MakeScaleMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\math\MakeTranslateMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\math\ParticleType.h" />
+    <ClInclude Include="DierctXGame\application\scene\base\BaseScene.h" />
     <ClInclude Include="DierctXGame\engine\audio\Audio.h" />
-    <ClInclude Include="DierctXGame\engine\base\Camera.h" />
-    <ClInclude Include="DierctXGame\engine\base\D3DresourceLeakChecker.h" />
-    <ClInclude Include="DierctXGame\engine\io\DirectionalLight.h" />
-    <ClInclude Include="DierctXGame\engine\base\DirectXCommon.h" />
-    <ClInclude Include="DierctXGame\engine\io\LevelData.h" />
-    <ClInclude Include="DierctXGame\engine\scene\SceneManager.h" />
-    <ClInclude Include="DierctXGame\application\Object\Enemy.h" />
+    <ClInclude Include="DierctXGame\engine\camera\Camera.h" />
+    <ClInclude Include="DierctXGame\engine\math\D3DresourceLeakChecker.h" />
+    <ClInclude Include="DierctXGame\engine\math\DirectionalLight.h" />
+    <ClInclude Include="DierctXGame\engine\base\DirectX\DirectXCommon.h" />
+    <ClInclude Include="DierctXGame\engine\math\LevelData.h" />
+    <ClInclude Include="DierctXGame\application\scene\SceneManager.h" />
+    <ClInclude Include="DierctXGame\application\Object\enemy\Enemy.h" />
     <ClInclude Include="DierctXGame\engine\util\JsonLoader.h" />
     <ClInclude Include="DierctXGame\application\Object\EnemyBullet.h" />
     <ClInclude Include="DierctXGame\engine\base\Input.h" />
@@ -210,31 +224,46 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\io\MaterialData.h" />
     <ClInclude Include="DierctXGame\engine\io\Matrix3x3.h" />
     <ClInclude Include="DierctXGame\engine\io\Matrix4x4.h" />
+    <ClInclude Include="DierctXGame\application\Object\enemy\EnemyBullet.h" />
+    <ClInclude Include="DierctXGame\engine\input\Input.h" />
+    <ClInclude Include="DierctXGame\engine\math\Inverse.h" />
+    <ClInclude Include="DierctXGame\engine\math\Logger.h" />
+    <ClInclude Include="DierctXGame\engine\math\MakeAffineMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\math\MakeIdentity4x4.h" />
+    <ClInclude Include="DierctXGame\engine\math\MakeOrthographicMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\math\MakePerspectiveFovMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\math\MakeRotateXMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\math\MakeRotateYMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\math\MakeRotateZMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\math\Material.h" />
+    <ClInclude Include="DierctXGame\engine\math\MaterialData.h" />
+    <ClInclude Include="DierctXGame\engine\math\Matrix3x3.h" />
+    <ClInclude Include="DierctXGame\engine\math\Matrix4x4.h" />
     <ClInclude Include="DierctXGame\engine\3d\Model.h" />
     <ClInclude Include="DierctXGame\engine\3d\ModelCommon.h" />
-    <ClInclude Include="DierctXGame\engine\io\ModelData.h" />
+    <ClInclude Include="DierctXGame\engine\math\ModelData.h" />
     <ClInclude Include="DierctXGame\engine\3d\ModelManager.h" />
-    <ClInclude Include="DierctXGame\engine\io\Multiply.h" />
-    <ClInclude Include="DierctXGame\engine\io\Normalize.h" />
+    <ClInclude Include="DierctXGame\engine\math\Multiply.h" />
+    <ClInclude Include="DierctXGame\engine\math\Normalize.h" />
     <ClInclude Include="DierctXGame\engine\3d\Object3d.h" />
     <ClInclude Include="DierctXGame\engine\3d\Object3dCommon.h" />
     <ClInclude Include="DierctXGame\engine\2d\Sprite.h" />
     <ClInclude Include="DierctXGame\engine\2d\SpriteCommon.h" />
-    <ClInclude Include="DierctXGame\engine\base\StringUtility.h" />
-    <ClInclude Include="DierctXGame\engine\base\TextureManager.h" />
-    <ClInclude Include="DierctXGame\engine\io\Transform.h" />
-    <ClInclude Include="DierctXGame\engine\io\TransformationMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\Vector2.h" />
-    <ClInclude Include="DierctXGame\engine\io\Vector3.h" />
-    <ClInclude Include="DierctXGame\engine\io\Vector4.h" />
-    <ClInclude Include="DierctXGame\engine\io\VertexData.h" />
-    <ClInclude Include="DierctXGame\engine\base\WinApp.h" />
-    <ClInclude Include="DierctXGame\engine\base\SrvManager.h" />
-    <ClInclude Include="DierctXGame\engine\scene\GamePlayScene.h" />
-    <ClInclude Include="DierctXGame\application\base\SRFramework.h" />
-    <ClInclude Include="DierctXGame\engine\base\ImGuiManager.h" />
-    <ClInclude Include="DierctXGame\application\base\MyGame.h" />
-    <ClInclude Include="DierctXGame\engine\scene\TitleScene.h" />
+    <ClInclude Include="DierctXGame\engine\math\StringUtility.h" />
+    <ClInclude Include="DierctXGame\engine\manager\TextureManager.h" />
+    <ClInclude Include="DierctXGame\engine\math\Transform.h" />
+    <ClInclude Include="DierctXGame\engine\math\TransformationMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\math\Vector2.h" />
+    <ClInclude Include="DierctXGame\engine\math\Vector3.h" />
+    <ClInclude Include="DierctXGame\engine\math\Vector4.h" />
+    <ClInclude Include="DierctXGame\engine\math\VertexData.h" />
+    <ClInclude Include="DierctXGame\engine\base\winapp\WinApp.h" />
+    <ClInclude Include="DierctXGame\engine\manager\SrvManager.h" />
+    <ClInclude Include="DierctXGame\application\scene\GamePlayScene.h" />
+    <ClInclude Include="DierctXGame\engine\base\framework\SRFramework.h" />
+    <ClInclude Include="DierctXGame\engine\manager\ImGuiManager.h" />
+    <ClInclude Include="DierctXGame\engine\base\framework\MyGame.h" />
+    <ClInclude Include="DierctXGame\application\scene\TitleScene.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\NoisePostEffect.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\PostEffectManager.h" />
     <ClInclude Include="DierctXGame\engine\FadeEffect\FadeManager.h" />
@@ -247,8 +276,17 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\application\Object\Player.h" />
     <ClInclude Include="DierctXGame\application\Object\PlayerBullet.h" />
     <ClInclude Include="DierctXGame\engine\scene\GameOverScene.h" />
+    <ClInclude Include="DierctXGame\engine\manager\ResourceManager.h" />
+    <ClInclude Include="DierctXGame\engine\math\GetNowTimeInSeconds.h" />
+    <ClInclude Include="DierctXGame\engine\math\Lerp.h" />
+    <ClInclude Include="DierctXGame\engine\math\MakeRotateXYZMatrix.h" />
+    <ClInclude Include="DierctXGame\engine\particle\ParticleEmitter.h" />
+    <ClInclude Include="DierctXGame\engine\manager\ParticleManager.h" />
+    <ClInclude Include="DierctXGame\engine\worldtransform\WorldTransform.h" />
+    <ClInclude Include="DierctXGame\application\Object\player\Player.h" />
+    <ClInclude Include="DierctXGame\application\Object\player\PlayerBullet.h" />
     <ClInclude Include="tools\json.hpp" />
-    <ClInclude Include="DierctXGame\engine\io\DepthMaterial.h" />
+    <ClInclude Include="DierctXGame\engine\math\DepthMaterial.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\GrayscalePostEffect.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\PostEffectBase.h" />
   </ItemGroup>

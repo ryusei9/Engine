@@ -47,18 +47,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)DirectXTex;$(SolutionDir)imgui;$(ProjectDir)tools;$(ProjectDir)DirectXGame\engine\util;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\externals\DirectXTex;$(SolutionDir)..\externals\imgui;$(ProjectDir)..\tools;$(ProjectDir)DirectXGame\engine\util;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)DirectXTex;$(SolutionDir)imgui;$(ProjectDir)tools;$(ProjectDir)DirectXGame\engine\util;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\externals\DirectXTex;$(SolutionDir)..\externals\imgui;$(ProjectDir)..\tools;$(ProjectDir)DirectXGame\engine\util;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;USE_IMGUI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -66,6 +66,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\engine\posteffect;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\application\Object;$(ProjectDir)DierctXGame\engine\util;$(ProjectDir)DierctXGame\engine\FadeEffect;$(ProjectDir)DierctXGame\engine\FadeEffect\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base\DirectX;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\math;$(ProjectDir)DierctXGame\application\scene;$(ProjectDir)DierctXGame\application\Object\base;$(ProjectDir)DierctXGame\application\Object;$(ProjectDir)DierctXGame\engine\util;$(ProjectDir)DierctXGame\application\Object\collider;$(ProjectDir)DierctXGame\application\Object\enemy;$(ProjectDir)DierctXGame\application\Object\player;$(ProjectDir)DierctXGame\engine\base\framework;$(ProjectDir)DierctXGame\engine\base\winapp;$(ProjectDir)DierctXGame\engine\camera;$(ProjectDir)DierctXGame\engine\input;$(ProjectDir)DierctXGame\engine\manager;$(ProjectDir)DierctXGame\engine\particle;$(ProjectDir)DierctXGame\engine\worldtransform;$(ProjectDir)DierctXGame\application\scene\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -73,6 +74,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <AdditionalOptions>/ignore:4049 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>imgui.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\generated\outputs\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
@@ -94,6 +97,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <TreatWarningAsError>true</TreatWarningAsError>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\engine\posteffect;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\io;$(ProjectDir)DierctXGame\engine\scene;$(ProjectDir)DierctXGame\application\base;$(ProjectDir)DierctXGame\application\Object;$(ProjectDir)DierctXGame\engine\util;$(ProjectDir)DierctXGame\engine\FadeEffect;$(ProjectDir)DierctXGame\engine\FadeEffect\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)DierctXGame\engine\base\DirectX;$(ProjectDir)DierctXGame\engine\2d;$(ProjectDir)DierctXGame\engine\3d;$(ProjectDir)DierctXGame\engine\audio;$(ProjectDir)DierctXGame\engine\math;$(ProjectDir)DierctXGame\application\scene;$(ProjectDir)DierctXGame\application\Object\base;$(ProjectDir)DierctXGame\application\Object;$(ProjectDir)DierctXGame\engine\util;$(ProjectDir)DierctXGame\application\Object\collider;$(ProjectDir)DierctXGame\application\Object\enemy;$(ProjectDir)DierctXGame\application\Object\player;$(ProjectDir)DierctXGame\engine\base\framework;$(ProjectDir)DierctXGame\engine\base\winapp;$(ProjectDir)DierctXGame\engine\camera;$(ProjectDir)DierctXGame\engine\input;$(ProjectDir)DierctXGame\engine\manager;$(ProjectDir)DierctXGame\engine\particle;$(ProjectDir)DierctXGame\engine\worldtransform;$(ProjectDir)DierctXGame\application\scene\base;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -102,6 +106,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\generated\outputs\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
@@ -109,7 +114,9 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="DierctXGame\application\Object\player\PlayerChargeBullet.cpp" />
+    <ClCompile Include="DierctXGame\application\scene\GameOverScene.cpp" />
     <ClCompile Include="DierctXGame\engine\posteffect\GrayscalePostEffect.cpp" />
     <ClCompile Include="DierctXGame\engine\posteffect\PostEffectBase.cpp" />
     <ClCompile Include="DierctXGame\application\Object\base\BaseCharacter.cpp" />
@@ -126,13 +133,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\application\Object\enemy\Enemy.cpp" />
     <ClCompile Include="DierctXGame\engine\util\JsonLoader.cpp" />
     <ClCompile Include="DierctXGame\application\Object\enemy\EnemyBullet.cpp" />
-    <ClCompile Include="externals\imgui\imgui.cpp" />
-    <ClCompile Include="externals\imgui\imgui_demo.cpp" />
-    <ClCompile Include="externals\imgui\imgui_draw.cpp" />
-    <ClCompile Include="externals\imgui\imgui_impl_dx12.cpp" />
-    <ClCompile Include="externals\imgui\imgui_impl_win32.cpp" />
-    <ClCompile Include="externals\imgui\imgui_tables.cpp" />
-    <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="DierctXGame\engine\FadeEffect\FadeManager.cpp" />
     <ClCompile Include="DierctXGame\engine\input\Input.cpp" />
     <ClCompile Include="DierctXGame\engine\math\Inverse.cpp" />
     <ClCompile Include="DierctXGame\engine\math\Logger.cpp" />
@@ -175,10 +176,12 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\application\Object\player\PlayerBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CameraManager.h" />
     <ClInclude Include="DierctXGame\application\Object\base\BaseCharacter.h" />
     <ClInclude Include="DierctXGame\application\Object\collider\Collider.h" />
     <ClInclude Include="DierctXGame\application\Object\enemy\EnemyAttack.h" />
     <ClInclude Include="DierctXGame\application\Object\player\PlayerChargeBullet.h" />
+    <ClInclude Include="DierctXGame\application\scene\GameOverScene.h" />
     <ClInclude Include="DierctXGame\engine\3d\Skybox.h" />
     <ClInclude Include="DierctXGame\engine\manager\CollisionManager.h" />
     <ClInclude Include="DierctXGame\application\Object\collider\CollisionTypeIdDef.h" />
@@ -196,14 +199,6 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\application\Object\enemy\Enemy.h" />
     <ClInclude Include="DierctXGame\engine\util\JsonLoader.h" />
     <ClInclude Include="DierctXGame\application\Object\enemy\EnemyBullet.h" />
-    <ClInclude Include="externals\imgui\imconfig.h" />
-    <ClInclude Include="externals\imgui\imgui.h" />
-    <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
-    <ClInclude Include="externals\imgui\imgui_impl_win32.h" />
-    <ClInclude Include="externals\imgui\imgui_internal.h" />
-    <ClInclude Include="externals\imgui\imstb_rectpack.h" />
-    <ClInclude Include="externals\imgui\imstb_textedit.h" />
-    <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="DierctXGame\engine\input\Input.h" />
     <ClInclude Include="DierctXGame\engine\math\Inverse.h" />
     <ClInclude Include="DierctXGame\engine\math\Logger.h" />
@@ -245,6 +240,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\application\scene\TitleScene.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\NoisePostEffect.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\PostEffectManager.h" />
+    <ClInclude Include="DierctXGame\engine\FadeEffect\FadeManager.h" />
     <ClInclude Include="DierctXGame\engine\manager\ResourceManager.h" />
     <ClInclude Include="DierctXGame\engine\math\GetNowTimeInSeconds.h" />
     <ClInclude Include="DierctXGame\engine\math\Lerp.h" />
@@ -260,14 +256,11 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\posteffect\PostEffectBase.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="externals\imgui\LICENSE.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
+    <ProjectReference Include="..\externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
       <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
     </ProjectReference>
-    <ProjectReference Include="ImGui\ImGui.vcxproj">
-      <Project>{f65a3899-9d89-405c-b3e8-af6f0c6c8139}</Project>
+    <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
+      <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

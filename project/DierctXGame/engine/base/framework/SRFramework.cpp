@@ -36,10 +36,15 @@ void SRFramework::Initialize()
 	TextureManager::GetInstance()->LoadTexture("resources/player.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Boss.png");
 	TextureManager::GetInstance()->LoadTexture("resources/player_bullet.png");
+	TextureManager::GetInstance()->LoadTexture("resources/white.png");
+	TextureManager::GetInstance()->LoadTexture("resources/backGround.png");
+	TextureManager::GetInstance()->LoadTexture("resources/fadeWhite.png");
+	TextureManager::GetInstance()->LoadTexture("resources/BackToTitle.png");
+	TextureManager::GetInstance()->LoadTexture("resources/Black.png");
 	
 	// スプライト共通部の初期化
 	
-	SpriteCommon::GetInstance()->Initialize();
+	SpriteCommon::GetInstance()->Initialize(srvManager.get());
 
 
 	// 3Dオブジェクト共通部の初期化
@@ -52,9 +57,13 @@ void SRFramework::Initialize()
 	// .objファイルからモデルを読み込む
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("axis.obj");
-
+	ModelManager::GetInstance()->LoadModel("BackToTitle.obj"); // ←追加
+	ModelManager::GetInstance()->LoadModel("testCube.obj");
+	ModelManager::GetInstance()->LoadModel("testGround.obj");
 	// 弾用モデルを事前にロード
 	ModelManager::GetInstance()->LoadModel("player_bullet.obj"); // ←追加
+
+
 
 	Input::GetInstance()->Initialize(winApp.get());
 
@@ -85,6 +94,9 @@ void SRFramework::Initialize()
 	postEffectManager_->SetEffectEnabled(1, false);
 
 	imGuiManager->Initialize(winApp.get());
+
+	/*------パーティクルマネージャの初期化------*/
+	ParticleManager::GetInstance()->Initialize(srvManager.get(), camera.get());
 
 	// シーンマネージャの初期化
 	sceneManager_ = std::make_unique<SceneManager>();

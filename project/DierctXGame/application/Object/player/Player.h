@@ -55,6 +55,14 @@ public:
 	// プレイヤーのチャージ弾を取得
 	std::list<std::unique_ptr<PlayerChargeBullet>>& GetChargeBullets() { return chargeBullets_; }
 
+	bool GetPlayerControlEnabled() const { return controlEnabled_; } // プレイヤー操作有効化フラグの取得
+
+	// プレイヤーの死亡フラグの取得
+	bool GetIsAlive() const { return isAlive_; }
+
+	/*------セッター------*/
+	void SetPlayerControlEnabled(bool enabled) { controlEnabled_ = enabled; } // プレイヤー操作有効化フラグの設定
+
 private:
 	/*------メンバ変数------*/
 
@@ -90,5 +98,8 @@ private:
 	float chargeTime_ = 0.0f;
 	bool isCharging_ = false;
 	bool chargeReady_ = false;
+
+	// 演出用プレイヤーが動かないフラグ
+	bool controlEnabled_ = true;
 };
 

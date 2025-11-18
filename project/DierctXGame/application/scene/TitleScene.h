@@ -7,6 +7,9 @@
 #include <Audio.h>
 #include <Vector2.h>
 #include <BaseScene.h>
+#include <Player.h>
+#include <FadeManager.h>
+#include <CameraManager.h>
 
 /// <summary>
 /// タイトルシーン	
@@ -29,6 +32,8 @@ public:
 	// ImGui描画
 	void DrawImGui() override;
 
+	void CameraMove();
+
 private:
 	// スプライトコモン
 	SpriteCommon* spriteCommon = nullptr;
@@ -46,5 +51,33 @@ private:
 	Vector2 spritePosition = { 100.0f,100.0f };
 
 	SoundData soundData1;
+
+	// プレイヤー
+	std::unique_ptr<Player> player_ = nullptr;
+
+	WorldTransform playerTransform_;
+
+	// タイトルロゴ
+	std::unique_ptr<Object3d> titleLogo_ = nullptr;
+
+	WorldTransform titleLogoTransform_;
+
+	std::unique_ptr<Camera> camera_ = std::make_unique<Camera>();
+
+	// skydome
+	std::unique_ptr<Object3d> skydome_ = nullptr;
+
+	WorldTransform skydomeTransform_;
+
+	// フェード演出管理
+	std::unique_ptr<FadeManager> fadeManager_;
+
+	std::unique_ptr<Object3d> titleGuide_ = nullptr;
+
+	Vector3 titleGuidePosition = { 0.0f, 0.0f, -6.000f };
+	Vector3 titleGuideRotate = { -1.387f, 0.0f, 0.0f };
+	Vector3 titleGuideScale = { 0.232f, 0.232f, 0.232f };
+
+	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
 };
 

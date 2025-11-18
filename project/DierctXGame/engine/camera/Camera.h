@@ -23,6 +23,9 @@ public:
 	// 平行移動の設定
 	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
 
+	// X座標の設定
+	void SetXPosition(const float& x) { transform.translate.x = x; }
+
 	// 視野角の設定
 	void SetFovY(const float& fovY) { this->fovY = fovY; }
 
@@ -55,6 +58,11 @@ public:
 	// 平行移動の取得
 	const Vector3& GetTranslate()const { return transform.translate; }
 
+	// 視野角の取得
+	const float& GetFovY()const { return fovY; }
+
+	// アスペクト比の取得
+	const float& GetAspectRatio()const { return aspectRatio; }
 private:
 
 	// 変換情報
@@ -75,5 +83,6 @@ private:
 	Matrix4x4 projectionMatrix;
 	Matrix4x4 viewProjectionMatrix;
 
+	
 };
 

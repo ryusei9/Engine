@@ -120,7 +120,7 @@ MaterialData Object3d::LoadMaterialTemplateFile(const std::string& directoryPath
 	return materialData;
 }
 
-Object3d::ModelData Object3d::LoadObjFile(const std::string& directoryPath, const std::string& filename)
+ModelData Object3d::LoadObjFile(const std::string& directoryPath, const std::string& filename)
 {
 	// 変数の宣言
 	// 構築するModelData

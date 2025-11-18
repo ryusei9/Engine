@@ -115,8 +115,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CameraManager.cpp" />
-    <ClCompile Include="DierctXGame\application\Object\PlayerChargeBullet.cpp" />
     <ClCompile Include="DierctXGame\application\Object\player\PlayerChargeBullet.cpp" />
+    <ClCompile Include="DierctXGame\application\scene\GameOverScene.cpp" />
     <ClCompile Include="DierctXGame\engine\posteffect\GrayscalePostEffect.cpp" />
     <ClCompile Include="DierctXGame\engine\posteffect\PostEffectBase.cpp" />
     <ClCompile Include="DierctXGame\application\Object\base\BaseCharacter.cpp" />
@@ -132,16 +132,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\application\scene\SceneManager.cpp" />
     <ClCompile Include="DierctXGame\application\Object\enemy\Enemy.cpp" />
     <ClCompile Include="DierctXGame\engine\util\JsonLoader.cpp" />
-    <ClCompile Include="DierctXGame\application\Object\EnemyBullet.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\Input.cpp" />
-    <ClCompile Include="DierctXGame\engine\io\Inverse.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\Logger.cpp" />
-    <ClCompile Include="DierctXGame\engine\scene\GamePlayScene.cpp" />
-    <ClCompile Include="DierctXGame\application\base\SRFramework.cpp" />
-    <ClCompile Include="DierctXGame\engine\base\ImGuiManager.cpp" />
-    <ClCompile Include="DierctXGame\engine\FadeEffect\FadeManager.cpp" />
-    <ClCompile Include="DierctXGame\engine\scene\GameOverScene.cpp" />
     <ClCompile Include="DierctXGame\application\Object\enemy\EnemyBullet.cpp" />
+    <ClCompile Include="DierctXGame\engine\FadeEffect\FadeManager.cpp" />
     <ClCompile Include="DierctXGame\engine\input\Input.cpp" />
     <ClCompile Include="DierctXGame\engine\math\Inverse.cpp" />
     <ClCompile Include="DierctXGame\engine\math\Logger.cpp" />
@@ -185,14 +177,11 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraManager.h" />
-    <ClInclude Include="DierctXGame\application\Object\BaseCharacter.h" />
-    <ClInclude Include="DierctXGame\application\Object\Collider.h" />
-    <ClInclude Include="DierctXGame\application\Object\EnemyAttack.h" />
-    <ClInclude Include="DierctXGame\application\Object\PlayerChargeBullet.h" />
     <ClInclude Include="DierctXGame\application\Object\base\BaseCharacter.h" />
     <ClInclude Include="DierctXGame\application\Object\collider\Collider.h" />
     <ClInclude Include="DierctXGame\application\Object\enemy\EnemyAttack.h" />
     <ClInclude Include="DierctXGame\application\Object\player\PlayerChargeBullet.h" />
+    <ClInclude Include="DierctXGame\application\scene\GameOverScene.h" />
     <ClInclude Include="DierctXGame\engine\3d\Skybox.h" />
     <ClInclude Include="DierctXGame\engine\manager\CollisionManager.h" />
     <ClInclude Include="DierctXGame\application\Object\collider\CollisionTypeIdDef.h" />
@@ -209,21 +198,6 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\application\scene\SceneManager.h" />
     <ClInclude Include="DierctXGame\application\Object\enemy\Enemy.h" />
     <ClInclude Include="DierctXGame\engine\util\JsonLoader.h" />
-    <ClInclude Include="DierctXGame\application\Object\EnemyBullet.h" />
-    <ClInclude Include="DierctXGame\engine\base\Input.h" />
-    <ClInclude Include="DierctXGame\engine\io\Inverse.h" />
-    <ClInclude Include="DierctXGame\engine\base\Logger.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakeAffineMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakeIdentity4x4.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakeOrthographicMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakePerspectiveFovMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakeRotateXMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakeRotateYMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakeRotateZMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\io\Material.h" />
-    <ClInclude Include="DierctXGame\engine\io\MaterialData.h" />
-    <ClInclude Include="DierctXGame\engine\io\Matrix3x3.h" />
-    <ClInclude Include="DierctXGame\engine\io\Matrix4x4.h" />
     <ClInclude Include="DierctXGame\application\Object\enemy\EnemyBullet.h" />
     <ClInclude Include="DierctXGame\engine\input\Input.h" />
     <ClInclude Include="DierctXGame\engine\math\Inverse.h" />
@@ -267,15 +241,6 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DierctXGame\engine\posteffect\NoisePostEffect.h" />
     <ClInclude Include="DierctXGame\engine\posteffect\PostEffectManager.h" />
     <ClInclude Include="DierctXGame\engine\FadeEffect\FadeManager.h" />
-    <ClInclude Include="DierctXGame\engine\io\GetNowTimeInSeconds.h" />
-    <ClInclude Include="DierctXGame\engine\io\Lerp.h" />
-    <ClInclude Include="DierctXGame\engine\io\MakeRotateXYZMatrix.h" />
-    <ClInclude Include="DierctXGame\engine\base\ParticleEmitter.h" />
-    <ClInclude Include="DierctXGame\engine\base\ParticleManager.h" />
-    <ClInclude Include="DierctXGame\engine\base\WorldTransform.h" />
-    <ClInclude Include="DierctXGame\application\Object\Player.h" />
-    <ClInclude Include="DierctXGame\application\Object\PlayerBullet.h" />
-    <ClInclude Include="DierctXGame\engine\scene\GameOverScene.h" />
     <ClInclude Include="DierctXGame\engine\manager\ResourceManager.h" />
     <ClInclude Include="DierctXGame\engine\math\GetNowTimeInSeconds.h" />
     <ClInclude Include="DierctXGame\engine\math\Lerp.h" />

@@ -120,7 +120,7 @@ MaterialData Object3d::LoadMaterialTemplateFile(const std::string& directoryPath
 	return materialData;
 }
 
-Object3d::ModelData Object3d::LoadObjFile(const std::string& directoryPath, const std::string& filename)
+ModelData Object3d::LoadObjFile(const std::string& directoryPath, const std::string& filename)
 {
 	// 変数の宣言
 	// 構築するModelData
@@ -247,6 +247,7 @@ void Object3d::CreateSpotLightResource()
 
 void Object3d::DrawImGui()
 {
+#ifdef USE_IMGUI
 	// ImGuiのウィンドウを作成
 	ImGui::Begin("Object3d");
 	ImGui::DragFloat3("position", &worldTransform.translate_.x, 0.01f);
@@ -277,6 +278,7 @@ void Object3d::DrawImGui()
 
 	// ウィンドウを閉じる
 	ImGui::End();
+#endif
 }
 
 void Object3d::SetModel(const std::string& filePath)
@@ -399,7 +401,7 @@ void Object3d::CreateMaterialData()
 	materialData->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
 
 	// 金属感
-	materialData->environmentCoefficient = 0.5f;
+	materialData->environmentCoefficient = 0.0f;
 }
 
 void Object3d::CreateDirectionalLightData()
@@ -412,7 +414,7 @@ void Object3d::CreateDirectionalLightData()
 	// 真上から白いライトで照らす
 	directionalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
 	directionalLightData->direction = { 0.0f,-1.0f,0.0f };
-	directionalLightData->intensity = 1.0f;
+	directionalLightData->intensity = 3.0f;
 
 
 	// 正規化

@@ -55,9 +55,13 @@ void EnemyBullet::Move()
 
 void EnemyBullet::OnCollision(Collider* other)
 {
+    if (!isAlive_) return;
+
 	// プレイヤーと衝突した場合に消滅
     if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayer)) {
         isAlive_ = false;
+        // 半径を0にして当たり判定も即無効化
+        SetRadius(0.0f);
     }
 }
 

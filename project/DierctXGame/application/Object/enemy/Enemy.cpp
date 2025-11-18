@@ -23,7 +23,7 @@ void Enemy::Initialize()
 	// 敵のワールド変換を初期化
 	worldTransform_.scale_ = { 1.0f,1.0f,1.0f };
 	worldTransform_.rotate_ = { 0.0f,0.0f,0.0f };
-	worldTransform_.translate_ = { 3.0f,0.0f,0.0f };
+	worldTransform_.translate_ = { 10.0f,0.0f,0.0f };
 	// 敵のカメラを取得
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
 
@@ -49,18 +49,14 @@ void Enemy::Initialize()
 	// 敵の攻撃パターンを初期化
 	attack_ = std::make_unique<EnemyAttack>();
 	// デフォルトの攻撃パターンを設定
-	attack_->SetPattern(3);
+	attack_->SetPattern(1);
 }
 
 void Enemy::Update()
 {
 	// 弾の削除
 	bullets_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) {
-		if (!bullet->IsAlive()) {
-			bullet.reset();
-			return true;
-		}
-		return false;
+		return !bullet->IsAlive();
 		});
 
 	// 弾の更新
@@ -81,8 +77,10 @@ void Enemy::Update()
 	Move();
 	
 	// 敵の攻撃
-	attack_->Update(this, player_, bullets_, 1.0f / 60.0f);
-
+	//Attack();
+	if (controlEnabled_) {
+		attack_->Update(this, player_, bullets_, 1.0f / 60.0f);
+	}
 	// 敵の死亡条件
 	if (hp_ <= 0)
 	{
@@ -90,6 +88,7 @@ void Enemy::Update()
 		isAlive_ = false;
 	}
 	if (!isAlive_) {
+#ifdef _DEBUG
 		// 敵が死んでいる場合
 		// 敵のリスポーンタイムを減少
 		respawnTime_ -= 1.0f / 60.0f;
@@ -101,13 +100,14 @@ void Enemy::Update()
 			respawnTime_ = 3.0f; // リスポーンタイムを3秒に設定
 			hasPlayedDeathParticle_ = false;
 		}
+#endif
 	}
 }
 
 void Enemy::Draw()
 {
 	// 敵が生きている場合のみ描画
-	if (isAlive_) {
+	if (isAlive_ || controlEnabled_) {
 		// 敵の描画
 		BaseCharacter::Draw();
 		// 弾の描画
@@ -119,6 +119,7 @@ void Enemy::Draw()
 
 void Enemy::DrawImGui()
 {
+#ifdef USE_IMGUI
 	ImGui::Begin("enemy");
 	// ImGuiで敵の情報を表示
 	ImGui::Text("Enemy Serial Number: %u", serialNumber_);
@@ -130,6 +131,7 @@ void Enemy::DrawImGui()
 	attack_->DrawImGui();
 	object3d_->DrawImGui();
 	ImGui::End();
+#endif
 }
 
 void Enemy::Move()
@@ -138,19 +140,17 @@ void Enemy::Move()
 
 void Enemy::Attack()
 {
-	// 敵の攻撃処理
-	if (!isAlive_) return;
-	shotTimer_ -= 1.0f / 60.0f;
-	// 一定時間ごとに弾を発射
-	if (shotTimer_ <= 0.0f) {
-		// プレイヤーの方向に発射（例：X軸負方向に発射）
-		Vector3 velocity = { -0.1f, 0.0f, 0.0f };
-		auto bullet = std::make_unique<EnemyBullet>();
-		bullet->Initialize(worldTransform_.translate_, velocity);
-		bullet->Update();
-		bullets_.push_back(std::move(bullet));
-		shotTimer_ = shotInterval_;
-	}
+	//if (!isAlive_) return;
+	//shotTimer_ -= 1.0f / 60.0f;
+	//if (shotTimer_ <= 0.0f) {
+	//	// プレイヤーの方向に発射（例：X軸負方向に発射）
+	//	Vector3 velocity = { -0.1f, 0.0f, 0.0f };
+	//	auto bullet = std::make_unique<EnemyBullet>();
+	//	bullet->Initialize(worldTransform_.translate_, velocity);
+	//	bullet->Update();
+	//	bullets_.push_back(std::move(bullet));
+	//	shotTimer_ = shotInterval_;
+	//}
 }
 
 void Enemy::OnCollision(Collider* other)

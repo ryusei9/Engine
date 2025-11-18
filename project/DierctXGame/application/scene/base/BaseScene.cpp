@@ -1,4 +1,4 @@
 #include "BaseScene.h"
 
 // タイトルシーンで初期化
-int BaseScene::sceneNo = GAMEPLAY;
+int BaseScene::sceneNo = TITLE;

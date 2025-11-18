@@ -133,6 +133,7 @@ public:
 
 	// スカイボックスのファイルパス設定
 	void SetSkyboxFilePath(std::string filePath);
+	void SetPointLight(float intensity) { pointLightData->intensity = intensity; }
 private:
 	// BufferResourceの作成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes);

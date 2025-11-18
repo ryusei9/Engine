@@ -1,8 +1,9 @@
 #include "ImGuiManager.h"
-#include "ImGui/imgui.h"
-#include <ImGui/imgui_impl_win32.h>
-#include <ImGui/imgui_impl_dx12.h>
-
+#ifdef USE_IMGUI
+#include <imgui.h>
+#include <imgui_impl_win32.h>
+#include <imgui_impl_dx12.h>
+#endif
 
 void ImGuiManager::Initialize(WinApp* winApp_)
 {
@@ -17,6 +18,7 @@ void ImGuiManager::Initialize(WinApp* winApp_)
 	// デスクリプタヒープの生成
 	HRESULT result = dxCommon_->GetDevice()->CreateDescriptorHeap(&desc, IID_PPV_ARGS(srvHeap_.GetAddressOf()));
 	assert(SUCCEEDED(result));
+#ifdef USE_IMGUI
 	// ImGuiの初期化
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
@@ -27,18 +29,23 @@ void ImGuiManager::Initialize(WinApp* winApp_)
 		srvHeap_.Get(),
 		srvHeap_->GetCPUDescriptorHandleForHeapStart(),
 		srvHeap_->GetGPUDescriptorHandleForHeapStart());
+#endif
 }
 
 void ImGuiManager::Begin()
 {
+#ifdef USE_IMGUI
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
+#endif
 }
 
 void ImGuiManager::End()
 {
+#ifdef USE_IMGUI
 	ImGui::Render();
+#endif
 }
 
 void ImGuiManager::Draw()
@@ -48,17 +55,20 @@ void ImGuiManager::Draw()
 	// デスクリプタヒープの配列をセットするコマンド
 	ID3D12DescriptorHeap* ppHeaps[] = { srvHeap_.Get() };
 	commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+#ifdef USE_IMGUI
 	// 描画コマンドを発行
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
+#endif
 }
 
 
 
 void ImGuiManager::Finalize()
 {
+#ifdef USE_IMGUI
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
-
+#endif
 	srvHeap_.Reset();
 }

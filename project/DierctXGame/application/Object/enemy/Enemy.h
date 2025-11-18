@@ -61,6 +61,16 @@ public:
 
 	
 
+	bool GetControlEnabled() const { return controlEnabled_; } // エネミー操作有効化フラグの取得
+
+	void SetControlEnabled(bool enabled) { controlEnabled_ = enabled; } // エネミー操作有効化フラグの設定
+
+	int GetColliderId() const { return colliderId_; }
+
+	Vector3 GetInitialPosition() const {return initialPosition_;}
+
+	void SetZ(float z) {worldTransform_.translate_.z = z;}
+
 private:
 	/*------メンバ変数------*/
 	// 敵の移動速度
@@ -98,5 +108,12 @@ private:
 	std::unique_ptr<EnemyAttack> attack_;
 
 	Player* player_ = nullptr; // プレイヤーへのポインタ
+
+	// 演出用エネミーが動かないフラグ
+	bool controlEnabled_ = false;
+
+	int colliderId_ = -1;
+
+	Vector3 initialPosition_ = { 0.0f, 0.0f, 0.0f };
 };
 

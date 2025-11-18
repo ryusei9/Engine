@@ -32,4 +32,10 @@ struct LevelData {
         Vector3 rotation;   // 回転
 	};
 	std::vector<EnemyData> enemies; // 敵のデータ
+
+    struct CurveData {
+        std::string fileName;
+        std::vector<Vector3> points;
+    };
+    std::vector<CurveData> curves;
 };

@@ -17,6 +17,9 @@
 #include <LevelData.h>
 #include <JsonLoader.h>
 #include <Skybox.h>
+#include <FadeManager.h>
+#include <CameraManager.h>
+
 /// <summary>
 /// ゲームプレイシーン
 /// </summary>
@@ -45,10 +48,43 @@ public:
 	// JSONから読み込んだオブジェクトのImGui調整
 	void DrawImGuiImportObjectsFromJson();
 
+	void UpdateStartCameraEasing();
+
+public:
+	// ステート
+	enum class GameSceneState {
+		Start,
+		Play,
+		GameClear,
+		GameOver,
+		Pause
+	};
+
+
+	enum class CameraMode {
+		Free,
+		FollowPlayer,
+		DynamicFollow
+	};
 private:
 
 	// 衝突判定と応答
 	void CheckAllCollisions();
+
+	// 
+	void LoadLevel(const LevelData* levelData);
+
+	// カーブに沿ってプレイヤーを移動させる
+	void UpdateCameraOnCurve();
+
+	// プレイヤーがカメラの視界内に収まるように制限する
+	void RestrictPlayerInsideCameraView();
+
+	// プレイヤーがカメラに追従する
+	void UpdatePlayerFollowCamera();
+
+	// カメラの中に入っているか
+	bool IsInCameraView(const Vector3& worldPos);
 
 	// スプライトコモン
 	SpriteCommon* spriteCommon = nullptr;
@@ -112,7 +148,47 @@ private:
 	// スカイボックス
 	std::unique_ptr<Skybox> skybox_ = nullptr;
 
+	// フェード演出管理
+	std::unique_ptr<FadeManager> fadeManager_;
+
 	// 複数の敵を管理するためのコンテナ
 	std::vector<std::unique_ptr<Enemy>> enemies_;
+
+	// カメラマネージャー
+	std::unique_ptr<CameraManager> cameraManager_;
+
+	CameraMode cameraMode_ = CameraMode::DynamicFollow;
+
+	// --- スタート演出用 ---
+	bool isStartCameraEasing_ = true;
+	float startCameraTimer_ = 0.0f;
+	const float startCameraDuration_ = 5.0f;
+	Vector3 startCameraPos_ = { 70.0f,-10.0f, -20.0f };
+	Vector3 startCameraRot_ = { 0.0f, 0.0f, 0.0f };
+	Vector3 endCameraPos_ = { 0.0f, 1.0f, -10.0f };
+	Vector3 endCameraRot_ = { 0.1f, 0.0f, 0.0f };
+
+	std::unique_ptr<Object3d> BackToTitle;
+
+	WorldTransform textTitle;
+
+	// カーブ座標リスト
+	std::vector<Vector3> curvePoints_;
+	// カーブ進行度（0.0～1.0）
+	float curveProgress_ = 0.0f;
+	// カーブの現在インデックス
+	size_t curveIndex_ = 0;
+	// プレイヤー移動速度
+	float curveSpeed_ = 0.004f; // 1フレームあたりの進行度
+
+	float gameOverTimer_ = 2.0f;
+
+	bool isGameOver_ = false;
+
+	bool fadeStarted_ = false;
+
+	std::unique_ptr<Camera> camera_;
+
+	bool isEnd = false;
 };
 

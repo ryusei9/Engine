@@ -670,6 +670,7 @@ void ParticleManager::CreateMaterialData()
 
 void ParticleManager::DrawImGui()
 {
+#ifdef USE_IMGUI
 	ImGui::Begin("ParticleManager");
 	if (ImGui::Button(useBillboard ? "Disable Billboard" : "Enable Billboard"))
 	{
@@ -686,6 +687,7 @@ void ParticleManager::DrawImGui()
 	}*/
 
 	ImGui::End(); // ウィンドウの終了
+#endif
 }
 
 void ParticleManager::SetParticleType(ParticleType type)

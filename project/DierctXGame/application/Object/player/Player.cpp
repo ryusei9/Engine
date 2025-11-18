@@ -23,7 +23,7 @@ void Player::Initialize()
 	// プレイヤーのワールド変換を初期化
 	worldTransform_.scale_ = { 1.0f,1.0f,1.0f };
 	worldTransform_.rotate_ = { 0.0f,0.0f,0.0f };
-	worldTransform_.translate_ = { 0.0f,1.0f,0.0f };
+	worldTransform_.translate_ = { 0.0f,0.0f,0.0f };
 
 	// プレイヤーのカメラを取得
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
@@ -52,17 +52,17 @@ void Player::Initialize()
 
 void Player::Update()
 {// プレイヤーの更新
-	if (!isAlive_) {
-		respawnTimer_ -= 1.0f / 60.0f;
-		if (respawnTimer_ <= 0.0f) {
-			// 復活
-			isAlive_ = true;
-			worldTransform_.translate_ = { 0.0f, 0.0f, 0.0f }; // 初期位置に戻す
-			hp_ = 1;
-			hasPlayedDeathParticle_ = false;
-		}
-		return; // 死亡中は何もしない
-	}
+	//if (!isAlive_) {
+	//	respawnTimer_ -= 1.0f / 60.0f;
+	//	if (respawnTimer_ <= 0.0f) {
+	//		// 復活
+	//		isAlive_ = true;
+	//		worldTransform_.translate_ = { 0.0f, 0.0f, 0.0f }; // 初期位置に戻す
+	//		hp_ = 1;
+	//		hasPlayedDeathParticle_ = false;
+	//	}
+	//	return; // 死亡中は何もしない
+	//}
 	BaseCharacter::Update();
 
 	// 弾の削除
@@ -84,8 +84,10 @@ void Player::Update()
 	}
 
 	// プレイヤーの移動
-	Move();
-	Attack();
+	if (controlEnabled_) {
+		Move();
+		Attack();
+	}
 	worldTransform_.Update();
 
 	
@@ -201,12 +203,14 @@ void Player::OnCollision(Collider* other)
 }
 
 void Player::DrawImGui() {
+#ifdef USE_IMGUI
 	object3d_->DrawImGui();
 	ImGui::Begin("Player Info");
 	ImGui::Text("Charge Time: %.2f seconds", chargeTime_);
 	ImGui::Text("Is Charging: %s", isCharging_ ? "Yes" : "No");
 	ImGui::Text("Charge Ready: %s", chargeReady_ ? "Yes" : "No");
 	ImGui::End();
+#endif
 }
 
 Vector3 Player::GetCenterPosition() const

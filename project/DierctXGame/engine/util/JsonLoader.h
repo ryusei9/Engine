@@ -16,6 +16,11 @@ struct EnemySpawnData {
     Vector3 rotation;   // 回転
 };
 
+struct CurveData {
+    std::string fileName;
+	std::vector<Vector3> points;
+};
+
 /// <summary>
 /// Jsonファイルを読み込むクラス
 /// </summary>

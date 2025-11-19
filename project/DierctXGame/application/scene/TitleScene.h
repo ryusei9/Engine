@@ -79,5 +79,7 @@ private:
 	Vector3 titleGuideScale = { 0.232f, 0.232f, 0.232f };
 
 	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
+
+	bool isGameStart_ = false;
 };
 

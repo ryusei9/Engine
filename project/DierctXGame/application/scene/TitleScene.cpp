@@ -41,7 +41,8 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	fadeManager_ = std::make_unique<FadeManager>();
 	fadeManager_->Initialize();
-	
+
+	fadeManager_->FadeOutStart(0.02f);
 
 	titleGuide_ = std::make_unique<Object3d>();
 	titleGuide_->Initialize("titleGuide.obj");
@@ -55,9 +56,10 @@ void TitleScene::Update()
 	// エンターキーでゲームシーンに切り替える
 	if (input->TriggerKey(DIK_SPACE))
 	{
+		isGameStart_ = true;
 		fadeManager_->FadeInStart(0.02f);
 	}
-	if(fadeManager_->GetFadeState() == FadeManager::EffectState::Finish)
+	if(fadeManager_->GetFadeState() == FadeManager::EffectState::Finish && isGameStart_)
 	{
 		SetSceneNo(GAMEPLAY);
 	}

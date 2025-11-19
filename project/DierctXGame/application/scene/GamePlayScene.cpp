@@ -6,6 +6,7 @@
 #include "Inverse.h"
 #include <iostream>
 #include <Multiply.h>
+#include <cmath>
 void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
 	sprite = std::make_unique<Sprite>();
@@ -103,10 +104,24 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	cameraManager_->SetCameraRotation(startCameraRot_);
 
 	gameOverTimer_ = 2.0f;
+
+	gameClearText_ = std::make_unique<Object3d>();
+	gameClearText_->Initialize("StageClear.obj");
 	
+	gameClearTextTransform_.Initialize();
+	gameClearTextTransform_.scale_ = Vector3(0.528f, 0.528f, 0.528f);
+	gameClearTextTransform_.rotate_.x = -1.694f;
+
+	pressSpaceKeyText_ = std::make_unique<Object3d>();
+	pressSpaceKeyText_->Initialize("PressSpaceKey.obj");
+
+	pressSpaceKeyTransform_.Initialize();
+	pressSpaceKeyTransform_.scale_ = Vector3(0.4f, 0.4f, 0.4f);
+	pressSpaceKeyTransform_.rotate_.x = -1.694f;
 #ifdef _DEBUG
 	//isStartCameraEasing_ = false; // デバッグ時はスタート演出をスキップ
 	//cameraMode_ = CameraMode::Free;
+	//isGameClear_ = true;
 #endif
 }
 
@@ -143,6 +158,8 @@ void GamePlayScene::Update()
 			fadeStarted_ = true;
 		}
 	}
+	// ゲームクリア時の更新
+	UpdateGameClear();
 	// ゲームオーバーじゃないとき
 	if (!isGameOver_) {
 		// プレイヤーの更新
@@ -155,7 +172,6 @@ void GamePlayScene::Update()
 			RestrictPlayerInsideCameraView();
 		}
 	}
-
 
 	//enemy_->SetPlayer(player_.get());
 	// 敵の更新
@@ -186,6 +202,25 @@ void GamePlayScene::Update()
 					bullet->SetPosition(bulletPos);
 				}
 			}
+		}
+	}
+
+	if (g_gameClearTextVisible && gameClearText_) {
+		// カメラ位置を取得して Y を +1.2 する
+		Camera* cam = cameraManager_->GetMainCamera();
+		if (cam) {
+			Vector3 camPos = cam->GetTranslate();
+			gameClearTextTransform_.translate_.x = camPos.x;
+			gameClearTextTransform_.translate_.y = camPos.y + 0.6f;
+			gameClearTextTransform_.translate_.z = camPos.z + 5.0f;
+
+			pressSpaceKeyTransform_.translate_ = camPos + Vector3(0.0f, -0.6f, 5.0f);
+
+			gameClearText_->SetWorldTransform(gameClearTextTransform_);
+			pressSpaceKeyText_->SetWorldTransform(pressSpaceKeyTransform_);
+
+			gameClearText_->Update();
+			pressSpaceKeyText_->Update();
 		}
 	}
 
@@ -220,6 +255,9 @@ void GamePlayScene::Update()
 		cameraManager_->MoveTargetAndCamera(player_->GetWorldTransform(), Vector3{ 0.0f,1.0f,-10.0f });
 		cameraManager_->LookAtTarget(player_->GetPosition());
 		break;
+	case CameraMode::centerPlayer:
+		//cameraManager_->SetCameraPosition(player_->GetWorldTransform().translate_ + Vector3{ 0.0f,1.0f,-10.0f });
+		cameraManager_->LookAtTarget(player_->GetPosition(),true);
 	}
 
 	// スタート演出カメラ初期化
@@ -235,7 +273,10 @@ void GamePlayScene::Update()
 		//UpdateCameraOnCurve();
 	}
 
-	cameraManager_->Update();
+	// 通常のカメラ更新（ゲームクリア時にカメライージング中なら上で更新済み）
+	if (!g_gameClearCameraMoving) {
+		cameraManager_->Update();
+	}
 	Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
 
 	// スプライトの更新
@@ -325,6 +366,11 @@ void GamePlayScene::Draw()
 	if (!isStartCameraEasing_) {
 		//BackToTitle->Draw();
 	}
+
+	if (g_gameClearTextVisible && gameClearText_) {
+		gameClearText_->Draw();
+		pressSpaceKeyText_->Draw();
+	}
 	/*------skyboxの描画------*/
 	skybox_->DrawSettings();
 	skybox_->Draw();
@@ -357,6 +403,10 @@ void GamePlayScene::DrawImGui()
 	}
 	ImGui::SliderFloat3("text Position", &textTitle.translate_.x, -10.0f, 10.0f);
 	ImGui::SliderFloat3("text rotation", &textTitle.rotate_.x, -3.14f, 3.14f);
+
+	ImGui::SliderFloat3("clear Text Position", &gameClearTextTransform_.translate_.x, -10.0f, 10.0f);
+	ImGui::SliderFloat3("clear Text rotation", &gameClearTextTransform_.rotate_.x, -3.14f, 3.14f);
+	ImGui::SliderFloat3("clear Text Scale", &gameClearTextTransform_.scale_.x, 0.1f, 10.0f);
 	// レベルデータから生成したオブジェクトのImGui調整
 	DrawImGuiImportObjectsFromJson();
 	ImGui::End();
@@ -568,7 +618,8 @@ void GamePlayScene::UpdateCameraOnCurve()
         if (curveIndex_ >= curvePoints_.size() - 1) {
             // 最終座標で停止
             cameraManager_->SetCameraPosition(curvePoints_.back());
-			isEnd = true;
+			//isEnd = true;
+			isGameClear_ = true;
             return;
         }
 
@@ -630,7 +681,7 @@ void GamePlayScene::RestrictPlayerInsideCameraView() {
 		newWorldPos.x / newWorldPos.w,
 		newWorldPos.y / newWorldPos.w,
 		newWorldPos.z / newWorldPos.w
-	};
+	};  
 	player_->SetPosition(clampedWorldPos);
 }
 
@@ -639,8 +690,9 @@ void GamePlayScene::UpdatePlayerFollowCamera()
 	Vector3 prevCamPos = cameraManager_->GetMainCamera()->GetTranslate();
 
 	if(!isStartCameraEasing_){
+		if (isGameClear_) return;
 		// カメラをカーブに沿って移動
-		UpdateCameraOnCurve();
+		UpdateCameraOnCurve ();
 	}
 	Camera* cam = cameraManager_->GetMainCamera();
 	Vector3 camPos = cam->GetTranslate();
@@ -688,4 +740,123 @@ bool GamePlayScene::IsInCameraView(const Vector3& worldPos)
 	return (ndc.x >= -1.0f && ndc.x <= 1.0f &&
 		ndc.y >= -1.0f && ndc.y <= 1.0f &&
 		ndc.z >= 0.0f && ndc.z <= 1.0f);
+}
+
+void GamePlayScene::UpdateGameClear()
+{
+	// ゲームクリア時の処理
+	if (isGameClear_) {
+		// プレイヤー操作を無効化
+		player_->SetPlayerControlEnabled(false);
+
+		// カメラはクリア演出用に制御する
+		//cameraMode_ = CameraMode::DynamicFollow;
+
+		// 初回に待機を開始
+		if (!g_gameClearCameraWaiting && !g_gameClearCameraMoving && !g_gameClearPlayerLaunched && !g_gameClearFadeStarted) {
+			g_gameClearCameraWaiting = true;
+			g_gameClearWaitTimer = 2.0f; // 2秒待つ
+		}
+
+		// 待機タイマー処理
+		if (g_gameClearCameraWaiting) {
+			g_gameClearWaitTimer -= 1.0f / 60.0f;
+			if (g_gameClearWaitTimer <= 0.0f) {
+				
+				g_gameClearCameraWaiting = false;
+				g_gameClearCameraMoving = true;
+				g_gameClearMoveTimer = 0.0f;
+				// カメラの開始位置と目標位置を設定
+				g_gameClearCamStartPos = cameraManager_->GetMainCamera()->GetTranslate();
+				g_gameClearCamTargetPos = player_->GetPosition() + Vector3{ 0.0f, 0.0f, -5.0f };
+			}
+		}
+		// カメラ移動（イージング）
+		else if (g_gameClearCameraMoving) {
+			g_gameClearMoveTimer += 1.0f / 60.0f;
+			float t = std::clamp(g_gameClearMoveTimer / g_gameClearMoveDuration, 0.0f, 1.0f);
+			// easeInOutCubic
+			float easeT;
+			if (t < 0.5f) {
+				easeT = 4.0f * t * t * t;
+			}
+			else {
+				float p = (t - 1.0f);
+				easeT = 1.0f + 4.0f * p * p * p;
+			}
+			Vector3 pos = {
+				std::lerp(g_gameClearCamStartPos.x, g_gameClearCamTargetPos.x, easeT),
+				std::lerp(g_gameClearCamStartPos.y, g_gameClearCamTargetPos.y, easeT),
+				std::lerp(g_gameClearCamStartPos.z, g_gameClearCamTargetPos.z, easeT)
+			};
+			// カメラはクリア演出用に制御する
+			cameraMode_ = CameraMode::centerPlayer;
+
+			cameraManager_->SetCameraPosition(pos);
+			// カメラ更新とデフォルトカメラ書き込み（見た目に即座に反映）
+			cameraManager_->Update();
+			Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
+
+			// スペースキーでプレイヤー発射開始（テキストはスペース押下で消す）
+			if (input->TriggerKey(DIK_SPACE) && !g_gameClearPlayerLaunched) {
+				g_gameClearPlayerLaunched = true;
+				// 表示中ならテキストを消す（押したタイミングで即時非表示）
+				g_gameClearTextVisible = false;
+			}
+
+			// イージング完了時の処理
+			if (t >= 1.0f) {
+				g_gameClearCameraMoving = false;
+				// 最終位置を確定
+				cameraManager_->SetCameraPosition(g_gameClearCamTargetPos);
+
+				// イージング終了直後にテキストを表示する
+				// カメラ位置から Y +1.2 の位置に表示
+				g_gameClearTextVisible = true;
+
+				// 即時に位置を設定しておく（Draw 側でも毎フレーム更新します）
+				if (gameClearText_) {
+					Camera* cam = cameraManager_->GetMainCamera();
+					if (cam) {
+						Vector3 camPos = cam->GetTranslate();
+						gameClearText_->SetTranslate(camPos + Vector3{ 0.0f, 1.2f, 0.0f });
+						gameClearText_->Update();
+					}
+				}
+			}
+		}
+	}
+
+	// プレイヤー発射（ゲームクリア中にSPACEで発射した場合の挙動）
+	if (g_gameClearPlayerLaunched) {
+		// カメラはクリア演出用に制御する
+		cameraMode_ = CameraMode::DynamicFollow;
+		// プレイヤーを +X 方向に飛ばす（簡易的に毎フレーム位置更新）
+		Vector3 pos = player_->GetPosition();
+		const float dt = 1.0f / 60.0f;
+		pos.x += g_gameClearPlayerLaunchSpeed * dt;
+		player_->SetPosition(pos);
+
+		// フェード開始を1秒遅延させる
+		static float s_fadeDelayTimer = 0.0f;
+		static bool s_fadeTimerInitialized = false;
+
+		// 初期化フラグが無ければ初期化
+		if (!s_fadeTimerInitialized) {
+			s_fadeDelayTimer = 1.0f;
+			s_fadeTimerInitialized = true;
+		}
+
+		// タイマーを進め、0以下になったらフェード開始
+		if (!g_gameClearFadeStarted) {
+			s_fadeDelayTimer -= dt;
+			if (s_fadeDelayTimer <= 0.0f) {
+				g_gameClearFadeStarted = true;
+				// フェードを開始してタイトルへ戻るコールバック（重複防止済み）
+				fadeManager_->FadeInStart(0.02f, [this]() {
+					SetSceneNo(TITLE);
+					});
+			}
+		}
+	}
 }

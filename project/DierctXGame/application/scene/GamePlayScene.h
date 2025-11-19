@@ -64,7 +64,8 @@ public:
 	enum class CameraMode {
 		Free,
 		FollowPlayer,
-		DynamicFollow
+		DynamicFollow,
+		centerPlayer
 	};
 private:
 
@@ -85,6 +86,9 @@ private:
 
 	// カメラの中に入っているか
 	bool IsInCameraView(const Vector3& worldPos);
+
+	// ゲームクリアの演出更新
+	void UpdateGameClear();
 
 	// スプライトコモン
 	SpriteCommon* spriteCommon = nullptr;
@@ -190,5 +194,32 @@ private:
 	std::unique_ptr<Camera> camera_;
 
 	bool isEnd = false;
+
+	// 仮ゲームクリア
+	bool isGameClear_ = false;
+
+	// ゲームクリア時のカメラ遷移・発射制御用
+	bool g_gameClearCameraWaiting = false;
+	float g_gameClearWaitTimer = 0.0f;
+
+	bool g_gameClearCameraMoving = false;
+	float g_gameClearMoveTimer = 0.0f;
+	const float g_gameClearMoveDuration = 2.0f;
+	Vector3 g_gameClearCamStartPos = { 0.0f, 0.0f, 0.0f };
+	Vector3 g_gameClearCamTargetPos = { 0.0f, 0.0f, 0.0f };
+
+	bool g_gameClearPlayerLaunched = false;
+	bool g_gameClearFadeStarted = false;
+	const float g_gameClearPlayerLaunchSpeed = 16.0f; // 単位: ワールド単位 / 秒
+
+	std::unique_ptr<Object3d> gameClearText_;
+
+	std::unique_ptr<Object3d> pressSpaceKeyText_;
+	// ゲームクリア演出用テキストの表示フラグ
+	bool g_gameClearTextVisible = false;
+
+	WorldTransform gameClearTextTransform_;
+
+	WorldTransform pressSpaceKeyTransform_;
 };
 

@@ -114,7 +114,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CameraManager.cpp" />
+    <ClCompile Include="DierctXGame\engine\manager\CameraManager.cpp" />
     <ClCompile Include="DierctXGame\application\Object\player\PlayerChargeBullet.cpp" />
     <ClCompile Include="DierctXGame\application\scene\GameOverScene.cpp" />
     <ClCompile Include="DierctXGame\engine\posteffect\GrayscalePostEffect.cpp" />
@@ -176,7 +176,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\application\Object\player\PlayerBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CameraManager.h" />
+    <ClInclude Include="DierctXGame\engine\manager\CameraManager.h" />
     <ClInclude Include="DierctXGame\application\Object\base\BaseCharacter.h" />
     <ClInclude Include="DierctXGame\application\Object\collider\Collider.h" />
     <ClInclude Include="DierctXGame\application\Object\enemy\EnemyAttack.h" />

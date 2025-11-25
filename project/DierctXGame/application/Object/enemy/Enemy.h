@@ -57,18 +57,18 @@ public:
 	/*------セッター------*/
 
 	// プレイヤーへのポインタを設定
-	void SetPlayer(Player* player) { player_ = player; } // プレイヤーへのポインタを設定
+	void SetPlayer(Player* player) { player_ = player; }
 
-	
+	// エネミー操作有効化フラグの取得
+	bool GetControlEnabled() const { return controlEnabled_; }
 
-	bool GetControlEnabled() const { return controlEnabled_; } // エネミー操作有効化フラグの取得
+	// エネミー操作有効化フラグの設定
+	void SetControlEnabled(bool enabled) { controlEnabled_ = enabled; } 
 
-	void SetControlEnabled(bool enabled) { controlEnabled_ = enabled; } // エネミー操作有効化フラグの設定
-
+	// コライダーIDの取得
 	int GetColliderId() const { return colliderId_; }
 
-	Vector3 GetInitialPosition() const {return initialPosition_;}
-
+	// Z軸の座標を設定
 	void SetZ(float z) {worldTransform_.translate_.z = z;}
 
 private:
@@ -107,13 +107,14 @@ private:
 	// 敵の攻撃パターン
 	std::unique_ptr<EnemyAttack> attack_;
 
-	Player* player_ = nullptr; // プレイヤーへのポインタ
+	// プレイヤーへのポインタ
+	Player* player_ = nullptr;
 
 	// 演出用エネミーが動かないフラグ
 	bool controlEnabled_ = false;
 
+	// コライダーID
 	int colliderId_ = -1;
 
-	Vector3 initialPosition_ = { 0.0f, 0.0f, 0.0f };
 };
 

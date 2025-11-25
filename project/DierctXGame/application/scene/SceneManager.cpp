@@ -16,7 +16,7 @@ void SceneManager::Initialize(WinApp* winApp)
 	directXCommon_ = DirectXCommon::GetInstance();
 	winApp_ = winApp;
 
-	// 初期シーンを設定（例としてDebugSceneを設定）
+	// 初期シーンを設定
 	nowScene_ = std::make_unique<TitleScene>();
 	nowScene_->Initialize(directXCommon_, winApp_);
 
@@ -68,10 +68,4 @@ void SceneManager::DrawImGui()
 	if (nowScene_) {
 		nowScene_->DrawImGui();
 	}
-	/*ImGui::Begin("DxCommon");
-	ImGui::SliderFloat("Dissolve Threshold", &directXCommon_->GetDissolveParam()->threshold, 0.0f, 1.0f);
-	ImGui::SliderFloat("Edge Width", &directXCommon_->GetDissolveParam()->edgeWidth, 0.0f, 0.2f);
-	ImGui::SliderFloat("Edge Strength", &directXCommon_->GetDissolveParam()->edgeStrength, 0.0f, 5.0f);
-	ImGui::ColorEdit3("Edge Color", directXCommon_->GetDissolveParam()->edgeColor);
-	ImGui::End();*/
 }

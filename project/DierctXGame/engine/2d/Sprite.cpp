@@ -10,9 +10,17 @@ void Sprite::Initialize(DirectXCommon* dxCommon, std::string textureFilePath)
 {
 	dxCommon_ = dxCommon;
 	this->filePath = textureFilePath; // メンバー変数に値を設定
+	
+	// 頂点データの作成
 	CreateVertexData();
+
+	// Materialデータの作成
 	CreateMaterialData();
+
+	// WVPデータの作成
 	CreateWVPData();
+
+	// テクスチャサイズをイメージに合わせる
 	AdjustTextureSize();
 }
 

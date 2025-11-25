@@ -76,11 +76,12 @@ private:
 	
 	float radius_ = 0.1f; // 半径
 	
+	// リスポーンタイマー
 	float respawnTimer_ = 0.0f;
+
 	// プレイヤーのシリアルナンバー
 	uint32_t serialNumber_ = 0;
-	// プレイヤーのワールド変換
-	//Transform worldTransform_;
+	
 	// プレイヤーのカメラ
 	Camera* camera_ = nullptr;
 
@@ -88,13 +89,16 @@ private:
 
 	ParticleManager* particleManager_; // パーティクルマネージャー
 
-	// メンバ変数
+	// スラスターパーティクルエミッター
 	std::unique_ptr<ParticleEmitter> thrusterEmitter_;
 
+	// 爆発パーティクルエミッター
 	std::unique_ptr<ParticleEmitter> explosionEmitter_;
 
+	// プレイヤー死亡時にパーティクルを一度だけ再生するためのフラグ
 	bool hasPlayedDeathParticle_ = false;
 
+	// チャージショット関連
 	float chargeTime_ = 0.0f;
 	bool isCharging_ = false;
 	bool chargeReady_ = false;

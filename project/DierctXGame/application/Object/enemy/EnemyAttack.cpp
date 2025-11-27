@@ -132,12 +132,7 @@ void EnemyAttack::Update(Enemy* enemy, Player* player, std::list<std::unique_ptr
 		patternTimer_ = 0.0f;
 		return;
 	}
-	// パターン2→待機
-	/*if (currentPattern_ == 1 && patternTimer_ >= 10.0f) {
-		SetPattern(3);
-		patternTimer_ = 0.0f;
-		return;
-	}*/
+	
 	// パターン3→待機（突進しきったら）
 	if (currentPattern_ == 2) {
 		if (!pattern3Rushed_ && enemy->GetWorldTransform().translate_.x < -4.0f) {

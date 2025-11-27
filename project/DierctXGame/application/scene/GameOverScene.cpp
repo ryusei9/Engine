@@ -3,26 +3,27 @@
 
 void GameOverScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
-	// 背景スプライトの生成
-	//backgroundSprite_ = std::make_unique<Sprite>();
-	//backgroundSprite_->Initialize(directXCommon, "resources/Black.png");
-
+	// インプットの初期化
 	input = std::make_unique<Input>();
 	input->Initialize(winApp);
 
+	// フェードマネージャーの初期化
 	fadeManager_ = std::make_unique<FadeManager>();
 	fadeManager_->Initialize();
 	fadeManager_->FadeOutStart(0.02f);
 
+	// オブジェクト3Dの初期化
 	gameOverText_ = std::make_unique<Object3d>();
 	gameOverText_->Initialize("GameOver.obj");
 
+	// カメラマネージャーの初期化
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(Object3dCommon::GetInstance()->GetDefaultCamera());
 
 	cameraManager_->SetCameraPosition({ 0.0f,1.0f,-10.0f });
 	cameraManager_->SetCameraRotation({ 0.1f,0.0f,0.0f });
 
+	// ワールド変換の初期化
 	gameOverTextTransform_.Initialize();
 	gameOverTextTransform_.translate_ = { 0.0f,1.4f,0.0f };
 	gameOverTextTransform_.rotate_ = { 0.0f,1.6f,0.0f };
@@ -31,15 +32,17 @@ void GameOverScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	gameOverGuideTransform_.translate_ = { 0.0f,-2.5f,4.0f };
 	gameOverGuideTransform_.rotate_ = { 0.0f,1.6f,0.0f };
 
+	// ガイドオブジェクトの初期化
 	gameOverGuide_ = std::make_unique<Object3d>();
 	gameOverGuide_->Initialize("GameOverGuide.obj");
 	
-
+	// skydomeの初期化
 	skydome_ = std::make_unique<Object3d>();
 	skydome_->Initialize("skydome.obj");
 	skydome_->SetPointLight(0.0f);
 	skydomeTransform_.Initialize();
 
+	// プレイヤーオブジェクトの初期化
 	player_ = std::make_unique<Object3d>();
 	player_->Initialize("Player.obj");
 
@@ -58,22 +61,26 @@ void GameOverScene::Update()
 	{
 		returnToTitle_ = true;
 	}
-
+	// フェード処理
 	if (returnToTitle_ && !fadeStarted_) {
 		fadeManager_->FadeInStart(0.02f, [this]() {
 			SetSceneNo(TITLE);
 			});
 		fadeStarted_ = true;
 	}
-	//backgroundSprite_->Update();
+	
+	// フェードマネージャーの更新
 	fadeManager_->Update();
 
+	// オブジェクト3Dの更新
 	gameOverText_->SetWorldTransform(gameOverTextTransform_);
 	gameOverText_->Update();
 
+	// skydomeの更新
 	skydome_->SetWorldTransform(skydomeTransform_);
 	skydome_->Update();
 
+	// ガイドオブジェクトの更新
 	gameOverGuide_->SetWorldTransform(gameOverGuideTransform_);
 	gameOverGuide_->Update();
 
@@ -83,17 +90,18 @@ void GameOverScene::Update()
 	// ゆっくり回転
 	playerTransform_.rotate_.x += 0.02f;    // X軸回転（調整可）
 	
-
+	// プレイヤーオブジェクトの更新
 	player_->SetWorldTransform(playerTransform_);
 	player_->Update();
 
+	// カメラマネージャーの更新
 	cameraManager_->Update();
 	Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
 }
 
 void GameOverScene::Draw()
 {
-	
+	/*------3Dオブジェクトの更新------*/
 	Object3dCommon::GetInstance()->DrawSettings();
 	gameOverText_->Draw();
 	gameOverGuide_->Draw();
@@ -101,7 +109,6 @@ void GameOverScene::Draw()
 	skydome_->Draw();
 	/*------スプライトの更新------*/
 	SpriteCommon::GetInstance()->DrawSettings();
-	//backgroundSprite_->Draw();
 	fadeManager_->Draw();
 }
 
@@ -111,6 +118,7 @@ void GameOverScene::Finalize()
 
 void GameOverScene::DrawImGui()
 {
+	// ImGui描画
 #ifdef USE_IMGUI
 	ImGui::Begin("GameOverScene");
 	ImGui::DragFloat3("text_translate_", &gameOverTextTransform_.translate_.x);

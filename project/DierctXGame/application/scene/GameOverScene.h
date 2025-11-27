@@ -7,24 +7,28 @@
 #include <Input.h>
 #include <Player.h>
 
+/// <summary>
+/// ゲームオーバーシーン
+/// </summary>
 class GameOverScene : public BaseScene
 {
 	public:
 	// 初期化
 	void Initialize(DirectXCommon* directXCommon, WinApp* winApp) override;
+
 	// 更新
 	void Update() override;
+
 	// 描画
 	void Draw() override;
+
 	// 終了
 	void Finalize() override;
+
 	// ImGui描画
 	void DrawImGui() override;
 
 private:
-	// 背景スプライト
-	//std::unique_ptr<Sprite> backgroundSprite_;
-
 	// 入力の初期化
 	std::unique_ptr<Input> input = nullptr;
 	
@@ -34,10 +38,13 @@ private:
 	// オブジェクト3D
 	std::unique_ptr<Object3d> gameOverText_;
 
+	// 3Dワールド変換
 	WorldTransform gameOverTextTransform_;
 
+	// ガイドオブジェクト
 	std::unique_ptr<Object3d> gameOverGuide_;
 
+	// ガイドワールド変換
 	WorldTransform gameOverGuideTransform_;
 
 	// カメラマネージャー
@@ -46,14 +53,19 @@ private:
 	// skydome
 	std::unique_ptr<Object3d> skydome_ = nullptr;
 
+	// skydomeワールド変換
 	WorldTransform skydomeTransform_;
 
+	// フェード開始フラグ
 	bool fadeStarted_ = false;
 
+	// タイトルに戻るフラグ
 	bool returnToTitle_ = false;
 
+	// プレイヤーオブジェクト
 	std::unique_ptr<Object3d> player_ = nullptr;
 
+	// プレイヤーワールド変換
 	WorldTransform playerTransform_;
 
 };

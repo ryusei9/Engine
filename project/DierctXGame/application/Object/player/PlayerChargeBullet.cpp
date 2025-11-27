@@ -1,9 +1,11 @@
 #include "PlayerChargeBullet.h"
 #include <CollisionTypeIdDef.h>
 
+// 静的メンバ変数の初期化
 uint32_t PlayerChargeBullet::nextSerialNumber_ = 1;
 
 PlayerChargeBullet::PlayerChargeBullet() {
+	// シリアルナンバーを設定
     serialNumber_ = nextSerialNumber_++;
 }
 
@@ -24,5 +26,6 @@ void PlayerChargeBullet::Update() {
 }
 
 void PlayerChargeBullet::Draw() {
+	// チャージ弾専用の描画処理があれば追加
     PlayerBullet::Draw();
 }

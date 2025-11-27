@@ -12,108 +12,123 @@
 #include <imgui.h>
 #include "DirectXCommon.h"
 
+//
+// Object3d
+// - 単一の 3D オブジェクトを表すクラス実装。
+// - OBJ ファイルの読み込み・頂点/マテリアルバッファ作成、描画、GUI 操作を含む。
+// - カメラ／ライト用の定数バッファも保持し、必要時に GPU に渡す。
+// - 注意: ファイル入出力やメモリマップは失敗時に assert で停止する実装になっているため、
+//         実行環境ではファイルの存在や DirectX の初期化が前提。
+//
+
 void Object3d::Initialize(const std::string& fileName)
 {
-	// 引数で受け取ってメンバ変数に記録する
-	//object3dCommon_ = object3dCommon;
-	//// モデル読み込み
+	// ファイル名からモデルを読み込み、GPU に転送する初期化処理を行う。
+	// 呼び出し側: シーンの初期化時など。resources ディレクトリ下のファイル名を期待する。
+	// 副作用:
+	//  - vertexResource / materialResource 等の Upload バッファを作成して Map する
+	//  - TextureManager によるテクスチャ読み込みを行う
+	//  - Skybox 用テクスチャのハンドルをキャッシュする
+	//  - worldTransform を初期化し、カメラ参照を取得する
+	//  - カメラ/ポイントライト/スポットライト用バッファを作成する
+	//
 	modelData = LoadObjFile("resources", fileName);
 	CreateVertexData();
 	CreateMaterialData();
 	CreateDirectionalLightData();
-	// .objの参照しているテクスチャファイル読み込み
-	TextureManager::GetInstance()->LoadTexture(modelData.material.textureFilePath);
-	
-	filePath_ = "resources/skybox.dds";
 
+	// OBJ が参照するテクスチャを事前登録
+	TextureManager::GetInstance()->LoadTexture(modelData.material.textureFilePath);
+
+	// デフォルトの skybox テクスチャを読み込み、GPU ハンドルを取得して保持
+	filePath_ = "resources/skybox.dds";
 	TextureManager::GetInstance()->LoadTexture(filePath_);
-	// Skybox用のGPUハンドルを取得して保持
 	skyboxGpuHandle_ = TextureManager::GetInstance()->GetSrvHandleGPU(filePath_);
 
-	// 読み込んだテクスチャの番号を取得
+	// モデルマテリアルの SRV ハンドルを保持（描画時に使う）
 	modelData.material.gpuHandle = TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureFilePath);
-	// Transform変数を作る
+
+	// ワールド変換の初期化（位置/回転/スケール）
 	worldTransform.Initialize();
-	//cameraTransform = { {1.0f,1.0f,1.0f},{0.3f,0.0f,0.0f},{0.0f,4.0f,-10.0f} };
+
+	// デフォルトカメラの参照を取得
 	this->camera = Object3dCommon::GetInstance()->GetDefaultCamera();
 
-	// カメラリソースの作成
+	// カメラ・ライト用の GPU 定数バッファを作成
 	CreateCameraResource();
-	// ポイントライトの作成
 	CreatePointLightResource();
-	// スポットライトの作成
 	CreateSpotLightResource();
-	
 }
 
 void Object3d::Update()
 {
+	// ワールド変換の内部状態更新（行列再計算など）
+	// - 外部から worldTransform の translate/rotate/scale を変更したあとに呼ぶ
 	worldTransform.Update();
+
+	// カメラ / ライトのデータは必要に応じて ImGui 等で変更されるため、
+	// GPU バッファへ書き戻す処理は描画前または ImGui ボタン処理側で行う想定。
 }
 
 void Object3d::Draw()
 {
+	// 描画準備: 頂点バッファをバインドし、マテリアル CBV・テクスチャ SRV をルートに設定する
+	// 前提: Draw 呼び出し前に適切な PSO / RootSignature / DescriptorHeap が設定済みであること。
 
-	//// VBVを設定
+	// 頂点バッファビューをバインド
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-	//// マテリアルCBufferの場所を設定
 
-	//// 第一引数の0はRootParameter配列の0番目
+	// マテリアル用 CBV をルートに設定 (b0)
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 
+	// worldTransform の行列等をパイプラインにセット（ワールド行列等をマテリアルに反映）
 	worldTransform.SetPipeline();
 
-
-	// ディスクリプタヒープに関連付けられたハンドルを使用
+	// モデルのテクスチャ SRV をデスクリプタテーブルへ設定 (slot = 2 を想定)
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, modelData.material.gpuHandle);
 
-	// 平行光源
+	// ディレクショナルライト（CBV slot = 3）
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
+	// カメラ情報（CBV slot = 4）
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(4, cameraResource->GetGPUVirtualAddress());
 
-	// ポイントライト
+	// ポイントライト（CBV slot = 5）
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
 
-	// スポットライト
+	// スポットライト（CBV slot = 6）
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
 
-	if(skyboxGpuHandle_.ptr != 0) {
-		// スカイボックスのテクスチャをセット
+	// スカイボックスが設定されていれば SRV をセット (slot = 7)
+	if (skyboxGpuHandle_.ptr != 0) {
 		Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(7, skyboxGpuHandle_);
 	}
-	
-	// 3Dモデルが割り当てられていれば描画する
+
+	// モデルが外部管理 (ModelManager 経由) でセットされていればそれを使って描画
 	if (model) {
 		model->Draw();
 	}
-	//// 描画 (DrawCall)。3頂点で1つのインスタンス。
+
+	// 追加の DrawInstanced（fallback / 互換性のため）
+	// - model->Draw() が呼ばれた場合は二重描画にならないよう、用途に応じてどちらかを使うこと
 	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 }
 
 MaterialData Object3d::LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename)
 {
-	// 変数の宣言
-	// 構築するMaterialData
+	// MTL を読み込み、map_Kd を検出して MaterialData.textureFilePath を設定して返す
 	MaterialData materialData;
-	// ファイルから読んだ一行を格納するもの
 	std::string line;
-	// ファイルを開く
 	std::ifstream file(directoryPath + "/" + filename);
-	// 開けなかったら止める
 	assert(file.is_open());
 
 	while (std::getline(file, line)) {
 		std::string identifier;
 		std::istringstream s(line);
 		s >> identifier;
-
-		// identifierに応じた処理
 		if (identifier == "map_Kd") {
 			std::string textureFilename;
 			s >> textureFilename;
-
-			// 連結してファイルパスにする
 			materialData.textureFilePath = directoryPath + "/" + textureFilename;
 		}
 	}
@@ -122,133 +137,121 @@ MaterialData Object3d::LoadMaterialTemplateFile(const std::string& directoryPath
 
 ModelData Object3d::LoadObjFile(const std::string& directoryPath, const std::string& filename)
 {
-	// 変数の宣言
-	// 構築するModelData
+	// OBJ ファイルをパースして ModelData を構築する
+	// サポートするトークン: v, vt, vn, f, mtllib
 	ModelData modelData;
-	// 位置
 	std::vector<Vector4> positions;
-	// 法線
 	std::vector<Vector3> normals;
-	// テクスチャ座標
 	std::vector<Vector2> texcoords;
-	// ファイルから読んだ一行を格納するもの
 	std::string line;
 
-	// ファイルを開く
 	std::ifstream file(directoryPath + "/" + filename);
-	// 開けなかったら止める
 	assert(file.is_open());
 
 	while (std::getline(file, line)) {
 		std::string identifier;
 		std::istringstream s(line);
-		// 先頭の識別子を読む
 		s >> identifier;
 
-		// identifierに応じた処理
-		// 頂点位置
 		if (identifier == "v") {
+			// 頂点位置 (x,y,z) を読み込み、右手系->左手系補正のため X を反転して格納
 			Vector4 position;
 			s >> position.x >> position.y >> position.z;
 			position.x *= -1.0f;
 			position.w = 1.0f;
 			positions.push_back(position);
-			// 頂点テクスチャ座標
 		} else if (identifier == "vt") {
+			// テクスチャ座標 (u,v) を読み込み、V を反転して DirectX 形式に合わせる
 			Vector2 texcoord;
 			s >> texcoord.x >> texcoord.y;
 			texcoord.y = 1.0f - texcoord.y;
 			texcoords.push_back(texcoord);
-			// 頂点法線
 		} else if (identifier == "vn") {
+			// 法線 (x,y,z) を読み込み、X を反転して格納
 			Vector3 normal;
 			s >> normal.x >> normal.y >> normal.z;
 			normal.x *= -1.0f;
 			normals.push_back(normal);
-			// 面
 		} else if (identifier == "f") {
+			// 面 (三角形) の読み取り: 各頂点は "posIndex/uvIndex/normalIndex"
 			VertexData triangle[3];
-			// 面は三角形限定。その他は未対応
 			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
 				std::string vertexDefinition;
 				s >> vertexDefinition;
-				// 頂点の要素へのIndexは「位置/UV/法線」で格納されているので分解してIndexを取得する
 				std::istringstream v(vertexDefinition);
 				uint32_t elementIndices[3];
 				for (int32_t element = 0; element < 3; ++element) {
 					std::string index;
-					// /区切りでインデックスを読んでいく
 					std::getline(v, index, '/');
-					elementIndices[element] = std::stoi(index);
+					elementIndices[element] = std::stoi(index); // OBJ は 1 始まり
 				}
-				// 要素へのIndexから、実際の要素の値を取得して、頂点を構築していく
 				Vector4 position = positions[elementIndices[0] - 1];
 				Vector2 texcoord = texcoords[elementIndices[1] - 1];
 				Vector3 normal = normals[elementIndices[2] - 1];
-				/*VertexData vertex = { position,texcoord,normal };
-				modelData.vertices.push_back(vertex);*/
-				triangle[faceVertex] = { position,texcoord,normal };
+				triangle[faceVertex] = { position, texcoord, normal };
 			}
-			// 頂点を逆順で登録することで、回り順を逆にする
+			// 頂点の登録順を逆順にする（回り順を調整）
 			modelData.vertices.push_back(triangle[2]);
 			modelData.vertices.push_back(triangle[1]);
 			modelData.vertices.push_back(triangle[0]);
 		} else if (identifier == "mtllib") {
-			// materialTemplateLibraryファイルの名前を取得する
+			// マテリアルライブラリ参照を読み込む
 			std::string materialFilename;
 			s >> materialFilename;
-
-			// 基本的にobjファイルと同一階層にmtlは存在させるので、ディレクトリ名とファイル名を渡す
 			modelData.material = LoadMaterialTemplateFile(directoryPath, materialFilename);
 		}
 	}
+
 	return modelData;
 }
 
 void Object3d::CreateCameraResource()
 {
-	// カメラのリソースを作成
+	// カメラ情報用の定数バッファを作成して Map
 	cameraResource = CreateBufferResource(Object3dCommon::GetInstance()->GetDxCommon()->GetDevice(), sizeof(CameraForGPU));
 	cameraResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraData));
-	// カメラの初期位置
+	// 初期値として現在のカメラ位置をコピー
 	cameraData->worldPosition = camera->GetTranslate();
 }
 
 void Object3d::CreatePointLightResource()
 {
-	// ポイントライトのリソースを作成
+	// ポイントライト用定数バッファを作成して Map、デフォルト値をセットする
 	pointLightResource = CreateBufferResource(Object3dCommon::GetInstance()->GetDxCommon()->GetDevice(), sizeof(PointLight));
 	pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
-	// ポイントライトの初期位置
+
 	pointLightData->position = { 0.0f, 2.0f, 0.0f };
 	pointLightData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
 	pointLightData->intensity = 1.0f;
-	pointLightData->radius = 10.0f;					 // ポイントライトの有効範囲
-	pointLightData->decay = 1.0f;						 // ポイントライトの減衰率
+	pointLightData->radius = 10.0f;
+	pointLightData->decay = 1.0f;
+
+	// 書き込み終了後に Unmap（Upload ヒープの扱いはいくつかの実装で省略されるが明示的に行う）
 	pointLightResource->Unmap(0, nullptr);
 }
 
 void Object3d::CreateSpotLightResource()
 {
-	// スポットライトのリソースを作成
+	// スポットライト用定数バッファを作成して Map、デフォルト値をセットする
 	spotLightResource = CreateBufferResource(Object3dCommon::GetInstance()->GetDxCommon()->GetDevice(), sizeof(SpotLight));
 	spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));
-	// スポットライトの初期位置
+
 	spotLightData->position = { 0.0f, 2.0f, 0.0f };
 	spotLightData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
 	spotLightData->intensity = 4.0f;
 	spotLightData->direction = { 0.0f, -1.0f, 0.0f };
-	spotLightData->cosAngle = std::cos(std::numbers::pi_v<float> / 3.0f);	 // スポットライトの角度
-	spotLightData->cosFalloffStart = std::cos(std::numbers::pi_v<float> / 6.0f); // スポットライトの開始角度の余弦値
-	spotLightData->distance = 7.0f;					 // スポットライトの有効範囲
-	spotLightData->decay = 2.0f;						 // スポットライトの減衰率
+	spotLightData->cosAngle = std::cos(std::numbers::pi_v<float> / 3.0f);
+	spotLightData->cosFalloffStart = std::cos(std::numbers::pi_v<float> / 6.0f);
+	spotLightData->distance = 7.0f;
+	spotLightData->decay = 2.0f;
+
 	spotLightResource->Unmap(0, nullptr);
 }
 
 void Object3d::DrawImGui()
 {
 #ifdef USE_IMGUI
-	// ImGuiのウィンドウを作成
+	// ImGui によるデバッグ用 GUI（位置・回転・スケール、マテリアル/ライトパラメータの編集）
 	ImGui::Begin("Object3d");
 	ImGui::DragFloat3("position", &worldTransform.translate_.x, 0.01f);
 	ImGui::DragFloat3("rotation", &worldTransform.rotate_.x, 0.01f);
@@ -260,12 +263,12 @@ void Object3d::DrawImGui()
 	ImGui::DragFloat("intensity", &directionalLightData->intensity, 0.01f);
 	ImGui::SliderFloat("environmentCoefficient", &materialData->environmentCoefficient, 0.0f, 1.0f);
 
-	/*------ポイントライト------*/
+	// ポイントライト
 	ImGui::ColorEdit4("pointLightColor", &pointLightData->color.x);
 	ImGui::DragFloat3("pointLightPosition", &pointLightData->position.x, 0.01f);
 	ImGui::DragFloat("pointLightIntensity", &pointLightData->intensity, 0.01f);
 
-	/*------スポットライト------*/
+	// スポットライト
 	ImGui::ColorEdit4("spotLightColor", &spotLightData->color.x);
 	ImGui::DragFloat3("spotLightPosition", &spotLightData->position.x, 0.01f);
 	ImGui::DragFloat3("spotLightDirection", &spotLightData->direction.x, 0.01f);
@@ -275,58 +278,44 @@ void Object3d::DrawImGui()
 	ImGui::DragFloat("spotLightCosAngle", &spotLightData->cosAngle, 0.01f);
 	ImGui::DragFloat("spotLightCosFalloffStart", &spotLightData->cosFalloffStart, 0.01f);
 
-
-	// ウィンドウを閉じる
 	ImGui::End();
 #endif
 }
 
 void Object3d::SetModel(const std::string& filePath)
 {
-	// モデルを検索してセットする
+	// ModelManager から既にロード済みのモデルを参照 (nullptr チェックは呼び出し側で)
 	model = ModelManager::GetInstance()->FindModel(filePath);
 }
 
 void Object3d::SetSkyboxFilePath(std::string filePath)
 {
+	// スカイボックス用テクスチャを設定し、SRV ハンドルを更新する
 	filePath_ = filePath;
 	TextureManager::GetInstance()->LoadTexture(filePath_);
-	// Skybox用のGPUハンドルを取得して保持
 	skyboxGpuHandle_ = TextureManager::GetInstance()->GetSrvHandleGPU(filePath_);
 }
 
 Microsoft::WRL::ComPtr<ID3D12Resource> Object3d::CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes)
 {
-	// DXGIファクトリーの生成
+	// Upload ヒープ上のバッファを作成して返すユーティリティ
 	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory = nullptr;
-	// 関数が成功したかどうか
 	HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
-	// 頂点リソース用のヒープの設定
-	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
+	// ファクトリは現状特に使用していないが、取得しておく
+	(void)dxgiFactory;
 
-	// UploadHeapを使う
+	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
 	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
 
-	// 頂点リソースの設定
 	D3D12_RESOURCE_DESC resourceDesc{};
-
-	// バッファリソース。テクスチャの場合はまた別の設定をする
 	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	// リソースのサイズ
 	resourceDesc.Width = sizeInBytes;
-
-	// バッファの場合はこれらは1にする決まり
 	resourceDesc.Height = 1;
 	resourceDesc.DepthOrArraySize = 1;
 	resourceDesc.MipLevels = 1;
 	resourceDesc.SampleDesc.Count = 1;
-
-	// バッファの場合はこれにする決まり
 	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
-
-
-	// 実際に頂点リソースを作る
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
 	hr = device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE,
 		&resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource));
@@ -336,25 +325,21 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Object3d::CreateBufferResource(Microsoft:
 
 void Object3d::CreateVertexData()
 {
+	// 頂点バッファサイズはモデル頂点 + 球体用追加領域 (TotalVertexCount)
 	vertexResource = CreateBufferResource(Object3dCommon::GetInstance()->GetDxCommon()->GetDevice(), sizeof(VertexData) * (modelData.vertices.size() + TotalVertexCount));
 
-	// リソースの先頭のアドレスから使う
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	// 使用するリソースのサイズ
 	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * (modelData.vertices.size() + TotalVertexCount));
-	// 1頂点当たりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
-
-	// 書き込むためのアドレスを取得
+	// マップしてモデル頂点データをコピー
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-
-	// 頂点データをリソースにコピー
 	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
 
-	// アンマップ
+	// アンマップしてから球体の頂点領域に直接書き込む実装にしている（既存の実装に合わせる）
 	vertexResource->Unmap(0, nullptr);
-	// 球体の頂点データをコピー
+
+	// 球体用頂点データの計算と書き込み
 	VertexData* sphereVertexData = vertexData + modelData.vertices.size();
 	auto calculateVertex = [](float lat, float lon, float u, float v) {
 		VertexData vertex;
@@ -362,17 +347,17 @@ void Object3d::CreateVertexData()
 		vertex.texcoord = { u, v };
 		vertex.normal = { vertex.position.x, vertex.position.y, vertex.position.z };
 		return vertex;
-		};
+	};
 	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
-		float lat = -std::numbers::pi_v<float> / 2.0f + kLatEvery * latIndex; // θ
+		float lat = -std::numbers::pi_v<float> / 2.0f + kLatEvery * latIndex;
 		float nextLat = lat + kLatEvery;
 		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
 			float u = float(lonIndex) / float(kSubdivision);
 			float v = 1.0f - float(latIndex) / float(kSubdivision);
-			float lon = lonIndex * kLonEvery; // Φ
+			float lon = lonIndex * kLonEvery;
 			float nextLon = lon + kLonEvery;
 			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
-			// 6つの頂点を計算
+			// 6 頂点分を計算して配置
 			sphereVertexData[start + 0] = calculateVertex(lat, lon, u, v);
 			sphereVertexData[start + 1] = calculateVertex(nextLat, lon, u, v - 1.0f / float(kSubdivision));
 			sphereVertexData[start + 2] = calculateVertex(lat, nextLon, u + 1.0f / float(kSubdivision), v);
@@ -385,38 +370,28 @@ void Object3d::CreateVertexData()
 
 void Object3d::CreateMaterialData()
 {
+	// material 用定数バッファを作成して Map、初期値を設定する
 	materialResource = CreateBufferResource(Object3dCommon::GetInstance()->GetDxCommon()->GetDevice(), sizeof(Material));
-
-	// ...Mapしてデータを書き込む。色は白を設定しておくといい
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 
 	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-
-	// Lightingはtrueを設定する
 	materialData->enableLighting = true;
-
 	materialData->shininess = 50.0f;
-
-	// 単位行列で初期化
 	materialData->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
-
-	// 金属感
 	materialData->environmentCoefficient = 0.0f;
 }
 
 void Object3d::CreateDirectionalLightData()
 {
+	// ディレクショナルライト用定数バッファを作成して Map、初期値をセットする
 	directionalLightResource = CreateBufferResource(Object3dCommon::GetInstance()->GetDxCommon()->GetDevice(), sizeof(DirectionalLight));
-
-	// 書き込むためのアドレスを取得
 	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
 
-	// 真上から白いライトで照らす
+	// 初期設定: 上方向からの強めの白色ライト
 	directionalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
 	directionalLightData->direction = { 0.0f,-1.0f,0.0f };
 	directionalLightData->intensity = 3.0f;
 
-
-	// 正規化
+	// 正規化して方向ベクトルを単位化
 	Normalize::Normalize(directionalLightData->direction);
 }

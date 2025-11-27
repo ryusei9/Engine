@@ -6,6 +6,10 @@
 #include "Multiply.h"
 #include "MakeOrthographicMatrix.h"
 
+/// 初期化
+/// - dxCommon を保存し、テクスチャパスをメンバに保持する
+/// - 頂点 / マテリアル / WVP のバッファを作成し、テクスチャサイズに合わせてスプライトサイズを設定する
+/// - 副作用: GPU 用バッファを確保して Map する
 void Sprite::Initialize(DirectXCommon* dxCommon, std::string textureFilePath)
 {
 	dxCommon_ = dxCommon;
@@ -24,6 +28,11 @@ void Sprite::Initialize(DirectXCommon* dxCommon, std::string textureFilePath)
 	AdjustTextureSize();
 }
 
+/// 毎フレーム更新
+/// - アンカーポイント・テクスチャ領域に基づいて頂点／インデックスデータを更新する
+/// - ワールド行列（スプライトの位置・回転・スケール）を計算して WVP を更新する
+/// - 入力: メンバ変数 `position`/`size`/`rotation`/`anchorPoint`/`textureLeftTop`/`textureSize`
+/// - 出力: `vertexData`（GPU マップ済み領域）、`transformationMatrixData`（WVP）
 void Sprite::Update()
 {
 	float left = 0.0f - anchorPoint.x;
@@ -82,6 +91,9 @@ void Sprite::Update()
 	transformationMatrixData->World = worldMatrix;
 }
 
+/// 描画
+/// - 頂点／インデックスビューをコマンドリストにバインドし、マテリアル・WVP・テクスチャをルートに設定して描画コマンドを発行する
+/// - 前提: `vertexResource`／`indexResource`／`materialResource`／`wvpResource` が有効であること
 void Sprite::Draw()
 {
 	// VBVを設定
@@ -103,6 +115,9 @@ void Sprite::Draw()
 	dxCommon_->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
+/// GPU 用バッファ作成ユーティリティ
+/// - device に対して Upload ヒープでコミット済みバッファを作成し返す
+/// - 成功を assert しているため、呼び出し元は失敗しない前提で使用する
 Microsoft::WRL::ComPtr<ID3D12Resource> Sprite::CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes)
 {
 	// DXGIファクトリーの生成
@@ -142,6 +157,9 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Sprite::CreateBufferResource(Microsoft::W
 	return resource;
 }
 
+/// 頂点 / インデックス用バッファの作成と Map
+/// - vertexResource/indexResource を確保し、vertexData/indexData へマップする
+/// - VertexData 構造のレイアウトに合わせて VertexBufferView / IndexBufferView を設定する
 void Sprite::CreateVertexData()
 {
 	vertexResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(VertexData) * 6);
@@ -175,6 +193,8 @@ void Sprite::CreateVertexData()
 	
 }
 
+/// マテリアル用定数バッファの作成と初期化
+/// - materialResource を確保し materialData にマップしてデフォルト値を書き込む
 void Sprite::CreateMaterialData()
 {
 	materialResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(Material));
@@ -191,6 +211,8 @@ void Sprite::CreateMaterialData()
 	materialData->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
 }
 
+/// WVP 用定数バッファの作成
+/// - wvpResource を確保し transformationMatrixData をマップして単位行列で初期化する
 void Sprite::CreateWVPData()
 {
 	wvpResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(TransformationMatrix));
@@ -203,6 +225,9 @@ void Sprite::CreateWVPData()
 	transformationMatrixData->World = MakeIdentity4x4::MakeIdentity4x4();
 }
 
+/// テクスチャ情報からスプライトの `size` を自動設定する
+/// - TextureManager からテクスチャメタデータを取得して `textureSize` に反映
+/// - 初期はスプライトの `size` をテクスチャサイズに合わせる
 void Sprite::AdjustTextureSize()
 {
 	// テクスチャメタデータを取得

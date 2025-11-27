@@ -8,8 +8,25 @@
 #include <MakeIdentity4x4.h>
 #include <imgui.h>
 
+//
+// Skybox
+// - シーン背景に描画するキューブ型スカイボックスを扱うクラス。
+// - 目的：遠景を埋めるための立方体マップ風テクスチャを描画し、カメラ位置に固定して視界いっぱいに見せる。
+// - 実装方針：内向き法線のキューブを大きくスケールして描画。頂点・インデックスは CPU 側で作成し Upload ヒープに保持する。
+// - 注意点：
+//   - スカイボックスはカメラの位置に追従して移動させ、回転だけ反映する（通常はワールド平行移動を無視する）
+//   - 現在の実装は単一テクスチャ（立方体マップではなく通常のテクスチャを各面に割り当てる想定）を想定している
+//   - リソースは Upload ヒープに置く簡易実装。大規模な最適化やストリーミングは未対応。
+//
+
 void Skybox::Initialize(const std::string& texturePath)
 {
+	// 入力:
+	// - texturePath: スカイボックス用テクスチャのファイルパス（TextureManager が扱える形式）
+	// 副作用:
+	// - 頂点バッファ / インデックスバッファ / マテリアル CBV を作成して初期化する
+	// - RootSignature / PSO を生成する
+	// - worldTransform_ を初期化してデフォルトのスケール・位置を設定する
 	filePath_ = texturePath;
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
 
@@ -24,15 +41,19 @@ void Skybox::Initialize(const std::string& texturePath)
 
 	worldTransform_.Initialize();
 
-	worldTransform_.scale_ = { 50.0f, 50.0f, 50.0f }; // スカイボックスの大きさを調整
-	worldTransform_.rotate_ = { 0.0f, 0.0f, 0.0f }; // 初期回転
-	worldTransform_.translate_ = { 0.0f, 0.0f, -10.0f }; // 初期位置
+	// スカイボックスは大きくスケールして遠景を覆う（値は調整可能）
+	worldTransform_.scale_ = { 50.0f, 50.0f, 50.0f };
+	worldTransform_.rotate_ = { 0.0f, 0.0f, 0.0f };
+	worldTransform_.translate_ = { 0.0f, 0.0f, -10.0f };
 }
 
 void Skybox::CreateVertexBuffer()
 {
-	// 8頂点（各面4頂点ずつ、インデックスで面を作る場合は24頂点でもOK）
-	// ここでは各面ごとに4頂点ずつ定義（内側向き）
+	// 頂点構成:
+	// - 各面を 4 頂点で定義（合計 24 頂点、内側向きに配置）
+	// - Vertex に position と texcoord を保持（シンプルな Skybox 用）
+	// 実装メモ:
+	// - Upload ヒープにバッファを確保して CPU 側データを memcpy する簡易実装
 	vertices_ = {
 		// 右面（+X）
 		{ {  1.0f,  1.0f,  1.0f, 1.0f }, {  1.0f,  1.0f,  1.0f } },
@@ -41,30 +62,35 @@ void Skybox::CreateVertexBuffer()
 		{ {  1.0f, -1.0f, -1.0f, 1.0f }, {  1.0f, -1.0f, -1.0f } },
 
 
+		// 左面（-X）
 		{ { -1.0f,  1.0f, -1.0f, 1.0f }, { -1.0f,  1.0f, -1.0f } },
 		{ { -1.0f,  1.0f,  1.0f, 1.0f }, { -1.0f,  1.0f,  1.0f } },
 		{ { -1.0f, -1.0f, -1.0f, 1.0f }, { -1.0f, -1.0f, -1.0f } },
 		{ { -1.0f, -1.0f,  1.0f, 1.0f }, { -1.0f, -1.0f,  1.0f } },
 
 
+		// 前面 (+Z)
 		{ { -1.0f,  1.0f,  1.0f, 1.0f }, { -1.0f,  1.0f,  1.0f } },
 		{ {  1.0f,  1.0f,  1.0f, 1.0f }, {  1.0f,  1.0f,  1.0f } },
 		{ { -1.0f, -1.0f,  1.0f, 1.0f }, { -1.0f, -1.0f,  1.0f } },
 		{ {  1.0f, -1.0f,  1.0f, 1.0f }, {  1.0f, -1.0f,  1.0f } },
 
 
+		// 後面 (-Z)
 		{ { -1.0f,  1.0f, -1.0f, 1.0f }, { -1.0f,  1.0f, -1.0f } },
 		{ {  1.0f,  1.0f, -1.0f, 1.0f }, {  1.0f,  1.0f, -1.0f } },
 		{ { -1.0f, -1.0f, -1.0f, 1.0f }, { -1.0f, -1.0f, -1.0f } },
 		{ {  1.0f, -1.0f, -1.0f, 1.0f }, {  1.0f, -1.0f, -1.0f } },
 
 
+		// 上面 (+Y)
 		{ { -1.0f,  1.0f, -1.0f, 1.0f }, { -1.0f,  1.0f, -1.0f } },
 		{ {  1.0f,  1.0f, -1.0f, 1.0f }, {  1.0f,  1.0f, -1.0f } },
 		{ { -1.0f,  1.0f,  1.0f, 1.0f }, { -1.0f,  1.0f,  1.0f } },
 		{ {  1.0f,  1.0f,  1.0f, 1.0f }, {  1.0f,  1.0f,  1.0f } },
 
 
+		// 下面 (-Y)
 		{ { -1.0f, -1.0f,  1.0f, 1.0f }, { -1.0f, -1.0f,  1.0f } },
 		{ {  1.0f, -1.0f,  1.0f, 1.0f }, {  1.0f, -1.0f,  1.0f } },
 		{ { -1.0f, -1.0f, -1.0f, 1.0f }, { -1.0f, -1.0f, -1.0f } },
@@ -103,21 +129,21 @@ void Skybox::CreateVertexBuffer()
 
 void Skybox::CreateTexture(const std::string& texturePath)
 {
-	// TextureManager経由でSRVを取得
+	// TextureManager経由で SRV を取得して保持する
 	TextureManager* texMgr = TextureManager::GetInstance().get();
 	texMgr->LoadTexture(texturePath);
 	textureHandle_ = texMgr->GetSrvHandleGPU(texturePath);
-
-
 }
 
 void Skybox::SetCamera(Camera* camera)
 {
+	// 描画に利用するカメラを差し替える（外部からカメラを渡せる）
 	camera_ = camera;
 }
 
 void Skybox::CreateMaterialResource()
 {
+	// マテリアル用 CBV を生成してデフォルト値を設定
 	auto* dxCommon = DirectXCommon::GetInstance();
 	materialResource_ = dxCommon->CreateBufferResource(sizeof(Material));
 	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
@@ -128,20 +154,23 @@ void Skybox::CreateMaterialResource()
 
 void Skybox::Update()
 {
+	// worldTransform_ の内部状態を更新（必要に応じて position/rotation/scale を変更した後に呼ぶ）
 	worldTransform_.Update();
 }
 
-
 void Skybox::CreateRootSignature()
 {
+	// ルートシグネチャ構築
+	// - rootParameters[0] : Material CBV (b0) - Pixel
+	// - rootParameters[1] : Transformation CBV (b0) - Vertex
+	// - rootParameters[2] : Texture SRV Table (t0) - Pixel
 	HRESULT hr;
 	D3D12_ROOT_SIGNATURE_DESC desc{};
 	desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
-	// RootParameter
 	D3D12_ROOT_PARAMETER rootParameters[3] = {};
 
-	// マテリアル用
+	// マテリアル用 CBV
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[0].Descriptor.ShaderRegister = 0;
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
@@ -154,12 +183,12 @@ void Skybox::CreateRootSignature()
 	descriptorRange.RegisterSpace = 0;
 	descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	/*------transformationMatrix用------*/
+	// transformationMatrix 用 CBV（頂点シェーダ用）
 	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	// vertexShaderで使う
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	rootParameters[1].Descriptor.ShaderRegister = 0;
 
+	// テクスチャ用 DescriptorTable
 	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParameters[2].DescriptorTable.pDescriptorRanges = &descriptorRange;
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
@@ -168,7 +197,7 @@ void Skybox::CreateRootSignature()
 	desc.NumParameters = _countof(rootParameters);
 	desc.pParameters = rootParameters;
 
-	// Sampler
+	// 静的サンプラ設定（バイリニア）
 	D3D12_STATIC_SAMPLER_DESC samplerDesc{};
 	samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -190,6 +219,10 @@ void Skybox::CreateRootSignature()
 
 void Skybox::CreatePipelineState()
 {
+	// PSO の生成：
+	// - 入力レイアウトは POSITION/TEXCOORD を使用
+	// - Rasterizer のカリングは front-face をカリング（内側から見るため front をカリング）
+	// - DepthWrite は無効にして深度テストは <= で評価（スカイボックスが最奥に描かれる想定）
 	HRESULT hr;
 	// InputLayout
 	inputElementDescs_[0].SemanticName = "POSITION";
@@ -211,21 +244,21 @@ void Skybox::CreatePipelineState()
 	inputLayoutDesc_.pInputElementDescs = inputElementDescs_;
 	inputLayoutDesc_.NumElements = _countof(inputElementDescs_);
 
-	// Blend
+	// Blend（無効）
 	blendDesc_.BlendEnable = FALSE;
 	blendDesc_.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
-	// Rasterizer
+	// Rasterizer : 内側を描くためにフロントカリング（Front = カリング）
 	rasterizerDesc_.CullMode = D3D12_CULL_MODE_FRONT;
 	rasterizerDesc_.FillMode = D3D12_FILL_MODE_SOLID;
 	rasterizerDesc_.FrontCounterClockwise = FALSE;
 
-	// DepthStencil
+	// DepthStencil: 書き込み無効（スカイボックスは深度を上書きしない）
 	depthStencilDesc_.DepthEnable = TRUE;
 	depthStencilDesc_.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	depthStencilDesc_.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
-	// シェーダーのコンパイル
+	// シェーダーのコンパイル（外部の DirectXCommon ラッパを利用）
 	auto* dxCommon = DirectXCommon::GetInstance();
 	auto vsBlob = dxCommon->CompileShader(L"resources/shaders/Skybox.VS.hlsl", L"vs_6_0");
 	auto psBlob = dxCommon->CompileShader(L"resources/shaders/Skybox.PS.hlsl", L"ps_6_0");
@@ -252,7 +285,7 @@ void Skybox::CreatePipelineState()
 
 void Skybox::CreateIndexBuffer()
 {
-	// インデックス用のリソースを作成
+	// インデックスバッファを Upload ヒープに作成し、各面ごとの三角形インデックスを書き込む
 	indexResource_ = DirectXCommon::GetInstance()->CreateBufferResource(sizeof(uint32_t) * kNumIndex);
 
 	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
@@ -261,36 +294,32 @@ void Skybox::CreateIndexBuffer()
 
 	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
 
-	// 右
+	// 各面のインデックス（右、左、前、後、上、下）
 	indexData_[0] = 2; indexData_[1] = 1; indexData_[2] = 0;
 	indexData_[3] = 3; indexData_[4] = 1; indexData_[5] = 2;
 
-	// 左
 	indexData_[6] = 6; indexData_[7] = 5; indexData_[8] = 4;
 	indexData_[9] = 7; indexData_[10] = 5; indexData_[11] = 6;
 
-	// 前面（+Z）
 	indexData_[12] = 10; indexData_[13] = 9; indexData_[14] = 8;
 	indexData_[15] = 11; indexData_[16] = 9; indexData_[17] = 10;
 
-	// 後面（-Z）
 	indexData_[18] = 12; indexData_[19] = 13; indexData_[20] = 14;
 	indexData_[21] = 14; indexData_[22] = 13; indexData_[23] = 15;
 
-	// 上面（+Y）
 	indexData_[24] = 17; indexData_[25] = 16; indexData_[26] = 18;
 	indexData_[27] = 17; indexData_[28] = 18; indexData_[29] = 19;
 
-	// 下面（-Y）
 	indexData_[30] = 21; indexData_[31] = 20; indexData_[32] = 22;
 	indexData_[33] = 21; indexData_[34] = 22; indexData_[35] = 23;
 
-	memcpy(indexData_, &indexData_[0], sizeof(uint32_t) * kNumIndex);
-
+	// indexData_ を既に Map したバッファに書き込んだので Unmap は不要（Upload ヒープ）
 }
 
 void Skybox::Draw()
 {
+	// 描画コマンド発行:
+	// - RootSignature/PSO をセットし、VB/IB をバインド、CBV/SRV をルートに配置して DrawIndexedInstanced を呼ぶ
 	auto* cmdList = DirectXCommon::GetInstance()->GetCommandList();
 
 	// RootSignatureとPSOをセット
@@ -302,17 +331,21 @@ void Skybox::Draw()
 	cmdList->IASetVertexBuffers(0, 1, &vbView_);
 	cmdList->IASetIndexBuffer(&indexBufferView_);
 
-	// CBVとSRVセット
+	// マテリアル CBV と transformation（world）をセット
 	cmdList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
 	worldTransform_.SetPipeline();
+
+	// テクスチャ SRV (t0)
 	cmdList->SetGraphicsRootDescriptorTable(2, textureHandle_);
 
+	// インデックス描画
 	cmdList->DrawIndexedInstanced(kNumIndex, 1, 0, 0, 0);
 }
 
 void Skybox::DrawImGui()
 {
 #ifdef USE_IMGUI
+	// デバッグ用 UI: 色・位置・回転・スケールを即時変更できる
 	ImGui::Begin("Skybox");
 	ImGui::ColorEdit4("Color", &materialData_->color.x);
 	ImGui::SliderFloat3("Position", &worldTransform_.translate_.x, -10.0f, 10.0f);
@@ -325,6 +358,7 @@ void Skybox::DrawImGui()
 }
 
 void Skybox::DrawSettings() {
+	// 描画前に PSO/RootSignature/Topology をコマンドリストに設定する補助関数
 	auto* cmdList = DirectXCommon::GetInstance()->GetCommandList();
 
 	cmdList->SetGraphicsRootSignature(rootSignature_.Get());

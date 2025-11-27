@@ -1,8 +1,33 @@
 #include "NoisePostEffect.h"
 
+//
+// NoisePostEffect
+// - フルスクリーンポストエフェクトを用いて画面にノイズ（時間変化する効果）を重畳するパス。
+// - DirectX12 のルートシグネチャ／PSO を構築し、内部で作成したレンダーターゲットに対して
+//   フルスクリーン三角形を描画してピクセルシェーダ（Noise.PS.hlsl）を実行することで、
+//   グラフィックスパイプライン上でノイズを生成する。
+// - 主な処理フロー：
+//     Initialize()         : 必要なリソース（タイムパラメータCB、ルートシグネチャ、PSO、レンダーターゲット）を作成
+//     PreRender()          : レンダーターゲットへの切替／クリア／ビューポート設定
+//     Draw()               : 入力 SRV／CBV をバインドしてフルスクリーン三角形を描画
+//     PostRender()         : 出力レンダーテクスチャを SRV として使える状態に遷移
+//     GetOutputSRV() const : 本パスの出力 SRV ハンドルを取得（他パスで参照するため）
+// - 注意点：
+//   * 本クラスは PostEffectBase を継承し、CreateRenderTexture 等のユーティリティを利用している。
+//   * 時間パラメータは Initialize 内で 0 初期化されるが、毎フレームの増分は呼び出し側で更新する必要がある。
+//     （例: timeParams_->time を毎フレーム加算してから Draw を呼ぶ）
+//   * SRV の入力ハンドルは dxCommon_->GetSRVGPUDescriptorHandle(1) など固定インデックスを参照しているため、
+//     実行環境にあわせて入力 SRV の管理（インデックス割当）を整合させること。
+//   * 深度テストは無効化されており、フルスクリーン描画専用の設定になっている。
+//
+
 void NoisePostEffect::Initialize(DirectXCommon* dxCommon)
 {
-	// 引数を代入
+	// 引数を保存し、ベースクラス初期化を行ったうえで本パス固有のリソースを構築する。
+	// - timeParamBuffer_ : 時間等のパラメータを格納する CBV（CPU マップ可能）
+	//   -> 呼び出し側が毎フレーム timeParams_->time を更新してノイズの時間変化を制御する
+	// - ルートシグネチャ / PSO を生成
+	// - 出力用のレンダーターゲクスチャを作成（幅/高は画面サイズ）
 	dxCommon_ = dxCommon;
 	PostEffectBase::Initialize(dxCommon);
     timeParamBuffer_ = dxCommon_->CreateBufferResource(sizeof(TimeParams));
@@ -15,7 +40,13 @@ void NoisePostEffect::Initialize(DirectXCommon* dxCommon)
 
 void NoisePostEffect::CreateRootSignature()
 {
-    // ルートシグネチャの作成（例：SRVとCBVのみ）
+    // ルートシグネチャの構築
+    // - rootParams[0] : SRV テーブル (t0) を 1 個（入力テクスチャや前段レンダー出力を参照）
+    // - rootParams[1] : CBV (b0) を 1 個（TimeParams を格納）
+    // - 静的サンプラを 1 個登録（ピクセルシェーダで利用）
+    //
+    // 補足:
+    // - Shader 側のレジスタ割当 (t0, b0, s0) と合わせること。
     D3D12_ROOT_PARAMETER rootParams[2]{};
     // SRV (t0)
     rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
@@ -33,7 +64,7 @@ void NoisePostEffect::CreateRootSignature()
     rootParams[1].Descriptor.RegisterSpace = 0;
     rootParams[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-    // ★ サンプラー範囲を追加
+    // サンプラー設定（線形、ラップ）
     D3D12_STATIC_SAMPLER_DESC samplerDesc = {};
     samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
     samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -58,6 +89,7 @@ void NoisePostEffect::CreateRootSignature()
     assert(SUCCEEDED(hr));
 
     /// InputLayout
+    // フルスクリーンクアッド（フルスクリーン三角形）を使用するため入力レイアウトは不要としている
     D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
     inputElementDescs[0].SemanticName = "POSITION";
     inputElementDescs[0].SemanticIndex = 0;
@@ -72,46 +104,36 @@ void NoisePostEffect::CreateRootSignature()
     inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
     inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
-
     inputLayoutDesc.pInputElementDescs = nullptr;
     inputLayoutDesc.NumElements = 0;
 
-    /// BlendStateの設定
-    // ブレンドするかしないか
+    /// BlendStateの設定（ブレンド無効）
     blendDesc.BlendEnable = false;
-    // すべての色要素を書き込む
     blendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
-    /// RasterizerState
-    // 裏面(時計回り)を表示しない
+    /// RasterizerState（カリング無し・塗りつぶし）
     rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
-    // 三角形の中を塗りつぶす
     rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-    rasterizerDesc.FrontCounterClockwise = FALSE;	 // 時計回りの面を表面とする（カリング方向の設定）
+    rasterizerDesc.FrontCounterClockwise = FALSE;	 // 時計回りを表面とする
 
-    /// VertexShader
-    // shaderをコンパイルする
+    /// VertexShader / PixelShader のコンパイル
     vsBlob_ = dxCommon_->CompileShader(L"Resources/shaders/FullScreen.VS.hlsl", L"vs_6_0");
     assert(vsBlob_ != nullptr);
 
-    /// PixelShader
-    // shaderをコンパイルする
     psBlob_ = dxCommon_->CompileShader(L"Resources/shaders/Noise.PS.hlsl", L"ps_6_0");
     assert(psBlob_ != nullptr);
 
-    // DepthStencilStateの設定
-    // Depthの機能を有効化する
+    // DepthStencilState の設定（深度テスト無効）
     depthStencilDesc.DepthEnable = false;
-    // 書き込みします
     depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-    // 比較関数はLessEqual。つまり、近ければ描画される
     depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 }
 
 void NoisePostEffect::CreatePipelineStateObject()
 {
+    // PSO を構築する
+    // - フルスクリーントライアングル用に入力レイアウトは空にしている
     HRESULT hr;
-    // PSOの作成
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
     psoDesc.pRootSignature = rootSignature_.Get();
     psoDesc.VS = { vsBlob_->GetBufferPointer(), vsBlob_->GetBufferSize() };
@@ -131,44 +153,47 @@ void NoisePostEffect::CreatePipelineStateObject()
 
 void NoisePostEffect::PreRender()
 {
-    // レンダーテクスチャをRTVとして使う準備
+    // 描画前準備:
+    // - 深度バッファを描画可能な状態に遷移
+    // - 出力レンダーターゲットを OMSetRenderTargets でバインドしクリア
+    // - ビューポート／シザーを設定
     dxCommon_->TransitionDepthBufferToWrite();
     D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dxCommon_->GetDSVCPUDescriptorHandle(0);
     commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
     float clearColor[4] = { 0.1f,0.25f,0.5f,1.0f };
     commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
-    // ビューポート・シザーもセット（DirectXCommonのDrawRenderTextureと同じように）
+    // ビューポート・シザーもセット（DirectXCommon の DrawRenderTexture と同様）
     commandList->RSSetViewports(1, &viewport);
     commandList->RSSetScissorRects(1, &scissorRect);
 }
 
 void NoisePostEffect::Draw()
 {
-    // SRVヒープをセット
+    // 描画:
+    // - SRV ヒープをセットし、PSO/RootSignature をバインド
+    // - ルートに入力 SRV (t0) と時間パラメータ CBV (b0) を配置
+    // - フルスクリーン三角形を DrawInstanced(3,1,0,0) で描画
     ID3D12DescriptorHeap* heaps[] = { dxCommon_->GetSRVDescriptorHeap().Get() };
     commandList->SetDescriptorHeaps(_countof(heaps), heaps);
 
-    // パイプラインステートオブジェクトの設定
     commandList->SetPipelineState(pipelineState_.Get());
-    // ルートシグネチャの設定
     commandList->SetGraphicsRootSignature(rootSignature_.Get());
-    // SRVとCBVの設定
     commandList->SetGraphicsRootDescriptorTable(0, dxCommon_->GetSRVGPUDescriptorHandle(1));
     commandList->SetGraphicsRootConstantBufferView(1, timeParamBuffer_->GetGPUVirtualAddress());
-    // プリミティブトポロジの設定
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    // フルスクリーン四角形を描画
 	commandList->DrawInstanced(3, 1, 0, 0);
 }
 
 void NoisePostEffect::PostRender()
 {
-    // バリアをSRV用に戻す
+    // 描画後処理:
+    // - 出力レンダーターゲクスチャをシェーダリソース（SRV）として使用可能に遷移する
     dxCommon_->TransitionRenderTextureToShaderResource();
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE NoisePostEffect::GetOutputSRV() const
 {
-    return dxCommon->GetSRVGPUDescriptorHandle(srvIndex_);
+    // 本パスの出力 SRV ハンドルを取得するラッパ
+    return dxCommon_->GetSRVGPUDescriptorHandle(srvIndex_);
 }

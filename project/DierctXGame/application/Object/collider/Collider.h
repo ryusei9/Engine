@@ -45,8 +45,10 @@ public:
 
 private:
 	/*------メンバ変数------*/
-	uint32_t typeID_ = 0; // 識別ID
+	// 識別ID
+	uint32_t typeID_ = 0;
 
-	float radius_ = 1.0f; // 半径
+	// 半径
+	float radius_ = 1.0f;
 };
 

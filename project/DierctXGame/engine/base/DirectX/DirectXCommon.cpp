@@ -301,24 +301,6 @@ void DirectXCommon::DescriptorHeap()
 	HRESULT hr = device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvDescriptorHeap));
 	assert(SUCCEEDED(hr));
 
-
-	//// DSVの設定
-	//D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-	//// Format。基本的にはResourceに合わせる
-	//dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	//// 2dTexture
-	//dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-	//// DSVHeapの先頭にDSVをつくる
-	//device->CreateDepthStencilView(depthStencilResource.Get(), &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-
-	//// SwapChainからResourceを引っ張ってくる
-	//Microsoft::WRL::ComPtr<ID3D12Resource> swapChainResources[2] = { nullptr };
-	//hr = swapChain->GetBuffer(0, IID_PPV_ARGS(&swapChainResources[0]));
-
-	//// うまく取得できなければ起動できない
-	//assert(SUCCEEDED(hr));
-	//hr = swapChain->GetBuffer(1, IID_PPV_ARGS(&swapChainResources[1]));
-	//assert(SUCCEEDED(hr));
 }
 
 Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DirectXCommon::CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
@@ -343,7 +325,6 @@ void DirectXCommon::RenderTargetView()
 {
 	HRESULT hr;
 	// SwapChainからResourceを引っ張ってくる
-	//swapChainResources[2] = { nullptr };
 	hr = swapChain->GetBuffer(0, IID_PPV_ARGS(&swapChainResources[0]));
 
 	// うまく取得できなければ起動できない
@@ -363,8 +344,7 @@ void DirectXCommon::RenderTargetView()
 
 	// ディスクリプタの先頭を取得する
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle = GetCPUDescriptorHandle(rtvDescriptorHeap.Get(), descriptorSizeRTV, 0);
-	//// RTVを2つ作るのでディスクリプタを2つ用意
-	//D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
+	
 	// まず1つ目を作る。1つ目は最初のところに作る。
 	// 裏表の2つ分
 	//まず一つ目は最初の所につくる。作る場所をこちらで指定してあげる必要がある
@@ -391,8 +371,7 @@ void DirectXCommon::DepthStencilViewInitialize()
 {
 	// DSVの設定
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-	// DepthStencilTextureをウィンドウのサイズで作成
-	//Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource = CreateDepthStencilTextureResource(device, WinApp::kClientWidth, WinApp::kClientHeight);
+	
 	// Format。基本的にはResourceに合わせる
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	// 2dTexture
@@ -474,7 +453,6 @@ void DirectXCommon::FenceInitialize()
 void DirectXCommon::ViewPortInitialize()
 {
 	//// ビューポート
-	//D3D12_VIEWPORT viewport{};
 
 	// クライアント領域のサイズと一緒にして画面全体に表示
 	viewport.Width = WinApp::kClientWidth;
@@ -488,7 +466,6 @@ void DirectXCommon::ViewPortInitialize()
 void DirectXCommon::ScissorRectInitialize()
 {
 	//// シザー矩形
-	//D3D12_RECT scissorRect{};
 
 	// 基本的にビューポートと同じ矩形が構成されるようにする
 	scissorRect.left = 0;
@@ -505,9 +482,6 @@ void DirectXCommon::CreateDXCCompiler()
 	// dxcCompilerを初期化
 	//////////////////////////
 
-	/*IDxcUtils* dxcUtils = nullptr;
-	IDxcCompiler3* dxcCompiler = nullptr;*/
-
 	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils));
 	assert(SUCCEEDED(hr));
 	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler));
@@ -519,30 +493,11 @@ void DirectXCommon::CreateDXCCompiler()
 	assert(SUCCEEDED(hr));
 }
 
-void DirectXCommon::ImGuiInitialize()
-{
-	/////////////////////
-	// ImGuiの初期化
-	/////////////////////
-	/*IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-	ImGui_ImplWin32_Init(winApp_->GetHwnd());
-	ImGui_ImplDX12_Init(device.Get(),
-		swapChainDesc.BufferCount,
-		rtvDesc.Format,
-		srvDescriptorHeap.Get(),
-		GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0),
-		GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 0));*/
-}
-
 /*------RenderTextureの描画------*/
 void DirectXCommon::PreRenderScene()
 {
 	TransitionDepthBufferToWrite();
-	//CreateRenderTexture();
-	// TransitionBarrierの設定
-	//ChengeBarrier();
+	
 
 	// RenderTargetViewのハンドルを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTextureRtvHeap->GetCPUDescriptorHandleForHeapStart();
@@ -587,9 +542,6 @@ void DirectXCommon::PreDraw()
 	
 	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
 
-	// 指定した深度で画面全体をクリアする
-	//commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-
 	/// 三角形の描画
 	// Viewportを設定
 	commandList->RSSetViewports(1, &viewport);
@@ -602,9 +554,7 @@ void DirectXCommon::PostDraw()
 	HRESULT hr;
 	// これから書き込むバックバッファのインデックスを取得する
 	UINT bbIndex = swapChain->GetCurrentBackBufferIndex();
-	// 実際のcommandListのImGuiの描画コマンドを積む
-	//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
-
+	
 	// 画面に描く処理はすべて終わり、画面に映すので、状態を遷移
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -643,8 +593,7 @@ void DirectXCommon::PostDraw()
 	assert(SUCCEEDED(hr));
 	hr = commandList->Reset(commandAllocator.Get(), nullptr);
 	assert(SUCCEEDED(hr));
-	// ★ここで状態を初期化！
-	//depthBufferState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+	
 }
 
 void DirectXCommon::ChengeBarrier()

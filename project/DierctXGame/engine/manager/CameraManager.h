@@ -18,7 +18,8 @@ public:
 	void MoveTargetAndCamera(WorldTransform target, const Vector3& delta);
 
 	// カメラが対象に向き続ける
-	void LookAtTarget(const Vector3& targetPosition);
+	// 既定では即時回転。eased=true にするとイージングで回転する（easeFactor は補間係数 0..1）
+	void LookAtTarget(const Vector3& targetPosition, bool eased = false, float easeFactor = 0.1f);
 
 	// セッター
 	void SetMainCamera(Camera* camera) { mainCamera_ = camera; }
@@ -43,7 +44,14 @@ public:
 
 	Camera* GetMainCamera() const { return mainCamera_; }
 
+	
 private:
 	Camera* mainCamera_ = nullptr;
+
+	// イージング用
+	bool isEasing_ = false;
+	Vector3 easeTargetRotation_ = {0.0f, 0.0f, 0.0f}; // 目標回転（ラジアン）
+	float easeFactor_ = 0.1f;                          // 補間係数（0..1、1で即時）
+	float angleEpsilon_ = 1e-3f;                       // しきい値（ラジアン）
 };
 

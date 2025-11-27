@@ -32,8 +32,10 @@ public:
     // 生存状態を取得
     bool IsAlive() const { return isAlive_; }
 
+	// 位置を取得
 	Vector3 GetPosition() const { return worldTransform_.translate_; }
 
+	// 位置を設定
 	void SetPosition(const Vector3& position) { worldTransform_.translate_ = position; }
 private:
 	// ワールド変形情報

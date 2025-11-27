@@ -48,6 +48,7 @@ public:
 	// JSONから読み込んだオブジェクトのImGui調整
 	void DrawImGuiImportObjectsFromJson();
 
+	// スタートカメライージング更新
 	void UpdateStartCameraEasing();
 
 public:
@@ -60,18 +61,19 @@ public:
 		Pause
 	};
 
-
+	// カメラモード
 	enum class CameraMode {
 		Free,
 		FollowPlayer,
-		DynamicFollow
+		DynamicFollow,
+		centerPlayer
 	};
 private:
 
 	// 衝突判定と応答
 	void CheckAllCollisions();
 
-	// 
+	// カメラルートの読み込み
 	void LoadLevel(const LevelData* levelData);
 
 	// カーブに沿ってプレイヤーを移動させる
@@ -86,6 +88,9 @@ private:
 	// カメラの中に入っているか
 	bool IsInCameraView(const Vector3& worldPos);
 
+	// ゲームクリアの演出更新
+	void UpdateGameClear();
+
 	// スプライトコモン
 	SpriteCommon* spriteCommon = nullptr;
 	// ダイレクトXコモン
@@ -93,35 +98,20 @@ private:
 	// WinApp
 	WinApp* winApp = nullptr;
 
+	// 当たり判定マネージャ
 	std::unique_ptr<CollisionManager> collisionManager_;
 
-
-
+	// スプライト
 	std::unique_ptr<Sprite> sprite = nullptr;
 
 	// 入力の初期化
 	Input* input = nullptr;
 
+	// スプライトの座標
 	Vector2 spritePosition = { 100.0f,100.0f };
 
+	// オーディオ
 	SoundData soundData1;
-
-	ParticleManager* particleManager = nullptr;
-
-	std::unique_ptr<ParticleEmitter> particleEmitter1 = nullptr;
-
-	std::unique_ptr<ParticleEmitter> particleEmitter2 = nullptr;
-
-	Vector3 particlePosition1 = { 0,0,5 };
-
-	Vector3 particlePosition2 = { 5,0,50 };
-
-	// ボール
-	std::unique_ptr<Object3d> ball = nullptr;
-	std::unique_ptr<Object3d> ground = nullptr;
-	// ボールの座標
-	WorldTransform ballTransform;
-	WorldTransform groundTransform;
 
 	// プレイヤー
 	std::unique_ptr<Player> player_ = nullptr;
@@ -137,6 +127,7 @@ private:
 	// 敵
 	std::unique_ptr<Enemy> enemy_ = nullptr;
 
+	// レベルデータ
 	LevelData* levelData_ = nullptr;
 
 	// 複数のモデルを管理するためのコンテナ
@@ -157,6 +148,7 @@ private:
 	// カメラマネージャー
 	std::unique_ptr<CameraManager> cameraManager_;
 
+	// カメラモードの状態
 	CameraMode cameraMode_ = CameraMode::DynamicFollow;
 
 	// --- スタート演出用 ---
@@ -168,27 +160,84 @@ private:
 	Vector3 endCameraPos_ = { 0.0f, 1.0f, -10.0f };
 	Vector3 endCameraRot_ = { 0.1f, 0.0f, 0.0f };
 
+	// タイトルに戻るテキスト
 	std::unique_ptr<Object3d> BackToTitle;
 
+	// タイトルに戻るテキストのワールド変換
 	WorldTransform textTitle;
 
 	// カーブ座標リスト
 	std::vector<Vector3> curvePoints_;
+
 	// カーブ進行度（0.0～1.0）
 	float curveProgress_ = 0.0f;
+
 	// カーブの現在インデックス
 	size_t curveIndex_ = 0;
-	// プレイヤー移動速度
+
+	// カメラ移動速度
 	float curveSpeed_ = 0.004f; // 1フレームあたりの進行度
 
+	// ゲームオーバー処理用タイマー
 	float gameOverTimer_ = 2.0f;
 
+	// ゲームオーバーフラグ
 	bool isGameOver_ = false;
 
+	// フェード開始フラグ
 	bool fadeStarted_ = false;
 
+	// カメラ
 	std::unique_ptr<Camera> camera_;
 
+	// ゲーム終了フラグ
 	bool isEnd = false;
+
+	// 仮ゲームクリア
+	bool isGameClear_ = false;
+
+	// ゲームクリア時のカメラ遷移・発射制御用
+	// 待機フェーズ
+	bool g_gameClearCameraWaiting = false;
+
+	// 待機タイマー
+	float g_gameClearWaitTimer = 0.0f;
+
+	// カメラ移動フェーズ
+	bool g_gameClearCameraMoving = false;
+
+	// カメラ移動タイマー
+	float g_gameClearMoveTimer = 0.0f;
+
+	// カメラ移動時間
+	const float g_gameClearMoveDuration = 2.0f;
+
+	// カメラ開始位置と目標位置
+	Vector3 g_gameClearCamStartPos = { 0.0f, 0.0f, 0.0f };
+	Vector3 g_gameClearCamTargetPos = { 0.0f, 0.0f, 0.0f };
+
+	// プレイヤー発射フェーズ
+	bool g_gameClearPlayerLaunched = false;
+
+	// フェード開始フラグ
+	bool g_gameClearFadeStarted = false;
+
+	// プレイヤー発射速度
+	const float g_gameClearPlayerLaunchSpeed = 16.0f; // 単位: ワールド単位 / 秒
+
+	// ゲームクリア演出用テキスト
+	std::unique_ptr<Object3d> gameClearText_;
+
+	// スペースキーを押してねテキスト
+	std::unique_ptr<Object3d> pressSpaceKeyText_;
+
+	// ゲームクリア演出用テキストの表示フラグ
+	bool g_gameClearTextVisible = false;
+
+	// ゲームクリア演出用テキストのワールド変換
+	WorldTransform gameClearTextTransform_;
+
+	// スペースキーを押してねテキストのワールド変換
+	WorldTransform pressSpaceKeyTransform_;
 };
 

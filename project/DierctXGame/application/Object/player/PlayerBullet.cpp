@@ -15,6 +15,7 @@ void PlayerBullet::Initialize(const Vector3& position)
 	// IDの設定
  	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerBullet));
 
+	// 初期化処理
 	isAlive_ = true;
 	lifeFrame_ = 180;
 	worldTransform_.Initialize();
@@ -28,7 +29,8 @@ void PlayerBullet::Initialize(const Vector3& position)
 	objectBullet_->Initialize("player_bullet.obj");
 	objectBullet_->SetScale(worldTransform_.scale_);
 	objectBullet_->SetTranslate(worldTransform_.translate_);
-	//objectBullet_->SetScale(worldTransform_.scale_);
+	
+	// 半径の設定
 	SetRadius(0.05f);
 }
 
@@ -44,8 +46,10 @@ void PlayerBullet::Update()
 	} else {
 		isAlive_ = false;
 	}
+	// ワールド変換の更新
 	worldTransform_.Update();
-	//objectBullet_->SetScale(worldTransform_.scale_);
+	
+	// オブジェクトの更新
 	objectBullet_->SetTranslate(worldTransform_.translate_);
 	objectBullet_->Update();
 	
@@ -54,6 +58,7 @@ void PlayerBullet::Update()
 
 void PlayerBullet::Draw()
 {
+	// プレイヤー弾の描画
 	objectBullet_->Draw();
 }
 
@@ -74,5 +79,6 @@ void PlayerBullet::OnCollision(Collider* other)
 
 Vector3 PlayerBullet::GetCenterPosition() const
 {
+	// プレイヤー弾の中心座標を取得
 	return worldTransform_.translate_;
 }

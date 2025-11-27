@@ -92,9 +92,6 @@ public: // メンバ関数
 	// DXCコンパイラの生成
 	void CreateDXCCompiler();
 
-	// ImGuiの初期化
-	void ImGuiInitialize();
-
 	// RenderTextureに対してのSceneの描画
 	void PreRenderScene();
 

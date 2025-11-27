@@ -156,8 +156,7 @@ void SRFramework::PreDraw()
    // 前フレームのポストエフェクト後なので
    // [D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE]（SRV用）になっている
 
-	// 深度バッファを「書き込み用」に遷移
-	//dxCommon->TransitionDepthBufferToWrite();
+
 
 	// --- ここでの深度バッファ状態 ---
 	// [D3D12_RESOURCE_STATE_DEPTH_WRITE]（書き込み

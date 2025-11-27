@@ -77,7 +77,6 @@ void Enemy::Update()
 	Move();
 	
 	// 敵の攻撃
-	//Attack();
 	if (controlEnabled_) {
 		attack_->Update(this, player_, bullets_, 1.0f / 60.0f);
 	}
@@ -140,17 +139,7 @@ void Enemy::Move()
 
 void Enemy::Attack()
 {
-	//if (!isAlive_) return;
-	//shotTimer_ -= 1.0f / 60.0f;
-	//if (shotTimer_ <= 0.0f) {
-	//	// プレイヤーの方向に発射（例：X軸負方向に発射）
-	//	Vector3 velocity = { -0.1f, 0.0f, 0.0f };
-	//	auto bullet = std::make_unique<EnemyBullet>();
-	//	bullet->Initialize(worldTransform_.translate_, velocity);
-	//	bullet->Update();
-	//	bullets_.push_back(std::move(bullet));
-	//	shotTimer_ = shotInterval_;
-	//}
+
 }
 
 void Enemy::OnCollision(Collider* other)

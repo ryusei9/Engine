@@ -28,6 +28,7 @@ void Player::Initialize()
 	// プレイヤーのカメラを取得
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
 
+	// プレイヤーの3Dオブジェクトを生成
 	object3d_ = std::make_unique<Object3d>();
 
 	// プレイヤーの3Dオブジェクトを初期化
@@ -35,6 +36,7 @@ void Player::Initialize()
 
 	SetRadius(radius_); // コライダーの半径を設定
 
+	// パーティクルマネージャーの取得とパーティクルグループの作成
 	particleManager_->GetInstance()->CreateParticleGroup("thruster", "resources/circle2.png");
 	particleManager_->GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
 
@@ -51,18 +53,8 @@ void Player::Initialize()
 }
 
 void Player::Update()
-{// プレイヤーの更新
-	//if (!isAlive_) {
-	//	respawnTimer_ -= 1.0f / 60.0f;
-	//	if (respawnTimer_ <= 0.0f) {
-	//		// 復活
-	//		isAlive_ = true;
-	//		worldTransform_.translate_ = { 0.0f, 0.0f, 0.0f }; // 初期位置に戻す
-	//		hp_ = 1;
-	//		hasPlayedDeathParticle_ = false;
-	//	}
-	//	return; // 死亡中は何もしない
-	//}
+{
+	// プレイヤーの更新
 	BaseCharacter::Update();
 
 	// 弾の削除
@@ -88,6 +80,25 @@ void Player::Update()
 		Move();
 		Attack();
 	}
+
+	float yRad = worldTransform_.rotate_.y;
+	Vector3 leftDir = {
+		-cosf(yRad), // X
+		0.0f,        // Y
+		sinf(yRad)   // Z
+	};
+
+	// 勢いの強さはvelocityの大きさで調整
+	float power = 2.0f + velocity_.x * 1.5f; // 例: X速度で強さを変える
+	Vector3 particleVelocity = leftDir * power;
+
+	// パーティクルの発生位置（プレイヤーの中心 or 左側に少しオフセットしてもOK）
+	Vector3 emitPos = worldTransform_.translate_;
+	// Update
+	thrusterEmitter_->SetPosition(worldTransform_.translate_ - Vector3(0.2f, 0.0f, 0.0f));
+	thrusterEmitter_->SetVelocity(particleVelocity);
+	thrusterEmitter_->Update();
+	// ワールド変換の更新
 	worldTransform_.Update();
 
 	
@@ -101,9 +112,11 @@ void Player::Update()
 
 void Player::Draw()
 {
-
+	// プレイヤーの描画
+	// 死亡していなければ描画
 	if (!isAlive_) return;
 	BaseCharacter::Draw();
+	// 弾の描画
 	for (auto& bullet : bullets_) {
 		bullet->Draw();
 	}
@@ -112,13 +125,6 @@ void Player::Draw()
 
 void Player::Move()
 {
-
-	float yRad = worldTransform_.rotate_.y;
-	Vector3 leftDir = {
-		-cosf(yRad), // X
-		0.0f,        // Y
-		sinf(yRad)   // Z
-	};
 	// 速度をリセット
 	velocity_ = { 0.0f, 0.0f, 0.0f };
 
@@ -138,17 +144,6 @@ void Player::Move()
 
 	// 速度を座標に反映
 	worldTransform_.translate_ += velocity_;
-
-	// 勢いの強さはvelocityの大きさで調整
-	float power = 2.0f + velocity_.x * 1.5f; // 例: X速度で強さを変える
-	Vector3 particleVelocity = leftDir * power;
-
-	// パーティクルの発生位置（プレイヤーの中心 or 左側に少しオフセットしてもOK）
-	Vector3 emitPos = worldTransform_.translate_;
-	// Update
-	thrusterEmitter_->SetPosition(worldTransform_.translate_ - Vector3(0.2f,0.0f,0.0f));
-	thrusterEmitter_->SetVelocity(particleVelocity);
-	thrusterEmitter_->Update();
 }
 
 void Player::Attack()
@@ -203,6 +198,7 @@ void Player::OnCollision(Collider* other)
 }
 
 void Player::DrawImGui() {
+	// ImGuiでの描画
 #ifdef USE_IMGUI
 	object3d_->DrawImGui();
 	ImGui::Begin("Player Info");
@@ -215,12 +211,14 @@ void Player::DrawImGui() {
 
 Vector3 Player::GetCenterPosition() const
 {
+	// プレイヤーの中心座標を取得
 	const Vector3 offset = { 0.0f, 0.0f, 0.0f }; // プレイヤーの中心を考慮
 	Vector3 worldPosition = worldTransform_.translate_ + offset;
 	return worldPosition;
 }
 
 void Player::PlayDeathParticleOnce() {
+	// プレイヤー死亡時に一度だけパーティクルを出す
 	if (!hasPlayedDeathParticle_) {
 		if (explosionEmitter_) {
 			explosionEmitter_->SetPosition(worldTransform_.translate_); // 位置をセット

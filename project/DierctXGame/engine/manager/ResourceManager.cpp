@@ -2,6 +2,19 @@
 #include <cassert>
 #include <Camera.h>
 #include <Inverse.h>
+
+//
+// ResourceManager
+// - Direct3D12 の Upload ヒープ上にサイズ指定のバッファリソースを作成して返すユーティリティ関数を提供する。
+// - 主に頂点 / インデックス / 定数バッファなど、CPU から直接書き込む用途のリソースを簡易に確保するために利用する。
+//
+// 注意事項（設計メモ）:
+// - 本関数は Upload ヒープ（D3D12_HEAP_TYPE_UPLOAD）でリソースを作成する。
+//   Upload ヒープは CPU からの書き込みが容易だが、GPU 側の読み取り性能は Default ヒープに比べ劣る。
+//   大きな静的リソースや頻繁に参照される大容量データは Default ヒープを作成し、Upload バッファ経由で転送する実装を推奨する。
+// - sizeInBytes はバイト単位のリソースサイズ。呼び出し側で適切に計算すること（必要ならアライメント調整を行う）。
+// - 生成に失敗した場合は assert で止める実装になっている（リリースでの堅牢性が必要ならエラー処理を拡張する）。
+//
 Microsoft::WRL::ComPtr<ID3D12Resource> ResourceManager::CreateBufferResource(ID3D12Device* device, size_t sizeInBytes)
 {
 	// DXGIファクトリーの生成

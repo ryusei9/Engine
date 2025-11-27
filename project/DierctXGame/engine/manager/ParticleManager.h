@@ -9,6 +9,8 @@
 #include "Material.h"
 #include <ParticleType.h>
 
+
+
 class DirectXCommon;// 前方宣言
 class Camera;// 前方宣言
 /*------パーティクルを管理するクラス------*/
@@ -78,6 +80,24 @@ public:
 		Microsoft::WRL::ComPtr<ID3D12Resource> instanceBuffer;
 	};
 
+	struct OverboostState {
+		bool initialized = false;
+		bool accumulating = false; // ため込み実行中
+		float timer = 0.0f;
+		float duration = 1.5f; // ため込む時間（秒）
+		bool burstActive = false; // 噴射中フラグ（継続）
+		float burstRate = 200.0f; // 1秒あたりに spawn するパーティクル数（調整可）
+		float burstTimer = 0.0f;
+		float spawnAccumulator = 0.0f; // 小数の繰り越し用
+		int initialBurst = 60; // ため込み終了時に一回だけ出す初回バースト数
+		Vector3 center = { 0.0f, 0.0f, 0.0f }; // ため込む中心位置
+
+		// 追加: 放出方向（正規化して使う）
+		Vector3 outDirection = { -1.0f, 0.0f, 0.0f }; // デフォルトはワールド左
+		// 追加: Y/Z に混ぜるランダム振幅
+		float spreadY = 0.2f;
+		float spreadZ = 0.2f;
+	};
 	
 
 	/*------メンバ関数------*/
@@ -131,6 +151,9 @@ public:
 	// スラスターパーティクルの生成
 	Particle MakeNewThrusterParticle(std::mt19937& randomEngine, const Vector3& translate);
 
+	// ため込み用の小さな粒子を生成する
+	Particle MakeNewOverboostParticle(std::mt19937& randomEngine, const Vector3& translate);
+
 	void UpdateExplosionParticle(Particle& particle);
 
 	/*------頂点データの作成------*/
@@ -167,6 +190,12 @@ public:
 
 	// パーティクルタイプの設定
 	void SetParticleType(ParticleType type);
+
+	// 追加：オーバーブーストの設定
+	void ConfigureOverboost(const std::string& groupName, float duration, int initialBurst, float burstRate);
+
+	// 追加：オーバーブーストのトリガー
+	void TriggerOverboost(const std::string& groupName, const Vector3& center, int initialAccumCount, const Vector3& outDirection);
 private:
 	static ParticleManager* instance;
 
@@ -233,5 +262,8 @@ private:
 	};
 
 	Material* materialData_ = nullptr;
+
+	// グローバルにグループごとの状態を保持
+	static std::unordered_map<std::string, OverboostState> g_overboostStates;
 };
 

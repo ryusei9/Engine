@@ -17,7 +17,7 @@ void ParticleEmitter::Update()
 		}else if (isThruster_) {
 			manager_->EmitWithVelocity(groupName_, position_, particleCount_, velocity_);
 		}else {
-			manager_->Emit(groupName_, position_, particleCount_);
+			//manager_->Emit(groupName_, position_, particleCount_);
 		}
 		interval_ -= static_cast<float>(particleRate) / particleRate;
 	}

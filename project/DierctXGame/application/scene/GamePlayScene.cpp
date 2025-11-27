@@ -96,7 +96,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(Object3dCommon::GetInstance()->GetDefaultCamera());
-	
+
 	// スタート演出用カメラ初期化
 	isStartCameraEasing_ = true;
 	startCameraTimer_ = 0.0f;
@@ -107,7 +107,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	gameClearText_ = std::make_unique<Object3d>();
 	gameClearText_->Initialize("StageClear.obj");
-	
+
 	gameClearTextTransform_.Initialize();
 	gameClearTextTransform_.scale_ = Vector3(0.528f, 0.528f, 0.528f);
 	gameClearTextTransform_.rotate_.x = -1.694f;
@@ -123,6 +123,16 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	//cameraMode_ = CameraMode::Free;
 	//isGameClear_ = true;
 #endif
+
+	// --- Overboost パーティクルグループとエミッタ生成 ---
+	particleManager = ParticleManager::GetInstance(); // もしまだセットしていなければ
+	particleManager->CreateParticleGroup("overboost", "resources/circle2.png");
+
+	overboostEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "overboost");
+	// 初期値をセット（エミッタ自体は通常のスラスターパーティクルを使用する想定）
+	overboostEmitter_->SetParticleRate(static_cast<uint32_t>(overboostBurstRate_));
+	overboostEmitter_->SetParticleCount(static_cast<uint32_t>(overboostInitialBurst_));
+	//overboostEmitter_->SetThruster(true); // 必要なら設定
 }
 
 void GamePlayScene::Update()
@@ -165,7 +175,32 @@ void GamePlayScene::Update()
 		// プレイヤーの更新
 		player_->Update();
 
-		
+		// --- Overboost エミッターをプレイヤーの後ろに追従させる ---
+		if (overboostEmitter_ && player_) {
+			// プレイヤー中心位置をメンバに保存（外部からも参照できるように）
+			overboostCenter_ = player_->GetCenterPosition();
+
+			// 自動追従が有効ならプレイヤーの「後ろ」に配置
+			if (overboostFollowEnabled && overboostEmitterAutoUpdate) {
+				// プレイヤーの Y 回転から前方ベクトルを作成（forward = { sin(y), 0, cos(y) }）
+				float yRad = player_->GetRotation().y;
+				Vector3 forward = { std::sin(yRad), 0.0f, std::cos(yRad) };
+
+				// エミッターをプレイヤーの後方にオフセット（メンバ overboostEmitPos_ に格納）
+				overboostEmitPos_ = overboostCenter_ - forward * overboostFollowDistance;
+
+				// 高さや追加オフセットを反映
+				overboostEmitPos_.y += overboostFollowHeight;
+				overboostEmitPos_ = overboostEmitPos_ + overboostFollowOffset;
+
+				// 実際にエミッタへセット
+				overboostEmitter_->SetPosition(overboostEmitPos_);
+			}
+
+			// エミッタ自体の更新（表示の都合で常に呼んでおく）
+			overboostEmitter_->Update();
+		}
+
 		if (!isStartCameraEasing_) {
 			UpdatePlayerFollowCamera();
 			// プレイヤーの移動制限
@@ -229,7 +264,7 @@ void GamePlayScene::Update()
 	//particleEmitter1->SetParticleRate(1);
 	//particleEmitter1->Update();
 
-	
+
 	//// パーティクルグループ"UV"の更新
 	/*particleEmitter2->SetPosition(particlePosition2);
 	particleEmitter2->SetParticleRate(8);
@@ -257,7 +292,7 @@ void GamePlayScene::Update()
 		break;
 	case CameraMode::centerPlayer:
 		//cameraManager_->SetCameraPosition(player_->GetWorldTransform().translate_ + Vector3{ 0.0f,1.0f,-10.0f });
-		cameraManager_->LookAtTarget(player_->GetPosition(),true);
+		cameraManager_->LookAtTarget(player_->GetPosition(), true);
 	}
 
 	// スタート演出カメラ初期化
@@ -267,7 +302,8 @@ void GamePlayScene::Update()
 		cameraManager_->Update();
 		Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
 		return; // 他の更新をスキップ（必要に応じて調整）
-	} else {
+	}
+	else {
 
 		// カメラをカーブに沿って移動
 		//UpdateCameraOnCurve();
@@ -352,7 +388,8 @@ void GamePlayScene::Draw()
 	if (!isGameOver_) {
 		// プレイヤーの描画
 		player_->Draw();
-	} else {
+	}
+	else {
 
 	}
 
@@ -420,6 +457,53 @@ void GamePlayScene::DrawImGui()
 	cameraManager_->DrawImGui();
 	fadeManager_->DrawImGui();
 	//ball->DrawImGui();
+
+	ImGui::Begin("Particle Test");
+	{
+
+		// Overboost モデル用のパラメータ設定
+		ImGui::SliderFloat("Overboost Duration (s)", &overboostDuration_, 0.1f, 5.0f);
+		ImGui::SliderInt("Initial Burst", &overboostInitialBurst_, 0, 1000);
+		ImGui::SliderFloat("Burst Rate (/s)", &overboostBurstRate_, 0.0f, 2000.0f);
+
+		if (ImGui::Button("Apply Overboost Settings")) {
+			// パーティクルマネージャの設定反映
+			particleManager->ConfigureOverboost("overboost", overboostDuration_, overboostInitialBurst_, overboostBurstRate_);
+			// エミッタ側のレートも更新しておくと見た目合わせしやすい
+			if (overboostEmitter_) {
+				overboostEmitter_->SetParticleRate(static_cast<uint32_t>(overboostBurstRate_));
+				overboostEmitter_->SetParticleCount(static_cast<uint32_t>(overboostInitialBurst_));
+			}
+		}
+
+		ImGui::SameLine();
+
+		// Trigger ボタン（プレイヤー位置に発動）
+		if (ImGui::Button("Trigger Overboost at Player")) {
+			// プレイヤー中心をメンバに保存してから発動（ImGui と競合しない）
+			overboostCenter_ = player_->GetCenterPosition();
+
+			// プレイヤーのローカル左（簡易）: Y 回転から計算
+			float yRad = player_->GetRotation().y;
+			Vector3 localLeft = { -std::cos(yRad), 0.0f, std::sin(yRad) };
+			// 少し上向きにしたければ localLeft.y = 0.1f; 等で調整
+
+			// 設定を反映して発動
+			particleManager->ConfigureOverboost("overboost", overboostDuration_, overboostInitialBurst_, overboostBurstRate_);
+			particleManager->TriggerOverboost("overboost", overboostEmitPos_, overboostInitialBurst_, localLeft);
+		}
+		ImGui::Separator();
+		ImGui::Text("Overboost Follow Settings");
+		ImGui::Checkbox("Enable Follow##overboost", &overboostFollowEnabled);
+		ImGui::Checkbox("Auto Update Emitter##overboost", &overboostEmitterAutoUpdate);
+		ImGui::SliderFloat("Follow Distance##overboost", &overboostFollowDistance, 0.0f, 5.0f);
+		ImGui::SliderFloat("Follow Height##overboost", &overboostFollowHeight, -5.0f, 5.0f);
+		ImGui::SliderFloat3("Follow Offset##overboost", &overboostFollowOffset.x, -5.0f, 5.0f);
+		ImGui::SliderFloat3("Emitter Position##overboost", &overboostEmitPos_.x, -50.0f, 50.0f);
+		ImGui::SliderFloat3("Center Position##overboost", &overboostCenter_.x, -50.0f, 50.0f);
+	}
+
+	ImGui::End();
 #endif
 }
 
@@ -491,7 +575,7 @@ void GamePlayScene::DrawImGuiImportObjectsFromJson()
 		ImGui::PopID();
 	}
 	// レベルデータから生成した敵のImGui調整
-	for (size_t i = 0;i < enemies_.size();++i) {
+	for (size_t i = 0; i < enemies_.size(); ++i) {
 		auto& enemy = enemies_[i];
 		ImGui::Begin("Enemy");
 		ImGui::Text("Enemy %d", static_cast<int>(i + 1));
@@ -580,7 +664,8 @@ void GamePlayScene::UpdateStartCameraEasing()
 	float easeT;
 	if (t < 0.5f) {
 		easeT = 4.0f * t * t * t;
-	} else {
+	}
+	else {
 		float p = (t - 1.0f);
 		easeT = 1.0f + 4.0f * p * p * p;
 	}
@@ -612,41 +697,41 @@ void GamePlayScene::UpdateStartCameraEasing()
 
 void GamePlayScene::UpdateCameraOnCurve()
 {
-    // カーブ座標が2点以上ある場合のみ移動
-    if (curvePoints_.size() >= 2) {
-        // 最後まで到達したら停止
-        if (curveIndex_ >= curvePoints_.size() - 1) {
-            // 最終座標で停止
-            cameraManager_->SetCameraPosition(curvePoints_.back());
+	// カーブ座標が2点以上ある場合のみ移動
+	if (curvePoints_.size() >= 2) {
+		// 最後まで到達したら停止
+		if (curveIndex_ >= curvePoints_.size() - 1) {
+			// 最終座標で停止
+			cameraManager_->SetCameraPosition(curvePoints_.back());
 			//isEnd = true;
 			isGameClear_ = true;
-            return;
-        }
+			return;
+		}
 
-        // 現在の区間の始点・終点
-        const Vector3& start = curvePoints_[curveIndex_];
-        const Vector3& end = curvePoints_[curveIndex_ + 1];
+		// 現在の区間の始点・終点
+		const Vector3& start = curvePoints_[curveIndex_];
+		const Vector3& end = curvePoints_[curveIndex_ + 1];
 
-        // 線形補間
-        Vector3 lerpPos;
-        lerpPos.x = std::lerp(start.x, end.x, curveProgress_);
-        lerpPos.y = std::lerp(start.y, end.y, curveProgress_);
-        lerpPos.z = std::lerp(start.z, end.z, curveProgress_);
+		// 線形補間
+		Vector3 lerpPos;
+		lerpPos.x = std::lerp(start.x, end.x, curveProgress_);
+		lerpPos.y = std::lerp(start.y, end.y, curveProgress_);
+		lerpPos.z = std::lerp(start.z, end.z, curveProgress_);
 
-        // カメラ座標を更新
-        cameraManager_->SetCameraPosition(lerpPos);
+		// カメラ座標を更新
+		cameraManager_->SetCameraPosition(lerpPos);
 
-        // 進行度を進める
-        curveProgress_ += curveSpeed_;
-        if (curveProgress_ >= 1.0f) {
-            curveProgress_ = 0.0f;
-            curveIndex_++;
-            // 次の区間がなければ停止
-            if (curveIndex_ >= curvePoints_.size() - 1) {
-                cameraManager_->SetCameraPosition(curvePoints_.back());
-            }
-        }
-    }
+		// 進行度を進める
+		curveProgress_ += curveSpeed_;
+		if (curveProgress_ >= 1.0f) {
+			curveProgress_ = 0.0f;
+			curveIndex_++;
+			// 次の区間がなければ停止
+			if (curveIndex_ >= curvePoints_.size() - 1) {
+				cameraManager_->SetCameraPosition(curvePoints_.back());
+			}
+		}
+	}
 }
 
 void GamePlayScene::RestrictPlayerInsideCameraView() {
@@ -681,7 +766,7 @@ void GamePlayScene::RestrictPlayerInsideCameraView() {
 		newWorldPos.x / newWorldPos.w,
 		newWorldPos.y / newWorldPos.w,
 		newWorldPos.z / newWorldPos.w
-	};  
+	};
 	player_->SetPosition(clampedWorldPos);
 }
 
@@ -689,10 +774,10 @@ void GamePlayScene::UpdatePlayerFollowCamera()
 {
 	Vector3 prevCamPos = cameraManager_->GetMainCamera()->GetTranslate();
 
-	if(!isStartCameraEasing_){
+	if (!isStartCameraEasing_) {
 		if (isGameClear_) return;
 		// カメラをカーブに沿って移動
-		UpdateCameraOnCurve ();
+		UpdateCameraOnCurve();
 	}
 	Camera* cam = cameraManager_->GetMainCamera();
 	Vector3 camPos = cam->GetTranslate();
@@ -717,7 +802,7 @@ void GamePlayScene::UpdatePlayerFollowCamera()
 	// ここで入力処理を反映（例: WASDで相対移動）
 	//player_->Update();
 
-	
+
 }
 
 bool GamePlayScene::IsInCameraView(const Vector3& worldPos)
@@ -762,7 +847,7 @@ void GamePlayScene::UpdateGameClear()
 		if (g_gameClearCameraWaiting) {
 			g_gameClearWaitTimer -= 1.0f / 60.0f;
 			if (g_gameClearWaitTimer <= 0.0f) {
-				
+
 				g_gameClearCameraWaiting = false;
 				g_gameClearCameraMoving = true;
 				g_gameClearMoveTimer = 0.0f;

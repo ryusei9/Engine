@@ -13,9 +13,13 @@
 #include <numbers>
 #include <Lerp.h>
 #include "DirectXCommon.h"
+#include <cmath>
+#include <unordered_map>
 
 using namespace Logger;
 
+ParticleManager* ParticleManager::instance = nullptr;
+std::unordered_map<std::string, ParticleManager::OverboostState> ParticleManager::g_overboostStates;
 //ParticleManager* ParticleManager::instance = nullptr;
 
 ParticleManager* ParticleManager::GetInstance()
@@ -77,7 +81,7 @@ void ParticleManager::Update()
 	uvTransformMatrix = Multiply::Multiply(uvTransformMatrix, MakeTranslateMatrix::MakeTranslateMatrix(uvTransform.translate));
 	materialData_->uvTransform = uvTransformMatrix;
 
-	
+
 	//uvTransform.translate.x += 0.0001f;
 
 	Matrix4x4 billboardMatrix = Multiply::Multiply(backToFrontMatrix, cameraMatrix);
@@ -86,21 +90,109 @@ void ParticleManager::Update()
 	billboardMatrix.m[3][2] = 0.0f;
 	//billboardMatrix = MakeIdentity4x4();
 	// パーティクルグループごとに更新処理
-	for (auto& group : particleGroups)
+	for (auto& [groupName, group] : particleGroups)
 	{
-		group.second.numParticles = 0; // 生存パーティクル数をリセット
+		group.numParticles = 0; // 生存パーティクル数をリセット
 
-		for (std::list<Particle>::iterator particleIterator = group.second.particles.begin(); particleIterator != group.second.particles.end();)
+		// Overboost 用状態参照（なければ find は end を返す）
+		auto itState = g_overboostStates.find(groupName);
+		if (itState != g_overboostStates.end())
+		{
+			OverboostState& st = itState->second;
+
+			std::normal_distribution<float> jitterYNormal(0.0f, st.spreadY * 0.5f);
+			std::normal_distribution<float> jitterZNormal(0.0f, st.spreadZ * 0.5f);
+
+			// ため込みフェーズ：既存の粒子を中心へ引き寄せる
+			if (st.accumulating)
+			{
+				st.timer += kDeltaTime;
+
+				for (auto& p : group.particles)
+				{
+					// 中心へ向かう加速（シンプルな引力）
+					Vector3 toCenter = Vector3{ st.center.x - p.transform.translate.x,
+												st.center.y - p.transform.translate.y,
+												st.center.z - p.transform.translate.z };
+					float dist = std::sqrt(toCenter.x * toCenter.x + toCenter.y * toCenter.y + toCenter.z * toCenter.z) + 1e-6f;
+					Vector3 dir = Vector3{ toCenter.x / dist, toCenter.y / dist, toCenter.z / dist };
+					// 引力の強さは距離や時間で調整可能
+					float attractStrength = 6.0f;
+					p.velocity.x += dir.x * attractStrength * kDeltaTime;
+					p.velocity.y += dir.y * attractStrength * kDeltaTime;
+					p.velocity.z += dir.z * attractStrength * kDeltaTime;
+					// 少し減衰を入れると収束しやすい
+					p.velocity = p.velocity * 0.96f;
+				}
+
+				if (st.timer >= st.duration)
+				{
+					// ため込み終了 -> 噴射フェーズ開始
+					st.accumulating = false;
+					st.burstActive = true;
+					st.burstTimer = 0.0f;
+					st.spawnAccumulator = 0.0f;
+
+					// オプション：ため込み終わりに大きめのバーストを一度発生させる
+					int initialBurst = st.initialBurst > 0 ? st.initialBurst : 60;
+					
+					for (int i = 0; i < initialBurst; ++i)
+					{
+						Particle p = MakeNewThrusterParticle(randomEngine, st.center);
+						float speed = std::sqrt(p.velocity.x * p.velocity.x + p.velocity.y * p.velocity.y + p.velocity.z * p.velocity.z);
+						if (speed < 1e-4f) speed = 1.0f;
+						float multiplier = 5.0f;
+
+						float jy = jitterYNormal(randomEngine);
+						float jz = jitterZNormal(randomEngine);
+
+						p.velocity = Vector3{
+							st.outDirection.x * speed * multiplier,
+							st.outDirection.y * speed * multiplier + jy,
+							st.outDirection.z * speed * multiplier + jz
+						};
+						group.particles.push_back(p);
+					}
+				}
+			}
+
+			// 噴射継続フェーズ：毎フレーム spawnRate に応じてパーティクルを追加
+			if (st.burstActive)
+			{
+				st.burstTimer += kDeltaTime;
+				float toSpawn = st.burstRate * kDeltaTime + st.spawnAccumulator;
+				int spawnCount = int(std::floor(toSpawn));
+				st.spawnAccumulator = toSpawn - spawnCount;
+				for (int i = 0; i < spawnCount; ++i)
+				{
+					Particle p = MakeNewThrusterParticle(randomEngine, st.center);
+					float speed = std::sqrt(p.velocity.x * p.velocity.x + p.velocity.y * p.velocity.y + p.velocity.z * p.velocity.z);
+					if (speed < 1e-4f) speed = 1.0f;
+					float multiplier = 6.0f;
+					float jy = jitterYNormal(randomEngine);
+					float jz = jitterZNormal(randomEngine);
+					p.velocity = Vector3{
+						st.outDirection.x * speed * multiplier,
+						st.outDirection.y * speed * multiplier + jy,
+						st.outDirection.z * speed * multiplier + jz
+					};
+					group.particles.push_back(p);
+				}
+			}
+		}
+
+		// 既存の粒子更新ループ（あなたの元処理と同様）
+		for (std::list<Particle>::iterator particleIterator = group.particles.begin(); particleIterator != group.particles.end();)
 		{
 			// 生存時間を超えたパーティクルは削除
 			if ((*particleIterator).lifeTime <= (*particleIterator).currentTime)
 			{
-				particleIterator = group.second.particles.erase(particleIterator);
+				particleIterator = group.particles.erase(particleIterator);
 				continue;
 			}
 
 			// 最大インスタンス数を超えない場合のみ更新
-			if (group.second.numParticles < kNumMaxInstance)
+			if (group.numParticles < kNumMaxInstance)
 			{
 				// 速度を適用して位置を更新
 				(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime;
@@ -125,13 +217,13 @@ void ParticleManager::Update()
 				Matrix4x4 worldViewProjectionMatrix = Multiply::Multiply(worldMatrix, viewProjectionMatrix);
 
 				// インスタンシング用データを設定
-				group.second.instanceData[group.second.numParticles].WVP = worldViewProjectionMatrix;
-				group.second.instanceData[group.second.numParticles].World = worldMatrix;
+				group.instanceData[group.numParticles].WVP = worldViewProjectionMatrix;
+				group.instanceData[group.numParticles].World = worldMatrix;
 
 				// 色とアルファ値を設定
 				float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
-				group.second.instanceData[group.second.numParticles].color = (*particleIterator).color;
-				group.second.instanceData[group.second.numParticles].color.w = alpha;
+				group.instanceData[group.numParticles].color = (*particleIterator).color;
+				group.instanceData[group.numParticles].color.w = alpha;
 
 				if (isWind)
 				{
@@ -156,7 +248,7 @@ void ParticleManager::Update()
 					break;
 				}
 				// 生存パーティクル数をカウント
-				++group.second.numParticles;
+				++group.numParticles;
 			}
 
 			// 次のパーティクルに進む
@@ -296,6 +388,17 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
 	// 最大数に達している場合
 	if (particleGroup.particles.size() >= count) return;
 
+	// もし現在の particleType_ が Overboost なら、グループ状態を初期化してため込みを開始
+	if (particleType_ == ParticleType::Overboost) {
+		OverboostState& st = g_overboostStates[name];
+		st.initialized = true;
+		st.accumulating = true;
+		st.timer = 0.0f;
+		st.burstActive = false;
+		st.spawnAccumulator = 0.0f;
+		st.center = position;
+	}
+
 	// パーティクルの生成
 	for (uint32_t index = 0; index < count; ++index)
 	{
@@ -315,6 +418,13 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
 			break;
 		case ParticleType::Explosion:
 			// 爆発はEmitExplosionでやるのでここは普通のパーティクル
+			particle = MakeNewParticle(randomEngine, position);
+			break;
+		case ParticleType::Overboost:
+			// ため込み用の小粒子を外周に作る
+			particle = MakeNewOverboostParticle(randomEngine, position);
+			break;
+		default:
 			particle = MakeNewParticle(randomEngine, position);
 			break;
 		}
@@ -498,6 +608,40 @@ ParticleManager::Particle ParticleManager::MakeNewThrusterParticle(std::mt19937&
 	particle.lifeTime = 0.1f;
 	particle.currentTime = 0;
 	particle.velocity = { distribution(randomEngine),distribution(randomEngine),distribution(randomEngine) };
+
+	return particle;
+}
+
+ParticleManager::Particle ParticleManager::MakeNewOverboostParticle(std::mt19937& randomEngine, const Vector3& translate)
+{
+	Particle particle;
+
+	std::uniform_real_distribution<float> distAngle(0.0f, 2.0f * float(std::numbers::pi));
+	std::uniform_real_distribution<float> distRadius(1.2f, 3.0f);
+	std::uniform_real_distribution<float> distZ(-0.2f, 0.2f);
+	std::uniform_real_distribution<float> distLife(1.0f, 2.0f);
+	float angle = distAngle(randomEngine);
+	float radius = distRadius(randomEngine);
+
+	// 外周に配置して、中心に向かってゆっくり移動する初期速度を与える
+	Vector3 pos = translate + Vector3{ std::cos(angle) * radius, std::sin(angle) * radius, distZ(randomEngine) };
+	Vector3 dir = Vector3{ translate.x - pos.x, translate.y - pos.y, translate.z - pos.z };
+	float len = std::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z) + 1e-6f;
+	dir = Vector3{ dir.x / len, dir.y / len, dir.z / len };
+
+	particle.transform.scale = { 0.12f, 0.12f, 0.12f };
+	particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
+	particle.transform.translate = pos;
+	// 色はため込みらしいグラデ寄せ（好みで変更可）
+	particle.color = { 0.8f, 0.6f, 1.0f, 1.0f };
+	particle.lifeTime = distLife(randomEngine) + 2.0f; // ため込み＋噴射をまたいで残る可能性を確保
+	particle.currentTime = 0.0f;
+	// 中心へ向かうゆっくりな速度
+	float inwardSpeed = 1.8f;
+	particle.velocity = Vector3{ dir.x * inwardSpeed, dir.y * inwardSpeed, dir.z * inwardSpeed };
+
+	particle.isExplosion = false;
+	particle.isSubExplosion = false;
 
 	return particle;
 }
@@ -711,6 +855,51 @@ void ParticleManager::SetParticleType(ParticleType type)
 		CreateVertexData();
 		break;
 	}
+}
+
+void ParticleManager::ConfigureOverboost(const std::string& groupName, float duration, int initialBurst, float burstRate)
+{
+	OverboostState& st = g_overboostStates[groupName]; // 存在しなければ生成される
+	st.duration = duration;
+	st.initialBurst = initialBurst;
+	st.burstRate = burstRate;
+}
+
+void ParticleManager::TriggerOverboost(const std::string& groupName, const Vector3& center, int initialAccumCount, const Vector3& outDirection)
+{
+	// グループが存在するか確認
+	auto it = particleGroups.find(groupName);
+	if (it == particleGroups.end()) {
+		std::cerr << "TriggerOverboost: group '" << groupName << "' not found\n";
+		return;
+	}
+
+	// 古い particleType を保存して一時的に Overboost にする
+	ParticleType prevType = particleType_;
+	particleType_ = ParticleType::Overboost;
+
+	// Overboost 状態を初期化
+	OverboostState& st = g_overboostStates[groupName];
+	st.initialized = true;
+	st.accumulating = true;
+	st.timer = 0.0f;
+	st.burstActive = false;
+	st.spawnAccumulator = 0.0f;
+	st.center = center;
+
+	// outDirection を正規化して保存（ゼロベクトルは -X をデフォルト）
+	float len = std::sqrt(outDirection.x * outDirection.x + outDirection.y * outDirection.y + outDirection.z * outDirection.z);
+	if (len < 1e-6f) {
+		st.outDirection = { -1.0f, 0.0f, 0.0f };
+	} else {
+		st.outDirection = { outDirection.x / len, outDirection.y / len, outDirection.z / len };
+	}
+
+	// 外周の「ため込み粒子」を initialAccumCount 個生成する
+	Emit(groupName, center, static_cast<uint32_t>(initialAccumCount));
+
+	// 元の particleType に戻す
+	particleType_ = prevType;
 }
 
 void ParticleManager::CreateRootSignature()

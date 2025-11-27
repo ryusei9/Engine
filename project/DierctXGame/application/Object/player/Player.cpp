@@ -35,13 +35,13 @@ void Player::Initialize()
 
 	SetRadius(radius_); // コライダーの半径を設定
 
-	particleManager_->GetInstance()->CreateParticleGroup("thruster", "resources/circle2.png");
+	particleManager_->GetInstance()->CreateParticleGroup("thruster", "resources/boost.png");
 	particleManager_->GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
 
 	// 初期化
 	thrusterEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "thruster");
 	thrusterEmitter_->SetParticleRate(60); // 1秒間に60個
-	thrusterEmitter_->SetParticleCount(3);
+	thrusterEmitter_->SetParticleCount(6);
 	thrusterEmitter_->SetThruster(true); // スラスターエミッターを有効化
 
 	explosionEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "explosion");
@@ -90,6 +90,23 @@ void Player::Update()
 	}
 	worldTransform_.Update();
 
+	float yRad = worldTransform_.rotate_.y;
+	Vector3 leftDir = {
+		-cosf(yRad), // X
+		0.0f,        // Y
+		sinf(yRad)   // Z
+	};
+
+	// 勢いの強さはvelocityの大きさで調整
+	float power = 2.0f + velocity_.x * 1.5f; // 例: X速度で強さを変える
+	Vector3 particleVelocity = leftDir * power;
+
+	// パーティクルの発生位置（プレイヤーの中心 or 左側に少しオフセットしてもOK）
+	Vector3 emitPos = worldTransform_.translate_;
+	// Update
+	thrusterEmitter_->SetPosition(worldTransform_.translate_ - Vector3(0.2f, 0.0f, 0.0f));
+	thrusterEmitter_->SetVelocity(particleVelocity);
+	thrusterEmitter_->Update();
 	
 	// プレイヤーのワールド変換を更新
 	object3d_->SetCamera(camera_);
@@ -113,12 +130,7 @@ void Player::Draw()
 void Player::Move()
 {
 
-	float yRad = worldTransform_.rotate_.y;
-	Vector3 leftDir = {
-		-cosf(yRad), // X
-		0.0f,        // Y
-		sinf(yRad)   // Z
-	};
+	
 	// 速度をリセット
 	velocity_ = { 0.0f, 0.0f, 0.0f };
 
@@ -139,16 +151,6 @@ void Player::Move()
 	// 速度を座標に反映
 	worldTransform_.translate_ += velocity_;
 
-	// 勢いの強さはvelocityの大きさで調整
-	float power = 2.0f + velocity_.x * 1.5f; // 例: X速度で強さを変える
-	Vector3 particleVelocity = leftDir * power;
-
-	// パーティクルの発生位置（プレイヤーの中心 or 左側に少しオフセットしてもOK）
-	Vector3 emitPos = worldTransform_.translate_;
-	// Update
-	thrusterEmitter_->SetPosition(worldTransform_.translate_ - Vector3(0.2f,0.0f,0.0f));
-	thrusterEmitter_->SetVelocity(particleVelocity);
-	thrusterEmitter_->Update();
 }
 
 void Player::Attack()
@@ -209,6 +211,43 @@ void Player::DrawImGui() {
 	ImGui::Text("Charge Time: %.2f seconds", chargeTime_);
 	ImGui::Text("Is Charging: %s", isCharging_ ? "Yes" : "No");
 	ImGui::Text("Charge Ready: %s", chargeReady_ ? "Yes" : "No");
+	// --- Thruster controls ---
+	if (thrusterEmitter_) {
+		ImGui::Separator();
+		ImGui::Text("Thruster Emitter");
+
+		// particleRate slider
+		{
+			int rate = static_cast<int>(thrusterEmitter_->GetParticleRate());
+			if (ImGui::SliderInt("Thruster Rate##player", &rate, 0, 1000)) {
+				thrusterEmitter_->SetParticleRate(static_cast<uint32_t>(rate));
+			}
+		}
+
+		// particleCount slider
+		{
+			int cnt = static_cast<int>(thrusterEmitter_->GetParticleCount());
+			if (ImGui::SliderInt("Thruster Count##player", &cnt, 0, 64)) {
+				thrusterEmitter_->SetParticleCount(static_cast<uint32_t>(cnt));
+			}
+		}
+
+		// ON/OFF トグル（内部状態は Player 側で保持しないのでシンプルなトグルボタン）
+		{
+			static bool thrusterEnabled = true; // Initialize() で SetThruster(true) している想定
+			if (ImGui::Button(thrusterEnabled ? "Disable Thruster" : "Enable Thruster")) {
+				thrusterEnabled = !thrusterEnabled;
+				thrusterEmitter_->SetThruster(thrusterEnabled);
+			}
+		}
+
+		// 現在のエミッタ位置の表示（読み取り専用）
+		{
+			const Vector3& pos = thrusterEmitter_->GetPosition();
+			ImGui::Text("Emitter Pos: %.2f, %.2f, %.2f", pos.x, pos.y, pos.z);
+		}
+	}
+
 	ImGui::End();
 #endif
 }

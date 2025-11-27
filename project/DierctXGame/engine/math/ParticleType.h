@@ -6,5 +6,6 @@ enum class ParticleType {
 	Plane,
 	Ring,
 	Cylinder,
-	Explosion
+	Explosion,
+	Overboost
 };

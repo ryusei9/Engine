@@ -221,5 +221,21 @@ private:
 	WorldTransform gameClearTextTransform_;
 
 	WorldTransform pressSpaceKeyTransform_;
+
+public:
+	// Overboost 用エミッタ（シーン側でもパラメータを持って ImGui に表示する）
+	std::unique_ptr<ParticleEmitter> overboostEmitter_ = nullptr;
+	Vector3 overboostCenter_{ 0.0f, 0.0f, 0.0f }; // ため込み／発動に使う中心位置
+	Vector3 overboostEmitPos_{ 0.0f, 0.0f, 0.0f }; // 実際にエミッタを置く位置（毎フレーム更新）
+	float overboostDuration_ = 1.5f;
+	int overboostInitialBurst_ = 60;
+	float overboostBurstRate_ = 200.0f;
+
+	// 追加: エミッター追従設定（ImGui と競合しないようメンバに統合）
+	bool overboostFollowEnabled = true;            // エミッタをプレイヤーに追従させるか
+	bool overboostEmitterAutoUpdate = true;        // 毎フレーム自動で SetPosition/Update するか
+	float overboostFollowDistance = 0.8f;          // プレイヤーの後方オフセット距離
+	float overboostFollowHeight = 0.0f;            // 高さオフセット（Y）
+	Vector3 overboostFollowOffset = { 0.0f,0.0f,0.0f }; // 追加の任意オフセット（ローカルで微調整）
 };
 

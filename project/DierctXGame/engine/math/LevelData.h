@@ -36,6 +36,7 @@ struct LevelData {
     struct CurveData {
         std::string fileName;
         std::vector<Vector3> points;
+        std::vector<float> times;
     };
     std::vector<CurveData> curves;
 };

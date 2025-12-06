@@ -7,6 +7,9 @@
 #include <iostream>
 #include <Multiply.h>
 #include <cmath>
+#undef min
+#undef max
+
 void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
 	// スプライトの初期化
@@ -571,41 +574,57 @@ void GamePlayScene::UpdateStartCameraEasing()
 
 void GamePlayScene::UpdateCameraOnCurve()
 {
-    // カーブ座標が2点以上ある場合のみ移動
-    if (curvePoints_.size() >= 2) {
-        // 最後まで到達したら停止
-        if (curveIndex_ >= curvePoints_.size() - 1) {
-            // 最終座標で停止
-            cameraManager_->SetCameraPosition(curvePoints_.back());
-			//isEnd = true;
-			isGameClear_ = true;
-            return;
-        }
+	// 点が2つ以下なら動かない
+	if (curvePoints_.size() < 2) return;
 
-        // 現在の区間の始点・終点
-        const Vector3& start = curvePoints_[curveIndex_];
-        const Vector3& end = curvePoints_[curveIndex_ + 1];
+	// 最後の制御点到達 → ゲームクリア
+	if (curveIndex_ >= curvePoints_.size() - 1) {
+		cameraManager_->SetCameraPosition(curvePoints_.back());
+		isGameClear_ = true;
+		return;
+	}
 
-        // 線形補間
-        Vector3 lerpPos;
-        lerpPos.x = std::lerp(start.x, end.x, curveProgress_);
-        lerpPos.y = std::lerp(start.y, end.y, curveProgress_);
-        lerpPos.z = std::lerp(start.z, end.z, curveProgress_);
+	// ------- 時間制御 ----------
+	// 次の制御点までの時間(JSON time)
+	float duration = levelData_->curves[0].times[curveIndex_ + 1];
+	if (curveIndex_ == 0) duration = levelData_->curves[0].times[1]; // 最初はスキップ
 
-        // カメラ座標を更新
-        cameraManager_->SetCameraPosition(lerpPos);
+	segmentTimer_ += kDeltaTime;
+	float t = std::clamp(segmentTimer_ / duration, 0.0f, 1.0f);
 
-        // 進行度を進める
-        curveProgress_ += curveSpeed_;
-        if (curveProgress_ >= 1.0f) {
-            curveProgress_ = 0.0f;
-            curveIndex_++;
-            // 次の区間がなければ停止
-            if (curveIndex_ >= curvePoints_.size() - 1) {
-                cameraManager_->SetCameraPosition(curvePoints_.back());
-            }
-        }
-    }
+	// ------- Catmull-Rom 用 index ----------
+	size_t p0 = std::max((int)curveIndex_ - 1, 0);
+	size_t p1 = curveIndex_;
+	size_t p2 = curveIndex_ + 1;
+	size_t p3 = std::min((int)curvePoints_.size() - 1, (int)curveIndex_ + 2);
+
+	// ------- Catmull-Rom 補間 ----------
+	auto catmullRom = [&](const Vector3& a, const Vector3& b, const Vector3& c, const Vector3& d, float t) {
+		float t2 = t * t;
+		float t3 = t2 * t;
+
+		return Vector3(
+			0.5f * (2.0f * b.x + (-a.x + c.x) * t + (2.0f * a.x - 5.0f * b.x + 4.0f * c.x - d.x) * t2 + (-a.x + 3.0f * b.x - 3.0f * c.x + d.x) * t3),
+			0.5f * (2.0f * b.y + (-a.y + c.y) * t + (2.0f * a.y - 5.0f * b.y + 4.0f * c.y - d.y) * t2 + (-a.y + 3.0f * b.y - 3.0f * c.y + d.y) * t3),
+			0.5f * (2.0f * b.z + (-a.z + c.z) * t + (2.0f * a.z - 5.0f * b.z + 4.0f * c.z - d.z) * t2 + (-a.z + 3.0f * b.z - 3.0f * c.z + d.z) * t3)
+		);
+		};
+
+	Vector3 newPos = catmullRom(
+		curvePoints_[p0],
+		curvePoints_[p1],
+		curvePoints_[p2],
+		curvePoints_[p3],
+		t
+	);
+
+	cameraManager_->SetCameraPosition(newPos);
+
+	// 次区間へ
+	if (t >= 1.0f) {
+		curveIndex_++;
+		segmentTimer_ = 0.0f;
+	}
 }
 
 void GamePlayScene::RestrictPlayerInsideCameraView() {

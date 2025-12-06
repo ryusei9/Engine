@@ -39,27 +39,41 @@ LevelData* JsonLoader::Load(const std::string& fileName)
             }
             else if (objectJson.contains("type") && objectJson["type"] == "CURVE") {
                 LevelData::CurveData curveData;
+
                 if (objectJson.contains("name")) {
                     curveData.fileName = objectJson["name"].get<std::string>();
                 }
-                // 親CURVEのy座標
+
                 float parentY = 0.0f;
                 if (objectJson.contains("transform") && objectJson["transform"].contains("translation")) {
                     parentY = objectJson["transform"]["translation"][1].get<float>();
                 }
+
                 if (objectJson.contains("curve")) {
                     const auto& curve = objectJson["curve"];
                     for (const auto& spline : curve["splines"]) {
+                        int index = 0;
                         for (const auto& point : spline["points"]) {
                             Vector3 v;
-                            // coのy座標に親CURVEのy座標を加算
                             v.x = point["co"][0].get<float>();
                             v.y = point["co"][2].get<float>();
                             v.z = point["co"][1].get<float>() + parentY;
+
                             curveData.points.push_back(v);
+
+                            // --- ★ time を読み込む ---
+                            if (point.contains("time")) {
+                                curveData.times.push_back(point["time"].get<float>());
+                            }
+                            else {
+                                curveData.times.push_back(1.0f); // fallback
+                            }
+
+                            index++;
                         }
                     }
                 }
+
                 levelData->curves.push_back(curveData);
             }
             // PlayerSpawn/EnemySpawnは現状jsonに存在しないが、将来拡張用

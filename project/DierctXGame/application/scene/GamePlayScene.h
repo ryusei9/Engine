@@ -239,5 +239,11 @@ private:
 
 	// スペースキーを押してねテキストのワールド変換
 	WorldTransform pressSpaceKeyTransform_;
+
+	// カーブセグメントタイマー
+	float segmentTimer_ = 0.0f;
+
+	// 現在のセグメントの所要時間
+	float currentSegmentDuration_ = 1.0f;
 };
 

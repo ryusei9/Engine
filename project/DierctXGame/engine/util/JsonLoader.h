@@ -19,6 +19,7 @@ struct EnemySpawnData {
 struct CurveData {
     std::string fileName;
 	std::vector<Vector3> points;
+    std::vector<float> times;
 };
 
 /// <summary>

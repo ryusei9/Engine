@@ -15,6 +15,10 @@ void ParticleEmitter::Update()
 		if (isExplosion_) {
 			manager_->EmitExplosion(groupName_, position_, particleCount_);
 		}else if (isThruster_) {
+			manager_->SetIsSmoke(false);
+			manager_->EmitWithVelocity(groupName_, position_, particleCount_, velocity_);
+		}else if (isSmoke_) {
+			manager_->SetIsSmoke(true);
 			manager_->EmitWithVelocity(groupName_, position_, particleCount_, velocity_);
 		}else {
 			manager_->Emit(groupName_, position_, particleCount_);

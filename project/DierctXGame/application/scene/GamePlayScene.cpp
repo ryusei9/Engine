@@ -491,7 +491,7 @@ void GamePlayScene::CheckAllCollisions()
 
 	// 敵とその弾を登録
 	for (auto& enemy : enemies_) {
-		if (enemy && enemy->IsAlive()) {
+		if (enemy && enemy->GetState() == Enemy::EnemyState::Alive) {
 			collisionManager_->AddCollider(enemy.get());
 
 			// 敵の弾も登録

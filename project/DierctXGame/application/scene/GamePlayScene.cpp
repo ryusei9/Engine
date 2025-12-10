@@ -157,6 +157,16 @@ void GamePlayScene::Update()
 			// プレイヤーの移動制限
 			RestrictPlayerInsideCameraView();
 		}
+
+		// プレイヤーの弾の奥行き調整
+		for (auto& bullet : player_->GetBullets()) {
+			if (bullet && bullet->IsAlive()) {
+				Camera* cam = cameraManager_->GetMainCamera();
+				Vector3 bulletPos = bullet->GetTranslate();
+				bulletPos.z = cam->GetTranslate().z + 10.0f; // プレイヤーと同じ奥行
+				bullet->SetTranslate(bulletPos);
+			}
+		}
 	}
 
 	// 読み込んだ全オブジェクトの更新
@@ -491,7 +501,7 @@ void GamePlayScene::CheckAllCollisions()
 
 	// 敵とその弾を登録
 	for (auto& enemy : enemies_) {
-		if (enemy && enemy->IsAlive()) {
+		if (enemy && enemy->GetState() == Enemy::EnemyState::Alive) {
 			collisionManager_->AddCollider(enemy.get());
 
 			// 敵の弾も登録

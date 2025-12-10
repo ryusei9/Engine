@@ -131,6 +131,9 @@ public:
 	// スラスターパーティクルの生成
 	Particle MakeNewThrusterParticle(std::mt19937& randomEngine, const Vector3& translate);
 
+	// 煙パーティクルの生成
+	Particle MakeNewSmokeParticle(std::mt19937& randomEngine, const Vector3& translate);
+
 	void UpdateExplosionParticle(Particle& particle);
 
 	/*------頂点データの作成------*/
@@ -167,6 +170,11 @@ public:
 
 	// パーティクルタイプの設定
 	void SetParticleType(ParticleType type);
+
+	// スケールの設定
+	void SetParticleScale(const Vector3& scale) { uvTransform.scale = scale; }
+
+	void SetIsSmoke(bool isSmoke) { isSmoke_ = isSmoke; }
 private:
 	static ParticleManager* instance;
 
@@ -233,5 +241,7 @@ private:
 	};
 
 	Material* materialData_ = nullptr;
+
+	bool isSmoke_ = false;
 };
 

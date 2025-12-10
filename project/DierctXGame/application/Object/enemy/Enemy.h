@@ -12,6 +12,13 @@ class Player; // 前方宣言
 class Enemy : public BaseCharacter
 {
 public:
+
+	/*------ステート------*/
+	enum class EnemyState {
+		Alive,
+		Dying,
+		Dead
+	};
 	/*------メンバ関数------*/
 	// コンストラクタ
 	Enemy();
@@ -40,6 +47,9 @@ public:
 	// 敵死亡時に一度だけパーティクルを出す
 	void PlayDeathParticleOnce();
 
+	// 敵ヒット時にパーティクルを出す
+	void PlayHitParticle();
+
 	/*------ゲッター------*/
 
 	// 中心座標を取得する純粋仮想関数
@@ -53,6 +63,9 @@ public:
 
 	// 敵の弾リストを取得
 	std::list<std::unique_ptr<EnemyBullet>>& GetBullets() { return bullets_; }
+
+	// 敵のステートを取得
+	EnemyState GetState() const { return state_; }
 
 	/*------セッター------*/
 
@@ -70,6 +83,8 @@ public:
 
 	// Z軸の座標を設定
 	void SetZ(float z) {worldTransform_.translate_.z = z;}
+
+	
 
 private:
 	/*------メンバ変数------*/
@@ -96,8 +111,17 @@ private:
 	// 敵死亡時のパーティクルエミッター
 	std::unique_ptr<ParticleEmitter> enemyDeathEmitter_;
 
+	// 敵ヒット時のパーティクルエミッター
+	std::unique_ptr<ParticleEmitter> enemyHitEmitter_;
+
+	// 煙用のパーティクルエミッター
+	std::unique_ptr<ParticleEmitter> smokeEmitter_;
+
 	// 敵死亡時にパーティクルを一度だけ再生するためのフラグ
 	bool hasPlayedDeathParticle_ = false;
+
+	// 敵ヒット時にパーティクルを一度だけ再生するためのフラグ
+	bool hasPlayedHitParticle_ = false;
 
 	// 敵の弾リスト
 	std::list<std::unique_ptr<EnemyBullet>> bullets_;
@@ -116,5 +140,13 @@ private:
 	// コライダーID
 	int colliderId_ = -1;
 
+	// ステート用変数
+	EnemyState state_ = EnemyState::Alive;
+
+	// 死亡演出用変数
+	float deathTimer_ = 1.0f;      // 落下演出 duration
+	float fallSpeed_ = -0.02f;     // 落下速度
+	float rotationSpeed_ = 0.01f;   // 回転速度
+	bool deathEffectPlayed_ = false;
 };
 

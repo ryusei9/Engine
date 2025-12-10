@@ -40,6 +40,9 @@ public:
 	// スラスター用かどうか
 	void SetThruster(bool isThruster) { isThruster_ = isThruster; }
 
+	// 煙用かどうか
+	void SetSmoke(bool isSmoke) { isSmoke_ = isSmoke; }
+
 	// 爆発用かどうかの取得
 	bool IsExplosion() const { return isExplosion_; }
 private:
@@ -70,6 +73,8 @@ private:
 	bool isExplosion_ = false; // 追加: 爆発用かどうか
 
 	bool isThruster_ = false; // 追加: スラスター用かどうか
+
+	bool isSmoke_ = false; // 追加: 煙用かどうか
 
 	uint32_t particleCount_ = 1; // 1回の発生で出すパーティクル数（デフォルト1）
 };

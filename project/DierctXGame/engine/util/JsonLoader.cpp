@@ -57,7 +57,7 @@ LevelData* JsonLoader::Load(const std::string& fileName)
                             Vector3 v;
                             v.x = point["co"][0].get<float>();
                             v.y = point["co"][2].get<float>();
-                            v.z = point["co"][1].get<float>() + parentY;
+                            v.z = point["co"][1].get<float>() + parentY - 10.0f;
 
                             curveData.points.push_back(v);
 

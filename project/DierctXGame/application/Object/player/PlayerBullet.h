@@ -30,6 +30,7 @@ public:
 	Vector3 GetCenterPosition() const override;
 
 	/*------ゲッター------*/
+	Vector3 GetTranslate() const { return worldTransform_.translate_; } // 座標の取得
 
 	/*------セッター------*/
 

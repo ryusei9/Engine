@@ -66,7 +66,11 @@ class ROUTE_OT_set_segment_props(bpy.types.Operator):
 
     def execute(self, context):
         seg = context.active_object
-        seg[SEGMENT_MODE_KEY] = self.segment_mode
+        value = self.segment_mode
+        if isinstance(value, bpy.types._PropertyDeferred):
+            self.report({'WARNING'}, "Segment mode not selected, using default.")
+            value = "DEFAULT"  # ←必要なら変更
+        seg[SEGMENT_MODE_KEY] = value
         seg[SEGMENT_TIME_KEY] = float(self.segment_time)
 
         # （任意）もし __init__.py で Object.segment_mode / segment_time を定義していれば同期

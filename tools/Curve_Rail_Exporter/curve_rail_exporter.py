@@ -59,41 +59,32 @@ def get_curve_control_points_world(obj: bpy.types.Object):
 # ----------------------------
 # Export Operator
 # ----------------------------
-class CURVE_RAIL_OT_export_json(bpy.types.Operator, ExportHelper):
-    """カーブ（レール）から制御点を JSON 出力"""
-    bl_idname = "curve_rail.export_json"
-    bl_label = "Export Curve Rails to JSON"
-    filename_ext = ".json"
+class CURVE_RAIL_OT_export_json(bpy.types.Operator):
+    bl_idname = "curve.export_json"
+    bl_label = "Export Curve JSON"
 
-    # ExportHelper が使うプロパティ
-    filter_glob = bpy.props.StringProperty(default="*.json", options={'HIDDEN'})
-
-    # 出力対象の選択モード
     export_mode = bpy.props.EnumProperty(
         name="Export Mode",
         items=[
-            ('SELECTED', "Selected Curves", "選択中のカーブオブジェクトを出力"),
-            ('RAILS', "All Rails", "is_rail=True のすべてのカーブを出力"),
+            ('ALL', "All Curves", "Export all curves"),
+            ('SELECTED', "Selected Only", "Export only selected curves"),
         ],
-        default='SELECTED'
-    )
-
-    include_empty_objects = bpy.props.BoolProperty(
-        name="Include non-curve objects",
-        default=False,
-        description="カーブでないオブジェクトを誤って選択していた場合に除外する"
+        default='ALL'
     )
 
     def execute(self, context):
-        # 収集対象
+        print("Export Mode:", self.export_mode)
         objs = []
         if self.export_mode == 'SELECTED':
             for o in context.selected_objects:
                 if o.type == 'CURVE':
+                    if "is_rail" not in o:
+                        o["is_rail"] = False
                     objs.append(o)
                 elif not self.include_empty_objects:
                     # skip non-curve
                     continue
+            print("export_mode =", self.export_mode)
         else:  # RAILS
             for o in context.scene.objects:
                 if o.type == 'CURVE' and o.get("is_rail", False):
@@ -148,24 +139,16 @@ class CURVE_RAIL_PT_panel(bpy.types.Panel):
         col = layout.column(align=True)
         col.label(text="Rail Flag")
         if obj and obj.type == 'CURVE':
-            # カスタムプロパティを直接編集する
-            # ない場合は作成される
-            if "is_rail" not in obj:
-                obj["is_rail"] = False
-            col.prop(obj, '["is_rail"]', text="is_rail")
-
-            col.separator()
-            col.label(text="Preview control points")
-            col.operator("curve_rail.show_points_in_console", text="Print Points to Console")
-        else:
-            col.label(text="Select a Curve object to set rail flag", icon='INFO')
-
-        col.separator()
-        col.label(text="Export")
+            if "is_rail" in obj:
+                col.prop(obj, '["is_rail"]', text="Rail")
+            else:
+                col.label(text="(Rail 未設定 - Export時に自動設定)", icon="INFO")
         row = col.row(align=True)
-        row.operator(CURVE_RAIL_OT_export_json.bl_idname, text="Export Selected").export_mode = 'SELECTED'
-        row.operator(CURVE_RAIL_OT_export_json.bl_idname, text="Export Rails").export_mode = 'RAILS'
 
+        op = row.operator(CURVE_RAIL_OT_export_json.bl_idname, text="Export Selected")
+        op.export_mode = 'SELECTED'
+        op2 = row.operator(CURVE_RAIL_OT_export_json.bl_idname, text="Export Rails")
+        op2.export_mode = 'ALL'
 # ----------------------------
 # Helper operator: プレビュー（コンソール出力）
 # ----------------------------
@@ -186,6 +169,87 @@ class CURVE_RAIL_OT_print_points(bpy.types.Operator):
                 print("  pt", p["index"], "co", p["co"])
         self.report({'INFO'}, "制御点をコンソールに出力しました")
         return {'FINISHED'}
+    
+# ----------------------------
+# Property Group: 制御点の時間情報
+# ----------------------------
+class RailPointTime(bpy.types.PropertyGroup):
+    value = bpy.props.FloatProperty(
+        name="Time",
+        default=1.0,
+        min=0.0,
+        description="この制御点に到達するまでの時間"
+    )
+    
+# ----------------------------
+# Operator: times 配列の初期化・修正
+# ----------------------------
+class CURVE_OT_fix_time_array(bpy.types.Operator):
+    bl_idname = "curve.fix_time_array"
+    bl_label = "Initialize / Fix Time List"
+
+    def execute(self, context):
+        obj = context.object
+
+        if not obj or obj.type != 'CURVE':
+            self.report({'WARNING'}, "Curve not selected")
+            return {'CANCELLED'}
+
+        curve = obj.data
+        points = curve.splines[0].bezier_points
+        count = len(points)
+
+        # ないなら作る
+        if "times" not in curve:
+            curve["times"] = [1.0] * count
+        else:
+            times = list(curve["times"])
+
+            if len(times) < count:
+                times.extend([1.0] * (count - len(times)))
+            elif len(times) > count:
+                times = times[:count]
+
+            curve["times"] = times
+
+        self.report({'INFO'}, "Time data updated.")
+        return {'FINISHED'}
+
+# ----------------------------
+# Curve Time Adjustment Panel
+# ----------------------------
+
+class CURVE_PT_time_adjust_panel(bpy.types.Panel):
+    bl_label = "Curve Time Controls"
+    bl_idname = "CURVE_PT_time_adjust_panel"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "data"
+
+    def draw(self, context):
+        layout = self.layout
+        obj = context.object
+
+        if not obj or obj.type != 'CURVE':
+            layout.label(text="Select a Curve")
+            return
+
+        curve = obj.data
+
+        # ボタンでデータ作成
+        layout.operator("curve.fix_time_array")
+
+        if "times" not in curve:
+            layout.label(text="No time data found.")
+            return
+
+        layout.label(text="Control Point Times:")
+
+        times = list(curve["times"])
+
+        for i, t in enumerate(times):
+            layout.prop(curve, '["times"]', index=i, text=f"Point {i}")
+
 
 # ----------------------------
 # registration
@@ -194,13 +258,19 @@ classes = (
     CURVE_RAIL_OT_export_json,
     CURVE_RAIL_PT_panel,
     CURVE_RAIL_OT_print_points,
+    CURVE_PT_time_adjust_panel,
+    CURVE_OT_fix_time_array,
 )
 
 def register():
+    bpy.utils.register_class(RailPointTime)
+    bpy.types.Curve.time_settings = bpy.props.CollectionProperty(type=RailPointTime)
     for c in classes:
         bpy.utils.register_class(c)
 
 def unregister():
+    del bpy.types.Curve.time_settings
+    bpy.utils.unregister_class(RailPointTime)
     for c in reversed(classes):
         bpy.utils.unregister_class(c)
 

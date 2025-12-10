@@ -53,8 +53,8 @@ public:
 private:
 	Camera* camera_ = nullptr; // カメラ
 
-	TransformationMatrix* wvpData_; // 変換行列
+	TransformationMatrix* wvpData_ = nullptr; // 変換行列
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_; // ワールドビュー射影行列バッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_ = nullptr; // ワールドビュー射影行列バッファ
 };
 

@@ -8,9 +8,9 @@ from .playback import ROUTE_OT_preview_modal
 from common_export.export_scene import MYADDON_OT_export_scene
 
 # トップバーの拡張メニュー
-class TOPBAR_MT_editor_menu(bpy.types.Menu):
+class TOPBAR_MT_route_editor_menu(bpy.types.Menu):
     bl_label = "RouteEditor"
-    bl_idname = "TOPBAR_MT_editor_menu"
+    bl_idname = "TOPBAR_MT_route_editor_menu"
     bl_description = "拡張メニュー by Ryusei Satou"
 
     def draw(self, context):
@@ -37,4 +37,4 @@ class TOPBAR_MT_editor_menu(bpy.types.Menu):
         layout.operator(MYADDON_OT_export_scene.bl_idname, text="シーンを出力(JSON)")
 
     def submenu(self, context):
-        self.layout.menu(TOPBAR_MT_editor_menu.bl_idname)
+        self.layout.menu(TOPBAR_MT_route_editor_menu.bl_idname)

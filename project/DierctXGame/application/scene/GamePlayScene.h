@@ -68,6 +68,16 @@ public:
 		DynamicFollow,
 		centerPlayer
 	};
+
+	template<typename T>
+	T MyMin(const T& a, const T& b) {
+		return (a < b) ? a : b;
+	}
+
+	template<typename T>
+	T MyMax(const T& a, const T& b) {
+		return (a > b) ? a : b;
+	}
 private:
 
 	// 衝突判定と応答
@@ -239,5 +249,13 @@ private:
 
 	// スペースキーを押してねテキストのワールド変換
 	WorldTransform pressSpaceKeyTransform_;
+
+	// カーブセグメントタイマー
+	float segmentTimer_ = 0.0f;
+
+	// 現在のセグメントの所要時間
+	float currentSegmentDuration_ = 1.0f;
+
+	const float kDeltaTime = 1.0f / 60.0f;
 };
 

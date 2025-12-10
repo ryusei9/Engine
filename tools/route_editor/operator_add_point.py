@@ -20,7 +20,9 @@ class ROUTE_OT_add_curve_point(bpy.types.Operator):
             self.report({'ERROR'}, "カーブオブジェクトを選択してください")
             return {'CANCELLED'}
 
-        spline = obj.data.splines.active if hasattr(obj.data.splines, "active") else obj.data.splines[0]
+        curve = obj.data
+        spline = curve.splines.active if hasattr(curve.splines, "active") else curve.splines[0]
+
 
         if spline.type != 'BEZIER':
             self.report({'ERROR'}, "ベジエカーブのみ対応しています")
@@ -28,30 +30,45 @@ class ROUTE_OT_add_curve_point(bpy.types.Operator):
 
         last_point = spline.bezier_points[-1]
 
-        # --- 安全なオフセット処理 ---
-        offset_vec = Vector((1.0, 0.0, 0.0))
+        # オフセット適用（安全処理）
         try:
-            if hasattr(self, "offset") and hasattr(self.offset, "__iter__"):
-                offset_vec = Vector(self.offset[:])
-        except Exception:
-            pass
-        # ----------------------------------
+            offset_vec = Vector(self.offset[:])
+        except:
+            offset_vec = Vector((1.0, 0.0, 0.0))
 
-        # ワールド座標で新しい点の位置を計算
+        # 新しい点の位置（ワールド→ローカル）
         world_last = obj.matrix_world @ last_point.co
         world_new = world_last + offset_vec
-        # ローカル空間に戻す
         local_new = obj.matrix_world.inverted() @ world_new
 
-        # 新しいポイントを追加
+        # 新規ポイント追加
         spline.bezier_points.add(1)
         new_point = spline.bezier_points[-1]
         new_point.co = local_new
         new_point.handle_left_type = 'AUTO'
         new_point.handle_right_type = 'AUTO'
 
-        obj.data.update_tag()
-        bpy.context.view_layer.update()
+        # --- ▼ 時間データ同期処理 ▼ ---
+        point_count = len(spline.bezier_points)
 
-        self.report({'INFO'}, f"新しいポイントを追加しました: {new_point.co}")
+        if "times" not in curve:
+            curve["times"] = [1.0] * point_count  # 初回生成
+        else:
+            times = list(curve["times"])
+
+            # 追加分を反映
+            if len(times) < point_count:
+                times.append(1.0)
+
+            # 余分があれば切る
+            elif len(times) > point_count:
+                times = times[:point_count]
+
+            curve["times"] = times
+        # ------------------------------------
+
+        curve.update_tag()
+        context.view_layer.update()
+
+        self.report({'INFO'}, f"ポイント追加 + time更新 ({len(curve['times'])} points)")
         return {'FINISHED'}

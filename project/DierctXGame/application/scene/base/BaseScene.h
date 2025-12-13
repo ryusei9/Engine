@@ -2,8 +2,9 @@
 #include <SpriteCommon.h>
 #include <DirectXCommon.h>
 #include <WinApp.h>
+
 // シーンの種類
-enum SCENE { TITLE, GAMEPLAY,GAMEOVER };
+enum SCENE { TITLE, GAMEPLAY, GAMEOVER };
 
 /// <summary>
 /// シーン基底クラス
@@ -30,13 +31,13 @@ public:
 	virtual void DrawImGui() = 0;
 
 	// シーン番号の取得
-	int GetSceneNo() { return sceneNo; }
+	int32_t GetSceneNo() { return sceneNo_; }
 
 	// シーン番号の設定
-	void SetSceneNo(int sceneNo) { this->sceneNo = sceneNo; }
+	void SetSceneNo(int32_t sceneNo) { sceneNo_ = sceneNo; }
 
 public:
 	// シーン番号
-	static int sceneNo;
+	static int32_t sceneNo_;
 };
 

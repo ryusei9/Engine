@@ -6,9 +6,9 @@
 Enemy::Enemy()
 {
 	// シリアルナンバーを振る
-	serialNumber_ = nextSerialNumber_;
+	serialNumber_ = sNextSerialNumber_;
 	// 次のシリアルナンバーに1を足す
-	++nextSerialNumber_;
+	++sNextSerialNumber_;
 }
 
 void Enemy::Initialize()
@@ -33,27 +33,27 @@ void Enemy::Initialize()
 	object3d_->Initialize("enemy.obj");
 
 	// パーティクルマネージャの初期化
-	particleManager = ParticleManager::GetInstance();
+	particleManager_ = ParticleManager::GetInstance();
 
 	// 敵死亡時のパーティクル設定
-	particleManager->GetInstance()->SetParticleType(ParticleType::Explosion);
+	particleManager_->GetInstance()->SetParticleType(ParticleType::Explosion);
 	// テクスチャ"circle2"を使用
-	particleManager->GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
-	particleManager->GetInstance()->CreateParticleGroup("smoke","resources/circle2.png");
+	particleManager_->GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
+	particleManager_->GetInstance()->CreateParticleGroup("smoke","resources/circle2.png");
 
 	// 敵死亡時のパーティクルエミッターを初期化
-	enemyDeathEmitter_ = std::make_unique<ParticleEmitter>(particleManager, "explosion");
+	enemyDeathEmitter_ = std::make_unique<ParticleEmitter>(particleManager_, "explosion");
 	enemyDeathEmitter_->SetUseRingParticle(true);
 	enemyDeathEmitter_->SetExplosion(true); // 爆発エミッターに設定
 
 	// 敵ヒット時のパーティクル設定
-	enemyHitEmitter_ = std::make_unique<ParticleEmitter>(particleManager, "explosion");
+	enemyHitEmitter_ = std::make_unique<ParticleEmitter>(particleManager_, "explosion");
 	enemyHitEmitter_->SetUseRingParticle(true);
 	enemyHitEmitter_->SetExplosion(true);
 
 	// 煙用のパーティクルエミッターを初期化
-	particleManager->GetInstance()->SetParticleType(ParticleType::Normal);
-	smokeEmitter_ = std::make_unique<ParticleEmitter>(particleManager, "smoke");
+	particleManager_->GetInstance()->SetParticleType(ParticleType::Normal);
+	smokeEmitter_ = std::make_unique<ParticleEmitter>(particleManager_, "smoke");
 	smokeEmitter_->SetParticleRate(60);
 	smokeEmitter_->SetParticleCount(3);
 	smokeEmitter_->SetSmoke(true); 

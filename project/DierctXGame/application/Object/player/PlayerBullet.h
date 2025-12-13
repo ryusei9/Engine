@@ -26,26 +26,26 @@ public:
 
 	// 衝突判定
 	void OnCollision(Collider* other) override;
+
 	// 中心座標を取得する純粋仮想関数
 	Vector3 GetCenterPosition() const override;
 
 	/*------ゲッター------*/
-	Vector3 GetTranslate() const { return worldTransform_.translate_; } // 座標の取得
+	// 座標の取得
+	Vector3 GetTranslate() const { return worldTransform_.translate_; }
+
+	// 生存フラグの取得
+	bool IsAlive() const { return isAlive_; }
+
+	// 半径の取得
+	float GetRadius() const { return radius_; }
 
 	/*------セッター------*/
-
 	// プレイヤーの設定
 	void SetPlayer(Player* player) { player_ = player; }
 
 	// 座標の設定
-	void SetTranslate(const Vector3& translate) { worldTransform_.translate_ = translate; } // 座標の設定
-
-	// 生存フラグの設定
-	bool IsAlive() const { return isAlive_; } // 生存フラグの取得
-
-	// 半径の取得
-	float GetRadius() const { return radius_; } // 半径の取得
-
+	void SetTranslate(const Vector3& translate) { worldTransform_.translate_ = translate; }
 
 protected:
 	/*------メンバ変数------*/
@@ -62,17 +62,20 @@ protected:
 
 	// 生存フラグ
 	bool isAlive_ = true;
+
 	// 生存フレーム
 	uint32_t lifeFrame_ = 360;
 
 	// 速度
-	const float speed_ = 0.2f;
+	const float kSpeed_ = 0.2f;
 
 	// シリアルナンバー
 	uint32_t serialNumber_ = 0;
+
 	// 次のシリアルナンバー
 	uint32_t nextSerialNumber_ = 0;
 
-	float radius_ = 0.5f; // 半径
+	// 半径
+	float radius_ = 0.5f;
 };
 

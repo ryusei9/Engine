@@ -18,7 +18,7 @@ public:
     virtual void Update(Enemy* enemy, Player* player, std::list<std::unique_ptr<EnemyBullet>>& bullets, float deltaTime) = 0;
 
 	// ImGui描画
-    virtual void DrawImGui(int idx, bool selected) = 0;
+    virtual void DrawImGui(int32_t idx, bool selected) = 0;
 
 	// パターン名取得
     virtual const char* GetName() const = 0;
@@ -33,7 +33,7 @@ public:
     void Update(Enemy* enemy, Player* player, std::list<std::unique_ptr<EnemyBullet>>& bullets, float deltaTime) override;
 
 	// ImGui描画
-    void DrawImGui(int idx, bool selected) override;
+    void DrawImGui(int32_t idx, bool selected) override;
 
 	// パターン名取得
     const char* GetName() const override { return "Pattern1"; }
@@ -50,7 +50,7 @@ public:
     void Update(Enemy* enemy, Player* player, std::list<std::unique_ptr<EnemyBullet>>& bullets, float deltaTime) override;
 
 	// ImGui描画
-    void DrawImGui(int idx, bool selected) override;
+    void DrawImGui(int32_t idx, bool selected) override;
 
 	// パターン名取得
     const char* GetName() const override { return "Pattern2"; }
@@ -65,7 +65,7 @@ public:
     void Update(Enemy* enemy, Player* player, std::list<std::unique_ptr<EnemyBullet>>& bullets, float deltaTime) override;
 
 	// ImGui描画
-    void DrawImGui(int idx, bool selected) override;
+    void DrawImGui(int32_t idx, bool selected) override;
 
 	// パターン名取得
     const char* GetName() const override { return "Pattern3"; }
@@ -81,7 +81,7 @@ public:
     void Update(Enemy* enemy, Player*, std::list<std::unique_ptr<EnemyBullet>>&, float deltaTime) override;
 
 	// ImGui描画
-    void DrawImGui(int idx, bool selected) override;
+    void DrawImGui(int32_t idx, bool selected) override;
 
 	// パターン名取得
     const char* GetName() const override { return "wait"; }
@@ -108,17 +108,17 @@ public:
     void DrawImGui();
 
 	// パターン設定・取得
-    void SetPattern(int idx);
+    void SetPattern(int32_t idx);
 
 	// 現在のパターン取得
-    int GetPattern() const { return currentPattern_; }
+    int32_t GetPattern() const { return currentPattern_; }
 
 	// 次のパターン設定
-    void SetNextPattern(int idx) { nextPattern_ = idx; }
+    void SetNextPattern(int32_t idx) { nextPattern_ = idx; }
 private:
     std::vector<std::unique_ptr<EnemyAttackPattern>> patterns_;
-    int currentPattern_ = 0;
-    int nextPattern_ = -1;
+    int32_t currentPattern_ = 0;
+    int32_t nextPattern_ = -1;
     float patternTimer_ = 0.0f;
     bool pattern3Rushed_ = false;
 };

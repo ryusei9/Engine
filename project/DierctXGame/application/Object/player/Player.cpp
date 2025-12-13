@@ -4,13 +4,15 @@
 #include <PlayerBullet.h>
 #include <PlayerChargeBullet.h>
 #include <imgui.h>
+
 Player::Player()
 {
 	// シリアルナンバーを振る
-	serialNumber_ = nextSerialNumber_;
+	serialNumber_ = sNextSerialNumber_;
 	// 次のシリアルナンバーに1を足す
-	++nextSerialNumber_;
+	++sNextSerialNumber_;
 }
+
 void Player::Initialize()
 {
 	// プレイヤーの初期化
@@ -49,7 +51,6 @@ void Player::Initialize()
 	explosionEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "explosion");
 	explosionEmitter_->SetUseRingParticle(true); // リングパーティクルを使用
 	explosionEmitter_->SetExplosion(true); // 爆発エミッターを有効化
-
 }
 
 void Player::Update()
@@ -61,7 +62,6 @@ void Player::Update()
 	bullets_.remove_if([](std::unique_ptr<PlayerBullet>& bullet) {
 		// 弾が死んでいる場合
 		if (!bullet->IsAlive()) {
-
 			// リセット
 			bullet.reset();
 			return true;
@@ -101,7 +101,6 @@ void Player::Update()
 	// ワールド変換の更新
 	worldTransform_.Update();
 
-	
 	// プレイヤーのワールド変換を更新
 	object3d_->SetCamera(camera_);
 	object3d_->SetTranslate(worldTransform_.translate_);
@@ -120,7 +119,6 @@ void Player::Draw()
 	for (auto& bullet : bullets_) {
 		bullet->Draw();
 	}
-
 }
 
 void Player::Move()
@@ -147,8 +145,9 @@ void Player::Move()
 }
 
 void Player::Attack()
-{// プレイヤーの攻撃
-	 // チャージ開始
+{
+	// プレイヤーの攻撃
+	// チャージ開始
 	if (input_->PushKey(DIK_SPACE)) {
 		if (!isCharging_) {
 			isCharging_ = true;
@@ -181,7 +180,8 @@ void Player::Attack()
 }
 
 void Player::OnCollision(Collider* other)
-{// プレイヤーの衝突判定
+{
+	// プレイヤーの衝突判定
 	if (isAlive_) {
 		if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
 			// 敵と衝突した場合

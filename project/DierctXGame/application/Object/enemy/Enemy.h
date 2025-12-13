@@ -84,14 +84,12 @@ public:
 	// Z軸の座標を設定
 	void SetZ(float z) {worldTransform_.translate_.z = z;}
 
-	
-
 private:
 	/*------メンバ変数------*/
 	// 敵の移動速度
 	float moveSpeed_ = 0.1f;
 	// 敵のヒットポイント
-	int hp_ = 1;
+	int32_t hp_ = 1;
 	// 敵のシリアルナンバー
 	uint32_t serialNumber_ = 0;
 	// 敵のワールド変換
@@ -106,7 +104,7 @@ private:
 	float radius_ = 1.0f;
 
 	// パーティクルマネージャーへのポインタ
-	ParticleManager* particleManager = nullptr;
+	ParticleManager* particleManager_ = nullptr;
 
 	// 敵死亡時のパーティクルエミッター
 	std::unique_ptr<ParticleEmitter> enemyDeathEmitter_;
@@ -138,7 +136,7 @@ private:
 	bool controlEnabled_ = false;
 
 	// コライダーID
-	int colliderId_ = -1;
+	int32_t colliderId_ = -1;
 
 	// ステート用変数
 	EnemyState state_ = EnemyState::Alive;

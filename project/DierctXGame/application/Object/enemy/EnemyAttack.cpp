@@ -6,10 +6,11 @@
 #include <Player.h>
 
 // 円周率
-constexpr float PI = 3.1415926535f;
+constexpr float kPi = 3.1415926535f;
 
 // 追加: 弾速スケール（0.5で半分）
-constexpr float BULLET_SPEED_SCALE = 0.5f;
+constexpr float kBulletSpeedScale = 0.5f;
+
 // パターン1: 画面右側で上下移動しつつ2秒ごとに扇形弾
 void EnemyAttackPatternFan::Update(Enemy* enemy, Player*, std::list<std::unique_ptr<EnemyBullet>>& bullets, float deltaTime) {
 	// 上下移動
@@ -21,9 +22,9 @@ void EnemyAttackPatternFan::Update(Enemy* enemy, Player*, std::list<std::unique_
 	// 2秒ごとに5発扇形弾
 	shotTimer_ += deltaTime;
 	if (shotTimer_ >= 2.0f) {
-		float baseAngle = PI; // 左向き
-		float spread = PI / 3.0f; // 扇の広がり
-		for (int i = 0; i < 5; ++i) {
+		float baseAngle = kPi; // 左向き
+		float spread = kPi / 3.0f; // 扇の広がり
+		for (int32_t i = 0; i < 5; ++i) {
 			float angle = baseAngle - spread / 2 + spread * (float(i) / 4.0f);
 			Vector3 v = { std::cos(angle) * 0.15f, std::sin(angle) * 0.15f, 0.0f };
 			auto bullet = std::make_unique<EnemyBullet>();
@@ -35,7 +36,7 @@ void EnemyAttackPatternFan::Update(Enemy* enemy, Player*, std::list<std::unique_
 	}
 }
 // ImGui描画
-void EnemyAttackPatternFan::DrawImGui(int idx, bool selected) {
+void EnemyAttackPatternFan::DrawImGui(int32_t idx, bool selected) {
 #ifdef USE_IMGUI
 	if (ImGui::Selectable(GetName(), selected)) {}
 #endif
@@ -51,7 +52,7 @@ void EnemyAttackPatternAimed::Update(Enemy* enemy, Player* player, std::list<std
 		Vector3 toPlayer = player->GetCenterPosition() - enemy->GetWorldTransform().translate_;
 		float len = std::sqrt(toPlayer.x * toPlayer.x + toPlayer.y * toPlayer.y + toPlayer.z * toPlayer.z);
 		if (len > 0.01f) {
-			float speed = 0.18f * BULLET_SPEED_SCALE;
+			float speed = 0.18f * kBulletSpeedScale;
 			Vector3 v = { toPlayer.x / len * speed,
 						  toPlayer.y / len * speed,
 						  0.0f };
@@ -65,7 +66,7 @@ void EnemyAttackPatternAimed::Update(Enemy* enemy, Player* player, std::list<std
 }
 
 // ImGui描画
-void EnemyAttackPatternAimed::DrawImGui(int idx, bool selected) {
+void EnemyAttackPatternAimed::DrawImGui(int32_t idx, bool selected) {
 #ifdef USE_IMGUI
 	if (ImGui::Selectable(GetName(), selected)) {}
 #endif
@@ -81,8 +82,8 @@ void EnemyAttackPatternRush::Update(Enemy* enemy, Player*, std::list<std::unique
 	enemy->GetWorldTransform().translate_.x -= 0.08f;
 	shotTimer_ += deltaTime;
 	if (shotTimer_ >= 0.3f) {
-		for (int i = 0; i < 12; ++i) {
-			float angle = 2 * PI * i / 12;
+		for (int32_t i = 0; i < 12; ++i) {
+			float angle = 2 * kPi * i / 12;
 			Vector3 v = { std::cos(angle) * 0.13f, std::sin(angle) * 0.13f, 0.0f };
 			auto bullet = std::make_unique<EnemyBullet>();
 			bullet->Initialize(enemy->GetWorldTransform().translate_, v);
@@ -101,15 +102,14 @@ void EnemyAttackPatternWait::Update(Enemy* enemy, Player*, std::list<std::unique
 }
 
 // ImGui描画
-void EnemyAttackPatternWait::DrawImGui(int idx, bool selected) {
+void EnemyAttackPatternWait::DrawImGui(int32_t idx, bool selected) {
 #ifdef USE_IMGUI
 	if (ImGui::Selectable(GetName(), selected)) {}
 #endif
 }
 
-
 // ImGui描画
-void EnemyAttackPatternRush::DrawImGui(int idx, bool selected) {
+void EnemyAttackPatternRush::DrawImGui(int32_t idx, bool selected) {
 #ifdef USE_IMGUI
 	if (ImGui::Selectable(GetName(), selected)) {}
 #endif
@@ -122,6 +122,7 @@ EnemyAttack::EnemyAttack() {
 	patterns_.push_back(std::make_unique<EnemyAttackPatternRush>());  // 2
 	patterns_.push_back(std::make_unique<EnemyAttackPatternWait>());  // 3
 }
+
 void EnemyAttack::Update(Enemy* enemy, Player* player, std::list<std::unique_ptr<EnemyBullet>>& bullets, float deltaTime) {
 	// パターン遷移管理
 	patternTimer_ += deltaTime;
@@ -148,7 +149,7 @@ void EnemyAttack::Update(Enemy* enemy, Player* player, std::list<std::unique_ptr
 	}
 
 	// パターン実行
-	if (currentPattern_ >= 0 && currentPattern_ < int(patterns_.size())) {
+	if (currentPattern_ >= 0 && currentPattern_ < int32_t(patterns_.size())) {
 		patterns_[currentPattern_]->Update(enemy, player, bullets, deltaTime);
 	}
 }
@@ -156,7 +157,7 @@ void EnemyAttack::Update(Enemy* enemy, Player* player, std::list<std::unique_ptr
 // ImGui描画
 void EnemyAttack::DrawImGui() {
 #ifdef USE_IMGUI
-	for (int i = 0; i < int(patterns_.size()); ++i) {
+	for (int32_t i = 0; i < int32_t(patterns_.size()); ++i) {
 		bool selected = (i == currentPattern_);
 		if (ImGui::Selectable(patterns_[i]->GetName(), selected)) {
 			currentPattern_ = i;
@@ -166,6 +167,6 @@ void EnemyAttack::DrawImGui() {
 }
 
 // パターン設定
-void EnemyAttack::SetPattern(int idx) {
-	if (idx >= 0 && idx < int(patterns_.size())) currentPattern_ = idx;
+void EnemyAttack::SetPattern(int32_t idx) {
+	if (idx >= 0 && idx < int32_t(patterns_.size())) currentPattern_ = idx;
 }

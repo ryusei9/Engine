@@ -12,7 +12,7 @@
 /// </summary>
 class GameOverScene : public BaseScene
 {
-	public:
+public:
 	// 初期化
 	void Initialize(DirectXCommon* directXCommon, WinApp* winApp) override;
 
@@ -30,7 +30,7 @@ class GameOverScene : public BaseScene
 
 private:
 	// 入力の初期化
-	std::unique_ptr<Input> input = nullptr;
+	std::unique_ptr<Input> input_ = nullptr;
 	
 	// フェードマネージャー
 	std::unique_ptr<FadeManager> fadeManager_;
@@ -67,6 +67,5 @@ private:
 
 	// プレイヤーワールド変換
 	WorldTransform playerTransform_;
-
 };
 

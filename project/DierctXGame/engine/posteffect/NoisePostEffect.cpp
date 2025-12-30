@@ -35,7 +35,7 @@ void NoisePostEffect::Initialize(DirectXCommon* dxCommon)
     timeParams_->time = 0.0f;
     CreateRootSignature();
 	CreatePipelineStateObject();
-	CreateRenderTexture(WinApp::kClientWidth, WinApp::kClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, kRenderTargetClearValue);
+	CreateRenderTexture(WinApp::kClientWidth, WinApp::kClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, kRenderTargetClearValue_);
 }
 
 void NoisePostEffect::CreateRootSignature()
@@ -104,17 +104,17 @@ void NoisePostEffect::CreateRootSignature()
     inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
     inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
-    inputLayoutDesc.pInputElementDescs = nullptr;
-    inputLayoutDesc.NumElements = 0;
+    inputLayoutDesc_.pInputElementDescs = nullptr;
+    inputLayoutDesc_.NumElements = 0;
 
     /// BlendStateの設定（ブレンド無効）
-    blendDesc.BlendEnable = false;
-    blendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+    blendDesc_.BlendEnable = false;
+    blendDesc_.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
     /// RasterizerState（カリング無し・塗りつぶし）
-    rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
-    rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-    rasterizerDesc.FrontCounterClockwise = FALSE;	 // 時計回りを表面とする
+    rasterizerDesc_.CullMode = D3D12_CULL_MODE_NONE;
+    rasterizerDesc_.FillMode = D3D12_FILL_MODE_SOLID;
+    rasterizerDesc_.FrontCounterClockwise = FALSE;	 // 時計回りを表面とする
 
     /// VertexShader / PixelShader のコンパイル
     vsBlob_ = dxCommon_->CompileShader(L"Resources/shaders/FullScreen.VS.hlsl", L"vs_6_0");
@@ -124,9 +124,9 @@ void NoisePostEffect::CreateRootSignature()
     assert(psBlob_ != nullptr);
 
     // DepthStencilState の設定（深度テスト無効）
-    depthStencilDesc.DepthEnable = false;
-    depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-    depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+    depthStencilDesc_.DepthEnable = false;
+    depthStencilDesc_.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+    depthStencilDesc_.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 }
 
 void NoisePostEffect::CreatePipelineStateObject()
@@ -138,9 +138,9 @@ void NoisePostEffect::CreatePipelineStateObject()
     psoDesc.pRootSignature = rootSignature_.Get();
     psoDesc.VS = { vsBlob_->GetBufferPointer(), vsBlob_->GetBufferSize() };
     psoDesc.PS = { psBlob_->GetBufferPointer(), psBlob_->GetBufferSize() };
-    psoDesc.BlendState.RenderTarget[0] = blendDesc;
-    psoDesc.RasterizerState = rasterizerDesc;
-    psoDesc.DepthStencilState = depthStencilDesc;
+    psoDesc.BlendState.RenderTarget[0] = blendDesc_;
+    psoDesc.RasterizerState = rasterizerDesc_;
+    psoDesc.DepthStencilState = depthStencilDesc_;
     psoDesc.SampleMask = UINT_MAX;
     psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     psoDesc.NumRenderTargets = 1;
@@ -159,13 +159,13 @@ void NoisePostEffect::PreRender()
     // - ビューポート／シザーを設定
     dxCommon_->TransitionDepthBufferToWrite();
     D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dxCommon_->GetDSVCPUDescriptorHandle(0);
-    commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
-    float clearColor[4] = { 0.1f,0.25f,0.5f,1.0f };
-    commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+    commandList_->OMSetRenderTargets(1, &rtvHandle_, FALSE, &dsvHandle);
+    float clearColor[4] = { 0.1f, 0.25f, 0.5f, 1.0f };
+    commandList_->ClearRenderTargetView(rtvHandle_, clearColor, 0, nullptr);
 
     // ビューポート・シザーもセット（DirectXCommon の DrawRenderTexture と同様）
-    commandList->RSSetViewports(1, &viewport);
-    commandList->RSSetScissorRects(1, &scissorRect);
+    commandList_->RSSetViewports(1, &viewport_);
+    commandList_->RSSetScissorRects(1, &scissorRect_);
 }
 
 void NoisePostEffect::Draw()
@@ -175,14 +175,14 @@ void NoisePostEffect::Draw()
     // - ルートに入力 SRV (t0) と時間パラメータ CBV (b0) を配置
     // - フルスクリーン三角形を DrawInstanced(3,1,0,0) で描画
     ID3D12DescriptorHeap* heaps[] = { dxCommon_->GetSRVDescriptorHeap().Get() };
-    commandList->SetDescriptorHeaps(_countof(heaps), heaps);
+    commandList_->SetDescriptorHeaps(_countof(heaps), heaps);
 
-    commandList->SetPipelineState(pipelineState_.Get());
-    commandList->SetGraphicsRootSignature(rootSignature_.Get());
-    commandList->SetGraphicsRootDescriptorTable(0, dxCommon_->GetSRVGPUDescriptorHandle(1));
-    commandList->SetGraphicsRootConstantBufferView(1, timeParamBuffer_->GetGPUVirtualAddress());
-    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	commandList->DrawInstanced(3, 1, 0, 0);
+    commandList_->SetPipelineState(pipelineState_.Get());
+    commandList_->SetGraphicsRootSignature(rootSignature_.Get());
+    commandList_->SetGraphicsRootDescriptorTable(0, dxCommon_->GetSRVGPUDescriptorHandle(1));
+    commandList_->SetGraphicsRootConstantBufferView(1, timeParamBuffer_->GetGPUVirtualAddress());
+    commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	commandList_->DrawInstanced(3, 1, 0, 0);
 }
 
 void NoisePostEffect::PostRender()

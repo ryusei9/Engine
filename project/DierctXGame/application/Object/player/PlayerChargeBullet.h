@@ -8,32 +8,32 @@
 class PlayerChargeBullet : public PlayerBullet {
 public:
 	// コンストラクタ
-    PlayerChargeBullet();
+	PlayerChargeBullet();
 
 	// 初期化
-    void Initialize(const Vector3& position) override;
+	void Initialize(const Vector3& position) override;
 
 	// 更新
-    void Update() override;
+	void Update() override;
 
 	// 描画
-    void Draw() override;
+	void Draw() override;
 
 	// ダメージ数の取得
-    float GetDamage() const { return damage_; }
+	float GetDamage() const { return damage_; }
 
 	// シリアルナンバーの取得
-    uint32_t GetSerialNumber() const { return serialNumber_; }
+	uint32_t GetSerialNumber() const { return serialNumber_; }
 
 private:
 	/*------メンバ変数------*/
 
 	// ダメージ数
-    float damage_ = 30.0f;
+	float damage_ = 30.0f;
 
 	// シリアルナンバー
-    uint32_t serialNumber_ = 0;
+	uint32_t serialNumber_ = 0;
 
 	// 次のシリアルナンバー
-    static uint32_t nextSerialNumber_;
+	static uint32_t sNextSerialNumber_;
 };

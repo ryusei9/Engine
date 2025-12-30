@@ -31,7 +31,7 @@ struct SoundData {
 	// バッファの先頭アドレス
 	BYTE* pBuffer;
 	// バッファのサイズ
-	unsigned int bufferSize;
+	uint32_t bufferSize;
 };
 
 /// <summary>
@@ -40,7 +40,6 @@ struct SoundData {
 class Audio
 {
 public:
-
 	// コンストラクタ・デストラクタ
 	Audio() = default;
 	~Audio() = default;
@@ -68,15 +67,12 @@ public:
 	void Finalize();
 
 private:
+	static std::shared_ptr<Audio> sInstance_;
 
-	static std::shared_ptr<Audio> instance;
+	Microsoft::WRL::ComPtr<IXAudio2> xAudio2_;
 
-	
+	IXAudio2MasteringVoice* masterVoice_ = nullptr;
 
-	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
-
-	IXAudio2MasteringVoice* masterVoice = nullptr;
-
-	HRESULT result;
+	HRESULT result_;
 };
 

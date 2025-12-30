@@ -10,21 +10,21 @@ void SRFramework::Initialize()
 
 
 	// WindowsAPIの初期化
-	winApp = make_unique< WinApp>();
-	winApp->Initialize();
+	winApp_ = make_unique<WinApp>();
+	winApp_->Initialize();
 
 
 
 	// DirectXの初期化
-	DirectXCommon::GetInstance()->Initialize(winApp.get());
+	DirectXCommon::GetInstance()->Initialize(winApp_.get());
 
 
 	// SRVマネージャの初期化
-	srvManager = make_unique<SrvManager>();
-	srvManager->Initialize();
+	srvManager_ = make_unique<SrvManager>();
+	srvManager_->Initialize();
 
 	// テクスチャマネージャの初期化
-	TextureManager::GetInstance()->Initialize(srvManager.get());
+	TextureManager::GetInstance()->Initialize(srvManager_.get());
 
 	// テクスチャを事前にロード
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
@@ -44,11 +44,11 @@ void SRFramework::Initialize()
 	
 	// スプライト共通部の初期化
 	
-	SpriteCommon::GetInstance()->Initialize(srvManager.get());
+	SpriteCommon::GetInstance()->Initialize(srvManager_.get());
 
 
 	// 3Dオブジェクト共通部の初期化
-	Object3dCommon::GetInstance()->Initialize(srvManager.get());
+	Object3dCommon::GetInstance()->Initialize(srvManager_.get());
 
 
 	// 3Dモデルマネージャの初期化
@@ -65,57 +65,57 @@ void SRFramework::Initialize()
 
 
 
-	Input::GetInstance()->Initialize(winApp.get());
+	Input::GetInstance()->Initialize(winApp_.get());
 
-	camera->SetRotate({ 0.1f,0.0f,0.0f });
-	camera->SetTranslate({ 0.0f,1.0f,-10.0f });
-	Object3dCommon::GetInstance()->SetDefaultCamera(camera.get());
+	camera_->SetRotate({ 0.1f, 0.0f, 0.0f });
+	camera_->SetTranslate({ 0.0f, 1.0f, -10.0f });
+	Object3dCommon::GetInstance()->SetDefaultCamera(camera_.get());
 
-	dxCommon = DirectXCommon::GetInstance();
+	dxCommon_ = DirectXCommon::GetInstance();
 
-	dxCommon->CreateDepthResource(camera.get());
+	dxCommon_->CreateDepthResource(camera_.get());
 
-	dxCommon->CreateMaskSRVDescriptorHeap();
+	dxCommon_->CreateMaskSRVDescriptorHeap();
 
 	// 各種ポストエフェクトの初期化
 	noisePostEffect_ = std::make_unique<NoisePostEffect>();
-	noisePostEffect_->Initialize(dxCommon);
+	noisePostEffect_->Initialize(dxCommon_);
 
 	grayscalePostEffect_ = std::make_unique<GrayscalePostEffect>();
-	grayscalePostEffect_->Initialize(dxCommon);
+	grayscalePostEffect_->Initialize(dxCommon_);
 
 	// ポストエフェクトマネージャにポストエフェクトを追加
 	postEffectManager_ = std::make_unique<PostEffectManager>();
-	postEffectManager_->Initialize(dxCommon);
+	postEffectManager_->Initialize(dxCommon_);
 	postEffectManager_->AddEffect(std::move(noisePostEffect_));
 	postEffectManager_->AddEffect(std::move(grayscalePostEffect_));
 
 	postEffectManager_->SetEffectEnabled(0, false);
 	postEffectManager_->SetEffectEnabled(1, false);
 
-	imGuiManager->Initialize(winApp.get());
+	imGuiManager_->Initialize(winApp_.get());
 
 	/*------パーティクルマネージャの初期化------*/
-	ParticleManager::GetInstance()->Initialize(srvManager.get(), camera.get());
+	ParticleManager::GetInstance()->Initialize(srvManager_.get(), camera_.get());
 
 	// シーンマネージャの初期化
 	sceneManager_ = std::make_unique<SceneManager>();
-	sceneManager_->Initialize(winApp.get());
+	sceneManager_->Initialize(winApp_.get());
 
 	/*------パーティクルマネージャの初期化------*/
-	ParticleManager::GetInstance()->Initialize(srvManager.get(),camera.get());
+	ParticleManager::GetInstance()->Initialize(srvManager_.get(), camera_.get());
 }
 
 void SRFramework::Finelize()
 {
-	for (uint32_t i = 0; i < SrvManager::kMaxSRVCount; i++) {
+	for (uint32_t i = 0; i < SrvManager::kMaxSRVCount_; i++) {
 		// 使われているSRVインデックスを解放
-		srvManager->Free(i);
+		srvManager_->Free(i);
 	}
 	
 	
 	// WindowsAPIの終了処理
-	winApp->Finalize();
+	winApp_->Finalize();
 	
 
 	CloseHandle(DirectXCommon::GetInstance()->GetFenceEvent());
@@ -137,13 +137,13 @@ void SRFramework::Update()
 	// ウィンドウの×ボタンが押されるまでループ
 
 	// Windowsのメッセージ処理
-	if (winApp->ProcessMessage()) {
+	if (winApp_->ProcessMessage()) {
 		// ゲームループを抜ける
 		endRequest_ = true;
 	}
 	// シーンマネージャの更新
 	sceneManager_->Update();
-	camera->Update();
+	camera_->Update();
 
 	postEffectManager_->SetTimeParams(GetNowTimeInSeconds());
 	// パーティクルマネージャの更新
@@ -163,7 +163,7 @@ void SRFramework::PreDraw()
 	// 描画前処理
 	DirectXCommon::GetInstance()->PreDraw();
 
-	srvManager->PreDraw();
+	srvManager_->PreDraw();
 	
 }
 
@@ -175,18 +175,18 @@ void SRFramework::PostDraw()
 void SRFramework::PrePostEffect()
 {
 	// [D3D12_RESOURCE_STATE_DEPTH_WRITE]（書き込み
-	dxCommon->PreRenderScene();
+	dxCommon_->PreRenderScene();
 	postEffectManager_->PreRenderAll();
 }
 
 void SRFramework::DrawPostEffect()
 {
 	// 深度バッファを「SRV用」に遷移
-	dxCommon->TransitionDepthBufferToSRV();
+	dxCommon_->TransitionDepthBufferToSRV();
 
-	dxCommon->TransitionRenderTextureToShaderResource();
-	dxCommon->DrawRenderTexture();
-	dxCommon->TransitionRenderTextureToRenderTarget();
+	dxCommon_->TransitionRenderTextureToShaderResource();
+	dxCommon_->DrawRenderTexture();
+	dxCommon_->TransitionRenderTextureToRenderTarget();
 	postEffectManager_->PreBarrierAll();
 	postEffectManager_->DrawAll();
 	postEffectManager_->PostBarrierAll();

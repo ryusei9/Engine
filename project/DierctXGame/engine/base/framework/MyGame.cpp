@@ -16,13 +16,13 @@ void MyGame::Update()
 {
 	SRFramework::Update();
 	// ImGuiの更新
-	imGuiManager->Begin();
+	imGuiManager_->Begin();
 #ifdef _DEBUG
 	// ゲームプレイシーンの更新
 	sceneManager_->DrawImGui();
 
 #endif
-	imGuiManager->End();
+	imGuiManager_->End();
 	
 }
 
@@ -38,7 +38,7 @@ void MyGame::Draw()
 
 	SRFramework::DrawPostEffect();
 
-	imGuiManager->Draw();
+	imGuiManager_->Draw();
 	
 	SRFramework::PostDraw();
 }

@@ -4,8 +4,8 @@
 void GameOverScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
 	// インプットの初期化
-	input = std::make_unique<Input>();
-	input->Initialize(winApp);
+	input_ = std::make_unique<Input>();
+	input_->Initialize(winApp);
 
 	// フェードマネージャーの初期化
 	fadeManager_ = std::make_unique<FadeManager>();
@@ -54,10 +54,10 @@ void GameOverScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 void GameOverScene::Update()
 {
 	// 入力の更新
-	input->Update();
+	input_->Update();
 
 	// スペースキーでタイトルシーンに切り替える
-	if(input->TriggerKey(DIK_SPACE))
+	if(input_->TriggerKey(DIK_SPACE))
 	{
 		returnToTitle_ = true;
 	}

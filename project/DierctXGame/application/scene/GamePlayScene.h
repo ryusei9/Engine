@@ -24,7 +24,6 @@
 /// ゲームプレイシーン
 /// </summary>
 class GamePlayScene : public BaseScene
-
 {
 public:
 	// 初期化
@@ -66,7 +65,7 @@ public:
 		Free,
 		FollowPlayer,
 		DynamicFollow,
-		centerPlayer
+		CenterPlayer
 	};
 
 	template<typename T>
@@ -78,8 +77,8 @@ public:
 	T MyMax(const T& a, const T& b) {
 		return (a > b) ? a : b;
 	}
-private:
 
+private:
 	// 衝突判定と応答
 	void CheckAllCollisions();
 
@@ -102,26 +101,28 @@ private:
 	void UpdateGameClear();
 
 	// スプライトコモン
-	SpriteCommon* spriteCommon = nullptr;
+	SpriteCommon* spriteCommon_ = nullptr;
+
 	// ダイレクトXコモン
-	DirectXCommon* directXCommon = nullptr;
+	DirectXCommon* directXCommon_ = nullptr;
+
 	// WinApp
-	WinApp* winApp = nullptr;
+	WinApp* winApp_ = nullptr;
 
 	// 当たり判定マネージャ
 	std::unique_ptr<CollisionManager> collisionManager_;
 
 	// スプライト
-	std::unique_ptr<Sprite> sprite = nullptr;
+	std::unique_ptr<Sprite> sprite_ = nullptr;
 
 	// 入力の初期化
-	Input* input = nullptr;
+	Input* input_ = nullptr;
 
 	// スプライトの座標
-	Vector2 spritePosition = { 100.0f,100.0f };
+	Vector2 spritePosition_ = { 100.0f, 100.0f };
 
 	// オーディオ
-	SoundData soundData1;
+	SoundData soundData1_;
 
 	// プレイヤー
 	std::unique_ptr<Player> player_ = nullptr;
@@ -129,6 +130,7 @@ private:
 	// プレイヤーの弾
 	std::list<std::unique_ptr<PlayerBullet>>* playerBullets_;
 
+	// プレイヤーのチャージ弾
 	std::list<std::unique_ptr<PlayerChargeBullet>>* playerChargeBullets_;
 
 	// 敵の弾
@@ -141,10 +143,10 @@ private:
 	LevelData* levelData_ = nullptr;
 
 	// 複数のモデルを管理するためのコンテナ
-	std::unordered_map<std::string, std::unique_ptr<Model>> models;
+	std::unordered_map<std::string, std::unique_ptr<Model>> models_;
 
 	// 複数のオブジェクトを管理するためのコンテナ
-	std::vector<std::unique_ptr<Object3d>> objects;
+	std::vector<std::unique_ptr<Object3d>> objects_;
 
 	// スカイボックス
 	std::unique_ptr<Skybox> skybox_ = nullptr;
@@ -164,17 +166,17 @@ private:
 	// --- スタート演出用 ---
 	bool isStartCameraEasing_ = true;
 	float startCameraTimer_ = 0.0f;
-	const float startCameraDuration_ = 5.0f;
-	Vector3 startCameraPos_ = { 70.0f,-10.0f, -20.0f };
+	const float kStartCameraDuration_ = 5.0f;
+	Vector3 startCameraPos_ = { 70.0f, -10.0f, -20.0f };
 	Vector3 startCameraRot_ = { 0.0f, 0.0f, 0.0f };
 	Vector3 endCameraPos_ = { 0.0f, 1.0f, -10.0f };
 	Vector3 endCameraRot_ = { 0.1f, 0.0f, 0.0f };
 
 	// タイトルに戻るテキスト
-	std::unique_ptr<Object3d> BackToTitle;
+	std::unique_ptr<Object3d> backToTitle_;
 
 	// タイトルに戻るテキストのワールド変換
-	WorldTransform textTitle;
+	WorldTransform textTitle_;
 
 	// カーブ座標リスト
 	std::vector<Vector3> curvePoints_;
@@ -185,8 +187,8 @@ private:
 	// カーブの現在インデックス
 	size_t curveIndex_ = 0;
 
-	// カメラ移動速度
-	float curveSpeed_ = 0.004f; // 1フレームあたりの進行度
+	// カメラ移動速度（1フレームあたりの進行度）
+	float curveSpeed_ = 0.004f;
 
 	// ゲームオーバー処理用タイマー
 	float gameOverTimer_ = 2.0f;
@@ -201,39 +203,39 @@ private:
 	std::unique_ptr<Camera> camera_;
 
 	// ゲーム終了フラグ
-	bool isEnd = false;
+	bool isEnd_ = false;
 
 	// 仮ゲームクリア
 	bool isGameClear_ = false;
 
 	// ゲームクリア時のカメラ遷移・発射制御用
 	// 待機フェーズ
-	bool g_gameClearCameraWaiting = false;
+	bool gameClearCameraWaiting_ = false;
 
 	// 待機タイマー
-	float g_gameClearWaitTimer = 0.0f;
+	float gameClearWaitTimer_ = 0.0f;
 
 	// カメラ移動フェーズ
-	bool g_gameClearCameraMoving = false;
+	bool gameClearCameraMoving_ = false;
 
 	// カメラ移動タイマー
-	float g_gameClearMoveTimer = 0.0f;
+	float gameClearMoveTimer_ = 0.0f;
 
 	// カメラ移動時間
-	const float g_gameClearMoveDuration = 2.0f;
+	const float kGameClearMoveDuration_ = 2.0f;
 
 	// カメラ開始位置と目標位置
-	Vector3 g_gameClearCamStartPos = { 0.0f, 0.0f, 0.0f };
-	Vector3 g_gameClearCamTargetPos = { 0.0f, 0.0f, 0.0f };
+	Vector3 gameClearCamStartPos_ = { 0.0f, 0.0f, 0.0f };
+	Vector3 gameClearCamTargetPos_ = { 0.0f, 0.0f, 0.0f };
 
 	// プレイヤー発射フェーズ
-	bool g_gameClearPlayerLaunched = false;
+	bool gameClearPlayerLaunched_ = false;
 
 	// フェード開始フラグ
-	bool g_gameClearFadeStarted = false;
+	bool gameClearFadeStarted_ = false;
 
-	// プレイヤー発射速度
-	const float g_gameClearPlayerLaunchSpeed = 16.0f; // 単位: ワールド単位 / 秒
+	// プレイヤー発射速度（単位: ワールド単位 / 秒）
+	const float kGameClearPlayerLaunchSpeed_ = 16.0f;
 
 	// ゲームクリア演出用テキスト
 	std::unique_ptr<Object3d> gameClearText_;
@@ -242,7 +244,7 @@ private:
 	std::unique_ptr<Object3d> pressSpaceKeyText_;
 
 	// ゲームクリア演出用テキストの表示フラグ
-	bool g_gameClearTextVisible = false;
+	bool gameClearTextVisible_ = false;
 
 	// ゲームクリア演出用テキストのワールド変換
 	WorldTransform gameClearTextTransform_;
@@ -256,6 +258,7 @@ private:
 	// 現在のセグメントの所要時間
 	float currentSegmentDuration_ = 1.0f;
 
-	const float kDeltaTime = 1.0f / 60.0f;
+	// デルタタイム
+	const float kDeltaTime_ = 1.0f / 60.0f;
 };
 

@@ -2,11 +2,11 @@
 #include <CollisionTypeIdDef.h>
 
 // 静的メンバ変数の初期化
-uint32_t PlayerChargeBullet::nextSerialNumber_ = 1;
+uint32_t PlayerChargeBullet::sNextSerialNumber_ = 1;
 
 PlayerChargeBullet::PlayerChargeBullet() {
 	// シリアルナンバーを設定
-    serialNumber_ = nextSerialNumber_++;
+    serialNumber_ = sNextSerialNumber_++;
 }
 
 void PlayerChargeBullet::Initialize(const Vector3& position) {

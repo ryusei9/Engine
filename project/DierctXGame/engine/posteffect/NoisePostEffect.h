@@ -47,17 +47,16 @@ private:
     // SRV用ディスクリプタヒープ
     Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap_;
 
-    D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
+    D3D12_INPUT_LAYOUT_DESC inputLayoutDesc_{};
 
     /// RasterizerState
-    D3D12_RASTERIZER_DESC rasterizerDesc{};
-
+    D3D12_RASTERIZER_DESC rasterizerDesc_{};
 
     // DepthStencilStateの設定
-    D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+    D3D12_DEPTH_STENCIL_DESC depthStencilDesc_{};
 
     /// BlendStateの設定
-    D3D12_RENDER_TARGET_BLEND_DESC blendDesc{};
+    D3D12_RENDER_TARGET_BLEND_DESC blendDesc_{};
 
     // mask用のResourceとアップロードリソース
     Microsoft::WRL::ComPtr<ID3D12Resource> maskResource_;

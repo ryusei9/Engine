@@ -92,6 +92,6 @@ protected:
 	uint32_t serialNumber_ = 0;
 
 	// 次のシリアルナンバー
-	static inline uint32_t nextSerialNumber_ = 0;
+	static inline uint32_t sNextSerialNumber_ = 0;
 };
 

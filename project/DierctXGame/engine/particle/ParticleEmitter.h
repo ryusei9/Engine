@@ -20,7 +20,7 @@ public:
 	void SetVelocity(const Vector3& velocity) { velocity_ = velocity; } // 追加: パーティクルの速度を設定
 
 	// 一秒あたりの最大発生数の設定
-	void SetParticleRate(uint32_t rate) { particleRate = rate; }
+	void SetParticleRate(uint32_t rate) { particleRate_ = rate; }
 
 	void SetParticleCount(uint32_t count) { particleCount_ = count; }
 	uint32_t GetParticleCount() const { return particleCount_; }
@@ -29,7 +29,7 @@ public:
 	const Vector3& GetPosition() const { return position_; }
 
 	// 一秒あたりの最大発生数の取得
-	uint32_t GetParticleRate() const { return particleRate; }
+	uint32_t GetParticleRate() const { return particleRate_; }
 
 	// リングパーティクルを使うか
 	void SetUseRingParticle(bool use) { useRingParticle_ = use; }
@@ -45,6 +45,7 @@ public:
 
 	// 爆発用かどうかの取得
 	bool IsExplosion() const { return isExplosion_; }
+
 private:
 	/*------メンバ変数------*/
 	// パーティクルマネージャ
@@ -57,12 +58,12 @@ private:
 	float deltaTime_ = 1.0f / 60.0f;
 
 	// パーティクルの発生位置
-	Vector3 position_ = { 0.0f,0.0f,0.0f };
+	Vector3 position_ = { 0.0f, 0.0f, 0.0f };
 
-	Vector3 velocity_ = { 0.0f,0.0f,0.0f }; // 追加: パーティクルの速度
+	Vector3 velocity_ = { 0.0f, 0.0f, 0.0f }; // 追加: パーティクルの速度
 
 	// パーティクルの一秒あたりの最大発生数
-	uint32_t particleRate = 10;
+	uint32_t particleRate_ = 10;
 
 	// パーティクルの発生間隔
 	float interval_ = 0.0f;

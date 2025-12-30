@@ -12,16 +12,16 @@
 //   - スレッドセーフではない（呼び出しはメインスレッド前提）。
 //
 
-std::shared_ptr<Audio> Audio::instance = nullptr;
+std::shared_ptr<Audio> Audio::sInstance_ = nullptr;
 
 void Audio::Initialize()
 {
 	// XAudio2 を初期化して MasteringVoice を作成する
-	// 副作用: xAudio2 と masterVoice をメンバに保存する
-	result = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
+	// 副作用: xAudio2_ と masterVoice_ をメンバに保存する
+	result_ = XAudio2Create(&xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
 
 	// マスターボイスの作成（出力デバイスとの接続）
-	result = xAudio2->CreateMasteringVoice(&masterVoice);
+	result_ = xAudio2_->CreateMasteringVoice(&masterVoice_);
 }
 
 SoundData Audio::SoundLoadWave(const char* filename)
@@ -108,8 +108,8 @@ void Audio::SoundPlayWave(const SoundData& soundData)
 	// - 再生完了後のリソース破棄（SourceVoice の DestroyVoice）は現在行っていないため、
 	//   長時間または多数のサウンドを再生する用途では追加の管理が必要
 	IXAudio2SourceVoice* pSourceVoice = nullptr;
-	result = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
-	assert(SUCCEEDED(result));
+	result_ = xAudio2_->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
+	assert(SUCCEEDED(result_));
 
 	// XAUDIO2_BUFFER に再生データを詰める
 	XAUDIO2_BUFFER buf{};
@@ -118,27 +118,27 @@ void Audio::SoundPlayWave(const SoundData& soundData)
 	buf.Flags = XAUDIO2_END_OF_STREAM;
 
 	// 再生キューに登録して再生開始
-	result = pSourceVoice->SubmitSourceBuffer(&buf);
-	result = pSourceVoice->Start();
+	result_ = pSourceVoice->SubmitSourceBuffer(&buf);
+	result_ = pSourceVoice->Start();
 }
 
 std::shared_ptr<Audio> Audio::GetInstance()
 {
 	// シングルトン取得（遅延初期化）
-	if (instance == nullptr) {
-		instance = std::make_shared<Audio>();
+	if (sInstance_ == nullptr) {
+		sInstance_ = std::make_shared<Audio>();
 	}
-	return instance;
+	return sInstance_;
 }
 
 void Audio::Finalize()
 {
 	// 終了処理: マスターボイスの破棄と XAudio2 オブジェクトの解放
-	if (masterVoice) {
-		masterVoice->DestroyVoice();
-		masterVoice = nullptr;
+	if (masterVoice_) {
+		masterVoice_->DestroyVoice();
+		masterVoice_ = nullptr;
 	}
-	if (xAudio2) {
-		xAudio2.Reset();
+	if (xAudio2_) {
+		xAudio2_.Reset();
 	}
 }

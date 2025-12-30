@@ -1,6 +1,7 @@
 #include "PlayerBullet.h"
 #include <CollisionTypeIdDef.h>
 #include <Player.h>
+
 PlayerBullet::PlayerBullet()
 {
 	// シリアルナンバーを設定
@@ -52,8 +53,6 @@ void PlayerBullet::Update()
 	// オブジェクトの更新
 	objectBullet_->SetTranslate(worldTransform_.translate_);
 	objectBullet_->Update();
-	
-	
 }
 
 void PlayerBullet::Draw()
@@ -65,12 +64,12 @@ void PlayerBullet::Draw()
 void PlayerBullet::Move()
 {
 	// プレイヤー弾の移動
-	worldTransform_.translate_.x += speed_;
-	
+	worldTransform_.translate_.x += kSpeed_;
 }
 
 void PlayerBullet::OnCollision(Collider* other)
-{// プレイヤー弾の衝突判定
+{
+	// プレイヤー弾の衝突判定
 	if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
 		// 敵と衝突した場合
 		isAlive_ = false;

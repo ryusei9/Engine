@@ -8,7 +8,7 @@
 #include <GameOverScene.h>
 
 /// <summary>
-// シーン管理
+/// シーン管理
 /// </summary>
 class SceneManager
 {
@@ -29,7 +29,6 @@ public:
 	void DrawImGui();
 	
 private:
-
 	// 現在のシーン
 	std::unique_ptr<BaseScene> nowScene_ = nullptr;
 
@@ -43,7 +42,7 @@ private:
 	WinApp* winApp_ = nullptr;
 
 	// シーンの管理
-	int currentSceneNo_;
-	int prevSceneNo_;
+	int32_t currentSceneNo_;
+	int32_t prevSceneNo_;
 };
 

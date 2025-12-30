@@ -8,22 +8,22 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(Object3dCommon::GetInstance()->GetDefaultCamera());
 
-	cameraManager_->SetCameraPosition({ 0.0f,1.0f,-10.0f });
-	cameraManager_->SetCameraRotation({ 0.1f,0.0f,0.0f });
+	cameraManager_->SetCameraPosition({ 0.0f, 1.0f, -10.0f });
+	cameraManager_->SetCameraRotation({ 0.1f, 0.0f, 0.0f });
 	
 	// 入力の初期化
-	input = std::make_unique<Input>();
-	input->Initialize(winApp);
+	input_ = std::make_unique<Input>();
+	input_->Initialize(winApp);
 
 	// オーディオの初期化
 	Audio::GetInstance()->Initialize();
-	soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
+	soundData1_ = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
 	
 	// プレイヤーの初期化
 	player_ = std::make_unique<Player>();
 	player_->Initialize();
 
-	playerTransform_.translate_ = { 0.0f,-0.5f,-4.0f };
+	playerTransform_.translate_ = { 0.0f, -0.5f, -4.0f };
 
 	// タイトルロゴの初期化
 	titleLogo_ = std::make_unique<Object3d>();
@@ -55,17 +55,17 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 void TitleScene::Update()
 {
 	// 入力の更新
-	input->Update();
+	input_->Update();
 
 	// スペースーキーでゲームシーンに切り替える
-	if (input->TriggerKey(DIK_SPACE))
+	if (input_->TriggerKey(DIK_SPACE))
 	{
 		// フェードイン開始
 		isGameStart_ = true;
 		fadeManager_->FadeInStart(0.02f);
 	}
 	// フェードが完了したらシーン切り替え
-	if(fadeManager_->GetFadeState() == FadeManager::EffectState::Finish && isGameStart_)
+	if (fadeManager_->GetFadeState() == FadeManager::EffectState::Finish && isGameStart_)
 	{
 		SetSceneNo(GAMEPLAY);
 	}
@@ -85,9 +85,9 @@ void TitleScene::Update()
 
 	// ガイドオブジェクト
 	titleGuide_->Update();
-	titleGuide_->SetTranslate(titleGuidePosition);
-	titleGuide_->SetRotate(titleGuideRotate);
-	titleGuide_->SetScale(titleGuideScale);
+	titleGuide_->SetTranslate(titleGuidePosition_);
+	titleGuide_->SetRotate(titleGuideRotate_);
+	titleGuide_->SetScale(titleGuideScale_);
 
 	// フェードマネージャの更新
 	fadeManager_->Update();
@@ -127,7 +127,7 @@ void TitleScene::Draw()
 void TitleScene::Finalize()
 {
 	// サウンドデータ解放
-	Audio::GetInstance()->SoundUnload(&soundData1);
+	Audio::GetInstance()->SoundUnload(&soundData1_);
 	Audio::GetInstance()->Finalize();
 }
 
@@ -142,9 +142,9 @@ void TitleScene::DrawImGui()
 	ImGui::SliderFloat3("titleRotate", &titleLogoTransform_.rotate_.x, -3.14f, 3.14f);
 	ImGui::SliderFloat3("titleScale", &titleLogoTransform_.scale_.x, 0.0f, 10.0f);
 	// ガイドの位置
-	ImGui::DragFloat3("titleGuidePosition", &titleGuidePosition.x);
-	ImGui::SliderFloat3("titleGuideRotate", &titleGuideRotate.x, -3.14f, 3.14f);
-	ImGui::SliderFloat3("titleGuideScale", &titleGuideScale.x, 0.0f, 10.0f);
+	ImGui::DragFloat3("titleGuidePosition", &titleGuidePosition_.x);
+	ImGui::SliderFloat3("titleGuideRotate", &titleGuideRotate_.x, -3.14f, 3.14f);
+	ImGui::SliderFloat3("titleGuideScale", &titleGuideScale_.x, 0.0f, 10.0f);
 
 	// その他のImGui描画
 	skydome_->DrawImGui();
@@ -159,17 +159,17 @@ void TitleScene::CameraMove()
 	// プレイヤーの位置を取得
 	Vector3 playerPos = player_->GetCenterPosition();
 
-	static float theta = 0.0f;
-	theta += 0.005f; // 回転速度（ラジアン）
+	static float sTheta_ = 0.0f;
+	sTheta_ += 0.005f; // 回転速度（ラジアン）
 
 	float radius = 5.0f; // プレイヤーからの距離
 	float height = 2.0f; // カメラの高さ
 
 	// カメラの位置を計算
 	Vector3 cameraPos = {
-		playerPos.x + std::cos(theta) * radius,
+		playerPos.x + std::cos(sTheta_) * radius,
 		height,
-		playerPos.z + std::sin(theta) * radius
+		playerPos.z + std::sin(sTheta_) * radius
 	};
 	// カメラの向きを計算
 	Vector3 toPlayer = playerPos - cameraPos;

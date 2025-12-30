@@ -13,15 +13,15 @@
 void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
 	// スプライトの初期化
-	sprite = std::make_unique<Sprite>();
+	sprite_ = std::make_unique<Sprite>();
 
-	sprite->Initialize(directXCommon, "resources/BackToTitle.png");
+	sprite_->Initialize(directXCommon, "resources/BackToTitle.png");
 	// 入力の初期化
-	input = Input::GetInstance();
+	input_ = Input::GetInstance();
 
 	// オーディオの初期化
 	Audio::GetInstance()->Initialize();
-	soundData1 = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
+	soundData1_ = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
 
 	// フェードマネージャの初期化
 	fadeManager_ = std::make_unique<FadeManager>();
@@ -31,14 +31,14 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	fadeManager_->FadeOutStart(0.02f);
 
 	// タイトルに戻るテキストのトランスフォームの初期化
-	textTitle.Initialize();
-	textTitle.translate_ = { 3.333f,2.857f,10.000f };
-	textTitle.rotate_ = { -1.495f,0.0f,0.0f };
+	textTitle_.Initialize();
+	textTitle_.translate_ = { 3.333f, 2.857f, 10.000f };
+	textTitle_.rotate_ = { -1.495f, 0.0f, 0.0f };
 
 	// オブジェクト3Dの初期化
-	BackToTitle = std::make_unique<Object3d>();
-	BackToTitle->Initialize("BackToTitle.obj");
-	BackToTitle->SetWorldTransform(textTitle);
+	backToTitle_ = std::make_unique<Object3d>();
+	backToTitle_->Initialize("BackToTitle.obj");
+	backToTitle_->SetWorldTransform(textTitle_);
 
 	// プレイヤーの初期化
 	player_ = std::make_unique<Player>();
@@ -100,18 +100,15 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	pressSpaceKeyTransform_.Initialize();
 	pressSpaceKeyTransform_.scale_ = Vector3(0.4f, 0.4f, 0.4f);
 	pressSpaceKeyTransform_.rotate_.x = -1.694f;
-#ifdef _DEBUG
-	
-#endif
 }
 
 void GamePlayScene::Update()
 {
 	// 入力の更新
-	input->Update();
+	input_->Update();
 
 	// Tキーでタイトルシーンに切り替える
-	if (input->TriggerKey(DIK_T))
+	if (input_->TriggerKey(DIK_T))
 	{
 		SetSceneNo(TITLE);
 	}
@@ -134,7 +131,7 @@ void GamePlayScene::Update()
 		}
 	}
 	// ゲームクリア時のフェード処理
-	if (isEnd && !fadeStarted_) {
+	if (isEnd_ && !fadeStarted_) {
 		gameOverTimer_ -= 1.0f / 60.0f; // 60FPS想定
 		if (gameOverTimer_ <= 0.0f) {
 			fadeManager_->FadeInStart(0.02f, [this]() {
@@ -170,7 +167,7 @@ void GamePlayScene::Update()
 	}
 
 	// 読み込んだ全オブジェクトの更新
-	for (auto& obj : objects) {
+	for (auto& obj : objects_) {
 		obj->Update();
 	}
 
@@ -200,7 +197,7 @@ void GamePlayScene::Update()
 	}
 
 	// ゲームクリアテキストの更新
-	if (g_gameClearTextVisible && gameClearText_) {
+	if (gameClearTextVisible_ && gameClearText_) {
 		// カメラ位置を取得して Y を +1.2 する
 		Camera* cam = cameraManager_->GetMainCamera();
 		if (cam) {
@@ -224,12 +221,11 @@ void GamePlayScene::Update()
 	skybox_->Update();
 
 	// タイトルに戻るテキストの更新
-	BackToTitle->SetWorldTransform(textTitle);
-	BackToTitle->Update();
+	backToTitle_->SetWorldTransform(textTitle_);
+	backToTitle_->Update();
 
 	// フェードマネージャの更新
 	fadeManager_->Update();
-
 
 	// カメラの更新
 	switch (cameraMode_) {
@@ -238,17 +234,18 @@ void GamePlayScene::Update()
 		break;
 	case CameraMode::FollowPlayer:
 		// プレイヤーについて行く
-		cameraManager_->SetCameraPosition(player_->GetWorldTransform().translate_ + Vector3{ 0.0f,1.0f,-10.0f });
-		cameraManager_->SetCameraRotation(Vector3{ 0.1f,0.0f,0.0f });
+		cameraManager_->SetCameraPosition(player_->GetWorldTransform().translate_ + Vector3{ 0.0f, 1.0f, -10.0f });
+		cameraManager_->SetCameraRotation(Vector3{ 0.1f, 0.0f, 0.0f });
 		break;
 	case CameraMode::DynamicFollow:
 		// プレイヤーを注視しつつ追従
-		cameraManager_->MoveTargetAndCamera(player_->GetWorldTransform(), Vector3{ 0.0f,1.0f,-10.0f });
+		cameraManager_->MoveTargetAndCamera(player_->GetWorldTransform(), Vector3{ 0.0f, 1.0f, -10.0f });
 		cameraManager_->LookAtTarget(player_->GetPosition());
 		break;
-	case CameraMode::centerPlayer:
+	case CameraMode::CenterPlayer:
 		// プレイヤーを中心に注視
-		cameraManager_->LookAtTarget(player_->GetPosition(),true);
+		cameraManager_->LookAtTarget(player_->GetPosition(), true);
+		break;
 	}
 
 	// スタート演出カメラ初期化
@@ -259,18 +256,17 @@ void GamePlayScene::Update()
 		cameraManager_->Update();
 		Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
 		return; // 他の更新をスキップ（必要に応じて調整）
-	} else {
 	}
 
 	// 通常のカメラ更新（ゲームクリア時にカメライージング中なら上で更新済み）
-	if (!g_gameClearCameraMoving) {
+	if (!gameClearCameraMoving_) {
 		cameraManager_->Update();
 	}
 	Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
 
 	// スプライトの更新
-	sprite->SetPosition(spritePosition);
-	sprite->Update();
+	sprite_->SetPosition(spritePosition_);
+	sprite_->Update();
 
 	// 衝突マネージャの更新
 	collisionManager_->Update();
@@ -312,34 +308,31 @@ void GamePlayScene::Draw()
 {
 	/*------UIの描画------*/
 	SpriteCommon::GetInstance()->DrawSettings();
-	
 
 	/*------オブジェクトの描画------*/
 	Object3dCommon::GetInstance()->DrawSettings();
 
 	// 読み込んだ全オブジェクトの描画
-	for (auto& obj : objects) {
+	for (auto& obj : objects_) {
 		obj->Draw();
 	}
-	//ground->Draw();
+
 	if (!isGameOver_) {
 		// プレイヤーの描画
 		player_->Draw();
-	} else {
-
 	}
 
 	// 敵の描画
-	
 	for (auto& enemy : enemies_) {
 		enemy->Draw();
 	}
 
 	// クリアテキストの描画
-	if (g_gameClearTextVisible && gameClearText_) {
+	if (gameClearTextVisible_ && gameClearText_) {
 		gameClearText_->Draw();
 		pressSpaceKeyText_->Draw();
 	}
+
 	/*------skyboxの描画------*/
 	skybox_->DrawSettings();
 	skybox_->Draw();
@@ -354,7 +347,7 @@ void GamePlayScene::Draw()
 void GamePlayScene::Finalize()
 {
 	// オーディオの終了処理
-	Audio::GetInstance()->SoundUnload(&soundData1);
+	Audio::GetInstance()->SoundUnload(&soundData1_);
 	Audio::GetInstance()->Finalize();
 }
 
@@ -366,15 +359,15 @@ void GamePlayScene::DrawImGui()
 	ImGui::Text("SPACE : Shot Bullet");
 	ImGui::Text("WASD : Move Player");
 	// パーティクルエミッター1の位置
-	ImGui::SliderFloat3("sprite Position", &spritePosition.x, 1.0f, 50.0f);
+	ImGui::SliderFloat3("sprite Position", &spritePosition_.x, 1.0f, 50.0f);
 	// CameraMode選択用Combo
-	static const char* cameraModeItems[] = { "Free", "FollowPlayer", "DynamicFollow" };
-	int cameraModeIndex = static_cast<int>(cameraMode_);
+	static const char* cameraModeItems[] = { "Free", "FollowPlayer", "DynamicFollow", "CenterPlayer" };
+	int32_t cameraModeIndex = static_cast<int32_t>(cameraMode_);
 	if (ImGui::Combo("Camera Mode", &cameraModeIndex, cameraModeItems, IM_ARRAYSIZE(cameraModeItems))) {
 		cameraMode_ = static_cast<CameraMode>(cameraModeIndex);
 	}
-	ImGui::SliderFloat3("text Position", &textTitle.translate_.x, -10.0f, 10.0f);
-	ImGui::SliderFloat3("text rotation", &textTitle.rotate_.x, -3.14f, 3.14f);
+	ImGui::SliderFloat3("text Position", &textTitle_.translate_.x, -10.0f, 10.0f);
+	ImGui::SliderFloat3("text rotation", &textTitle_.rotate_.x, -3.14f, 3.14f);
 
 	ImGui::SliderFloat3("clear Text Position", &gameClearTextTransform_.translate_.x, -10.0f, 10.0f);
 	ImGui::SliderFloat3("clear Text rotation", &gameClearTextTransform_.rotate_.x, -3.14f, 3.14f);
@@ -391,7 +384,6 @@ void GamePlayScene::DrawImGui()
 	skybox_->DrawImGui();
 	cameraManager_->DrawImGui();
 	fadeManager_->DrawImGui();
-	
 #endif
 }
 
@@ -405,8 +397,8 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		}
 		// ファイル名から登録済みモデルを検索
 		Model* model = nullptr;
-		auto it = models.find(objectData.fileName);
-		if (it != models.end()) { model = it->second.get(); }
+		auto it = models_.find(objectData.fileName);
+		if (it != models_.end()) { model = it->second.get(); }
 		// モデルを指定して3Dオブジェクトを生成
 		auto newObject = std::make_unique<Object3d>();
 		newObject->Initialize(objectData.fileName + ".obj");
@@ -416,23 +408,21 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		newObject->SetRotate(objectData.rotation);
 		// スケーリング
 		newObject->SetScale(objectData.scaling);
-		objects.push_back(std::move(newObject));
+		objects_.push_back(std::move(newObject));
 	}
 
 	// レベルデータから敵を生成、配置
 	for (auto& enemyData : levelData_->enemies) {
-
 		// ファイル名から登録済みモデルを検索
 		Model* model = nullptr;
-		auto it = models.find(enemyData.fileName);
-		if (it != models.end()) { model = it->second.get(); }
+		auto it = models_.find(enemyData.fileName);
+		if (it != models_.end()) { model = it->second.get(); }
 		// 敵オブジェクトの生成
 		auto newEnemy = std::make_unique<Enemy>();
 		newEnemy->Initialize();
 		newEnemy->SetPosition(enemyData.translation);
 		newEnemy->SetRotation(enemyData.rotation);
 		newEnemy->SetPlayer(player_.get());
-		//enemyBullets_ = &newEnemy->GetBullets();
 		enemies_.push_back(std::move(newEnemy));
 	}
 }
@@ -441,9 +431,9 @@ void GamePlayScene::DrawImGuiImportObjectsFromJson()
 {
 #ifdef USE_IMGUI
 	// レベルデータから生成したオブジェクトのImGui調整
-	for (size_t i = 0; i < objects.size(); ++i) {
-		auto& obj = objects[i];
-		ImGui::PushID(static_cast<int>(i)); // 複数オブジェクト対応
+	for (size_t i = 0; i < objects_.size(); ++i) {
+		auto& obj = objects_[i];
+		ImGui::PushID(static_cast<int32_t>(i)); // 複数オブジェクト対応
 
 		// 位置・回転・スケールの取得
 		Vector3 pos = obj->GetTranslate();
@@ -463,17 +453,16 @@ void GamePlayScene::DrawImGuiImportObjectsFromJson()
 		ImGui::PopID();
 	}
 	// レベルデータから生成した敵のImGui調整
-	for (size_t i = 0;i < enemies_.size();++i) {
+	for (size_t i = 0; i < enemies_.size(); ++i) {
 		auto& enemy = enemies_[i];
 		ImGui::Begin("Enemy");
-		ImGui::Text("Enemy %d", static_cast<int>(i + 1));
-		ImGui::PushID(static_cast<int>(i)); // 複数オブジェクト対応
+		ImGui::Text("Enemy %d", static_cast<int32_t>(i + 1));
+		ImGui::PushID(static_cast<int32_t>(i)); // 複数オブジェクト対応
 
 		// 位置・回転・スケールの取得
 		Vector3 pos = enemy->GetPosition();
 		Vector3 rot = enemy->GetRotation();
 		Vector3 scale = enemy->GetScale();
-
 
 		if (ImGui::SliderFloat3("position", &pos.x, -10.0f, 10.0f)) {
 			enemy->SetPosition(pos);
@@ -506,7 +495,7 @@ void GamePlayScene::CheckAllCollisions()
 
 			// 敵の弾も登録
 			for (const auto& bullet : enemy->GetBullets()) {
-				if (bullet) { // ← isAlive_ チェックを外す
+				if (bullet) {
 					collisionManager_->AddCollider(bullet.get());
 				}
 			}
@@ -546,7 +535,7 @@ void GamePlayScene::LoadLevel(const LevelData* levelData)
 void GamePlayScene::UpdateStartCameraEasing()
 {
 	startCameraTimer_ += 1.0f / 60.0f; // フレームレート固定なら
-	float t = std::clamp(startCameraTimer_ / startCameraDuration_, 0.0f, 1.0f);
+	float t = std::clamp(startCameraTimer_ / kStartCameraDuration_, 0.0f, 1.0f);
 
 	// イージング（easeInOutCubic）
 	float easeT;
@@ -569,7 +558,6 @@ void GamePlayScene::UpdateStartCameraEasing()
 	};
 
 	cameraManager_->SetCameraPosition(pos);
-	//cameraManager_->SetCameraRotation(rot);
 
 	if (t >= 1.0f) {
 		isStartCameraEasing_ = false;
@@ -599,14 +587,14 @@ void GamePlayScene::UpdateCameraOnCurve()
 	float duration = levelData_->curves[0].times[curveIndex_ + 1];
 	if (curveIndex_ == 0) duration = levelData_->curves[0].times[1]; // 最初はスキップ
 
-	segmentTimer_ += kDeltaTime;
+	segmentTimer_ += kDeltaTime_;
 	float t = std::clamp(segmentTimer_ / duration, 0.0f, 1.0f);
 
 	// ------- Catmull-Rom 用 index ----------
-	size_t p0 = std::max((int)curveIndex_ - 1, 0);
+	size_t p0 = std::max(static_cast<int32_t>(curveIndex_) - 1, 0);
 	size_t p1 = curveIndex_;
 	size_t p2 = curveIndex_ + 1;
-	size_t p3 = std::min((int)curvePoints_.size() - 1, (int)curveIndex_ + 2);
+	size_t p3 = std::min(static_cast<int32_t>(curvePoints_.size()) - 1, static_cast<int32_t>(curveIndex_) + 2);
 
 	// ------- Catmull-Rom 補間 ----------
 	auto catmullRom = [&](const Vector3& a, const Vector3& b, const Vector3& c, const Vector3& d, float t) {
@@ -677,10 +665,10 @@ void GamePlayScene::UpdatePlayerFollowCamera()
 {
 	Vector3 prevCamPos = cameraManager_->GetMainCamera()->GetTranslate();
 
-	if(!isStartCameraEasing_){
+	if (!isStartCameraEasing_) {
 		if (isGameClear_) return;
 		// カメラをカーブに沿って移動
-		UpdateCameraOnCurve ();
+		UpdateCameraOnCurve();
 	}
 	Camera* cam = cameraManager_->GetMainCamera();
 	Vector3 camPos = cam->GetTranslate();
@@ -732,28 +720,27 @@ void GamePlayScene::UpdateGameClear()
 		// プレイヤー操作を無効化
 		player_->SetPlayerControlEnabled(false);
 		// 初回に待機を開始
-		if (!g_gameClearCameraWaiting && !g_gameClearCameraMoving && !g_gameClearPlayerLaunched && !g_gameClearFadeStarted) {
-			g_gameClearCameraWaiting = true;
-			g_gameClearWaitTimer = 2.0f; // 2秒待つ
+		if (!gameClearCameraWaiting_ && !gameClearCameraMoving_ && !gameClearPlayerLaunched_ && !gameClearFadeStarted_) {
+			gameClearCameraWaiting_ = true;
+			gameClearWaitTimer_ = 2.0f; // 2秒待つ
 		}
 
 		// 待機タイマー処理
-		if (g_gameClearCameraWaiting) {
-			g_gameClearWaitTimer -= 1.0f / 60.0f;
-			if (g_gameClearWaitTimer <= 0.0f) {
-				
-				g_gameClearCameraWaiting = false;
-				g_gameClearCameraMoving = true;
-				g_gameClearMoveTimer = 0.0f;
+		if (gameClearCameraWaiting_) {
+			gameClearWaitTimer_ -= 1.0f / 60.0f;
+			if (gameClearWaitTimer_ <= 0.0f) {
+				gameClearCameraWaiting_ = false;
+				gameClearCameraMoving_ = true;
+				gameClearMoveTimer_ = 0.0f;
 				// カメラの開始位置と目標位置を設定
-				g_gameClearCamStartPos = cameraManager_->GetMainCamera()->GetTranslate();
-				g_gameClearCamTargetPos = player_->GetPosition() + Vector3{ 0.0f, 0.0f, -5.0f };
+				gameClearCamStartPos_ = cameraManager_->GetMainCamera()->GetTranslate();
+				gameClearCamTargetPos_ = player_->GetPosition() + Vector3{ 0.0f, 0.0f, -5.0f };
 			}
 		}
 		// カメラ移動（イージング）
-		else if (g_gameClearCameraMoving) {
-			g_gameClearMoveTimer += 1.0f / 60.0f;
-			float t = std::clamp(g_gameClearMoveTimer / g_gameClearMoveDuration, 0.0f, 1.0f);
+		else if (gameClearCameraMoving_) {
+			gameClearMoveTimer_ += 1.0f / 60.0f;
+			float t = std::clamp(gameClearMoveTimer_ / kGameClearMoveDuration_, 0.0f, 1.0f);
 			// easeInOutCubic
 			float easeT;
 			if (t < 0.5f) {
@@ -764,12 +751,12 @@ void GamePlayScene::UpdateGameClear()
 				easeT = 1.0f + 4.0f * p * p * p;
 			}
 			Vector3 pos = {
-				std::lerp(g_gameClearCamStartPos.x, g_gameClearCamTargetPos.x, easeT),
-				std::lerp(g_gameClearCamStartPos.y, g_gameClearCamTargetPos.y, easeT),
-				std::lerp(g_gameClearCamStartPos.z, g_gameClearCamTargetPos.z, easeT)
+				std::lerp(gameClearCamStartPos_.x, gameClearCamTargetPos_.x, easeT),
+				std::lerp(gameClearCamStartPos_.y, gameClearCamTargetPos_.y, easeT),
+				std::lerp(gameClearCamStartPos_.z, gameClearCamTargetPos_.z, easeT)
 			};
 			// カメラはクリア演出用に制御する
-			cameraMode_ = CameraMode::centerPlayer;
+			cameraMode_ = CameraMode::CenterPlayer;
 
 			cameraManager_->SetCameraPosition(pos);
 			// カメラ更新とデフォルトカメラ書き込み（見た目に即座に反映）
@@ -777,21 +764,21 @@ void GamePlayScene::UpdateGameClear()
 			Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
 
 			// スペースキーでプレイヤー発射開始（テキストはスペース押下で消す）
-			if (input->TriggerKey(DIK_SPACE) && !g_gameClearPlayerLaunched) {
-				g_gameClearPlayerLaunched = true;
+			if (input_->TriggerKey(DIK_SPACE) && !gameClearPlayerLaunched_) {
+				gameClearPlayerLaunched_ = true;
 				// 表示中ならテキストを消す（押したタイミングで即時非表示）
-				g_gameClearTextVisible = false;
+				gameClearTextVisible_ = false;
 			}
 
 			// イージング完了時の処理
 			if (t >= 1.0f) {
-				g_gameClearCameraMoving = false;
+				gameClearCameraMoving_ = false;
 				// 最終位置を確定
-				cameraManager_->SetCameraPosition(g_gameClearCamTargetPos);
+				cameraManager_->SetCameraPosition(gameClearCamTargetPos_);
 
 				// イージング終了直後にテキストを表示する
 				// カメラ位置から Y +1.2 の位置に表示
-				g_gameClearTextVisible = true;
+				gameClearTextVisible_ = true;
 
 				// 即時に位置を設定しておく（Draw 側でも毎フレーム更新します）
 				if (gameClearText_) {
@@ -807,30 +794,30 @@ void GamePlayScene::UpdateGameClear()
 	}
 
 	// プレイヤー発射（ゲームクリア中にSPACEで発射した場合の挙動）
-	if (g_gameClearPlayerLaunched) {
+	if (gameClearPlayerLaunched_) {
 		// カメラはクリア演出用に制御する
 		cameraMode_ = CameraMode::DynamicFollow;
 		// プレイヤーを +X 方向に飛ばす（簡易的に毎フレーム位置更新）
 		Vector3 pos = player_->GetPosition();
 		const float dt = 1.0f / 60.0f;
-		pos.x += g_gameClearPlayerLaunchSpeed * dt;
+		pos.x += kGameClearPlayerLaunchSpeed_ * dt;
 		player_->SetPosition(pos);
 
 		// フェード開始を1秒遅延させる
-		static float s_fadeDelayTimer = 0.0f;
-		static bool s_fadeTimerInitialized = false;
+		static float sFadeDelayTimer_ = 0.0f;
+		static bool sFadeTimerInitialized_ = false;
 
 		// 初期化フラグが無ければ初期化
-		if (!s_fadeTimerInitialized) {
-			s_fadeDelayTimer = 1.0f;
-			s_fadeTimerInitialized = true;
+		if (!sFadeTimerInitialized_) {
+			sFadeDelayTimer_ = 1.0f;
+			sFadeTimerInitialized_ = true;
 		}
 
 		// タイマーを進め、0以下になったらフェード開始
-		if (!g_gameClearFadeStarted) {
-			s_fadeDelayTimer -= dt;
-			if (s_fadeDelayTimer <= 0.0f) {
-				g_gameClearFadeStarted = true;
+		if (!gameClearFadeStarted_) {
+			sFadeDelayTimer_ -= dt;
+			if (sFadeDelayTimer_ <= 0.0f) {
+				gameClearFadeStarted_ = true;
 				// フェードを開始してタイトルへ戻るコールバック（重複防止済み）
 				fadeManager_->FadeInStart(0.02f, [this]() {
 					SetSceneNo(TITLE);

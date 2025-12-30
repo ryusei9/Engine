@@ -6,15 +6,15 @@
 #include "string"
 #include "fstream"
 #include "Material.h"
+
 /// <summary>
 /// 3Dモデル
 /// </summary>
 class Model
 {
 public:
-	
 	// 初期化
-	void Initialize(ModelCommon* modelCommon,const std::string& directorypath,const std::string& filename);
+	void Initialize(ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename);
 
 	// 描画
 	void Draw();
@@ -24,6 +24,7 @@ public:
 
 	// .objファイルの読み取り
 	static ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
+
 private:
 	// BufferResourceの作成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes);
@@ -33,17 +34,16 @@ private:
 	ModelCommon* modelCommon_;
 
 	// Objファイルのデータ
-	ModelData modelData;
+	ModelData modelData_;
 
 	// バッファリソース
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
 
 	// バッファリソース内のデータを指すポインタ
-	VertexData* vertexData = nullptr;
-	Material* materialData = nullptr;
+	VertexData* vertexData_ = nullptr;
+	Material* materialData_ = nullptr;
 
 	// 頂点バッファビューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 };
-

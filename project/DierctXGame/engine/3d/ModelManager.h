@@ -13,36 +13,33 @@
 class ModelManager
 {
 public:
-    // シングルトンインスタンスの取得
-    static std::shared_ptr<ModelManager> GetInstance();
-    ModelManager() = default;
-    ~ModelManager() = default;
-    ModelManager(const ModelManager&) = delete;
-    ModelManager& operator=(const ModelManager&) = delete;
-
-    
+	// シングルトンインスタンスの取得
+	static std::shared_ptr<ModelManager> GetInstance();
+	ModelManager() = default;
+	~ModelManager() = default;
+	ModelManager(const ModelManager&) = delete;
+	ModelManager& operator=(const ModelManager&) = delete;
 
 	// 初期化
-    void Initialize();
+	void Initialize();
 
 	// モデルの読み込み
-    void LoadModel(const std::string& filePath);
-   
+	void LoadModel(const std::string& filePath);
+
 	// 終了
-    void Finalize();
+	void Finalize();
 
 	// モデルの取得
-    Model* GetModel(const std::string& fileName);
+	Model* GetModel(const std::string& fileName);
 
 	// モデルの検索
 	Model* FindModel(const std::string& filePath);
-private:
-   
 
-    static std::shared_ptr<ModelManager> instance;
-    std::unique_ptr<ModelCommon> modelCommon = nullptr;
-    // モデルデータ
-    std::unordered_map<std::string, std::unique_ptr<Model>> models;
+private:
+	static std::shared_ptr<ModelManager> sInstance_;
+	std::unique_ptr<ModelCommon> modelCommon_ = nullptr;
+	// モデルデータ
+	std::unordered_map<std::string, std::unique_ptr<Model>> models_;
 };
 
 

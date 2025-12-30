@@ -22,16 +22,16 @@ void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypat
 
 	// .obj をパースして ModelData を構築する（頂点配列・MaterialData 等を取得）
 	// -> LoadObjFile は v/vt/vn/f/mtllib を処理し、ModelData を返す
-	modelData = LoadObjFile(directorypath,filename);
+	modelData_ = LoadObjFile(directorypath, filename);
 
 	// GPU 用バッファ類を作成して初期化
 	CreateVertexData();
 	CreateMaterialData();
 	
 	// OBJ が参照するテクスチャを TextureManager に登録しておく
-	TextureManager::GetInstance()->LoadTexture(modelData.material.textureFilePath);
+	TextureManager::GetInstance()->LoadTexture(modelData_.material.textureFilePath);
 	// 登録済みテクスチャのインデックスを ModelData に保存（参照情報として保持）
-	modelData.material.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(modelData.material.textureFilePath);
+	modelData_.material.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(modelData_.material.textureFilePath);
 }
 
 /// 描画
@@ -40,16 +40,16 @@ void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypat
 void Model::Draw()
 {
 	// 頂点バッファビューを設定（頂点配列は Upload ヒープ上に保持されている）
-	modelCommon_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+	modelCommon_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView_);
 
 	// マテリアル用定数バッファ（CBV）をルートに設定（RootParameter の b0 を想定）
-	modelCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+	modelCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
 
 	// テクスチャ SRV をルートのデスクリプタテーブルに設定（テクスチャはファイルパスで管理）
-	modelCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureFilePath));
+	modelCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData_.material.textureFilePath));
 
 	// DrawInstanced: 頂点数分を描画、インスタンス数は1
-	modelCommon_->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
+	modelCommon_->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelData_.vertices.size()), 1, 0, 0);
 }
 
 /// MTL ファイルを読み込み MaterialData を構築する
@@ -187,7 +187,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Model::CreateBufferResource(Microsoft::WR
 	resourceDesc.SampleDesc.Count = 1;
 	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;		
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
 	hr = device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE,
 		&resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource));
 	assert(SUCCEEDED(hr));
@@ -195,20 +195,20 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Model::CreateBufferResource(Microsoft::WR
 }
 
 /// 頂点バッファを作成して CPU 側の頂点配列を GPU にコピーする
-/// - modelData.vertices に格納された頂点群を Upload ヒープ上に確保したバッファへ memcpy する
+/// - modelData_.vertices に格納された頂点群を Upload ヒープ上に確保したバッファへ memcpy する
 void Model::CreateVertexData()
 {
 	// 必要サイズ分の Upload バッファを作成
-	vertexResource = CreateBufferResource(modelCommon_->GetDxCommon()->GetDevice(), sizeof(VertexData) * static_cast<UINT>(modelData.vertices.size()));
+	vertexResource_ = CreateBufferResource(modelCommon_->GetDxCommon()->GetDevice(), sizeof(VertexData) * static_cast<UINT>(modelData_.vertices.size()));
 
 	// VertexBufferView を設定（描画時に使用）
-	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	vertexBufferView.SizeInBytes = sizeof(VertexData) * static_cast<UINT>(modelData.vertices.size());
-	vertexBufferView.StrideInBytes = sizeof(VertexData);
+	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
+	vertexBufferView_.SizeInBytes = sizeof(VertexData) * static_cast<UINT>(modelData_.vertices.size());
+	vertexBufferView_.StrideInBytes = sizeof(VertexData);
 
 	// バッファをマップして CPU からコピーする（Upload ヒープなので書き込みは直接可能）
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
+	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
+	std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
 	// 注意: Upload ヒープ上に常駐させる実装。大きなモデルや効率を求める場合は Default ヒープに転送する実装へ変更を検討
 }
 
@@ -216,14 +216,14 @@ void Model::CreateVertexData()
 /// - マテリアル色のデフォルト設定や UV 変換行列の初期化を行う
 void Model::CreateMaterialData()
 {
-	materialResource = CreateBufferResource(modelCommon_->GetDxCommon()->GetDevice(), sizeof(Material));
+	materialResource_ = CreateBufferResource(modelCommon_->GetDxCommon()->GetDevice(), sizeof(Material));
 
-	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 
 	// デフォルトマテリアル値
-	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialData_->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	// ライティングはこのスプライト系モデルでは無効にしている（必要なら true に変更）
-	materialData->enableLighting = false;
+	materialData_->enableLighting = false;
 	// UV トランスフォームは単位行列で初期化
-	materialData->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
+	materialData_->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
 }

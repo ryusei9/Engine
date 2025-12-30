@@ -1,12 +1,12 @@
 #include "SrvManager.h"
 #include <cassert>
 
-const uint32_t SrvManager::kMaxSRVCount = 512;
+const uint32_t SrvManager::kMaxSRVCount_ = 512;
 
 //
 // SrvManager
 // - GPU 用の SRV (Shader Resource View) デスクリプタを管理するユーティリティ。
-// - DescriptorHeap を内部で1つ保持し、SRV を配列インデックス (0..kMaxSRVCount-1) で割り当て/解放できる。
+// - DescriptorHeap を内部で1つ保持し、SRV を配列インデックス (0..kMaxSRVCount_-1) で割り当て/解放できる。
 // - 主な機能:
 //   * Initialize(): DescriptorHeap の確保と空きインデックスの初期化
 //   * Allocate()/Free(): SRV スロットの割当と解放（FIFO の空きリスト）
@@ -19,37 +19,37 @@ const uint32_t SrvManager::kMaxSRVCount = 512;
 //  呼び出し元は Allocate() で取得した有効なインデックスを必ず使用すること。
 // - 現実的なレンダラーではスレッド安全性やデスクリプタ更新の同期（フレームバッファごとのデスクリプタスロット分離）を考慮する必要があるが
 //   本実装は単純化のため単一ヒープかつ単純な空き管理（queue）としている。
-// - descriptorSize はデバイス依存（GetDescriptorHandleIncrementSize で取得）で、ハンドル計算時に使用する。
+// - descriptorSize_ はデバイス依存（GetDescriptorHandleIncrementSize で取得）で、ハンドル計算時に使用する。
 //
 
 void SrvManager::Initialize()
 {
 	// DirectXCommon インスタンスを取得して保持
-	this->directXCommon = DirectXCommon::GetInstance();
+	directXCommon_ = DirectXCommon::GetInstance();
 
 	// DescriptorHeap を作成する:
 	// - 種別: CBV/SRV/UAV
-	// - エントリ数: kMaxSRVCount（定数）
+	// - エントリ数: kMaxSRVCount_（定数）
 	// - Shader-visible にしてシェーダ側から参照可能にする
-	descriptorHeap = this->directXCommon->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
+	descriptorHeap_ = directXCommon_->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount_, true);
 
 	// デスクリプタのステップサイズを取得（CPU/GPU ハンドル計算で使用）
-	descriptorSize = this->directXCommon->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	descriptorSize_ = directXCommon_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-	// 空きインデックスキューを初期化（0..kMaxSRVCount-1 を push）
-	for (uint32_t i = 0; i < kMaxSRVCount; ++i) {
-		freeIndices.push(i);
+	// 空きインデックスキューを初期化（0..kMaxSRVCount_-1 を push）
+	for (uint32_t i = 0; i < kMaxSRVCount_; ++i) {
+		freeIndices_.push(i);
 	}
 }
 
 uint32_t SrvManager::Allocate()
 {
 	// 空きインデックスが存在することを保証
-	assert(!freeIndices.empty() && "No available SRV slots!");
+	assert(!freeIndices_.empty() && "No available SRV slots!");
 
 	// キューから1つ取り出して割り当て番号として返す
-	uint32_t index = freeIndices.front();
-	freeIndices.pop();
+	uint32_t index = freeIndices_.front();
+	freeIndices_.pop();
 
 	return index;
 }
@@ -57,10 +57,10 @@ uint32_t SrvManager::Allocate()
 void SrvManager::Free(uint32_t srvIndex)
 {
 	// 解放するインデックスが範囲内であることをチェック
-	assert(srvIndex < kMaxSRVCount && "Invalid SRV index to free!");
+	assert(srvIndex < kMaxSRVCount_ && "Invalid SRV index to free!");
 
 	// 再利用のためキューに戻す
-	freeIndices.push(srvIndex);
+	freeIndices_.push(srvIndex);
 }
 
 void SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DXGI_FORMAT Format, UINT MipLevels)
@@ -77,7 +77,7 @@ void SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource* pResou
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = UINT(MipLevels);
 
-	directXCommon->GetDevice()->CreateShaderResourceView(pResource, &srvDesc, GetCPUDescriptorHandle(srvIndex));
+	directXCommon_->GetDevice()->CreateShaderResourceView(pResource, &srvDesc, GetCPUDescriptorHandle(srvIndex));
 }
 
 void SrvManager::CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structuredByteStride)
@@ -95,35 +95,35 @@ void SrvManager::CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource*
 	srvDesc.Buffer.StructureByteStride = structuredByteStride;
 	srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
-	directXCommon->GetDevice()->CreateShaderResourceView(pResource, &srvDesc, GetCPUDescriptorHandle(srvIndex));
+	directXCommon_->GetDevice()->CreateShaderResourceView(pResource, &srvDesc, GetCPUDescriptorHandle(srvIndex));
 }
 
 void SrvManager::PreDraw()
 {
 	// 描画前に DescriptorHeap をコマンドリストに設定する補助関数
 	// - 各フレームの描画開始時に呼ぶことで、ルートに設定する GPU ハンドルが有効になる
-	ID3D12DescriptorHeap* descriptorHeaps[] = { descriptorHeap.Get() };
-	directXCommon->GetCommandList()->SetDescriptorHeaps(1, descriptorHeaps);
+	ID3D12DescriptorHeap* descriptorHeaps[] = { descriptorHeap_.Get() };
+	directXCommon_->GetCommandList()->SetDescriptorHeaps(1, descriptorHeaps);
 }
 
 void SrvManager::SetGraphicsRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex)
 {
 	// 指定のルートパラメータに GPU 側のデスクリプタハンドルを設定するラッパ
-	directXCommon->GetCommandList()->SetGraphicsRootDescriptorTable(RootParameterIndex, GetGPUDescriptorHandle(srvIndex));
+	directXCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(RootParameterIndex, GetGPUDescriptorHandle(srvIndex));
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE SrvManager::GetCPUDescriptorHandle(uint32_t index)
 {
 	// DescriptorHeap の先頭ハンドルを基準にインデックス分オフセットして CPU ハンドルを返す
-	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	handleCPU.ptr += (descriptorSize * index);
+	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+	handleCPU.ptr += (descriptorSize_ * index);
 	return handleCPU;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE SrvManager::GetGPUDescriptorHandle(uint32_t index)
 {
 	// DescriptorHeap の先頭ハンドルを基準にインデックス分オフセットして GPU ハンドルを返す
-	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	handleGPU.ptr += (descriptorSize * index);
+	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap_->GetGPUDescriptorHandleForHeapStart();
+	handleGPU.ptr += (descriptorSize_ * index);
 	return handleGPU;
 }

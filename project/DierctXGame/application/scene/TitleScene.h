@@ -37,17 +37,19 @@ public:
 
 private:
 	// スプライトコモン
-	SpriteCommon* spriteCommon = nullptr;
+	SpriteCommon* spriteCommon_ = nullptr;
+
 	// ダイレクトXコモン
-	DirectXCommon* directXCommon = nullptr;
+	DirectXCommon* directXCommon_ = nullptr;
+
 	// WinApp
-	WinApp* winApp = nullptr;
+	WinApp* winApp_ = nullptr;
 
 	// 入力の初期化
-	std::unique_ptr<Input> input = nullptr;
+	std::unique_ptr<Input> input_ = nullptr;
 
 	// オーディオ
-	SoundData soundData1;
+	SoundData soundData1_;
 
 	// プレイヤー
 	std::unique_ptr<Player> player_ = nullptr;
@@ -77,9 +79,9 @@ private:
 	std::unique_ptr<Object3d> titleGuide_ = nullptr;
 
 	// ガイドオブジェクトのパラメータ
-	Vector3 titleGuidePosition = { 0.0f, 0.0f, -6.000f };
-	Vector3 titleGuideRotate = { -1.387f, 0.0f, 0.0f };
-	Vector3 titleGuideScale = { 0.232f, 0.232f, 0.232f };
+	Vector3 titleGuidePosition_ = { 0.0f, 0.0f, -6.000f };
+	Vector3 titleGuideRotate_ = { -1.387f, 0.0f, 0.0f };
+	Vector3 titleGuideScale_ = { 0.232f, 0.232f, 0.232f };
 
 	// カメラマネージャー
 	std::unique_ptr<CameraManager> cameraManager_ = nullptr;

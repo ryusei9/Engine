@@ -27,13 +27,11 @@ class Object3dCommon;
 class Object3d
 {
 public:
-
-
 	// 座標変換行列データ
-	struct worldTransformationMatrix {
-		Matrix4x4 WVP;
-		Matrix4x4 World;
-		Matrix4x4 WorldInverseTranspose;
+	struct WorldTransformationMatrix {
+		Matrix4x4 wvp;
+		Matrix4x4 world;
+		Matrix4x4 worldInverseTranspose;
 	};
 
 	// ディレクショナルライトデータ
@@ -42,7 +40,6 @@ public:
 		Vector3 direction; // ライトの向き
 		float intensity; // 輝度
 	};
-
 
 	struct CameraForGPU {
 		Vector3 worldPosition; // カメラのワールド座標
@@ -68,7 +65,7 @@ public:
 		float distance; // ライトの届く最大距離
 		float decay; // 減衰率
 		float padding[2]; // パディング
-	};;
+	};
 
 	// 初期化
 	void Initialize(const std::string& fileName);
@@ -111,7 +108,7 @@ public:
 	/*------セッター------*/
 
 	// モデルの設定
-	void SetModel(Model* model) { this->model = model; }
+	void SetModel(Model* model) { model_ = model; }
 
 	// モデルの設定（ファイルパスから読み込み）
 	void SetModel(const std::string& filePath);
@@ -129,20 +126,21 @@ public:
 	void SetWorldTransform(const WorldTransform& worldTransform) { this->worldTransform = worldTransform; }
 
 	// カメラの設定
-	void SetCamera(Camera* camera) { this->camera = camera; }
+	void SetCamera(Camera* camera) { camera_ = camera; }
 
 	// スカイボックスのファイルパス設定
 	void SetSkyboxFilePath(std::string filePath);
 
 	// ライトの明るさのセット
-	void SetPointLight(float intensity) { pointLightData->intensity = intensity; }
+	void SetPointLight(float intensity) { pointLightData_->intensity = intensity; }
 
-	void SetSpotLight(float intensity) { spotLightData->intensity = intensity; }
+	void SetSpotLight(float intensity) { spotLightData_->intensity = intensity; }
 
-	void SetDirectionalLight(float intensity) { directionalLightData->intensity = intensity; }
+	void SetDirectionalLight(float intensity) { directionalLightData_->intensity = intensity; }
 
 	// マテリアルデータのセット
-	void SetMaterialColor(Vector4 color) { materialData->color = color; }
+	void SetMaterialColor(Vector4 color) { materialData_->color = color; }
+
 private:
 	// BufferResourceの作成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes);
@@ -150,49 +148,51 @@ private:
 	void CreateMaterialData();
 	void CreateDirectionalLightData();
 
-	Model* model = nullptr;
-	//// Objファイルのデータ
-	ModelData modelData;
+	// Model共通データ
+	Model* model_ = nullptr;
 
-	//// バッファリソース
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource;
-	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource;
-	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource;
-	Microsoft::WRL::ComPtr<ID3D12Resource> pointLightResource;
-	Microsoft::WRL::ComPtr<ID3D12Resource> spotLightResource;
+	// Objファイルのデータ
+	ModelData modelData_;
 
-	//// バッファリソース内のデータを指すポインタ
-	VertexData* vertexData = nullptr;
-	Material* materialData = nullptr;
-	worldTransformationMatrix* worldTransformationMatrixData = nullptr;
-	DirectionalLight* directionalLightData = nullptr;
+	// バッファリソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> pointLightResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> spotLightResource_;
+
+	// バッファリソース内のデータを指すポインタ
+	VertexData* vertexData_ = nullptr;
+	Material* materialData_ = nullptr;
+	WorldTransformationMatrix* worldTransformationMatrixData_ = nullptr;
+	DirectionalLight* directionalLightData_ = nullptr;
 	// カメラにデータを書き込む
-	CameraForGPU* cameraData = nullptr;
-	PointLight* pointLightData = nullptr;
-	SpotLight* spotLightData = nullptr;
+	CameraForGPU* cameraData_ = nullptr;
+	PointLight* pointLightData_ = nullptr;
+	SpotLight* spotLightData_ = nullptr;
 
 	// バッファリソースの使い道を補足するバッファビュー
-	//// 頂点バッファビューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+	// 頂点バッファビューを作成する
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 
 	WorldTransform worldTransform;
 
-	Camera* camera = nullptr;
+		Camera* camera_ = nullptr;
 
 	// 分割数
-	uint32_t kSubdivision = 32;
+	uint32_t kSubdivision_ = 32;
 
 	// 緯度・経度の分割数に応じた角度の計算
-	float kLatEvery = std::numbers::pi_v<float> / float(kSubdivision);
-	float kLonEvery = 2.0f * std::numbers::pi_v<float> / float(kSubdivision);
+	float kLatEvery_ = std::numbers::pi_v<float> / float(kSubdivision_);
+	float kLonEvery_ = 2.0f * std::numbers::pi_v<float> / float(kSubdivision_);
 
 	// 球体の頂点数の計算
-	uint32_t TotalVertexCount = kSubdivision * kSubdivision * 6;
+	uint32_t totalVertexCount_ = kSubdivision_ * kSubdivision_ * 6;
 
-	
-	std::string filePath_; // ファイル名
+	// ファイル名
+	std::string filePath_;
 
 	// 追加
 	D3D12_GPU_DESCRIPTOR_HANDLE skyboxGpuHandle_{};

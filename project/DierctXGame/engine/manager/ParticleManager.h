@@ -78,8 +78,6 @@ public:
 		Microsoft::WRL::ComPtr<ID3D12Resource> instanceBuffer;
 	};
 
-	
-
 	/*------メンバ関数------*/
 
 	// シングルトンインスタンス
@@ -91,7 +89,7 @@ public:
 	ParticleManager& operator=(const ParticleManager&) = delete;
 
 	// 初期化
-	void Initialize(SrvManager* srvManager,Camera* camera);
+	void Initialize(SrvManager* srvManager, Camera* camera);
 
 	// 更新
 	void Update();
@@ -153,31 +151,30 @@ public:
 
 	/*------ゲッター------*/
 	// ビルボードの取得
-	bool GetUseBillboard() const { return useBillboard; }
+	bool GetUseBillboard() const { return useBillboard_; }
 
 	// リング型の頂点を使うか
-	bool GetUseRingVertex() const { return useRingVertex; }
+	bool GetUseRingVertex() const { return useRingVertex_; }
 
 	// パーティクルタイプの取得
 	ParticleType GetParticleType() const { return particleType_; }
 
 	/*------セッター------*/
 	// ビルボードの設定
-	void SetUseBillboard(bool useBillboard) { this->useBillboard = useBillboard; }
+	void SetUseBillboard(bool useBillboard) { useBillboard_ = useBillboard; }
 
 	// リング型の頂点を使うか
-	void SetUseRingVertex(bool useRingVertex) { this->useRingVertex = useRingVertex; }
+	void SetUseRingVertex(bool useRingVertex) { useRingVertex_ = useRingVertex; }
 
 	// パーティクルタイプの設定
 	void SetParticleType(ParticleType type);
 
 	// スケールの設定
-	void SetParticleScale(const Vector3& scale) { uvTransform.scale = scale; }
+	void SetParticleScale(const Vector3& scale) { uvTransform_.scale = scale; }
 
 	void SetIsSmoke(bool isSmoke) { isSmoke_ = isSmoke; }
-private:
-	static ParticleManager* instance;
 
+private:
 	// ルートシグネイチャの作成
 	void CreateRootSignature();
 
@@ -197,47 +194,47 @@ private:
 	/*------ルートシグネイチャ------*/
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_;
 
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
 
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 
-	ModelData modelData;
+	ModelData modelData_;
 	// 頂点データ
-	VertexData* vertexData;
+	VertexData* vertexData_;
 
 	/*------生成する上限------*/
-	const uint32_t kNumMaxInstance = 100;
+	const uint32_t kNumMaxInstance_ = 100;
 
 	Camera* camera_ = nullptr;
 
-	const float kDeltaTime = 1.0f / 60.0f;
+	const float kDeltaTime_ = 1.0f / 60.0f;
 
-	bool useBillboard = false;
+	bool useBillboard_ = false;
 
-	bool isWind = false;
+	bool isWind_ = false;
 
 	// 加速度フィールド
-	AccelerationField accelerationField;
+	AccelerationField accelerationField_;
 
-	std::vector<ParticleManager::WindZone> windZones = {
-	{ { {-5.0f, -5.0f, -5.0f}, {5.0f, 5.0f, 5.0f} }, {0.1f, 0.0f, 0.0f} },
-	{ { {10.0f, -5.0f, -5.0f}, {15.0f, 5.0f, 5.0f} }, {5.0f, 0.0f, 0.0f} }
+	std::vector<ParticleManager::WindZone> windZones_ = {
+		{ { {-5.0f, -5.0f, -5.0f}, {5.0f, 5.0f, 5.0f} }, {0.1f, 0.0f, 0.0f} },
+		{ { {10.0f, -5.0f, -5.0f}, {15.0f, 5.0f, 5.0f} }, {5.0f, 0.0f, 0.0f} }
 	};
 	// ランダム
-	std::random_device seedGeneral;
-	std::mt19937 randomEngine;
+	std::random_device seedGeneral_;
+	std::mt19937 randomEngine_;
 
-	std::unordered_map<std::string, ParticleGroup> particleGroups;
+	std::unordered_map<std::string, ParticleGroup> particleGroups_;
 
 	// リング型の頂点を使うか
-	bool useRingVertex = false;
+	bool useRingVertex_ = false;
 
-	Transform uvTransform{
-		{1.0f,1.0f,1.0f}, // スケール
-		{0.0f,0.0f,0.0f}, // 回転
-		{0.0f,0.0f,0.0f}  // 座標
+	Transform uvTransform_{
+		{1.0f, 1.0f, 1.0f}, // スケール
+		{0.0f, 0.0f, 0.0f}, // 回転
+		{0.0f, 0.0f, 0.0f}  // 座標
 	};
 
 	Material* materialData_ = nullptr;

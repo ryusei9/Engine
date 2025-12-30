@@ -39,29 +39,29 @@ void WinApp::Initialize()
 	// ウィンドウの作成
 	///////////////////////
 
-	//WNDCLASS wc{};
+	//WNDCLASS wc_{};
 	// ウィンドウプロシーシャ
-	wc.lpfnWndProc = WindowProc;
+	wc_.lpfnWndProc = WindowProc;
 	// ウィンドウクラス名
-	wc.lpszClassName = L"GE3WindowClass";
+	wc_.lpszClassName = L"GE3WindowClass";
 	// インスタンスハンドル
-	wc.hInstance = GetModuleHandle(nullptr);
+	wc_.hInstance = GetModuleHandle(nullptr);
 	// カーソル
-	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wc_.hCursor = LoadCursor(nullptr, IDC_ARROW);
 
 	// ウィンドウクラスを登録する
-	RegisterClass(&wc);
+	RegisterClass(&wc_);
 
 	// ウィンドウサイズを表す構造体にクライアント領域を入れる
-	RECT wrc = { 0,0,kClientWidth,kClientHeight };
+	RECT wrc = { 0, 0, kClientWidth, kClientHeight };
 
 	// クライアント領域を元に実際のサイズにrcを変更してもらう
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
 
 	// ウィンドウの生成
-	hwnd = CreateWindow(
+	hwnd_ = CreateWindow(
 		// 利用するクラス名
-		wc.lpszClassName,
+		wc_.lpszClassName,
 		// タイトルバーの文字
 		L"GE3",
 		// ウィンドウスタイル
@@ -79,19 +79,19 @@ void WinApp::Initialize()
 		// メニューハンドル
 		nullptr,
 		// インスタンスハンドル
-		wc.hInstance,
+		wc_.hInstance,
 		// オプション
 		nullptr);
 
 	// ウィンドウを表示する
-	ShowWindow(hwnd, SW_SHOW);
+	ShowWindow(hwnd_, SW_SHOW);
 }
 
 
 
 void WinApp::Finalize()
 {
-	CloseWindow(hwnd);
+	CloseWindow(hwnd_);
 	CoUninitialize();
 }
 

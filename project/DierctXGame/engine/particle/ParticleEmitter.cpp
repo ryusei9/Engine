@@ -1,28 +1,28 @@
 #include "ParticleEmitter.h"
 #include "ParticleManager.h"
+
 ParticleEmitter::ParticleEmitter(ParticleManager* manager, const std::string& groupName)
 {
 	manager_ = manager;
 	groupName_ = groupName;
-
 }
 
 void ParticleEmitter::Update()
 {
 	interval_ += deltaTime_;
-	//int particleCount = static_cast<int>(particleRate * interval_);
-	if (particleRate > 0.0f) {
+	//int particleCount = static_cast<int>(particleRate_ * interval_);
+	if (particleRate_ > 0.0f) {
 		if (isExplosion_) {
 			manager_->EmitExplosion(groupName_, position_, particleCount_);
-		}else if (isThruster_) {
+		} else if (isThruster_) {
 			manager_->SetIsSmoke(false);
 			manager_->EmitWithVelocity(groupName_, position_, particleCount_, velocity_);
-		}else if (isSmoke_) {
+		} else if (isSmoke_) {
 			manager_->SetIsSmoke(true);
 			manager_->EmitWithVelocity(groupName_, position_, particleCount_, velocity_);
-		}else {
+		} else {
 			manager_->Emit(groupName_, position_, particleCount_);
 		}
-		interval_ -= static_cast<float>(particleRate) / particleRate;
+		interval_ -= static_cast<float>(particleRate_) / particleRate_;
 	}
 }

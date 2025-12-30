@@ -9,9 +9,9 @@
 // - 機能概要：ファイルからテクスチャを読み込み（WIC / DDS）、必要に応じてミップマップを生成し、
 //   Direct3D のリソースへアップロードして SRV（Shader Resource View）を作成・管理する。
 // - 設計メモ：
-//   * textureDatas はファイルパスをキーにした連想配列（unordered_map）で、読み込み済みテクスチャを保持する。
+//   * textureDatas_ はファイルパスをキーにした連想配列（unordered_map）で、読み込み済みテクスチャを保持する。
 //   * SRV のヒープインデックスは内部で srvManager_ に Allocate させ、そのハンドルを保存する。
-//   * ImGui 利用の都合で 0 番を予約しており、実際のテクスチャは kSRVIndexTop (=1) から割り当てる。
+//   * ImGui 利用の都合で 0 番を予約しており、実際のテクスチャは kSRVIndexTop_ (=1) から割り当てる。
 //   * 圧縮テクスチャ（BCn 等）はミップ生成を行わずそのまま利用する。非圧縮テクスチャは GenerateMipMaps を使う。
 //   * 実装は簡易化のためアップロード同期（SyncCPUWithGPU）を呼び出している。大規模ロードやストリーミング化する場合は
 //     非同期アップロード＋複数バッファ戦略に変更することを推奨する。
@@ -19,18 +19,18 @@
 //   * Finalize() は将来的なリソース解放処理を入れるフック（現状内容なし）。
 //
 
-std::shared_ptr<TextureManager> TextureManager::instance = nullptr;
+std::shared_ptr<TextureManager> TextureManager::instance_ = nullptr;
 
 // ImGui で 0 番を予約して使うため、実際のテクスチャは 1 番から使用する
-uint32_t TextureManager::kSRVIndexTop = 1;
+uint32_t TextureManager::kSRVIndexTop_ = 1;
 
 void TextureManager::LoadTexture(const std::string& filePath)
 {
 	// 既に読み込まれている場合は早期リターン
-	if (textureDatas.contains(filePath)) {
+	if (textureDatas_.contains(filePath)) {
 		// テクスチャ枚数上限チェック（SRV ヒープの上限を超えないようにする）
-		assert(textureDatas.size() + kSRVIndexTop < DirectXCommon::kMaxSRVCount);
-		if (textureDatas.find(filePath) != textureDatas.end()) {
+		assert(textureDatas_.size() + kSRVIndexTop_ < DirectXCommon::kMaxSRVCount_);
+		if (textureDatas_.find(filePath) != textureDatas_.end()) {
 			// 既にロード済み
 			return;
 		}
@@ -66,8 +66,8 @@ void TextureManager::LoadTexture(const std::string& filePath)
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 	const DirectX::Image* mipImage = mipImages.GetImages();
 
-	// textureDatas に要素を追加して参照を取得（デフォルト構築を利用）
-	TextureData& textureData = textureDatas[filePath];
+	// textureDatas_ に要素を追加して参照を取得（デフォルト構築を利用）
+	TextureData& textureData = textureDatas_[filePath];
 
 	// メタデータを保存し、リソースを作成
 	textureData.metadata = mipImages.GetMetadata();
@@ -96,7 +96,7 @@ void TextureManager::LoadTexture(const std::string& filePath)
 	dxCommon_->GetDevice()->CreateShaderResourceView(textureData.resource.Get(), &srvDesc, textureData.srvHandleCPU);
 
 	// テクスチャデータを GPU にアップロード（中間リソースを返す）
-	Microsoft::WRL::ComPtr< ID3D12Resource> intermediateResource = dxCommon_->UploadTextureData(textureData.resource.Get(), mipImages);
+	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource = dxCommon_->UploadTextureData(textureData.resource.Get(), mipImages);
 
 	// 簡易実装: CPU と GPU の同期を待つ（同期してしまうため高速化は未対応）
 	dxCommon_->SyncCPUWithGPU();
@@ -105,18 +105,18 @@ void TextureManager::LoadTexture(const std::string& filePath)
 const DirectX::TexMetadata& TextureManager::GetMetaData(const std::string& filePath)
 {
 	// ファイルが存在することのチェック
-	assert(textureDatas.contains(filePath));
+	assert(textureDatas_.contains(filePath));
 
-	TextureData& textureData = textureDatas[filePath];
+	TextureData& textureData = textureDatas_[filePath];
 	return textureData.metadata;
 }
 
 uint32_t TextureManager::GetTextureIndexByFilePath(const std::string& filePath)
 {
 	// 読み込み済みテクスチャのインデックス（内部 map の順序に基づく）を返す
-	if (textureDatas.contains(filePath)) {
-		auto it = textureDatas.find(filePath);
-		uint32_t textureIndex = static_cast<uint32_t>(std::distance(textureDatas.begin(), it));
+	if (textureDatas_.contains(filePath)) {
+		auto it = textureDatas_.find(filePath);
+		uint32_t textureIndex = static_cast<uint32_t>(std::distance(textureDatas_.begin(), it));
 		return textureIndex;
 	}
 
@@ -131,24 +131,24 @@ void TextureManager::Initialize(SrvManager* srvManager)
 	dxCommon_ = DirectXCommon::GetInstance();
 	srvManager_ = srvManager;
 	// 内部コンテナの予約（SRV の最大数分）
-	textureDatas.reserve(DirectXCommon::kMaxSRVCount);
+	textureDatas_.reserve(DirectXCommon::kMaxSRVCount_);
 }
 
 std::shared_ptr<TextureManager> TextureManager::GetInstance()
 {
-	if (instance == nullptr) {
-		instance = std::make_shared<TextureManager>();
+	if (instance_ == nullptr) {
+		instance_ = std::make_shared<TextureManager>();
 	}
-	return instance;
+	return instance_;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(const std::string& filePath)
 {
 	// ファイルが存在することのチェック
-	assert(textureDatas.contains(filePath));
+	assert(textureDatas_.contains(filePath));
 
 	// 対応する TextureData を取得して GPU ハンドルを返す
-	TextureData& textureData = textureDatas[filePath];
+	TextureData& textureData = textureDatas_[filePath];
 
 	textureData.srvHandleGPU = srvManager_->GetGPUDescriptorHandle(textureData.srvIndex);
 	return textureData.srvHandleGPU;

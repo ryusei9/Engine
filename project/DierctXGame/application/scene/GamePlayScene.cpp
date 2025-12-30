@@ -32,8 +32,8 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	// タイトルに戻るテキストのトランスフォームの初期化
 	textTitle_.Initialize();
-	textTitle_.translate_ = { 3.333f,2.857f,10.000f };
-	textTitle_.rotate_ = { -1.495f,0.0f,0.0f };
+	textTitle_.translate_ = { 3.333f, 2.857f, 10.000f };
+	textTitle_.rotate_ = { -1.495f, 0.0f, 0.0f };
 
 	// オブジェクト3Dの初期化
 	backToTitle_ = std::make_unique<Object3d>();
@@ -234,17 +234,18 @@ void GamePlayScene::Update()
 		break;
 	case CameraMode::FollowPlayer:
 		// プレイヤーについて行く
-		cameraManager_->SetCameraPosition(player_->GetWorldTransform().translate_ + Vector3{ 0.0f,1.0f,-10.0f });
-		cameraManager_->SetCameraRotation(Vector3{ 0.1f,0.0f,0.0f });
+		cameraManager_->SetCameraPosition(player_->GetWorldTransform().translate_ + Vector3{ 0.0f, 1.0f, -10.0f });
+		cameraManager_->SetCameraRotation(Vector3{ 0.1f, 0.0f, 0.0f });
 		break;
 	case CameraMode::DynamicFollow:
 		// プレイヤーを注視しつつ追従
-		cameraManager_->MoveTargetAndCamera(player_->GetWorldTransform(), Vector3{ 0.0f,1.0f,-10.0f });
+		cameraManager_->MoveTargetAndCamera(player_->GetWorldTransform(), Vector3{ 0.0f, 1.0f, -10.0f });
 		cameraManager_->LookAtTarget(player_->GetPosition());
 		break;
 	case CameraMode::CenterPlayer:
 		// プレイヤーを中心に注視
-		cameraManager_->LookAtTarget(player_->GetPosition(),true);
+		cameraManager_->LookAtTarget(player_->GetPosition(), true);
+		break;
 	}
 
 	// スタート演出カメラ初期化
@@ -360,8 +361,8 @@ void GamePlayScene::DrawImGui()
 	// パーティクルエミッター1の位置
 	ImGui::SliderFloat3("sprite Position", &spritePosition_.x, 1.0f, 50.0f);
 	// CameraMode選択用Combo
-	static const char* cameraModeItems[] = { "Free", "FollowPlayer", "DynamicFollow" };
-	int cameraModeIndex = static_cast<int>(cameraMode_);
+	static const char* cameraModeItems[] = { "Free", "FollowPlayer", "DynamicFollow", "CenterPlayer" };
+	int32_t cameraModeIndex = static_cast<int32_t>(cameraMode_);
 	if (ImGui::Combo("Camera Mode", &cameraModeIndex, cameraModeItems, IM_ARRAYSIZE(cameraModeItems))) {
 		cameraMode_ = static_cast<CameraMode>(cameraModeIndex);
 	}
@@ -432,7 +433,7 @@ void GamePlayScene::DrawImGuiImportObjectsFromJson()
 	// レベルデータから生成したオブジェクトのImGui調整
 	for (size_t i = 0; i < objects_.size(); ++i) {
 		auto& obj = objects_[i];
-		ImGui::PushID(static_cast<int>(i)); // 複数オブジェクト対応
+		ImGui::PushID(static_cast<int32_t>(i)); // 複数オブジェクト対応
 
 		// 位置・回転・スケールの取得
 		Vector3 pos = obj->GetTranslate();
@@ -452,11 +453,11 @@ void GamePlayScene::DrawImGuiImportObjectsFromJson()
 		ImGui::PopID();
 	}
 	// レベルデータから生成した敵のImGui調整
-	for (size_t i = 0;i < enemies_.size();++i) {
+	for (size_t i = 0; i < enemies_.size(); ++i) {
 		auto& enemy = enemies_[i];
 		ImGui::Begin("Enemy");
-		ImGui::Text("Enemy %d", static_cast<int>(i + 1));
-		ImGui::PushID(static_cast<int>(i)); // 複数オブジェクト対応
+		ImGui::Text("Enemy %d", static_cast<int32_t>(i + 1));
+		ImGui::PushID(static_cast<int32_t>(i)); // 複数オブジェクト対応
 
 		// 位置・回転・スケールの取得
 		Vector3 pos = enemy->GetPosition();
@@ -590,10 +591,10 @@ void GamePlayScene::UpdateCameraOnCurve()
 	float t = std::clamp(segmentTimer_ / duration, 0.0f, 1.0f);
 
 	// ------- Catmull-Rom 用 index ----------
-	size_t p0 = std::max((int)curveIndex_ - 1, 0);
+	size_t p0 = std::max(static_cast<int32_t>(curveIndex_) - 1, 0);
 	size_t p1 = curveIndex_;
 	size_t p2 = curveIndex_ + 1;
-	size_t p3 = std::min((int)curvePoints_.size() - 1, (int)curveIndex_ + 2);
+	size_t p3 = std::min(static_cast<int32_t>(curvePoints_.size()) - 1, static_cast<int32_t>(curveIndex_) + 2);
 
 	// ------- Catmull-Rom 補間 ----------
 	auto catmullRom = [&](const Vector3& a, const Vector3& b, const Vector3& c, const Vector3& d, float t) {
@@ -664,7 +665,7 @@ void GamePlayScene::UpdatePlayerFollowCamera()
 {
 	Vector3 prevCamPos = cameraManager_->GetMainCamera()->GetTranslate();
 
-	if(!isStartCameraEasing_){
+	if (!isStartCameraEasing_) {
 		if (isGameClear_) return;
 		// カメラをカーブに沿って移動
 		UpdateCameraOnCurve();
@@ -803,19 +804,19 @@ void GamePlayScene::UpdateGameClear()
 		player_->SetPosition(pos);
 
 		// フェード開始を1秒遅延させる
-		static float s_fadeDelayTimer = 0.0f;
-		static bool s_fadeTimerInitialized = false;
+		static float sFadeDelayTimer_ = 0.0f;
+		static bool sFadeTimerInitialized_ = false;
 
 		// 初期化フラグが無ければ初期化
-		if (!s_fadeTimerInitialized) {
-			s_fadeDelayTimer = 1.0f;
-			s_fadeTimerInitialized = true;
+		if (!sFadeTimerInitialized_) {
+			sFadeDelayTimer_ = 1.0f;
+			sFadeTimerInitialized_ = true;
 		}
 
 		// タイマーを進め、0以下になったらフェード開始
 		if (!gameClearFadeStarted_) {
-			s_fadeDelayTimer -= dt;
-			if (s_fadeDelayTimer <= 0.0f) {
+			sFadeDelayTimer_ -= dt;
+			if (sFadeDelayTimer_ <= 0.0f) {
 				gameClearFadeStarted_ = true;
 				// フェードを開始してタイトルへ戻るコールバック（重複防止済み）
 				fadeManager_->FadeInStart(0.02f, [this]() {

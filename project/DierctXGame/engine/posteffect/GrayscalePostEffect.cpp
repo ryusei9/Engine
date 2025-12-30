@@ -1,4 +1,4 @@
-    #include "GrayscalePostEffect.h"
+#include "GrayscalePostEffect.h"
 
 //
 // GrayscalePostEffect
@@ -35,7 +35,7 @@ void GrayscalePostEffect::Initialize(DirectXCommon* dxCommon) {
     PostEffectBase::Initialize(dxCommon);
     CreateRootSignature();
     CreatePipelineStateObject();
-    CreateRenderTexture(WinApp::kClientWidth, WinApp::kClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, kRenderTargetClearValue);
+    CreateRenderTexture(WinApp::kClientWidth, WinApp::kClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, kRenderTargetClearValue_);
 }
 
 void GrayscalePostEffect::CreateRootSignature() {
@@ -125,11 +125,11 @@ void GrayscalePostEffect::PreRender() {
     // - コマンドリストに対するレンダーターゲット設定、クリアが行われる
     dxCommon_->TransitionDepthBufferToWrite();
     D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dxCommon_->GetDSVCPUDescriptorHandle(0);
-    commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
-    float clearColor[4] = { 0.1f,0.25f,0.5f,1.0f };
-    commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-    commandList->RSSetViewports(1, &viewport);
-    commandList->RSSetScissorRects(1, &scissorRect);
+    commandList_->OMSetRenderTargets(1, &rtvHandle_, FALSE, &dsvHandle);
+    float clearColor[4] = { 0.1f, 0.25f, 0.5f, 1.0f };
+    commandList_->ClearRenderTargetView(rtvHandle_, clearColor, 0, nullptr);
+    commandList_->RSSetViewports(1, &viewport_);
+    commandList_->RSSetScissorRects(1, &scissorRect_);
 }
 
 void GrayscalePostEffect::Draw() {
@@ -142,12 +142,12 @@ void GrayscalePostEffect::Draw() {
     // - ここでは入力 SRV を固定インデックス 1 のハンドルから取得している（dxCommon_->GetSRVGPUDescriptorHandle(1)）。
     //   実行環境によっては入力ソースの SRV 管理を呼び出し元で適切に行う必要がある。
     ID3D12DescriptorHeap* heaps[] = { dxCommon_->GetSRVDescriptorHeap().Get() };
-    commandList->SetDescriptorHeaps(_countof(heaps), heaps);
-    commandList->SetPipelineState(pipelineState_.Get());
-    commandList->SetGraphicsRootSignature(rootSignature_.Get());
-    commandList->SetGraphicsRootDescriptorTable(0, dxCommon_->GetSRVGPUDescriptorHandle(1));
-    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    commandList->DrawInstanced(3, 1, 0, 0);
+    commandList_->SetDescriptorHeaps(_countof(heaps), heaps);
+    commandList_->SetPipelineState(pipelineState_.Get());
+    commandList_->SetGraphicsRootSignature(rootSignature_.Get());
+    commandList_->SetGraphicsRootDescriptorTable(0, dxCommon_->GetSRVGPUDescriptorHandle(1));
+    commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    commandList_->DrawInstanced(3, 1, 0, 0);
 }
 
 void GrayscalePostEffect::PostRender() {
@@ -159,5 +159,5 @@ void GrayscalePostEffect::PostRender() {
 D3D12_GPU_DESCRIPTOR_HANDLE GrayscalePostEffect::GetOutputSRV() const
 {
     // 出力レンダーターゲットの SRV ハンドルを返す
-   return dxCommon->GetSRVGPUDescriptorHandle(srvIndex_);
+    return dxCommon_->GetSRVGPUDescriptorHandle(srvIndex_);
 }

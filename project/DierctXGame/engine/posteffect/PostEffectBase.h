@@ -2,6 +2,7 @@
 #include "DirectXCommon.h"
 #include <wrl.h>
 #include "SrvManager.h"
+
 /// <summary>
 /// ポストエフェクト用のベースクラス
 /// </summary>
@@ -54,28 +55,27 @@ public:
 
     // 入力テクスチャをセット
     virtual void SetInputSRV(D3D12_GPU_DESCRIPTOR_HANDLE handle) { inputSRV_ = handle; }
-protected:
 
+protected:
     uint32_t srvIndex_ = 0; // SRVインデックス（動的割り当て用）
 
-	DirectXCommon* dxCommon = nullptr; // DirectX共通処理
+	DirectXCommon* dxCommon_ = nullptr; // DirectX共通処理
 
-	ID3D12GraphicsCommandList* commandList = nullptr; // コマンドリスト
+	ID3D12GraphicsCommandList* commandList_ = nullptr; // コマンドリスト
 
-    D3D12_RESOURCE_STATES renderTextureState = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    D3D12_RESOURCE_STATES renderTextureState_ = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
-    Microsoft::WRL::ComPtr<ID3D12Resource> renderTexture;
+    Microsoft::WRL::ComPtr<ID3D12Resource> renderTexture_;
 
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap; // レンダーターゲットビュー用ヒープ
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap_; // レンダーターゲットビュー用ヒープ
 
-    D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle; // レンダーターゲットビューのハンドル
+    D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle_; // レンダーターゲットビューのハンドル
 
-    const Vector4 kRenderTargetClearValue = { 0.1f,0.25f,0.5f,1.0f };
+    const Vector4 kRenderTargetClearValue_ = { 0.1f, 0.25f, 0.5f, 1.0f };
 
-    D3D12_VIEWPORT viewport{};
+    D3D12_VIEWPORT viewport_{};
 
-    D3D12_RECT scissorRect{};
+    D3D12_RECT scissorRect_{};
 
     D3D12_GPU_DESCRIPTOR_HANDLE inputSRV_ = {};
-
 };

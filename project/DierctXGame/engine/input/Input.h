@@ -8,7 +8,7 @@
 /// <summary>
 /// 入力
 /// </summary>
-class Input{
+class Input {
 public:
 	// namespace省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -27,7 +27,7 @@ public:
 	Input& operator=(const Input&) = delete;
 
 
-	/*-------メンバ変数------*/
+	/*-------メンバ関数------*/
 	// 初期化
 	void Initialize(WinApp* winApp);
 	// 更新
@@ -43,19 +43,17 @@ public:
 	/// キーのトリガーをチェック
 	/// </summary>
 	bool TriggerKey(BYTE keyNumber);
-private:
-	
-	
 
+private:
 	// メンバ変数
 	// キーボードのデバイス
-	ComPtr<IDirectInputDevice8> keyboard;
+	ComPtr<IDirectInputDevice8> keyboard_;
 	// 全キーの状態
-	BYTE key[256] = {};
+	BYTE key_[256] = {};
 	// 前回の全キーの状態
-	BYTE keyPre[256] = {};
+	BYTE keyPre_[256] = {};
 	// DirectInputのインスタンス
-	ComPtr<IDirectInput8> directInput = nullptr;
+	ComPtr<IDirectInput8> directInput_ = nullptr;
 
 	// WindowsAPI
 	WinApp* winApp_ = nullptr;

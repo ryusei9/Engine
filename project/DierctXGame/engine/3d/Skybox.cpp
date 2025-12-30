@@ -97,7 +97,7 @@ void Skybox::CreateVertexBuffer()
 		{ {  1.0f, -1.0f, -1.0f, 1.0f }, {  1.0f, -1.0f, -1.0f } }
 	};
 
-	const UINT size = static_cast<UINT>(sizeof(Vertex) * vertices_.size());
+	const uint32_t size = static_cast<uint32_t>(sizeof(Vertex) * vertices_.size());
 
 	D3D12_HEAP_PROPERTIES heapProp = {};
 	heapProp.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -286,10 +286,10 @@ void Skybox::CreatePipelineState()
 void Skybox::CreateIndexBuffer()
 {
 	// インデックスバッファを Upload ヒープに作成し、各面ごとの三角形インデックスを書き込む
-	indexResource_ = DirectXCommon::GetInstance()->CreateBufferResource(sizeof(uint32_t) * kNumIndex);
+	indexResource_ = DirectXCommon::GetInstance()->CreateBufferResource(sizeof(uint32_t) * kNumIndex_);
 
 	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
-	indexBufferView_.SizeInBytes = sizeof(uint32_t) * kNumIndex;
+	indexBufferView_.SizeInBytes = sizeof(uint32_t) * kNumIndex_;
 	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
 
 	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
@@ -339,7 +339,7 @@ void Skybox::Draw()
 	cmdList->SetGraphicsRootDescriptorTable(2, textureHandle_);
 
 	// インデックス描画
-	cmdList->DrawIndexedInstanced(kNumIndex, 1, 0, 0, 0);
+	cmdList->DrawIndexedInstanced(kNumIndex_, 1, 0, 0, 0);
 }
 
 void Skybox::DrawImGui()

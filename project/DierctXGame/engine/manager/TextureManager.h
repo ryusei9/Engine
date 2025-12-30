@@ -42,13 +42,13 @@ public:
 
 	// メタデータを取得
 	const DirectX::TexMetadata& GetMetaData(const std::string& filePath);
+
 private:
 	// シングルトンインスタンス
-	static std::shared_ptr<TextureManager> instance;
+	static std::shared_ptr<TextureManager> instance_;
 
 	// テクスチャ1枚分のデータ
 	struct TextureData {
-		//std::string filePath;
 		DirectX::TexMetadata metadata;
 		Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 		uint32_t srvIndex;
@@ -56,18 +56,14 @@ private:
 		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU;
 	};
 
-	
-
 	// テクスチャデータ
-	std::unordered_map<std::string,TextureData> textureDatas;
+	std::unordered_map<std::string, TextureData> textureDatas_;
 
 	DirectXCommon* dxCommon_;
 
 	// SRVインデックスの開始番号
-	static uint32_t kSRVIndexTop;
+	static uint32_t kSRVIndexTop_;
 
 	SrvManager* srvManager_;
-
-
 };
 

@@ -14,9 +14,9 @@
 //   4) GetOutputSRV() 等で出力を他パスに渡す
 // - 実装上の注意点:
 //   * 本クラスは DirectX リソースのライフサイクル（CreateCommittedResource など）を扱うため、呼び出し側で
-//     dxCommon（DirectXCommon）の初期化が済んでいることが前提です。
-//   * CreateRenderTexture は Default ヒープ上にレンダーターゲットを作成し、RTV と SRV（dxCommon の SRV ヒープ）を生成します。
-//   * リソース状態遷移は ResourceBarrier で明示的に行い、内部変数 renderTextureState を更新して二重遷移を避けます。
+//     dxCommon_（DirectXCommon）の初期化が済んでいることが前提です。
+//   * CreateRenderTexture は Default ヒープ上にレンダーターゲットを作成し、RTV と SRV（dxCommon_ の SRV ヒープ）を生成します。
+//   * リソース状態遷移は ResourceBarrier で明示的に行い、内部変数 renderTextureState_ を更新して二重遷移を避けます。
 //   * スレッドセーフではありません。レンダースレッド（メインスレッド）で利用してください。
 //
 
@@ -28,8 +28,8 @@ void PostEffectBase::Initialize(DirectXCommon* dxCommon) {
     //
     // 前提:
     // - dxCommon は既に初期化済みであること（デバイスやスワップチェインが生成済み）。
-    this->dxCommon = dxCommon;
-    commandList = dxCommon->GetCommandList();
+    dxCommon_ = dxCommon;
+    commandList_ = dxCommon_->GetCommandList();
     ViewPortInitialize();
     ScissorRectInitialize();
 }
@@ -39,66 +39,66 @@ void PostEffectBase::ViewPortInitialize() {
     // - 幅／高さは WinApp のクライアントサイズを使用する（デフォルトの画面サイズ）。
     // - MinDepth/MaxDepth は [0,1] に設定。
     // - TopLeft は (0,0)。
-    viewport.Width = static_cast<float>(WinApp::kClientWidth);
-    viewport.Height = static_cast<float>(WinApp::kClientHeight);
-    viewport.MinDepth = 0.0f;
-    viewport.MaxDepth = 1.0f;
-    viewport.TopLeftX = 0.0f;
-    viewport.TopLeftY = 0.0f;
+    viewport_.Width = static_cast<float>(WinApp::kClientWidth);
+    viewport_.Height = static_cast<float>(WinApp::kClientHeight);
+    viewport_.MinDepth = 0.0f;
+    viewport_.MaxDepth = 1.0f;
+    viewport_.TopLeftX = 0.0f;
+    viewport_.TopLeftY = 0.0f;
 }
 
 void PostEffectBase::ScissorRectInitialize() {
     // シザー矩形の初期化:
     // - left/top を 0 に、right/bottom をクライアント幅・高さに合わせる。
-    scissorRect.left = 0;
-    scissorRect.right = WinApp::kClientWidth;
-    scissorRect.top = 0;
-    scissorRect.bottom = WinApp::kClientHeight;
+    scissorRect_.left = 0;
+    scissorRect_.right = WinApp::kClientWidth;
+    scissorRect_.top = 0;
+    scissorRect_.bottom = WinApp::kClientHeight;
 }
 
 void PostEffectBase::TransitionRenderTextureToRenderTarget() {
     // レンダーテクスチャを RTV (レンダーターゲット) 用に遷移するユーティリティ。
     // - 現在の状態が既に RENDER_TARGET であれば何もしない（冪等性を担保）。
     // - それ以外の場合は PIXEL_SHADER_RESOURCE -> RENDER_TARGET の遷移バリアを発行する。
-    // - 実行後、内部状態 renderTextureState を更新する。
-	if (renderTextureState == D3D12_RESOURCE_STATE_RENDER_TARGET) return;
+    // - 実行後、内部状態 renderTextureState_ を更新する。
+	if (renderTextureState_ == D3D12_RESOURCE_STATE_RENDER_TARGET) return;
 	D3D12_RESOURCE_BARRIER barrier{};
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	barrier.Transition.pResource = renderTexture.Get();
+	barrier.Transition.pResource = renderTexture_.Get();
 	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
-	commandList->ResourceBarrier(1, &barrier);
+	commandList_->ResourceBarrier(1, &barrier);
 
 	// 状態を更新して以降の遷移呼び出しで無駄なバリア発行を防ぐ
-	renderTextureState = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	renderTextureState_ = D3D12_RESOURCE_STATE_RENDER_TARGET;
 }
 
 void PostEffectBase::TransitionRenderTextureToShaderResource() {
     // レンダーテクスチャをシェーダリソース（SRV）用に遷移するユーティリティ。
     // - 現在の状態が既に PIXEL_SHADER_RESOURCE であれば何もしない（冪等性を担保）。
     // - それ以外の場合は RENDER_TARGET -> PIXEL_SHADER_RESOURCE の遷移バリアを発行する。
-    // - 実行後、内部状態 renderTextureState を更新する。
-	if (renderTextureState == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) return;
+    // - 実行後、内部状態 renderTextureState_ を更新する。
+	if (renderTextureState_ == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) return;
 	D3D12_RESOURCE_BARRIER barrier{};
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	barrier.Transition.pResource = renderTexture.Get();
+	barrier.Transition.pResource = renderTexture_.Get();
 	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 
-	commandList->ResourceBarrier(1, &barrier);
-	renderTextureState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	commandList_->ResourceBarrier(1, &barrier);
+	renderTextureState_ = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 }
 
 void PostEffectBase::CreateRenderTexture(UINT width, UINT height, DXGI_FORMAT format, const Vector4& clearColor) {
     // 出力用レンダーテクスチャ（Render Target）を生成し、
     // - Default ヒープ上にテクスチャリソースを作成
     // - このリソース用の RTV ヒープを作成して RTV を生成
-    // - dxCommon が管理する SRV ヒープの指定インデックスへ SRV を書き込む
+    // - dxCommon_ が管理する SRV ヒープの指定インデックスへ SRV を書き込む
     //
     // 引数:
     // - width/height : レンダーテクスチャのサイズ（通常はスワップチェインのサイズと同じ）
@@ -106,7 +106,7 @@ void PostEffectBase::CreateRenderTexture(UINT width, UINT height, DXGI_FORMAT fo
     // - clearColor    : RTV クリア時に使う色（RGBA）
     //
     // 注意:
-    // - SRV はここでは dxCommon->GetSRVCPUDescriptorHandle(1) へ作成する例になっている（インデックス管理に注意）。
+    // - SRV はここでは dxCommon_->GetSRVCPUDescriptorHandle(1) へ作成する例になっている（インデックス管理に注意）。
     // - CreateCommittedResource の初期状態は RENDER_TARGET にしている（すぐに書き込み可能）。
     // - 複数フレーム用にフレーム分のリソースを用意する等は行っておらず、単一の出力テクスチャ想定。
     //
@@ -130,10 +130,10 @@ void PostEffectBase::CreateRenderTexture(UINT width, UINT height, DXGI_FORMAT fo
     clearValue.Color[2] = clearColor.z;
     clearValue.Color[3] = clearColor.w;
 
-    HRESULT hr = dxCommon->GetDevice()->CreateCommittedResource(
+    HRESULT hr = dxCommon_->GetDevice()->CreateCommittedResource(
         &heapProps, D3D12_HEAP_FLAG_NONE, &desc,
         D3D12_RESOURCE_STATE_RENDER_TARGET, &clearValue,
-        IID_PPV_ARGS(&renderTexture));
+        IID_PPV_ARGS(&renderTexture_));
     assert(SUCCEEDED(hr));
 
     // RTV ヒープ（CPU only）を作成して RTV を生成
@@ -141,21 +141,21 @@ void PostEffectBase::CreateRenderTexture(UINT width, UINT height, DXGI_FORMAT fo
     rtvHeapDesc.NumDescriptors = 1;
     rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
     rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-    hr = dxCommon->GetDevice()->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap));
+    hr = dxCommon_->GetDevice()->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap_));
     assert(SUCCEEDED(hr));
-    rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
-    dxCommon->GetDevice()->CreateRenderTargetView(renderTexture.Get(), nullptr, rtvHandle);
+    rtvHandle_ = rtvHeap_->GetCPUDescriptorHandleForHeapStart();
+    dxCommon_->GetDevice()->CreateRenderTargetView(renderTexture_.Get(), nullptr, rtvHandle_);
 
-    // SRV を dxCommon の SRV ヒープへ作成（ここでは例として index=1 を使用）
+    // SRV を dxCommon_ の SRV ヒープへ作成（ここでは例として index=1 を使用）
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Format = format;
     srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
     srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
     srvDesc.Texture2D.MipLevels = 1;
 
-    // 注意: dxCommon->GetSRVCPUDescriptorHandle(1) のインデックス管理は呼び出し側で合わせること
-    dxCommon->GetDevice()->CreateShaderResourceView(renderTexture.Get(), &srvDesc, dxCommon->GetSRVCPUDescriptorHandle(1));
+    // 注意: dxCommon_->GetSRVCPUDescriptorHandle(1) のインデックス管理は呼び出し側で合わせること
+    dxCommon_->GetDevice()->CreateShaderResourceView(renderTexture_.Get(), &srvDesc, dxCommon_->GetSRVCPUDescriptorHandle(1));
 
     // 初期のリソース状態を RENDER_TARGET として記録
-    renderTextureState = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    renderTextureState_ = D3D12_RESOURCE_STATE_RENDER_TARGET;
 }

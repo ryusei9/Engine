@@ -94,20 +94,21 @@ public:
 	// 実行
 	void Run();
 
-	// ゲッター
+	/*------ゲッター------*/
 
 	// winappの取得
-	WinApp* GetWinApp() const { return winApp.get(); }
+	WinApp* GetWinApp() const { return winApp_.get(); }
+
 protected:
 	// メンバ変数
 	// ポインタ
-	unique_ptr<WinApp> winApp = nullptr;
+	std::unique_ptr<WinApp> winApp_ = nullptr;
 
-	unique_ptr<SrvManager> srvManager = nullptr;
+	std::unique_ptr<SrvManager> srvManager_ = nullptr;
 
-	unique_ptr<Camera> camera = make_unique<Camera>();
+	std::unique_ptr<Camera> camera_ = std::make_unique<Camera>();
 
-	unique_ptr<ImGuiManager> imGuiManager = make_unique<ImGuiManager>();
+	std::unique_ptr<ImGuiManager> imGuiManager_ = std::make_unique<ImGuiManager>();
 
 	bool endRequest_ = false;
 
@@ -119,6 +120,6 @@ protected:
 
 	std::unique_ptr<PostEffectManager> postEffectManager_ = nullptr;
 
-	DirectXCommon* dxCommon = nullptr;
+	DirectXCommon* dxCommon_ = nullptr;
 };
 

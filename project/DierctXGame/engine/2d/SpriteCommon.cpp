@@ -9,16 +9,16 @@
 // - 描画前に DrawSettings() を呼んでルートシグネチャや PSO をコマンドリストに設定する
 //
 
-std::shared_ptr<SpriteCommon> SpriteCommon::instance = nullptr;
+std::shared_ptr<SpriteCommon> SpriteCommon::sInstance_ = nullptr;
 
 // シングルトン取得
 // 返り値: SpriteCommon の shared_ptr（初回呼出し時にインスタンス生成）
 std::shared_ptr<SpriteCommon> SpriteCommon::GetInstance()
 {
-	if (instance == nullptr) {
-		instance = std::make_shared<SpriteCommon>();
+	if (sInstance_ == nullptr) {
+		sInstance_ = std::make_shared<SpriteCommon>();
 	}
-	return instance;
+	return sInstance_;
 }
 
 // 初期化
@@ -45,16 +45,16 @@ void SpriteCommon::DrawSettings()
 	dxCommon_->GetCommandList()->SetDescriptorHeaps(_countof(heaps), heaps);
 
 	// ルートシグネチャをコマンドリストに設定
-	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature_.Get());
 	// パイプラインステートオブジェクトを設定
-	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
+	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState_.Get());
 	// プリミティブトポロジを設定（トライアングルリスト）
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 // RootSignature の構築
 // - CBV / SRV / Sampler のルートパラメータを定義し、シリアライズ→生成する
-// - 入力レイアウトの要素配列 (inputElementDescs) をここで設定する
+// - 入力レイアウトの要素配列 (inputElementDescs_) をここで設定する
 void SpriteCommon::RootSignatureInitialize()
 {
 	HRESULT hr;
@@ -121,67 +121,67 @@ void SpriteCommon::RootSignatureInitialize()
 		assert(false);
 	}
 
-	rootSignature = nullptr;
+	rootSignature_ = nullptr;
 	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
-		signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+		signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
 	assert(SUCCEEDED(hr));
 
 	// 頂点入力レイアウトを設定（POSITION, TEXCOORD）
-	inputElementDescs[0].SemanticName = "POSITION";
-	inputElementDescs[0].SemanticIndex = 0;
-	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDescs_[0].SemanticName = "POSITION";
+	inputElementDescs_[0].SemanticIndex = 0;
+	inputElementDescs_[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDescs_[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
-	inputElementDescs[1].SemanticName = "TEXCOORD";
-	inputElementDescs[1].SemanticIndex = 0;
-	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
-	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDescs_[1].SemanticName = "TEXCOORD";
+	inputElementDescs_[1].SemanticIndex = 0;
+	inputElementDescs_[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	inputElementDescs_[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
-	inputLayoutDesc.pInputElementDescs = inputElementDescs;
-	inputLayoutDesc.NumElements = _countof(inputElementDescs);
+	inputLayoutDesc_.pInputElementDescs = inputElementDescs_;
+	inputLayoutDesc_.NumElements = _countof(inputElementDescs_);
 
 	// ブレンド設定（アルファ混合）
-	blendDesc.RenderTarget[0].BlendEnable = TRUE;
-	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	blendDesc_.RenderTarget[0].BlendEnable = TRUE;
+	blendDesc_.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	blendDesc_.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	blendDesc_.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	blendDesc_.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	blendDesc_.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	blendDesc_.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	blendDesc_.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
 	// ラスタライザ設定
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
-	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	rasterizerDesc_.CullMode = D3D12_CULL_MODE_NONE;
+	rasterizerDesc_.FillMode = D3D12_FILL_MODE_SOLID;
 
 	// シェーダをコンパイルしてバイナリを保存（VS, PS）
-	vertexShaderBlob = dxCommon_->CompileShader(L"Resources/shaders/Sprite.VS.hlsl", L"vs_6_0");
-	assert(vertexShaderBlob != nullptr);
+	vertexShaderBlob_ = dxCommon_->CompileShader(L"Resources/shaders/Sprite.VS.hlsl", L"vs_6_0");
+	assert(vertexShaderBlob_ != nullptr);
 
-	pixelShaderBlob = dxCommon_->CompileShader(L"Resources/shaders/Sprite.PS.hlsl", L"ps_6_0");
-	assert(pixelShaderBlob != nullptr);
+	pixelShaderBlob_ = dxCommon_->CompileShader(L"Resources/shaders/Sprite.PS.hlsl", L"ps_6_0");
+	assert(pixelShaderBlob_ != nullptr);
 
 	// デプスステンシル設定（Depth 有効、書き込み有効、比較関数 LessEqual）
-	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	depthStencilDesc_.DepthEnable = true;
+	depthStencilDesc_.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc_.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 }
 
 // グラフィックスパイプライン（PSO）を作成
 // - RootSignatureInitialize() で構築した情報をもとに PSO を作る
-// - 生成された graphicsPipelineState をメンバに保持する
+// - 生成された graphicsPipelineState_ をメンバに保持する
 void SpriteCommon::GraphicsPipelineInitialize()
 {
 	RootSignatureInitialize();
 	HRESULT hr;
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
-	graphicsPipelineStateDesc.pRootSignature = rootSignature.Get();
-	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;
-	graphicsPipelineStateDesc.BlendState = blendDesc;
-	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;
-	graphicsPipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),vertexShaderBlob->GetBufferSize() };
-	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),pixelShaderBlob->GetBufferSize() };
-	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
+	graphicsPipelineStateDesc.pRootSignature = rootSignature_.Get();
+	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc_;
+	graphicsPipelineStateDesc.BlendState = blendDesc_;
+	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc_;
+	graphicsPipelineStateDesc.VS = { vertexShaderBlob_->GetBufferPointer(), vertexShaderBlob_->GetBufferSize() };
+	graphicsPipelineStateDesc.PS = { pixelShaderBlob_->GetBufferPointer(), pixelShaderBlob_->GetBufferSize() };
+	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc_;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 	graphicsPipelineStateDesc.NumRenderTargets = 1;
@@ -190,7 +190,7 @@ void SpriteCommon::GraphicsPipelineInitialize()
 	graphicsPipelineStateDesc.SampleDesc.Count = 1;
 	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
-	hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
+	hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState_));
 	assert(SUCCEEDED(hr));
 }
 

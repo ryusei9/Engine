@@ -10,7 +10,6 @@
 class MyGame : public SRFramework
 {
 public:
-
 	// 初期化
 	void Initialize() override;
 
@@ -22,7 +21,6 @@ public:
 
 	// 描画
 	void Draw() override;
-
 
 private:
 	// ゲームプレイシーン

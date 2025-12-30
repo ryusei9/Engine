@@ -20,6 +20,36 @@
 #include <FadeManager.h>
 #include <CameraManager.h>
 
+/// 調整用定数（マジックナンバー排除）
+namespace GamePlayDefaults {
+	// スプライト座標
+	inline constexpr Vector2 kSpritePos{ 100.0f, 100.0f };
+
+	// スタート演出
+	inline constexpr bool  kStartCameraEasing = true;
+	inline constexpr float kStartCameraDurationSec = 5.0f;
+	inline constexpr Vector3 kStartCamPos{ 70.0f, -10.0f, -20.0f };
+	inline constexpr Vector3 kStartCamRot{ 0.0f,  0.0f,   0.0f };
+	inline constexpr Vector3 kEndCamPos{   0.0f,   1.0f, -10.0f };
+	inline constexpr Vector3 kEndCamRot{   0.1f,   0.0f,   0.0f };
+
+	// カーブ移動
+	inline constexpr float kCurveSpeed = 0.004f;
+
+	// ゲームオーバー
+	inline constexpr float kGameOverTimerSec = 2.0f;
+
+	// ゲームクリア
+	inline constexpr float kGameClearMoveDurationSec = 2.0f;
+	inline constexpr float kGameClearPlayerLaunchSpeed = 16.0f;
+
+	// セグメント
+	inline constexpr float kSegmentDefaultDurationSec = 1.0f;
+
+	// 時間ステップ
+	inline constexpr float kDeltaTime60Hz = 1.0f / 60.0f;
+}
+
 /// <summary>
 /// ゲームプレイシーン
 /// </summary>
@@ -115,11 +145,11 @@ private:
 	// スプライト
 	std::unique_ptr<Sprite> sprite_ = nullptr;
 
-	// 入力の初期化
+	// 入力
 	Input* input_ = nullptr;
 
 	// スプライトの座標
-	Vector2 spritePosition_ = { 100.0f, 100.0f };
+	Vector2 spritePosition_ = GamePlayDefaults::kSpritePos;
 
 	// オーディオ
 	SoundData soundData1_;
@@ -164,13 +194,13 @@ private:
 	CameraMode cameraMode_ = CameraMode::DynamicFollow;
 
 	// --- スタート演出用 ---
-	bool isStartCameraEasing_ = true;
-	float startCameraTimer_ = 0.0f;
-	const float kStartCameraDuration_ = 5.0f;
-	Vector3 startCameraPos_ = { 70.0f, -10.0f, -20.0f };
-	Vector3 startCameraRot_ = { 0.0f, 0.0f, 0.0f };
-	Vector3 endCameraPos_ = { 0.0f, 1.0f, -10.0f };
-	Vector3 endCameraRot_ = { 0.1f, 0.0f, 0.0f };
+	bool  isStartCameraEasing_ = GamePlayDefaults::kStartCameraEasing;
+	float startCameraTimer_    = 0.0f;
+	const float kStartCameraDuration_ = GamePlayDefaults::kStartCameraDurationSec;
+	Vector3 startCameraPos_ = GamePlayDefaults::kStartCamPos;
+	Vector3 startCameraRot_ = GamePlayDefaults::kStartCamRot;
+	Vector3 endCameraPos_   = GamePlayDefaults::kEndCamPos;
+	Vector3 endCameraRot_   = GamePlayDefaults::kEndCamRot;
 
 	// タイトルに戻るテキスト
 	std::unique_ptr<Object3d> backToTitle_;
@@ -188,10 +218,10 @@ private:
 	size_t curveIndex_ = 0;
 
 	// カメラ移動速度（1フレームあたりの進行度）
-	float curveSpeed_ = 0.004f;
+	float curveSpeed_ = GamePlayDefaults::kCurveSpeed;
 
 	// ゲームオーバー処理用タイマー
-	float gameOverTimer_ = 2.0f;
+	float gameOverTimer_ = GamePlayDefaults::kGameOverTimerSec;
 
 	// ゲームオーバーフラグ
 	bool isGameOver_ = false;
@@ -222,10 +252,10 @@ private:
 	float gameClearMoveTimer_ = 0.0f;
 
 	// カメラ移動時間
-	const float kGameClearMoveDuration_ = 2.0f;
+	const float kGameClearMoveDuration_ = GamePlayDefaults::kGameClearMoveDurationSec;
 
 	// カメラ開始位置と目標位置
-	Vector3 gameClearCamStartPos_ = { 0.0f, 0.0f, 0.0f };
+	Vector3 gameClearCamStartPos_  = { 0.0f, 0.0f, 0.0f };
 	Vector3 gameClearCamTargetPos_ = { 0.0f, 0.0f, 0.0f };
 
 	// プレイヤー発射フェーズ
@@ -235,7 +265,7 @@ private:
 	bool gameClearFadeStarted_ = false;
 
 	// プレイヤー発射速度（単位: ワールド単位 / 秒）
-	const float kGameClearPlayerLaunchSpeed_ = 16.0f;
+	const float kGameClearPlayerLaunchSpeed_ = GamePlayDefaults::kGameClearPlayerLaunchSpeed;
 
 	// ゲームクリア演出用テキスト
 	std::unique_ptr<Object3d> gameClearText_;
@@ -256,9 +286,9 @@ private:
 	float segmentTimer_ = 0.0f;
 
 	// 現在のセグメントの所要時間
-	float currentSegmentDuration_ = 1.0f;
+	float currentSegmentDuration_ = GamePlayDefaults::kSegmentDefaultDurationSec;
 
 	// デルタタイム
-	const float kDeltaTime_ = 1.0f / 60.0f;
+	const float kDeltaTime_ = GamePlayDefaults::kDeltaTime60Hz;
 };
 

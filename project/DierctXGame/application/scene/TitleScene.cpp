@@ -8,8 +8,8 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(Object3dCommon::GetInstance()->GetDefaultCamera());
 
-	cameraManager_->SetCameraPosition({ 0.0f, 1.0f, -10.0f });
-	cameraManager_->SetCameraRotation({ 0.1f, 0.0f, 0.0f });
+	cameraManager_->SetCameraPosition(TitleDefaults::kCamPos);
+	cameraManager_->SetCameraRotation(TitleDefaults::kCamRot);
 	
 	// 入力の初期化
 	input_ = std::make_unique<Input>();
@@ -23,7 +23,7 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	player_ = std::make_unique<Player>();
 	player_->Initialize();
 
-	playerTransform_.translate_ = { 0.0f, -0.5f, -4.0f };
+	playerTransform_.SetTranslate(TitleDefaults::kPlayerInitPos);
 
 	// タイトルロゴの初期化
 	titleLogo_ = std::make_unique<Object3d>();
@@ -31,8 +31,8 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	// ワールド変換の初期化
 	titleLogoTransform_.Initialize();
-	titleLogoTransform_.rotate_ = { -1.73f, 0.0f, 0.0f };
-	titleLogoTransform_.translate_ = { 0.0f, 1.2f, 0.0f };
+	titleLogoTransform_.SetRotate(TitleDefaults::kTitleLogoRot);
+	titleLogoTransform_.SetTranslate(TitleDefaults::kTitleLogoPos);
 
 	// skydomeの初期化
 	skydome_ = std::make_unique<Object3d>();
@@ -45,7 +45,7 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	fadeManager_->Initialize();
 
 	// フェード開始
-	fadeManager_->FadeOutStart(0.02f);
+	fadeManager_->FadeOutStart(TitleDefaults::kFadeStep);
 
 	// ガイドオブジェクトの初期化
 	titleGuide_ = std::make_unique<Object3d>();
@@ -62,7 +62,7 @@ void TitleScene::Update()
 	{
 		// フェードイン開始
 		isGameStart_ = true;
-		fadeManager_->FadeInStart(0.02f);
+		fadeManager_->FadeInStart(TitleDefaults::kFadeStep);
 	}
 	// フェードが完了したらシーン切り替え
 	if (fadeManager_->GetFadeState() == FadeManager::EffectState::Finish && isGameStart_)
@@ -72,7 +72,7 @@ void TitleScene::Update()
 
 	// オブジェクトの更新
 	// プレイヤー
-	player_->SetPosition(playerTransform_.translate_);
+	player_->SetPosition(playerTransform_.GetTranslate());
 	player_->Update();
 	
 	// タイトルロゴ
@@ -160,23 +160,20 @@ void TitleScene::CameraMove()
 	Vector3 playerPos = player_->GetCenterPosition();
 
 	static float sTheta_ = 0.0f;
-	sTheta_ += 0.005f; // 回転速度（ラジアン）
-
-	float radius = 5.0f; // プレイヤーからの距離
-	float height = 2.0f; // カメラの高さ
+	sTheta_ += TitleDefaults::kCameraRotSpeed; // 回転速度（ラジアン）
 
 	// カメラの位置を計算
 	Vector3 cameraPos = {
-		playerPos.x + std::cos(sTheta_) * radius,
-		height,
-		playerPos.z + std::sin(sTheta_) * radius
+		playerPos.x + std::cos(sTheta_) * TitleDefaults::kCameraRadius,
+		TitleDefaults::kCameraHeight,
+		playerPos.z + std::sin(sTheta_) * TitleDefaults::kCameraRadius
 	};
 	// カメラの向きを計算
 	Vector3 toPlayer = playerPos - cameraPos;
 	float yaw = std::atan2(toPlayer.z, toPlayer.x); // Y軸回転
 	
 	// カメラの位置と回転を設定
-	Vector3 cameraRotate = { 0, -yaw + 3.14159f / 2.0f, 0.0f }; // 必要に応じて符号やオフセット調整
+	Vector3 cameraRotate = { 0, -yaw + TitleDefaults::kPiOver2, 0.0f }; // 必要に応じて符号やオフセット調整
 	player_->SetRotation(cameraRotate);
 	skydomeTransform_.rotate_.y = cameraRotate.y;
 	titleLogoTransform_.rotate_.y = camera_->GetRotate().y;

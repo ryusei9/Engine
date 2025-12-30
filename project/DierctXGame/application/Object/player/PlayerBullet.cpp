@@ -1,83 +1,80 @@
 #include "PlayerBullet.h"
 #include <CollisionTypeIdDef.h>
-#include <Player.h>
 
-PlayerBullet::PlayerBullet()
-{
-	// シリアルナンバーを設定
-	serialNumber_ = nextSerialNumber_;
-
-	// 次のシリアルナンバーを設定
-	nextSerialNumber_++;
-}
+PlayerBullet::PlayerBullet() = default;
 
 void PlayerBullet::Initialize(const Vector3& position)
 {
-	// IDの設定
- 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerBullet));
+	// ColliderにIDをセット
+	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerBullet));
 
-	// 初期化処理
-	isAlive_ = true;
-	lifeFrame_ = 180;
+	// 初期化
+	isAlive_   = true;
+	lifeFrame_ = PlayerBulletDefaults::kLifeFrames;
+
 	worldTransform_.Initialize();
-	// 座標の設定
-	worldTransform_.scale_ = { 1.0f, 1.0f, 1.0f };
-	worldTransform_.rotate_ = { 0.0f, 0.0f, 0.0f };
-	worldTransform_.translate_ = position;
+	worldTransform_.SetScale(PlayerBulletDefaults::kInitScale);
+	worldTransform_.SetRotate(PlayerBulletDefaults::kInitRotate);
+	worldTransform_.SetTranslate(position);
 
-	// オブジェクトの生成・初期化
+	// 弾オブジェクト
 	objectBullet_ = std::make_unique<Object3d>();
 	objectBullet_->Initialize("player_bullet.obj");
-	objectBullet_->SetScale(worldTransform_.scale_);
-	objectBullet_->SetTranslate(worldTransform_.translate_);
-	
-	// 半径の設定
-	SetRadius(0.05f);
+	objectBullet_->SetScale(worldTransform_.GetScale());
+	objectBullet_->SetTranslate(worldTransform_.GetTranslate());
+
+	// 初速を設定（右方向に飛ぶ例：X正方向）
+	velocity_ = { kSpeed_, 0.0f, 0.0f };
+
+	// 半径を設定
+	SetRadius(radius_);
 }
 
 void PlayerBullet::Update()
 {
-	// プレイヤー弾の移動
+	// 移動
 	Move();
 
-	// プレイヤー弾の生存フレームを減少
-	// 生存フレームの更新
+	// 寿命
 	if (lifeFrame_ > 0) {
-		lifeFrame_--;
+		--lifeFrame_;
 	} else {
 		isAlive_ = false;
 	}
-	// ワールド変換の更新
+
+	// 変換更新と反映
 	worldTransform_.Update();
-	
-	// オブジェクトの更新
-	objectBullet_->SetTranslate(worldTransform_.translate_);
+	objectBullet_->SetScale(worldTransform_.GetScale());
+	objectBullet_->SetTranslate(worldTransform_.GetTranslate());
 	objectBullet_->Update();
 }
 
 void PlayerBullet::Draw()
 {
-	// プレイヤー弾の描画
+	if (!isAlive_) return;
 	objectBullet_->Draw();
 }
 
 void PlayerBullet::Move()
 {
-	// プレイヤー弾の移動
-	worldTransform_.translate_.x += kSpeed_;
+	// 速度に基づいて位置更新
+	worldTransform_.SetTranslate(worldTransform_.GetTranslate() + velocity_);
 }
 
 void PlayerBullet::OnCollision(Collider* other)
 {
-	// プレイヤー弾の衝突判定
-	if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
-		// 敵と衝突した場合
+	if (!isAlive_) return;
+
+	// 敵や敵弾に当たったら消える（必要に応じて条件拡張）
+	const uint32_t type = other->GetTypeID();
+	if (type == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy) ||
+		type == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyBullet)) {
 		isAlive_ = false;
+		SetRadius(0.0f); // 直ちに当たり判定無効化
 	}
 }
 
 Vector3 PlayerBullet::GetCenterPosition() const
 {
-	// プレイヤー弾の中心座標を取得
-	return worldTransform_.translate_;
+	return worldTransform_.GetTranslate();
 }

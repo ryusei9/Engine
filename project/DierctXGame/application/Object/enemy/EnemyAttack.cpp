@@ -5,36 +5,34 @@
 #include <Enemy.h>
 #include <Player.h>
 
-// 円周率
-constexpr float kPi = 3.1415926535f;
-
-// 追加: 弾速スケール（0.5で半分）
-constexpr float kBulletSpeedScale = 0.5f;
-
-// パターン1: 画面右側で上下移動しつつ2秒ごとに扇形弾
+// パターン1: 画面右側で上下移動しつつ扇形弾
 void EnemyAttackPatternFan::Update(Enemy* enemy, Player*, std::list<std::unique_ptr<EnemyBullet>>& bullets, float deltaTime) {
 	// 上下移動
-	float& y = enemy->GetWorldTransform().translate_.y;
-	y += moveDir_ * 0.02f;
-	if (y > 2.0f) moveDir_ = -1.0f;
-	if (y < -2.0f) moveDir_ = 1.0f;
+	Vector3 t = enemy->GetWorldTransform().GetTranslate();
+	t.y += moveDir_ * EnemyAttackDefaults::kFanMoveSpeedY;
+	if (t.y > EnemyAttackDefaults::kFanMoveRangeY) moveDir_ = -1.0f;
+	if (t.y < -EnemyAttackDefaults::kFanMoveRangeY) moveDir_ = 1.0f;
+	enemy->GetWorldTransform().SetTranslate(t);
 
-	// 2秒ごとに5発扇形弾
+	// 扇形弾
 	shotTimer_ += deltaTime;
-	if (shotTimer_ >= 2.0f) {
-		float baseAngle = kPi; // 左向き
-		float spread = kPi / 3.0f; // 扇の広がり
-		for (int32_t i = 0; i < 5; ++i) {
-			float angle = baseAngle - spread / 2 + spread * (float(i) / 4.0f);
-			Vector3 v = { std::cos(angle) * 0.15f, std::sin(angle) * 0.15f, 0.0f };
+	if (shotTimer_ >= EnemyAttackDefaults::kFanShotIntervalSec) {
+		const float baseAngle = EnemyAttackDefaults::kFanBaseAngle;
+		const float spread = EnemyAttackDefaults::kFanSpread;
+		for (int32_t i = 0; i < EnemyAttackDefaults::kFanShotCount; ++i) {
+			float angle = baseAngle - spread / 2.0f + spread * (float(i) / float(EnemyAttackDefaults::kFanShotCount - 1));
+			Vector3 v = { std::cos(angle) * EnemyAttackDefaults::kFanBulletSpeed,
+						  std::sin(angle) * EnemyAttackDefaults::kFanBulletSpeed,
+						  0.0f };
 			auto bullet = std::make_unique<EnemyBullet>();
-			bullet->Initialize(enemy->GetWorldTransform().translate_, v);
+			bullet->Initialize(enemy->GetWorldTransform().GetTranslate(), v);
 			bullet->Update();
 			bullets.push_back(std::move(bullet));
 		}
 		shotTimer_ = 0.0f;
 	}
 }
+
 // ImGui描画
 void EnemyAttackPatternFan::DrawImGui(int32_t idx, bool selected) {
 #ifdef USE_IMGUI
@@ -44,20 +42,17 @@ void EnemyAttackPatternFan::DrawImGui(int32_t idx, bool selected) {
 
 // パターン2: 右側中央で自機狙い弾連射
 void EnemyAttackPatternAimed::Update(Enemy* enemy, Player* player, std::list<std::unique_ptr<EnemyBullet>>& bullets, float deltaTime) {
-	// 位置固定
-	//enemy->GetWorldTransform().translate_ = { 3.0f, 0.0f, 0.0f };
-	// 0.2秒ごとに自機狙い弾
 	shotTimer_ += deltaTime;
-	if (shotTimer_ >= 2.0f && player) {
-		Vector3 toPlayer = player->GetCenterPosition() - enemy->GetWorldTransform().translate_;
+	if (shotTimer_ >= EnemyAttackDefaults::kAimedShotIntervalSec && player) {
+		Vector3 toPlayer = player->GetCenterPosition() - enemy->GetWorldTransform().GetTranslate();
 		float len = std::sqrt(toPlayer.x * toPlayer.x + toPlayer.y * toPlayer.y + toPlayer.z * toPlayer.z);
-		if (len > 0.01f) {
-			float speed = 0.18f * kBulletSpeedScale;
+		if (len > EnemyAttackDefaults::kAimedMinLen) {
+			float speed = EnemyAttackDefaults::kAimedBulletSpeed * EnemyAttackDefaults::kBulletSpeedScale;
 			Vector3 v = { toPlayer.x / len * speed,
 						  toPlayer.y / len * speed,
 						  0.0f };
 			auto bullet = std::make_unique<EnemyBullet>();
-			bullet->Initialize(enemy->GetWorldTransform().translate_, v);
+			bullet->Initialize(enemy->GetWorldTransform().GetTranslate(), v);
 			bullet->Update();
 			bullets.push_back(std::move(bullet));
 		}
@@ -75,30 +70,42 @@ void EnemyAttackPatternAimed::DrawImGui(int32_t idx, bool selected) {
 // パターン3: 全方位弾+左突進→左で消えて右から復活
 void EnemyAttackPatternRush::Update(Enemy* enemy, Player*, std::list<std::unique_ptr<EnemyBullet>>& bullets, float deltaTime) {
 	if (!rushing_) {
-		enemy->GetWorldTransform().translate_ = { 5.0f, 0.0f, 0.0f };
+		Vector3 t = enemy->GetWorldTransform().GetTranslate();
+		t.x = EnemyAttackDefaults::kRushStartX;
+		enemy->GetWorldTransform().SetTranslate(t);
 		rushing_ = true;
 		shotTimer_ = 0.0f;
 	}
-	enemy->GetWorldTransform().translate_.x -= 0.08f;
+
+	// 左へ移動
+	Vector3 t = enemy->GetWorldTransform().GetTranslate();
+	t.x -= EnemyAttackDefaults::kRushSpeedX;
+	enemy->GetWorldTransform().SetTranslate(t);
+
+	// 全方位弾
 	shotTimer_ += deltaTime;
-	if (shotTimer_ >= 0.3f) {
-		for (int32_t i = 0; i < 12; ++i) {
-			float angle = 2 * kPi * i / 12;
-			Vector3 v = { std::cos(angle) * 0.13f, std::sin(angle) * 0.13f, 0.0f };
+	if (shotTimer_ >= EnemyAttackDefaults::kRushShotIntervalSec) {
+		for (int32_t i = 0; i < EnemyAttackDefaults::kRushRingCount; ++i) {
+			float angle = 2.0f * EnemyAttackDefaults::kPi * float(i) / float(EnemyAttackDefaults::kRushRingCount);
+			Vector3 v = { std::cos(angle) * EnemyAttackDefaults::kRushRingSpeed,
+						  std::sin(angle) * EnemyAttackDefaults::kRushRingSpeed,
+						  0.0f };
 			auto bullet = std::make_unique<EnemyBullet>();
-			bullet->Initialize(enemy->GetWorldTransform().translate_, v);
+			bullet->Initialize(enemy->GetWorldTransform().GetTranslate(), v);
 			bullet->Update();
 			bullets.push_back(std::move(bullet));
 		}
 		shotTimer_ = 0.0f;
 	}
-	if (enemy->GetWorldTransform().translate_.x < -4.0f) {
+
+	// 左端で終了
+	if (enemy->GetWorldTransform().GetTranslate().x < EnemyAttackDefaults::kRushLeftEndX) {
 		rushing_ = false;
 	}
 }
 
-void EnemyAttackPatternWait::Update(Enemy* enemy, Player*, std::list<std::unique_ptr<EnemyBullet>>&,float deltaTime) {
-	
+void EnemyAttackPatternWait::Update(Enemy* enemy, Player*, std::list<std::unique_ptr<EnemyBullet>>&, float /*deltaTime*/) {
+	// 必要なら待機のイージング移動などをここで実装
 }
 
 // ImGui描画
@@ -128,7 +135,7 @@ void EnemyAttack::Update(Enemy* enemy, Player* player, std::list<std::unique_ptr
 	patternTimer_ += deltaTime;
 
 	// パターン1→待機
-	if (currentPattern_ == 0 && patternTimer_ >= 10.0f) {
+	if (currentPattern_ == 0 && patternTimer_ >= EnemyAttackDefaults::kPattern1DurationSec) {
 		SetPattern(3); // 3: 待機
 		patternTimer_ = 0.0f;
 		return;
@@ -136,14 +143,18 @@ void EnemyAttack::Update(Enemy* enemy, Player* player, std::list<std::unique_ptr
 	
 	// パターン3→待機（突進しきったら）
 	if (currentPattern_ == 2) {
-		if (!pattern3Rushed_ && enemy->GetWorldTransform().translate_.x < -4.0f) {
+		if (!pattern3Rushed_ && enemy->GetWorldTransform().GetTranslate().x < EnemyAttackDefaults::kRushLeftEndX) {
 			pattern3Rushed_ = true;
-			enemy->GetWorldTransform().translate_ = { 4.0f, 0.0f, 0.0f };
+			Vector3 t = enemy->GetWorldTransform().GetTranslate();
+			t.x = EnemyAttackDefaults::kRushRespawnX;
+			t.y = 0.0f;
+			t.z = t.z;
+			enemy->GetWorldTransform().SetTranslate(t);
 			SetPattern(3);
 			patternTimer_ = 0.0f;
 			return;
 		}
-		if (enemy->GetWorldTransform().translate_.x >= 3.0f) {
+		if (enemy->GetWorldTransform().GetTranslate().x >= EnemyAttackDefaults::kRushResetX) {
 			pattern3Rushed_ = false;
 		}
 	}

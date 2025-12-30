@@ -5,6 +5,13 @@
 /// <summary>
 /// コライダー基底クラス
 /// </summary>
+namespace ColliderDefaults {
+	// 未設定（無効）識別ID
+	inline constexpr uint32_t kInvalidTypeId = 0u;
+	// 既定の半径
+	inline constexpr float kDefaultRadius = 1.0f;
+}
+
 class Collider
 {
 public:
@@ -23,6 +30,7 @@ public:
 	void Draw();
 	
 	// 衝突したオブジェクトの情報を取得
+	// 既存の互換性維持のためポインタのまま（必要なら派生側でconst許容へ拡張可）
 	virtual void OnCollision([[maybe_unused]] Collider* other) {}
 
 	// 中心座標の取得
@@ -45,10 +53,10 @@ public:
 
 private:
 	/*------メンバ変数------*/
-	// 識別ID
-	uint32_t typeID_ = 0;
+	// 識別ID（未設定はkInvalidTypeId）
+	uint32_t typeID_ = ColliderDefaults::kInvalidTypeId;
 
-	// 半径
-	float radius_ = 1.0f;
+	// 半径（既定値はkDefaultRadius）
+	float radius_ = ColliderDefaults::kDefaultRadius;
 };
 

@@ -10,6 +10,13 @@
 /// <summary>
 /// シーン管理
 /// </summary>
+namespace SceneDefaults {
+	// 初期シーン番号（TITLE）
+	inline constexpr int32_t kInitialSceneNo = TITLE;
+	// 未設定の過去シーン番号
+	inline constexpr int32_t kNoPrevSceneNo  = -1;
+}
+
 class SceneManager
 {
 public:
@@ -32,7 +39,7 @@ private:
 	// 現在のシーン
 	std::unique_ptr<BaseScene> nowScene_ = nullptr;
 
-	// 次のシーン
+	// 次のシーン（未使用なら保持しない）
 	std::unique_ptr<BaseScene> nextScene_ = nullptr;
 
 	// ダイレクトXコモン
@@ -42,7 +49,7 @@ private:
 	WinApp* winApp_ = nullptr;
 
 	// シーンの管理
-	int32_t currentSceneNo_;
-	int32_t prevSceneNo_;
+	int32_t currentSceneNo_ = SceneDefaults::kInitialSceneNo;
+	int32_t prevSceneNo_    = SceneDefaults::kNoPrevSceneNo;
 };
 

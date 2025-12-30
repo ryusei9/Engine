@@ -4,12 +4,15 @@
 #include <MakeIdentity4x4.h>
 #include <MakeAffineMatrix.h>
 #include <Inverse.h>
+
 void WorldTransform::Initialize()
 {
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
 
 	// WVP用のリソースを作る
-	wvpResource_ = CreateBufferResource(Object3dCommon::GetInstance()->GetDxCommon()->GetDevice(),sizeof(TransformationMatrix));
+	wvpResource_ = CreateBufferResource(
+		Object3dCommon::GetInstance()->GetDxCommon()->GetDevice(),
+		sizeof(TransformationMatrix));
 
 	// WVP用のリソースの設定
 	wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
@@ -17,7 +20,7 @@ void WorldTransform::Initialize()
 	wvpData_->WVP = MakeIdentity4x4::MakeIdentity4x4();
 	// ワールド行列
 	wvpData_->World = MakeIdentity4x4::MakeIdentity4x4();
-	// ビュー行列
+	// ワールド逆行列の転置
 	wvpData_->WorldInversedTranspose = MakeIdentity4x4::MakeIdentity4x4();
 }
 
@@ -36,7 +39,8 @@ void WorldTransform::Update()
 	{
 		const Matrix4x4& viewProjectionMatrix = camera_->GetViewProjectionMatrix();
 		worldViewProjectionMatrix = Multiply::Multiply(worldMatrix, viewProjectionMatrix);
-	} else
+	}
+	else
 	{
 		worldViewProjectionMatrix = worldMatrix;
 	}
@@ -49,11 +53,12 @@ void WorldTransform::Update()
 void WorldTransform::SetPipeline()
 {
 	auto commandList = Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList();
-
 	commandList->SetGraphicsRootConstantBufferView(1, wvpResource_->GetGPUVirtualAddress());
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> WorldTransform::CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes)
+Microsoft::WRL::ComPtr<ID3D12Resource> WorldTransform::CreateBufferResource(
+	const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+	size_t sizeInBytes)
 {
 	// DXGIファクトリーの生成
 	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory = nullptr;
@@ -82,12 +87,15 @@ Microsoft::WRL::ComPtr<ID3D12Resource> WorldTransform::CreateBufferResource(Micr
 	// バッファの場合はこれにする決まり
 	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
-
-
 	// 実際に頂点リソースを作る
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
-	hr = device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE,
-		&resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource));
+	hr = device->CreateCommittedResource(
+		&uploadHeapProperties,
+		D3D12_HEAP_FLAG_NONE,
+		&resourceDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&resource));
 	assert(SUCCEEDED(hr));
 	return resource;
 }

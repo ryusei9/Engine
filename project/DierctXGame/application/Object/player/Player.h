@@ -3,8 +3,33 @@
 #include "ParticleManager.h"
 #include "ParticleEmitter.h"
 
-class PlayerBullet; // 前方宣言
-class PlayerChargeBullet; // 前方宣言
+class PlayerBullet;        // 前方宣言
+class PlayerChargeBullet;  // 前方宣言
+
+/// <summary>
+/// プレイヤー調整用定数（マジックナンバー排除）
+/// </summary>
+namespace PlayerDefaults {
+	inline constexpr float kMoveSpeed         = 0.1f;
+	inline constexpr float kRadius            = 0.1f;
+	inline constexpr float kRespawnWaitSec    = 2.0f;
+	inline constexpr float kDelta60Hz         = 1.0f / 60.0f;
+
+	// チャージ関連
+	inline constexpr float kChargeReadySec    = 3.0f;
+
+	// パーティクル
+	inline constexpr uint32_t kThrusterRate   = 60;     // 1秒間に60個
+	inline constexpr uint32_t kThrusterCount  = 3;
+	inline constexpr float    kThrusterOffsetX = 0.2f;  // 左オフセット
+	inline constexpr float    kExplosionRate  = 1.0f;
+	inline constexpr uint32_t kExplosionCount = 0;
+
+	// 初期Transform
+	inline constexpr Vector3  kInitScale  = { 1.0f, 1.0f, 1.0f };
+	inline constexpr Vector3  kInitRotate = { 0.0f, 0.0f, 0.0f };
+	inline constexpr Vector3  kInitTranslate = { 0.0f, 0.0f, 0.0f };
+}
 
 /// <summary>
 /// プレイヤークラス
@@ -39,7 +64,7 @@ public:
 	void DrawImGui();
 
 	// プレイヤー死亡時に一度だけパーティクルを出す
-	void PlayDeathParticleOnce(); // 追加: 一度だけパーティクルを出す関数
+	void PlayDeathParticleOnce();
 
 	// 中心座標を取得する純粋仮想関数
 	Vector3 GetCenterPosition() const override;
@@ -55,26 +80,26 @@ public:
 	// プレイヤーのチャージ弾を取得
 	std::list<std::unique_ptr<PlayerChargeBullet>>& GetChargeBullets() { return chargeBullets_; }
 
-	bool GetPlayerControlEnabled() const { return controlEnabled_; } // プレイヤー操作有効化フラグの取得
+	bool GetPlayerControlEnabled() const { return controlEnabled_; }
 
 	// プレイヤーの死亡フラグの取得
 	bool GetIsAlive() const { return isAlive_; }
 
 	/*------セッター------*/
-	void SetPlayerControlEnabled(bool enabled) { controlEnabled_ = enabled; } // プレイヤー操作有効化フラグの設定
+	void SetPlayerControlEnabled(bool enabled) { controlEnabled_ = enabled; }
 
 private:
 	/*------メンバ変数------*/
 
-	std::list<std::unique_ptr<PlayerBullet>> bullets_; // 武器
-	std::list<std::unique_ptr<PlayerChargeBullet>> chargeBullets_; // チャージ弾
+	std::list<std::unique_ptr<PlayerBullet>>        bullets_;        // 武器
+	std::list<std::unique_ptr<PlayerChargeBullet>>  chargeBullets_;  // チャージ弾
 
 	// プレイヤーの移動速度
-	float moveSpeed_ = 0.1f;
+	float moveSpeed_ = PlayerDefaults::kMoveSpeed;
 
-	Vector3 velocity_ = { 0.0f, 0.0f, 0.0f }; // 速度ベクトルを追加
+	Vector3 velocity_ = { 0.0f, 0.0f, 0.0f }; // 速度ベクトル
 	
-	float radius_ = 0.1f; // 半径
+	float radius_ = PlayerDefaults::kRadius; // 半径
 	
 	// リスポーンタイマー
 	float respawnTimer_ = 0.0f;
@@ -87,7 +112,7 @@ private:
 
 	bool isShot_ = false; // 発射フラグ
 
-	ParticleManager* particleManager_; // パーティクルマネージャー
+	ParticleManager* particleManager_ = nullptr; // パーティクルマネージャー
 
 	// スラスターパーティクルエミッター
 	std::unique_ptr<ParticleEmitter> thrusterEmitter_;

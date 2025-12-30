@@ -28,12 +28,12 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	fadeManager_->Initialize();
 
 	// フェード開始
-	fadeManager_->FadeOutStart(0.02f);
+	fadeManager_->FadeOutStart(GamePlayDefaults::kDeltaTime60Hz * 1.2f); // 0.02f相当
 
 	// タイトルに戻るテキストのトランスフォームの初期化
 	textTitle_.Initialize();
-	textTitle_.translate_ = { 3.333f, 2.857f, 10.000f };
-	textTitle_.rotate_ = { -1.495f, 0.0f, 0.0f };
+	textTitle_.SetTranslate(Vector3{ 3.333f, 2.857f, 10.000f });
+	textTitle_.SetRotate(Vector3{ -1.495f, 0.0f, 0.0f });
 
 	// オブジェクト3Dの初期化
 	backToTitle_ = std::make_unique<Object3d>();
@@ -81,7 +81,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	cameraManager_->SetCameraRotation(startCameraRot_);
 
 	// ゲームオーバー用タイマー初期化
-	gameOverTimer_ = 2.0f;
+	gameOverTimer_ = GamePlayDefaults::kGameOverTimerSec;
 
 	// ゲームクリアテキストの初期化
 	gameClearText_ = std::make_unique<Object3d>();
@@ -89,8 +89,8 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	
 	// ゲームクリアテキストのトランスフォーム初期化
 	gameClearTextTransform_.Initialize();
-	gameClearTextTransform_.scale_ = Vector3(0.528f, 0.528f, 0.528f);
-	gameClearTextTransform_.rotate_.x = -1.694f;
+	gameClearTextTransform_.SetScale(Vector3(0.528f, 0.528f, 0.528f));
+	gameClearTextTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
 
 	// スペースキーを押してくださいテキストの初期化
 	pressSpaceKeyText_ = std::make_unique<Object3d>();
@@ -98,8 +98,8 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	// スペースキーを押してくださいテキストのトランスフォーム初期化
 	pressSpaceKeyTransform_.Initialize();
-	pressSpaceKeyTransform_.scale_ = Vector3(0.4f, 0.4f, 0.4f);
-	pressSpaceKeyTransform_.rotate_.x = -1.694f;
+	pressSpaceKeyTransform_.SetScale(Vector3(0.4f, 0.4f, 0.4f));
+	pressSpaceKeyTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
 }
 
 void GamePlayScene::Update()
@@ -122,9 +122,9 @@ void GamePlayScene::Update()
 	// フェード処理
 	// ゲームオーバー時の更新
 	if (isGameOver_ && !fadeStarted_) {
-		gameOverTimer_ -= 1.0f / 60.0f; // 60FPS想定
+		gameOverTimer_ -= GamePlayDefaults::kDeltaTime60Hz; // 60FPS想定
 		if (gameOverTimer_ <= 0.0f) {
-			fadeManager_->FadeInStart(0.02f, [this]() {
+			fadeManager_->FadeInStart(GamePlayDefaults::kDeltaTime60Hz * 1.2f, [this]() { // 0.02f相当
 				SetSceneNo(GAMEOVER);
 				});
 			fadeStarted_ = true;
@@ -132,9 +132,9 @@ void GamePlayScene::Update()
 	}
 	// ゲームクリア時のフェード処理
 	if (isEnd_ && !fadeStarted_) {
-		gameOverTimer_ -= 1.0f / 60.0f; // 60FPS想定
+		gameOverTimer_ -= GamePlayDefaults::kDeltaTime60Hz; // 60FPS想定
 		if (gameOverTimer_ <= 0.0f) {
-			fadeManager_->FadeInStart(0.02f, [this]() {
+			fadeManager_->FadeInStart(GamePlayDefaults::kDeltaTime60Hz * 1.2f, [this]() { // 0.02f相当
 				SetSceneNo(TITLE);
 				});
 			fadeStarted_ = true;
@@ -234,7 +234,7 @@ void GamePlayScene::Update()
 		break;
 	case CameraMode::FollowPlayer:
 		// プレイヤーについて行く
-		cameraManager_->SetCameraPosition(player_->GetWorldTransform().translate_ + Vector3{ 0.0f, 1.0f, -10.0f });
+		cameraManager_->SetCameraPosition(player_->GetWorldTransform().GetTranslate() + Vector3{ 0.0f, 1.0f, -10.0f });
 		cameraManager_->SetCameraRotation(Vector3{ 0.1f, 0.0f, 0.0f });
 		break;
 	case CameraMode::DynamicFollow:
@@ -534,7 +534,7 @@ void GamePlayScene::LoadLevel(const LevelData* levelData)
 
 void GamePlayScene::UpdateStartCameraEasing()
 {
-	startCameraTimer_ += 1.0f / 60.0f; // フレームレート固定なら
+	startCameraTimer_ += GamePlayDefaults::kDeltaTime60Hz; // フレームレート固定なら
 	float t = std::clamp(startCameraTimer_ / kStartCameraDuration_, 0.0f, 1.0f);
 
 	// イージング（easeInOutCubic）
@@ -604,7 +604,7 @@ void GamePlayScene::UpdateCameraOnCurve()
 		return Vector3(
 			0.5f * (2.0f * b.x + (-a.x + c.x) * t + (2.0f * a.x - 5.0f * b.x + 4.0f * c.x - d.x) * t2 + (-a.x + 3.0f * b.x - 3.0f * c.x + d.x) * t3),
 			0.5f * (2.0f * b.y + (-a.y + c.y) * t + (2.0f * a.y - 5.0f * b.y + 4.0f * c.y - d.y) * t2 + (-a.y + 3.0f * b.y - 3.0f * c.y + d.y) * t3),
-			0.5f * (2.0f * b.z + (-a.z + c.z) * t + (2.0f * a.z - 5.0f * b.z + 4.0f * c.z - d.z) * t2 + (-a.z + 3.0f * b.z - 3.0f * c.z + d.z) * t3)
+			0.5f * (2.0f * b.z + (-a.z + c.z) * t + (2.0f * a.z - 5.0f * b.z + 4.0f * c.z - d.z) * t2 + (-a.z + 3.0f * b.z - 3.0f * c.x + d.x) * t3)
 		);
 		};
 
@@ -722,12 +722,12 @@ void GamePlayScene::UpdateGameClear()
 		// 初回に待機を開始
 		if (!gameClearCameraWaiting_ && !gameClearCameraMoving_ && !gameClearPlayerLaunched_ && !gameClearFadeStarted_) {
 			gameClearCameraWaiting_ = true;
-			gameClearWaitTimer_ = 2.0f; // 2秒待つ
+			gameClearWaitTimer_ = GamePlayDefaults::kDeltaTime60Hz * 120.0f; // 2秒待つ
 		}
 
 		// 待機タイマー処理
 		if (gameClearCameraWaiting_) {
-			gameClearWaitTimer_ -= 1.0f / 60.0f;
+			gameClearWaitTimer_ -= GamePlayDefaults::kDeltaTime60Hz;
 			if (gameClearWaitTimer_ <= 0.0f) {
 				gameClearCameraWaiting_ = false;
 				gameClearCameraMoving_ = true;
@@ -739,7 +739,7 @@ void GamePlayScene::UpdateGameClear()
 		}
 		// カメラ移動（イージング）
 		else if (gameClearCameraMoving_) {
-			gameClearMoveTimer_ += 1.0f / 60.0f;
+			gameClearMoveTimer_ += GamePlayDefaults::kDeltaTime60Hz;
 			float t = std::clamp(gameClearMoveTimer_ / kGameClearMoveDuration_, 0.0f, 1.0f);
 			// easeInOutCubic
 			float easeT;
@@ -799,7 +799,7 @@ void GamePlayScene::UpdateGameClear()
 		cameraMode_ = CameraMode::DynamicFollow;
 		// プレイヤーを +X 方向に飛ばす（簡易的に毎フレーム位置更新）
 		Vector3 pos = player_->GetPosition();
-		const float dt = 1.0f / 60.0f;
+		const float dt = GamePlayDefaults::kDeltaTime60Hz;
 		pos.x += kGameClearPlayerLaunchSpeed_ * dt;
 		player_->SetPosition(pos);
 
@@ -819,7 +819,7 @@ void GamePlayScene::UpdateGameClear()
 			if (sFadeDelayTimer_ <= 0.0f) {
 				gameClearFadeStarted_ = true;
 				// フェードを開始してタイトルへ戻るコールバック（重複防止済み）
-				fadeManager_->FadeInStart(0.02f, [this]() {
+				fadeManager_->FadeInStart(GamePlayDefaults::kDeltaTime60Hz * 1.2f, [this]() { // 0.02f相当
 					SetSceneNo(TITLE);
 					});
 			}

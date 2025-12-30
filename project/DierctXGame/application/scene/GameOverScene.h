@@ -7,6 +7,30 @@
 #include <Input.h>
 #include <Player.h>
 
+/// 調整用定数（マジックナンバー排除）
+namespace GameOverDefaults {
+	// カメラ
+	inline constexpr Vector3 kCamPos{ 0.0f, 1.0f, -10.0f };
+	inline constexpr Vector3 kCamRot{ 0.1f, 0.0f, 0.0f };
+
+	// テキスト
+	inline constexpr Vector3 kTextTranslate{ 0.0f, 1.4f, 0.0f };
+	inline constexpr Vector3 kTextRotate{ 0.0f, 1.6f, 0.0f };
+
+	// ガイド
+	inline constexpr Vector3 kGuideTranslate{ 0.0f, -2.5f, 4.0f };
+	inline constexpr Vector3 kGuideRotate{ 0.0f, 1.6f, 0.0f };
+
+	// プレイヤー落下演出
+	inline constexpr Vector3 kPlayerInitTranslate{ 0.0f, 3.0f, 0.0f };
+	inline constexpr Vector3 kPlayerInitRotate{ 0.0f, 0.0f, -1.0f };
+	inline constexpr float   kPlayerFallSpeed = 0.01f;
+	inline constexpr float   kPlayerRotateSpeedX = 0.02f;
+
+	// フェード
+	inline constexpr float kFadeStep = 0.02f;
+}
+
 /// <summary>
 /// ゲームオーバーシーン
 /// </summary>

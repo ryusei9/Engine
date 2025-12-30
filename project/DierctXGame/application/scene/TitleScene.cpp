@@ -50,6 +50,12 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	// ガイドオブジェクトの初期化
 	titleGuide_ = std::make_unique<Object3d>();
 	titleGuide_->Initialize("titleGuide.obj");
+
+	// キューブの初期化
+	cube_ = std::make_unique<Skybox>();
+	cube_->Initialize("resources/Voxel_Enemy_Body.dds");
+
+	cube_->SetTranslate(Vector3(1.0f, 1.0f, 1.0f));
 }
 
 void TitleScene::Update()
@@ -89,6 +95,9 @@ void TitleScene::Update()
 	titleGuide_->SetRotate(titleGuideRotate);
 	titleGuide_->SetScale(titleGuideScale);
 
+	// キューブ
+	cube_->Update();
+
 	// フェードマネージャの更新
 	fadeManager_->Update();
 
@@ -116,6 +125,10 @@ void TitleScene::Draw()
 
 	// ガイドオブジェクトの描画
 	titleGuide_->Draw();
+
+	/*------キューブの描画------*/
+	cube_->DrawSettings();
+	cube_->Draw();
 
 	/*------スプライトの更新------*/
 	SpriteCommon::GetInstance()->DrawSettings();
@@ -150,6 +163,7 @@ void TitleScene::DrawImGui()
 	skydome_->DrawImGui();
 	fadeManager_->DrawImGui();
 	cameraManager_->DrawImGui();
+	cube_->DrawImGui();
 	ImGui::End();
 #endif
 }

@@ -54,6 +54,18 @@ public:
 	// カメラ設定
     void SetCamera(Camera* camera);
 
+    // ワールドトランスフォーム設定
+    void SetTransform(WorldTransform worldTransform) { worldTransform_ = worldTransform; }
+
+    // スケール設定
+    void SetScale(Vector3 scale) { worldTransform_.scale_ = scale; }
+
+    // 回転設定
+    void SetRotate(Vector3 rotate) { worldTransform_.rotate_ = rotate; }
+
+    // 座標設定
+    void SetTranslate(Vector3 translate) { worldTransform_.translate_ = translate; }
+
 private:
 	// 頂点バッファ作成
     void CreateVertexBuffer();

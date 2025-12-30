@@ -10,6 +10,7 @@
 #include <Player.h>
 #include <FadeManager.h>
 #include <CameraManager.h>
+#include <Skybox.h>
 
 /// <summary>
 /// タイトルシーン	
@@ -86,5 +87,8 @@ private:
 
 	// ゲームスタートフラグ
 	bool isGameStart_ = false;
+
+	// キューブ
+	std::unique_ptr<Skybox> cube_ = nullptr;
 };
 

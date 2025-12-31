@@ -9,6 +9,8 @@
 //   - モデルのライフタイムは ModelManager が所有する unique_ptr によって管理される
 //
 
+using namespace ModelManagerConstants;
+
 std::shared_ptr<ModelManager> ModelManager::sInstance_ = nullptr;
 
 // シングルトン取得
@@ -39,16 +41,15 @@ void ModelManager::Initialize()
 void ModelManager::LoadModel(const std::string& filePath)
 {
 	// 読み込み済みかチェック（存在するなら再読み込みを行わない）
-	if (models_.contains(filePath)) {
-		return; // 既にロード済み
+	if (IsModelLoaded(filePath)) {
+		return;
 	}
 
-	// Model を生成して初期化（resources フォルダを基準にファイル読み込み）
-	std::unique_ptr<Model> model = std::make_unique<Model>();
-	model->Initialize(modelCommon_.get(), "resources", filePath);
+	// Model を生成して初期化
+	std::unique_ptr<Model> model = CreateAndInitializeModel(filePath);
 
 	// マップに格納（所有権を移動）
-	models_.insert(std::make_pair(filePath, std::move(model)));
+	RegisterModel(filePath, std::move(model));
 }
 
 // 読み込み済みモデルを取得
@@ -66,8 +67,6 @@ Model* ModelManager::FindModel(const std::string& filePath)
 // - 現状は明示的な処理なし。ただし将来的にリソース解放や map の clear を入れる場所
 void ModelManager::Finalize()
 {
-	// ここで models_ を clear したり ModelCommon を解放したりできます。
-	// 明示的な順序が必要ならここに実装してください。
 	models_.clear();
 	modelCommon_.reset();
 }
@@ -76,9 +75,24 @@ void ModelManager::Finalize()
 // - GetModel と FindModel の機能は重複するが、コードベースの呼び出し方に合わせて両方用意している
 Model* ModelManager::GetModel(const std::string& fileName)
 {
-	auto it = models_.find(fileName);
-	if (it != models_.end()) {
-		return it->second.get();
-	}
-	return nullptr;
+	return FindModel(fileName);
+}
+
+// ===== ヘルパー関数 =====
+
+bool ModelManager::IsModelLoaded(const std::string& filePath) const
+{
+	return models_.contains(filePath);
+}
+
+std::unique_ptr<Model> ModelManager::CreateAndInitializeModel(const std::string& filePath)
+{
+	std::unique_ptr<Model> model = std::make_unique<Model>();
+	model->Initialize(modelCommon_.get(), kDefaultResourceDirectory, filePath);
+	return model;
+}
+
+void ModelManager::RegisterModel(const std::string& filePath, std::unique_ptr<Model> model)
+{
+	models_.insert(std::make_pair(filePath, std::move(model)));
 }

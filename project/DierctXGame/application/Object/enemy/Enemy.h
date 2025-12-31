@@ -98,7 +98,7 @@ public:
 	int GetColliderId() const { return colliderId_; }
 
 	// Z軸の座標を設定
-	void SetZ(float z) { worldTransform_.SetTranslate(Vector3{ worldTransform_.GetTranslate().x, worldTransform_.GetTranslate().y, z }); }
+	void SetZ(float z) { worldTransform_.translate_.z = z; }
 
 private:
 	/*------メンバ変数------*/

@@ -19,6 +19,8 @@
 //   - リソースは Upload ヒープに置く簡易実装。大規模な最適化やストリーミングは未対応。
 //
 
+using namespace SkyboxConstants;
+
 void Skybox::Initialize(const std::string& texturePath)
 {
 	// 入力:
@@ -42,9 +44,9 @@ void Skybox::Initialize(const std::string& texturePath)
 	worldTransform_.Initialize();
 
 	// スカイボックスは大きくスケールして遠景を覆う（値は調整可能）
-	worldTransform_.scale_ = { 50.0f, 50.0f, 50.0f };
-	worldTransform_.rotate_ = { 0.0f, 0.0f, 0.0f };
-	worldTransform_.translate_ = { 0.0f, 0.0f, -10.0f };
+	worldTransform_.scale_ = { kDefaultScale, kDefaultScale, kDefaultScale };
+	worldTransform_.rotate_ = { kDefaultRotation, kDefaultRotation, kDefaultRotation };
+	worldTransform_.translate_ = { 0.0f, 0.0f, kDefaultTranslateZ };
 }
 
 void Skybox::CreateVertexBuffer()
@@ -54,48 +56,7 @@ void Skybox::CreateVertexBuffer()
 	// - Vertex に position と texcoord を保持（シンプルな Skybox 用）
 	// 実装メモ:
 	// - Upload ヒープにバッファを確保して CPU 側データを memcpy する簡易実装
-	vertices_ = {
-		// 右面（+X）
-		{ {  1.0f,  1.0f,  1.0f, 1.0f }, {  1.0f,  1.0f,  1.0f } },
-		{ {  1.0f,  1.0f, -1.0f, 1.0f }, {  1.0f,  1.0f, -1.0f } },
-		{ {  1.0f, -1.0f,  1.0f, 1.0f }, {  1.0f, -1.0f,  1.0f } },
-		{ {  1.0f, -1.0f, -1.0f, 1.0f }, {  1.0f, -1.0f, -1.0f } },
-
-
-		// 左面（-X）
-		{ { -1.0f,  1.0f, -1.0f, 1.0f }, { -1.0f,  1.0f, -1.0f } },
-		{ { -1.0f,  1.0f,  1.0f, 1.0f }, { -1.0f,  1.0f,  1.0f } },
-		{ { -1.0f, -1.0f, -1.0f, 1.0f }, { -1.0f, -1.0f, -1.0f } },
-		{ { -1.0f, -1.0f,  1.0f, 1.0f }, { -1.0f, -1.0f,  1.0f } },
-
-
-		// 前面 (+Z)
-		{ { -1.0f,  1.0f,  1.0f, 1.0f }, { -1.0f,  1.0f,  1.0f } },
-		{ {  1.0f,  1.0f,  1.0f, 1.0f }, {  1.0f,  1.0f,  1.0f } },
-		{ { -1.0f, -1.0f,  1.0f, 1.0f }, { -1.0f, -1.0f,  1.0f } },
-		{ {  1.0f, -1.0f,  1.0f, 1.0f }, {  1.0f, -1.0f,  1.0f } },
-
-
-		// 後面 (-Z)
-		{ { -1.0f,  1.0f, -1.0f, 1.0f }, { -1.0f,  1.0f, -1.0f } },
-		{ {  1.0f,  1.0f, -1.0f, 1.0f }, {  1.0f,  1.0f, -1.0f } },
-		{ { -1.0f, -1.0f, -1.0f, 1.0f }, { -1.0f, -1.0f, -1.0f } },
-		{ {  1.0f, -1.0f, -1.0f, 1.0f }, {  1.0f, -1.0f, -1.0f } },
-
-
-		// 上面 (+Y)
-		{ { -1.0f,  1.0f, -1.0f, 1.0f }, { -1.0f,  1.0f, -1.0f } },
-		{ {  1.0f,  1.0f, -1.0f, 1.0f }, {  1.0f,  1.0f, -1.0f } },
-		{ { -1.0f,  1.0f,  1.0f, 1.0f }, { -1.0f,  1.0f,  1.0f } },
-		{ {  1.0f,  1.0f,  1.0f, 1.0f }, {  1.0f,  1.0f,  1.0f } },
-
-
-		// 下面 (-Y)
-		{ { -1.0f, -1.0f,  1.0f, 1.0f }, { -1.0f, -1.0f,  1.0f } },
-		{ {  1.0f, -1.0f,  1.0f, 1.0f }, {  1.0f, -1.0f,  1.0f } },
-		{ { -1.0f, -1.0f, -1.0f, 1.0f }, { -1.0f, -1.0f, -1.0f } },
-		{ {  1.0f, -1.0f, -1.0f, 1.0f }, {  1.0f, -1.0f, -1.0f } }
-	};
+	InitializeVertexData();
 
 	const uint32_t size = static_cast<uint32_t>(sizeof(Vertex) * vertices_.size());
 
@@ -148,7 +109,7 @@ void Skybox::CreateMaterialResource()
 	materialResource_ = dxCommon->CreateBufferResource(sizeof(Material));
 	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 
-	materialData_->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	materialData_->color = { kDefaultColorR, kDefaultColorG, kDefaultColorB, kDefaultColorA };
 	materialData_->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
 }
 
@@ -168,43 +129,17 @@ void Skybox::CreateRootSignature()
 	D3D12_ROOT_SIGNATURE_DESC desc{};
 	desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
-	D3D12_ROOT_PARAMETER rootParameters[3] = {};
-
-	// マテリアル用 CBV
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[0].Descriptor.ShaderRegister = 0;
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-
-	// SRV (t0, PS)
+	D3D12_ROOT_PARAMETER rootParameters[kRootParameterCount] = {};
 	D3D12_DESCRIPTOR_RANGE descriptorRange{};
-	descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	descriptorRange.NumDescriptors = 1;
-	descriptorRange.BaseShaderRegister = 0;
-	descriptorRange.RegisterSpace = 0;
-	descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	// transformationMatrix 用 CBV（頂点シェーダ用）
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	rootParameters[1].Descriptor.ShaderRegister = 0;
+	SetupRootParameters(rootParameters, &descriptorRange);
 
-	// テクスチャ用 DescriptorTable
-	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootParameters[2].DescriptorTable.pDescriptorRanges = &descriptorRange;
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
-	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-
-	desc.NumParameters = _countof(rootParameters);
+	desc.NumParameters = kRootParameterCount;
 	desc.pParameters = rootParameters;
 
 	// 静的サンプラ設定（バイリニア）
 	D3D12_STATIC_SAMPLER_DESC samplerDesc{};
-	samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	samplerDesc.ShaderRegister = 0;
-	samplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	SetupStaticSampler(&samplerDesc);
 	desc.NumStaticSamplers = 1;
 	desc.pStaticSamplers = &samplerDesc;
 
@@ -224,44 +159,16 @@ void Skybox::CreatePipelineState()
 	// - Rasterizer のカリングは front-face をカリング（内側から見るため front をカリング）
 	// - DepthWrite は無効にして深度テストは <= で評価（スカイボックスが最奥に描かれる想定）
 	HRESULT hr;
-	// InputLayout
-	inputElementDescs_[0].SemanticName = "POSITION";
-	inputElementDescs_[0].SemanticIndex = 0;
-	inputElementDescs_[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	inputElementDescs_[0].InputSlot = 0;
-	inputElementDescs_[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	inputElementDescs_[0].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-	inputElementDescs_[0].InstanceDataStepRate = 0;
-
-	inputElementDescs_[1].SemanticName = "TEXCOORD";
-	inputElementDescs_[1].SemanticIndex = 0;
-	inputElementDescs_[1].Format = DXGI_FORMAT_R32G32_FLOAT;
-	inputElementDescs_[1].InputSlot = 0;
-	inputElementDescs_[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	inputElementDescs_[1].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-	inputElementDescs_[1].InstanceDataStepRate = 0;
-
-	inputLayoutDesc_.pInputElementDescs = inputElementDescs_;
-	inputLayoutDesc_.NumElements = _countof(inputElementDescs_);
-
-	// Blend（無効）
-	blendDesc_.BlendEnable = FALSE;
-	blendDesc_.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-
-	// Rasterizer : 内側を描くためにフロントカリング（Front = カリング）
-	rasterizerDesc_.CullMode = D3D12_CULL_MODE_FRONT;
-	rasterizerDesc_.FillMode = D3D12_FILL_MODE_SOLID;
-	rasterizerDesc_.FrontCounterClockwise = FALSE;
-
-	// DepthStencil: 書き込み無効（スカイボックスは深度を上書きしない）
-	depthStencilDesc_.DepthEnable = TRUE;
-	depthStencilDesc_.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-	depthStencilDesc_.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	
+	SetupInputLayout();
+	SetupBlendState();
+	SetupRasterizerState();
+	SetupDepthStencilState();
 
 	// シェーダーのコンパイル（外部の DirectXCommon ラッパを利用）
 	auto* dxCommon = DirectXCommon::GetInstance();
-	auto vsBlob = dxCommon->CompileShader(L"resources/shaders/Skybox.VS.hlsl", L"vs_6_0");
-	auto psBlob = dxCommon->CompileShader(L"resources/shaders/Skybox.PS.hlsl", L"ps_6_0");
+	auto vsBlob = dxCommon->CompileShader(kVertexShaderPath, kVertexShaderProfile);
+	auto psBlob = dxCommon->CompileShader(kPixelShaderPath, kPixelShaderProfile);
 	assert(vsBlob && psBlob);
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
@@ -286,34 +193,14 @@ void Skybox::CreatePipelineState()
 void Skybox::CreateIndexBuffer()
 {
 	// インデックスバッファを Upload ヒープに作成し、各面ごとの三角形インデックスを書き込む
-	indexResource_ = DirectXCommon::GetInstance()->CreateBufferResource(sizeof(uint32_t) * kNumIndex_);
+	indexResource_ = DirectXCommon::GetInstance()->CreateBufferResource(sizeof(uint32_t) * kNumIndices);
 
 	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
-	indexBufferView_.SizeInBytes = sizeof(uint32_t) * kNumIndex_;
+	indexBufferView_.SizeInBytes = sizeof(uint32_t) * kNumIndices;
 	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
 
 	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
-
-	// 各面のインデックス（右、左、前、後、上、下）
-	indexData_[0] = 2; indexData_[1] = 1; indexData_[2] = 0;
-	indexData_[3] = 3; indexData_[4] = 1; indexData_[5] = 2;
-
-	indexData_[6] = 6; indexData_[7] = 5; indexData_[8] = 4;
-	indexData_[9] = 7; indexData_[10] = 5; indexData_[11] = 6;
-
-	indexData_[12] = 10; indexData_[13] = 9; indexData_[14] = 8;
-	indexData_[15] = 11; indexData_[16] = 9; indexData_[17] = 10;
-
-	indexData_[18] = 12; indexData_[19] = 13; indexData_[20] = 14;
-	indexData_[21] = 14; indexData_[22] = 13; indexData_[23] = 15;
-
-	indexData_[24] = 17; indexData_[25] = 16; indexData_[26] = 18;
-	indexData_[27] = 17; indexData_[28] = 18; indexData_[29] = 19;
-
-	indexData_[30] = 21; indexData_[31] = 20; indexData_[32] = 22;
-	indexData_[33] = 21; indexData_[34] = 22; indexData_[35] = 23;
-
-	// indexData_ を既に Map したバッファに書き込んだので Unmap は不要（Upload ヒープ）
+	InitializeIndexData();
 }
 
 void Skybox::Draw()
@@ -332,14 +219,14 @@ void Skybox::Draw()
 	cmdList->IASetIndexBuffer(&indexBufferView_);
 
 	// マテリアル CBV と transformation（world）をセット
-	cmdList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
+	cmdList->SetGraphicsRootConstantBufferView(kRootParameterIndexMaterial, materialResource_->GetGPUVirtualAddress());
 	worldTransform_.SetPipeline();
 
 	// テクスチャ SRV (t0)
-	cmdList->SetGraphicsRootDescriptorTable(2, textureHandle_);
+	cmdList->SetGraphicsRootDescriptorTable(kRootParameterIndexTexture, textureHandle_);
 
 	// インデックス描画
-	cmdList->DrawIndexedInstanced(kNumIndex_, 1, 0, 0, 0);
+	cmdList->DrawIndexedInstanced(kNumIndices, 1, 0, 0, 0);
 }
 
 void Skybox::DrawImGui()
@@ -364,4 +251,151 @@ void Skybox::DrawSettings() {
 	cmdList->SetGraphicsRootSignature(rootSignature_.Get());
 	cmdList->SetPipelineState(pipelineState_.Get());
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+// ===== ヘルパー関数 =====
+
+void Skybox::SetupInputLayout()
+{
+	// InputLayout
+	inputElementDescs_[0].SemanticName = "POSITION";
+	inputElementDescs_[0].SemanticIndex = 0;
+	inputElementDescs_[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDescs_[0].InputSlot = 0;
+	inputElementDescs_[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDescs_[0].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+	inputElementDescs_[0].InstanceDataStepRate = 0;
+
+	inputElementDescs_[1].SemanticName = "TEXCOORD";
+	inputElementDescs_[1].SemanticIndex = 0;
+	inputElementDescs_[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	inputElementDescs_[1].InputSlot = 0;
+	inputElementDescs_[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDescs_[1].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+	inputElementDescs_[1].InstanceDataStepRate = 0;
+
+	inputLayoutDesc_.pInputElementDescs = inputElementDescs_;
+	inputLayoutDesc_.NumElements = kInputElementCount;
+}
+
+void Skybox::SetupBlendState()
+{
+	// Blend（無効）
+	blendDesc_.BlendEnable = FALSE;
+	blendDesc_.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+}
+
+void Skybox::SetupRasterizerState()
+{
+	// Rasterizer : 内側を描くためにフロントカリング（Front = カリング）
+	rasterizerDesc_.CullMode = D3D12_CULL_MODE_FRONT;
+	rasterizerDesc_.FillMode = D3D12_FILL_MODE_SOLID;
+	rasterizerDesc_.FrontCounterClockwise = FALSE;
+}
+
+void Skybox::SetupDepthStencilState()
+{
+	// DepthStencil: 書き込み無効（スカイボックスは深度を上書きしない）
+	depthStencilDesc_.DepthEnable = TRUE;
+	depthStencilDesc_.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	depthStencilDesc_.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+}
+
+void Skybox::SetupRootParameters(D3D12_ROOT_PARAMETER* rootParameters, D3D12_DESCRIPTOR_RANGE* descriptorRange)
+{
+	// マテリアル用 CBV
+	rootParameters[kRootParameterIndexMaterial].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[kRootParameterIndexMaterial].Descriptor.ShaderRegister = kMaterialRegister;
+	rootParameters[kRootParameterIndexMaterial].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	// SRV (t0, PS)
+	descriptorRange->RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorRange->NumDescriptors = 1;
+	descriptorRange->BaseShaderRegister = kTextureRegister;
+	descriptorRange->RegisterSpace = 0;
+	descriptorRange->OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	// transformationMatrix 用 CBV（頂点シェーダ用）
+	rootParameters[kRootParameterIndexTransformation].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[kRootParameterIndexTransformation].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[kRootParameterIndexTransformation].Descriptor.ShaderRegister = kTransformationRegister;
+
+	// テクスチャ用 DescriptorTable
+	rootParameters[kRootParameterIndexTexture].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[kRootParameterIndexTexture].DescriptorTable.pDescriptorRanges = descriptorRange;
+	rootParameters[kRootParameterIndexTexture].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[kRootParameterIndexTexture].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+}
+
+void Skybox::SetupStaticSampler(D3D12_STATIC_SAMPLER_DESC* samplerDesc)
+{
+	samplerDesc->Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc->AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	samplerDesc->AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	samplerDesc->AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	samplerDesc->ShaderRegister = kSamplerRegister;
+	samplerDesc->ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+}
+
+void Skybox::InitializeVertexData()
+{
+	vertices_ = {
+		// 右面（+X）
+		{ {  1.0f,  1.0f,  1.0f, 1.0f }, {  1.0f,  1.0f,  1.0f } },
+		{ {  1.0f,  1.0f, -1.0f, 1.0f }, {  1.0f,  1.0f, -1.0f } },
+		{ {  1.0f, -1.0f,  1.0f, 1.0f }, {  1.0f, -1.0f,  1.0f } },
+		{ {  1.0f, -1.0f, -1.0f, 1.0f }, {  1.0f, -1.0f, -1.0f } },
+
+		// 左面（-X）
+		{ { -1.0f,  1.0f, -1.0f, 1.0f }, { -1.0f,  1.0f, -1.0f } },
+		{ { -1.0f,  1.0f,  1.0f, 1.0f }, { -1.0f,  1.0f,  1.0f } },
+		{ { -1.0f, -1.0f, -1.0f, 1.0f }, { -1.0f, -1.0f, -1.0f } },
+		{ { -1.0f, -1.0f,  1.0f, 1.0f }, { -1.0f, -1.0f,  1.0f } },
+
+		// 前面 (+Z)
+		{ { -1.0f,  1.0f,  1.0f, 1.0f }, { -1.0f,  1.0f,  1.0f } },
+		{ {  1.0f,  1.0f,  1.0f, 1.0f }, {  1.0f,  1.0f,  1.0f } },
+		{ { -1.0f, -1.0f,  1.0f, 1.0f }, { -1.0f, -1.0f,  1.0f } },
+		{ {  1.0f, -1.0f,  1.0f, 1.0f }, {  1.0f, -1.0f,  1.0f } },
+
+		// 後面 (-Z)
+		{ { -1.0f,  1.0f, -1.0f, 1.0f }, { -1.0f,  1.0f, -1.0f } },
+		{ {  1.0f,  1.0f, -1.0f, 1.0f }, {  1.0f,  1.0f, -1.0f } },
+		{ { -1.0f, -1.0f, -1.0f, 1.0f }, { -1.0f, -1.0f, -1.0f } },
+		{ {  1.0f, -1.0f, -1.0f, 1.0f }, {  1.0f, -1.0f, -1.0f } },
+
+		// 上面 (+Y)
+		{ { -1.0f,  1.0f, -1.0f, 1.0f }, { -1.0f,  1.0f, -1.0f } },
+		{ {  1.0f,  1.0f, -1.0f, 1.0f }, {  1.0f,  1.0f, -1.0f } },
+		{ { -1.0f,  1.0f,  1.0f, 1.0f }, { -1.0f,  1.0f,  1.0f } },
+		{ {  1.0f,  1.0f,  1.0f, 1.0f }, {  1.0f,  1.0f,  1.0f } },
+
+		// 下面 (-Y)
+		{ { -1.0f, -1.0f,  1.0f, 1.0f }, { -1.0f, -1.0f,  1.0f } },
+		{ {  1.0f, -1.0f,  1.0f, 1.0f }, {  1.0f, -1.0f,  1.0f } },
+		{ { -1.0f, -1.0f, -1.0f, 1.0f }, { -1.0f, -1.0f, -1.0f } },
+		{ {  1.0f, -1.0f, -1.0f, 1.0f }, {  1.0f, -1.0f, -1.0f } }
+	};
+}
+
+void Skybox::InitializeIndexData()
+{
+	// 各面のインデックス（右、左、前、後、上、下）
+	indexData_[0] = 2; indexData_[1] = 1; indexData_[2] = 0;
+	indexData_[3] = 3; indexData_[4] = 1; indexData_[5] = 2;
+
+	indexData_[6] = 6; indexData_[7] = 5; indexData_[8] = 4;
+	indexData_[9] = 7; indexData_[10] = 5; indexData_[11] = 6;
+
+	indexData_[12] = 10; indexData_[13] = 9; indexData_[14] = 8;
+	indexData_[15] = 11; indexData_[16] = 9; indexData_[17] = 10;
+
+	indexData_[18] = 12; indexData_[19] = 13; indexData_[20] = 14;
+	indexData_[21] = 14; indexData_[22] = 13; indexData_[23] = 15;
+
+	indexData_[24] = 17; indexData_[25] = 16; indexData_[26] = 18;
+	indexData_[27] = 17; indexData_[28] = 18; indexData_[29] = 19;
+
+	indexData_[30] = 21; indexData_[31] = 20; indexData_[32] = 22;
+	indexData_[33] = 21; indexData_[34] = 22; indexData_[35] = 23;
 }

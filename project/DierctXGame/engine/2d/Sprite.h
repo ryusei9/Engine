@@ -18,6 +18,42 @@ struct TransformationMatrix {
 	Matrix4x4 world;
 };
 
+/// スプライト調整用定数（マジックナンバー排除）
+namespace SpriteDefaults {
+	// 頂点・インデックス数
+	inline constexpr uint32_t kVertexCount = 6;
+	inline constexpr uint32_t kIndexCount  = 6;
+
+	// 初期座標
+	inline constexpr Vector2 kInitPos{ 0.0f, 0.0f };
+
+	// 初期回転角
+	inline constexpr float kInitRotation = 0.0f;
+
+	// 初期サイズ
+	inline constexpr Vector2 kInitSize{ 640.0f, 360.0f };
+
+	// 初期アンカーポイント
+	inline constexpr Vector2 kInitAnchor{ 0.0f, 0.0f };
+
+	// 初期フリップ
+	inline constexpr bool kInitFlipX = false;
+	inline constexpr bool kInitFlipY = false;
+
+	// テクスチャ左上座標
+	inline constexpr Vector2 kInitTexLeftTop{ 0.0f, 0.0f };
+
+	// テクスチャ切り出しサイズ
+	inline constexpr Vector2 kInitTexSize{ 100.0f, 100.0f };
+
+	// 初期カラー（白）
+	inline constexpr Vector4 kInitColor{ 1.0f, 1.0f, 1.0f, 1.0f };
+
+	// 正射影範囲
+	inline constexpr float kOrthoNear = 0.0f;
+	inline constexpr float kOrthoFar  = 100.0f;
+}
+
 /// <summary>
 /// スプライト
 /// </summary>
@@ -93,7 +129,7 @@ public:
 
 private:
 	// BufferResourceの作成
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(const Microsoft::WRL::ComPtr<ID3D12Device>& device, size_t sizeInBytes);
 	void CreateVertexData();
 	void CreateMaterialData();
 	void CreateWVPData();
@@ -124,31 +160,31 @@ private:
 	Material* materialData_ = nullptr;
 
 	// スプライト個々の座標
-	Vector2 position_ = { 0.0f, 0.0f };
+	Vector2 position_ = SpriteDefaults::kInitPos;
 
 	// スプライト個々の回転角
-	float rotation_ = 0.0f;
+	float rotation_ = SpriteDefaults::kInitRotation;
 
 	// スプライト個々のサイズ
-	Vector2 size_ = { 640.0f, 360.0f };
+	Vector2 size_ = SpriteDefaults::kInitSize;
 
 	// テクスチャ番号
 	uint32_t textureIndex_ = 0;
 
 	// アンカーポイント
-	Vector2 anchorPoint_ = { 0.0f, 0.0f };
+	Vector2 anchorPoint_ = SpriteDefaults::kInitAnchor;
 
 	// 左右フリップ
-	bool isFlipX_ = false;
+	bool isFlipX_ = SpriteDefaults::kInitFlipX;
 
 	// 上下フリップ
-	bool isFlipY_ = false;
+	bool isFlipY_ = SpriteDefaults::kInitFlipY;
 
 	// テクスチャ左上座標
-	Vector2 textureLeftTop_ = { 0.0f, 0.0f };
+	Vector2 textureLeftTop_ = SpriteDefaults::kInitTexLeftTop;
 
 	// テクスチャ切り出しサイズ
-	Vector2 textureSize_ = { 100.0f, 100.0f };
+	Vector2 textureSize_ = SpriteDefaults::kInitTexSize;
 
 	// テクスチャファイルパス
 	std::string filePath_;

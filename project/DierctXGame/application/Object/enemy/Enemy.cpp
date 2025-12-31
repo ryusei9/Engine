@@ -3,6 +3,7 @@
 #include <Object3dCommon.h>
 #include <ParticleEmitter.h>
 #include <PlayerChargeBullet.h>
+
 Enemy::Enemy()
 {
 	// シリアルナンバーを振る
@@ -20,16 +21,16 @@ void Enemy::Initialize()
 
 	// 敵のワールド変換を初期化
 	worldTransform_.Initialize();
-	// 敵のワールド変換を初期化
-	worldTransform_.scale_ = { 1.0f,1.0f,1.0f };
-	worldTransform_.rotate_ = { 0.0f,0.0f,0.0f };
-	worldTransform_.translate_ = { 10.0f,0.0f,0.0f };
+	// 初期Transform（定数で意味付け）
+	worldTransform_.SetScale(Vector3{ 1.0f, 1.0f, 1.0f });
+	worldTransform_.SetRotate(Vector3{ 0.0f, 0.0f, 0.0f });
+	worldTransform_.SetTranslate(Vector3{ 10.0f, 0.0f, 0.0f });
+
 	// 敵のカメラを取得
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
 
-	// 敵の3Dオブジェクトを生成
+	// 敵の3Dオブジェクトを生成・初期化
 	object3d_ = std::make_unique<Object3d>();
-	// 敵の3Dオブジェクトを初期化
 	object3d_->Initialize("enemy.obj");
 
 	// パーティクルマネージャの初期化
@@ -39,7 +40,7 @@ void Enemy::Initialize()
 	particleManager_->GetInstance()->SetParticleType(ParticleType::Explosion);
 	// テクスチャ"circle2"を使用
 	particleManager_->GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
-	particleManager_->GetInstance()->CreateParticleGroup("smoke","resources/circle2.png");
+	particleManager_->GetInstance()->CreateParticleGroup("smoke", "resources/circle2.png");
 
 	// 敵死亡時のパーティクルエミッターを初期化
 	enemyDeathEmitter_ = std::make_unique<ParticleEmitter>(particleManager_, "explosion");
@@ -54,11 +55,11 @@ void Enemy::Initialize()
 	// 煙用のパーティクルエミッターを初期化
 	particleManager_->GetInstance()->SetParticleType(ParticleType::Normal);
 	smokeEmitter_ = std::make_unique<ParticleEmitter>(particleManager_, "smoke");
-	smokeEmitter_->SetParticleRate(60);
+	smokeEmitter_->SetParticleRate(60);         // 調整値は将来定数化候補
 	smokeEmitter_->SetParticleCount(3);
-	smokeEmitter_->SetSmoke(true); 
+	smokeEmitter_->SetSmoke(true);
 
-	SetRadius(0.4f); // コライダーの半径を設定
+	SetRadius(EnemyDefaults::kColliderRadius); // コライダーの半径を設定
 
 	// 敵の攻撃パターンを初期化
 	attack_ = std::make_unique<EnemyAttack>();
@@ -71,12 +72,13 @@ void Enemy::Update()
 	// 弾の削除
 	bullets_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) {
 		return !bullet->IsAlive();
-		});
+	});
 
 	// 弾の更新
 	for (auto& bullet : bullets_) {
 		bullet->Update();
 	}
+
 	// 生きてる時だけ通常ロジック
 	if (state_ == EnemyState::Alive) {
 		BaseCharacter::Update();
@@ -88,51 +90,47 @@ void Enemy::Update()
 		if (hp_ <= 0) {
 			// 死亡演出へ移行
 			state_ = EnemyState::Dying;
-			object3d_->SetPointLight(0.0f); // 光消す(optional)
-			object3d_->SetDirectionalLight(1.0f);  // 光消す(optional)
-			//object3d_->SetSpotLight(2.0f);  // 光消す(optional)
+			object3d_->SetPointLight(0.0f);                  // 光消す(optional)
+			object3d_->SetDirectionalLight(1.0f);            // 光消す(optional)
 			object3d_->SetMaterialColor(Vector4(0.3f, 0.3f, 0.3f, 1.0f)); // グレー化
 		}
 	}
-	
+
 	// ワールド変換の更新
 	worldTransform_.Update();
+
 	// 敵のワールド変換を更新
 	object3d_->SetCamera(camera_);
-	object3d_->SetScale(worldTransform_.scale_);
-	object3d_->SetRotate(worldTransform_.rotate_);
-	object3d_->SetTranslate(worldTransform_.translate_);
+	object3d_->SetScale(worldTransform_.GetScale());
+	object3d_->SetRotate(worldTransform_.GetRotate());
+	object3d_->SetTranslate(worldTransform_.GetTranslate());
 	object3d_->Update();
-	
-	
-	
+
 	// 死亡演出
 	if (state_ == EnemyState::Dying) {
+		// 120fps相当の減算（将来的にdeltaTime導入推奨）
 		deathTimer_ -= 1.0f / 120.0f;
 
 		// 回転
-		worldTransform_.rotate_.x += rotationSpeed_ / 2.0f;
-		worldTransform_.rotate_.y -= rotationSpeed_;
-		worldTransform_.rotate_.z -= rotationSpeed_;
+		Vector3 r = worldTransform_.GetRotate();
+		r.x += EnemyDefaults::kRotationSpeed / 2.0f;
+		r.y -= EnemyDefaults::kRotationSpeed;
+		r.z -= EnemyDefaults::kRotationSpeed;
+		worldTransform_.SetRotate(r);
 
 		// 落下（-Y方向）
-		worldTransform_.translate_.y += fallSpeed_;
+		Vector3 t = worldTransform_.GetTranslate();
+		t.y += EnemyDefaults::kFallSpeed;
+		worldTransform_.SetTranslate(t);
 
-		float yRad = worldTransform_.rotate_.y;
-		Vector3 leftDir = {
-			0.0f, // X
-			2.0f,        // Y
-			0.0f   // Z
-		};
-
+		// 煙の向き・速度
+		Vector3 leftDir = { 0.0f, 2.0f, 0.0f };
 		// 勢いの強さはvelocityの大きさで調整
-		float power = 2.0f + 0.1f * 1.5f; // 例: X速度で強さを変える
+		float power = 2.0f + 0.1f * 1.5f; // 調整値（必要なら定数化）
 		Vector3 particleVelocity = leftDir * power;
 
-		// パーティクルの発生位置（プレイヤーの中心 or 左側に少しオフセットしてもOK）
-		Vector3 emitPos = worldTransform_.translate_;
-		// Update
-		smokeEmitter_->SetPosition(worldTransform_.translate_);
+		// パーティクル更新
+		smokeEmitter_->SetPosition(worldTransform_.GetTranslate());
 		smokeEmitter_->SetVelocity(particleVelocity);
 		smokeEmitter_->Update();
 
@@ -149,17 +147,15 @@ void Enemy::Update()
 		// 敵が死んでいる場合
 		// 敵のリスポーンタイムを減少
 		respawnTime_ -= 1.0f / 60.0f;
-		if (respawnTime_ <= 0.0f)
-		{
+		if (respawnTime_ <= 0.0f) {
 			// リスポーンタイムが0以下になったら
 			state_ = EnemyState::Alive;
-			hp_ = 1;
-			respawnTime_ = 3.0f; // リスポーンタイムを3秒に設定
+			hp_ = EnemyDefaults::kInitialHp;
+			respawnTime_ = EnemyDefaults::kRespawnTimeSec; // リスポーンタイムを既定値に設定
 			hasPlayedDeathParticle_ = false;
 		}
 #endif
 	}
-	
 }
 
 void Enemy::Draw()
@@ -180,7 +176,8 @@ void Enemy::DrawImGui()
 	// ImGuiで敵の情報を表示
 	ImGui::Text("Enemy Serial Number: %u", serialNumber_);
 	ImGui::Text("HP: %d", hp_);
-	ImGui::Text("Position: (%.2f, %.2f, %.2f)", worldTransform_.translate_.x, worldTransform_.translate_.y, worldTransform_.translate_.z);
+	const Vector3& pos = worldTransform_.GetTranslate();
+	ImGui::Text("Position: (%.2f, %.2f, %.2f)", pos.x, pos.y, pos.z);
 	ImGui::Text("Alive: %s", isAlive_ ? "Yes" : "No");
 	ImGui::Text("Respawn Time: %.2f seconds", respawnTime_);
 	// 攻撃パターンの選択
@@ -196,7 +193,6 @@ void Enemy::Move()
 
 void Enemy::Attack()
 {
-
 }
 
 void Enemy::OnCollision(Collider* other)
@@ -204,23 +200,20 @@ void Enemy::OnCollision(Collider* other)
 	// 敵の衝突判定
 	// 生きていない場合は無視
 	if (state_ != EnemyState::Alive) return;
+
 	// チャージ弾と衝突した場合
-	if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerChargeBullet))
-	{
+	if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerChargeBullet)) {
 		auto* chargeBullet = dynamic_cast<PlayerChargeBullet*>(other);
 		if (chargeBullet) {
 			hp_ -= static_cast<int>(chargeBullet->GetDamage()); // チャージ弾
 		}
-		//PlayDeathParticleOnce(); // ここで一度だけパーティクルを出す
 		PlayHitParticle();
-	} else if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerBullet))
-	{
+	}
+	else if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerBullet)) {
 		// プレイヤー弾と衝突した場合
 		hp_ -= 1;
 		PlayHitParticle();
-		//PlayDeathParticleOnce(); // ここで一度だけパーティクルを出す
 	}
-	
 }
 
 void Enemy::PlayDeathParticleOnce()
@@ -228,10 +221,9 @@ void Enemy::PlayDeathParticleOnce()
 	// 敵死亡時に一度だけパーティクルを出す
 	if (!hasPlayedDeathParticle_) {
 		if (enemyDeathEmitter_) {
-			enemyDeathEmitter_->SetPosition(worldTransform_.translate_); // 位置をセット
-			enemyDeathEmitter_->SetParticleRate(8); // 必要に応じて発生数を調整
+			enemyDeathEmitter_->SetPosition(worldTransform_.GetTranslate()); // 位置をセット
+			enemyDeathEmitter_->SetParticleRate(8); // 例: rate調整（必要なら専用定数へ）
 			enemyDeathEmitter_->SetParticleCount(8);
-			// ここでパーティクルを即時発生させるメソッドがあれば呼ぶ
 			enemyDeathEmitter_->Update();
 		}
 		hasPlayedDeathParticle_ = true;
@@ -242,10 +234,9 @@ void Enemy::PlayHitParticle()
 {
 	if (!hasPlayedHitParticle_) {
 		if (enemyHitEmitter_) {
-			enemyHitEmitter_->SetPosition(worldTransform_.translate_); // 位置をセット
-			enemyHitEmitter_->SetParticleRate(1); // 必要に応じて発生数を調整
+			enemyHitEmitter_->SetPosition(worldTransform_.GetTranslate()); // 位置をセット
+			enemyHitEmitter_->SetParticleRate(1);
 			enemyHitEmitter_->SetParticleCount(0);
-			// ここでパーティクルを即時発生させるメソッドがあれば呼ぶ
 			enemyHitEmitter_->Update();
 		}
 		hasPlayedHitParticle_ = true;
@@ -255,8 +246,7 @@ void Enemy::PlayHitParticle()
 Vector3 Enemy::GetCenterPosition() const
 {
 	const Vector3 offset = { 0.0f, 0.0f, 0.0f }; // エネミーの中心を考慮
-	Vector3 worldPosition = worldTransform_.translate_ + offset;
-	return worldPosition;
+	return worldTransform_.GetTranslate() + offset;
 }
 
 

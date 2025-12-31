@@ -3,6 +3,16 @@
 #include "Collider.h"
 
 /// <summary>
+/// チャージ弾の調整用定数（マジックナンバー排除）
+/// </summary>
+namespace PlayerChargeBulletDefaults {
+	inline constexpr float    kDamage        = 30.0f;
+	inline constexpr float    kRadius        = 0.5f;      // 通常弾より大きめ
+	inline constexpr float    kScaleFactor   = 10.0f;     // 見た目スケール倍率
+	inline constexpr uint32_t kSerialStart   = 1u;
+}
+
+/// <summary>
 /// プレイヤーのチャージ弾クラス
 /// </summary>
 class PlayerChargeBullet : public PlayerBullet {
@@ -29,7 +39,7 @@ private:
 	/*------メンバ変数------*/
 
 	// ダメージ数
-	float damage_ = 30.0f;
+	float damage_ = PlayerChargeBulletDefaults::kDamage;
 
 	// シリアルナンバー
 	uint32_t serialNumber_ = 0;

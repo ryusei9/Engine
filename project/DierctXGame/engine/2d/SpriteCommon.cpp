@@ -64,11 +64,11 @@ void SpriteCommon::RootSignatureInitialize()
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	// ルートパラメータを用意（CBV x2, DescriptorTable x1）
-	D3D12_ROOT_PARAMETER rootParameters[3] = {};
+	D3D12_ROOT_PARAMETER rootParameters[SpriteCommonDefaults::kRootParamCount] = {};
 
 	// SRV 用のディスクリプタレンジ（テクスチャ1枚想定）
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	descriptorRange[0].BaseShaderRegister = 0;
+	D3D12_DESCRIPTOR_RANGE descriptorRange[SpriteCommonDefaults::kDescRangeCount] = {};
+	descriptorRange[0].BaseShaderRegister = SpriteCommonDefaults::kSrvBaseRegister;
 	descriptorRange[0].NumDescriptors = 1;
 	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -85,22 +85,22 @@ void SpriteCommon::RootSignatureInitialize()
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	// CBV のレジスタ番号を設定（b0/b0 を使用）
-	rootParameters[0].Descriptor.ShaderRegister = 0;
-	rootParameters[1].Descriptor.ShaderRegister = 0;
+	rootParameters[0].Descriptor.ShaderRegister = SpriteCommonDefaults::kCbvRegister;
+	rootParameters[1].Descriptor.ShaderRegister = SpriteCommonDefaults::kCbvRegister;
 
 	// DescriptorTable にディスクリプタレンジを設定
 	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
 
 	// 静的サンプラを設定（1つのバイリニアサンプラ）
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
+	D3D12_STATIC_SAMPLER_DESC staticSamplers[SpriteCommonDefaults::kStaticSamplerCount] = {};
 	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 	staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX;
-	staticSamplers[0].ShaderRegister = 0;
+	staticSamplers[0].ShaderRegister = SpriteCommonDefaults::kSrvBaseRegister;
 	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	descriptionRootSignature.pStaticSamplers = staticSamplers;
@@ -184,10 +184,10 @@ void SpriteCommon::GraphicsPipelineInitialize()
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc_;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
-	graphicsPipelineStateDesc.NumRenderTargets = 1;
+	graphicsPipelineStateDesc.NumRenderTargets = SpriteCommonDefaults::kRenderTargetCount;
 	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	graphicsPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	graphicsPipelineStateDesc.SampleDesc.Count = 1;
+	graphicsPipelineStateDesc.SampleDesc.Count = SpriteCommonDefaults::kSampleCount;
 	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
 	hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState_));

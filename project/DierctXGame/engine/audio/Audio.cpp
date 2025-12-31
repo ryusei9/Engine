@@ -1,5 +1,6 @@
 #include "Audio.h"
 #include <cassert>
+#include <cstring>
 
 //
 // Audio: XAudio2 を使った簡易オーディオユーティリティ
@@ -12,16 +13,25 @@
 //   - スレッドセーフではない（呼び出しはメインスレッド前提）。
 //
 
+using namespace AudioConstants;
+
 std::shared_ptr<Audio> Audio::sInstance_ = nullptr;
+
+std::shared_ptr<Audio> Audio::GetInstance()
+{
+	// シングルトン取得（遅延初期化）
+	if (sInstance_ == nullptr) {
+		sInstance_ = std::make_shared<Audio>();
+	}
+	return sInstance_;
+}
 
 void Audio::Initialize()
 {
 	// XAudio2 を初期化して MasteringVoice を作成する
 	// 副作用: xAudio2_ と masterVoice_ をメンバに保存する
-	result_ = XAudio2Create(&xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
-
-	// マスターボイスの作成（出力デバイスとの接続）
-	result_ = xAudio2_->CreateMasteringVoice(&masterVoice_);
+	InitializeXAudio2();
+	CreateMasteringVoice();
 }
 
 SoundData Audio::SoundLoadWave(const char* filename)
@@ -43,42 +53,18 @@ SoundData Audio::SoundLoadWave(const char* filename)
 
 	// RIFF ヘッダ読み取り
 	RiffHeader riff;
-	file.read((char*)&riff, sizeof(riff));
-
-	// チャンクID が "RIFF" であることを確認
-	if (strncmp(riff.chunk.id, "RIFF", 4) != 0) {
-		assert(false);
-	}
-	// タイプが "WAVE" であることを確認
-	if (strncmp(riff.type, "WAVE", 4) != 0) {
-		assert(false);
-	}
+	ReadRiffHeader(file, riff);
 
 	// fmt チャンクの読み込み
 	FormatChunk format{};
-	file.read((char*)&format, sizeof(ChunkHeader));
-	if (strncmp(format.chunk.id, "fmt ", 4) != 0) {
-		assert(false);
-	}
-	// fmt 本体を読み込む（可変長なので chunk.size を使う）
-	assert(format.chunk.size <= sizeof(format.fmt));
-	file.read((char*)&format.fmt, format.chunk.size);
+	ReadFormatChunk(file, format);
 
 	// data チャンクの読み込み（JUNK をスキップする場合あり）
 	ChunkHeader data;
-	file.read((char*)&data, sizeof(data));
-	// "JUNK" チャンクを検出したらスキップして次のチャンクを読む
-	if (strncmp(data.id, "JUNK", 4) == 0) {
-		file.seekg(data.size, std::ios::cur);
-		file.read((char*)&data, sizeof(data));
-	}
-	// data チャンクであることを確認
-	if (strncmp(data.id, "data", 4) != 0) {
-		assert(false);
-	}
+	ReadDataChunk(file, data);
+
 	// 波形データ本体を読み込む
-	char* pBuffer = new char[data.size];
-	file.read(pBuffer, data.size);
+	char* pBuffer = ReadWaveData(file, data.size);
 
 	// ファイルを閉じる
 	file.close();
@@ -107,28 +93,8 @@ void Audio::SoundPlayWave(const SoundData& soundData)
 	// SoundData のフォーマット情報を使って SourceVoice を作成し再生する
 	// - 再生完了後のリソース破棄（SourceVoice の DestroyVoice）は現在行っていないため、
 	//   長時間または多数のサウンドを再生する用途では追加の管理が必要
-	IXAudio2SourceVoice* pSourceVoice = nullptr;
-	result_ = xAudio2_->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
-	assert(SUCCEEDED(result_));
-
-	// XAUDIO2_BUFFER に再生データを詰める
-	XAUDIO2_BUFFER buf{};
-	buf.pAudioData = soundData.pBuffer;
-	buf.AudioBytes = soundData.bufferSize;
-	buf.Flags = XAUDIO2_END_OF_STREAM;
-
-	// 再生キューに登録して再生開始
-	result_ = pSourceVoice->SubmitSourceBuffer(&buf);
-	result_ = pSourceVoice->Start();
-}
-
-std::shared_ptr<Audio> Audio::GetInstance()
-{
-	// シングルトン取得（遅延初期化）
-	if (sInstance_ == nullptr) {
-		sInstance_ = std::make_shared<Audio>();
-	}
-	return sInstance_;
+	IXAudio2SourceVoice* pSourceVoice = CreateSourceVoice(soundData.wfex);
+	PlaySourceVoice(pSourceVoice, soundData);
 }
 
 void Audio::Finalize()
@@ -141,4 +107,96 @@ void Audio::Finalize()
 	if (xAudio2_) {
 		xAudio2_.Reset();
 	}
+}
+
+// ===== ヘルパー関数 =====
+
+void Audio::InitializeXAudio2()
+{
+	result_ = XAudio2Create(&xAudio2_, kXAudio2Flags, kDefaultProcessor);
+	assert(SUCCEEDED(result_));
+}
+
+void Audio::CreateMasteringVoice()
+{
+	// マスターボイスの作成（出力デバイスとの接続）
+	result_ = xAudio2_->CreateMasteringVoice(&masterVoice_);
+	assert(SUCCEEDED(result_));
+}
+
+void Audio::ReadRiffHeader(std::ifstream& file, RiffHeader& riff)
+{
+	file.read(reinterpret_cast<char*>(&riff), sizeof(riff));
+
+	// チャンクID が "RIFF" であることを確認
+	assert(ValidateChunkId(riff.chunk.id, kRiffChunkId));
+	
+	// タイプが "WAVE" であることを確認
+	assert(ValidateChunkId(riff.type, kWaveType));
+}
+
+void Audio::ReadFormatChunk(std::ifstream& file, FormatChunk& format)
+{
+	file.read(reinterpret_cast<char*>(&format), sizeof(ChunkHeader));
+	
+	assert(ValidateChunkId(format.chunk.id, kFmtChunkId));
+	
+	// fmt 本体を読み込む（可変長なので chunk.size を使う）
+	assert(format.chunk.size <= sizeof(format.fmt));
+	file.read(reinterpret_cast<char*>(&format.fmt), format.chunk.size);
+}
+
+void Audio::ReadDataChunk(std::ifstream& file, ChunkHeader& data)
+{
+	file.read(reinterpret_cast<char*>(&data), sizeof(data));
+	
+	// "JUNK" チャンクを検出したらスキップ
+	SkipJunkChunk(file, data);
+	
+	// data チャンクであることを確認
+	assert(ValidateChunkId(data.id, kDataChunkId));
+}
+
+char* Audio::ReadWaveData(std::ifstream& file, uint32_t size)
+{
+	char* pBuffer = new char[size];
+	file.read(pBuffer, size);
+	return pBuffer;
+}
+
+bool Audio::ValidateChunkId(const char* chunkId, const char* expectedId) const
+{
+	return std::strncmp(chunkId, expectedId, kChunkIdSize) == 0;
+}
+
+void Audio::SkipJunkChunk(std::ifstream& file, ChunkHeader& data)
+{
+	if (ValidateChunkId(data.id, kJunkChunkId)) {
+		file.seekg(data.size, std::ios::cur);
+		file.read(reinterpret_cast<char*>(&data), sizeof(data));
+	}
+}
+
+IXAudio2SourceVoice* Audio::CreateSourceVoice(const WAVEFORMATEX& wfex)
+{
+	IXAudio2SourceVoice* pSourceVoice = nullptr;
+	result_ = xAudio2_->CreateSourceVoice(&pSourceVoice, &wfex);
+	assert(SUCCEEDED(result_));
+	return pSourceVoice;
+}
+
+void Audio::PlaySourceVoice(IXAudio2SourceVoice* sourceVoice, const SoundData& soundData)
+{
+	// XAUDIO2_BUFFER に再生データを詰める
+	XAUDIO2_BUFFER buf{};
+	buf.pAudioData = soundData.pBuffer;
+	buf.AudioBytes = soundData.bufferSize;
+	buf.Flags = XAUDIO2_END_OF_STREAM;
+
+	// 再生キューに登録して再生開始
+	result_ = sourceVoice->SubmitSourceBuffer(&buf);
+	assert(SUCCEEDED(result_));
+	
+	result_ = sourceVoice->Start();
+	assert(SUCCEEDED(result_));
 }

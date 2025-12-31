@@ -84,7 +84,10 @@ void Sprite::Update()
 
 	Matrix4x4 worldMatrix = MakeAffineMatrix::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 	Matrix4x4 viewMatrix = MakeIdentity4x4::MakeIdentity4x4();
-	Matrix4x4 projectionMatrix = MakeOrthographicMatrix::MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
+	Matrix4x4 projectionMatrix = MakeOrthographicMatrix::MakeOrthographicMatrix(
+		0.0f, 0.0f,
+		float(WinApp::kClientWidth), float(WinApp::kClientHeight),
+		SpriteDefaults::kOrthoNear, SpriteDefaults::kOrthoFar);
 
 	transformationMatrixData_->wvp = Multiply::Multiply(worldMatrix, Multiply::Multiply(viewMatrix, projectionMatrix));
 	transformationMatrixData_->world = worldMatrix;
@@ -105,19 +108,15 @@ void Sprite::Draw()
 	// wvp用のCBufferの場所を設定
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource_->GetGPUVirtualAddress());
 
-	// Spriteを常にuvCheckerにする
-	//auto handle = TextureManager::GetInstance()->GetSrvHandleGPU(filePath_);
-	//printf("SRV Handle: %llu\n", handle.ptr);
-	
 	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(filePath_));
 	// 描画
-	dxCommon_->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+	dxCommon_->GetCommandList()->DrawIndexedInstanced(SpriteDefaults::kIndexCount, 1, 0, 0, 0);
 }
 
 /// GPU 用バッファ作成ユーティリティ
 /// - device に対して Upload ヒープでコミット済みバッファを作成し返す
 /// - 成功を assert しているため、呼び出し元は失敗しない前提で使用する
-Microsoft::WRL::ComPtr<ID3D12Resource> Sprite::CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes)
+Microsoft::WRL::ComPtr<ID3D12Resource> Sprite::CreateBufferResource(const Microsoft::WRL::ComPtr<ID3D12Device>& device, size_t sizeInBytes)
 {
 	// DXGIファクトリーの生成
 	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory = nullptr;
@@ -159,13 +158,13 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Sprite::CreateBufferResource(Microsoft::W
 /// - VertexData 構造のレイアウトに合わせて VertexBufferView / IndexBufferView を設定する
 void Sprite::CreateVertexData()
 {
-	vertexResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(VertexData) * 6);
-	indexResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(uint32_t) * 6);
+	vertexResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(VertexData) * SpriteDefaults::kVertexCount);
+	indexResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(uint32_t) * SpriteDefaults::kIndexCount);
 
 	// リソースの先頭のアドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
 	// 使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferView_.SizeInBytes = sizeof(VertexData) * 6;
+	vertexBufferView_.SizeInBytes = sizeof(VertexData) * SpriteDefaults::kVertexCount;
 	// 1頂点当たりのサイズ
 	vertexBufferView_.StrideInBytes = sizeof(VertexData);
 
@@ -173,16 +172,13 @@ void Sprite::CreateVertexData()
 	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
 
 	// 使用するリソースのサイズはインデックス6つ分のサイズ
-	indexBufferView_.SizeInBytes = sizeof(uint32_t) * 6;
+	indexBufferView_.SizeInBytes = sizeof(uint32_t) * SpriteDefaults::kIndexCount;
 
 	// インデックスはuint_32とする
 	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
 
 	// 書き込むためのアドレスを取得
 	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
-
-	// 頂点データをリソースにコピー
-	//std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
 
 	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
 }
@@ -196,7 +192,7 @@ void Sprite::CreateMaterialData()
 	// ...Mapしてデータを書き込む。色は白を設定しておくといい
 	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 
-	materialData_->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialData_->color = SpriteDefaults::kInitColor;
 
 	// SpriteはLightingしないのでfalseを設定する
 	materialData_->enableLighting = false;

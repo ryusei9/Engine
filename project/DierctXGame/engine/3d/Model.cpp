@@ -69,7 +69,7 @@ MaterialData Model::LoadMaterialTemplateFile(const std::string& directoryPath, c
 		s >> identifier;
 
 		// map_Kd が見つかったらテクスチャ名を読み取り、ディレクトリと連結してフルパス化する
-		if (identifier == "map_Kd") {
+		if (identifier == kMtlIdentifierTexture) {
 			std::string textureFilename;
 			s >> textureFilename;
 			materialData.textureFilePath = directoryPath + "/" + textureFilename;
@@ -102,61 +102,26 @@ ModelData Model::LoadObjFile(const std::string& directoryPath, const std::string
 		s >> identifier;
 
 		// 頂点位置: "v x y z"
-		if (identifier == "v") {
-			Vector4 position;
-			s >> position.x >> position.y >> position.z;
-			// 右手系 OBJ を左手系レンダラーに合わせるため X 軸を反転
-			position.x *= -1.0f;
-			position.w = 1.0f;
+		if (identifier == kObjIdentifierVertex) {
+			Vector4 position = ParseVertexPosition(s);
 			positions.push_back(position);
 		}
 		// テクスチャ座標: "vt u v"
-		else if (identifier == "vt") {
-			Vector2 texcoord;
-			s >> texcoord.x >> texcoord.y;
-			// OBJ の V は上方向が +、DirectX は下方向が + なので反転
-			texcoord.y = 1.0f - texcoord.y;
+		else if (identifier == kObjIdentifierTexCoord) {
+			Vector2 texcoord = ParseTexCoord(s);
 			texcoords.push_back(texcoord);
 		}
 		// 法線: "vn x y z"
-		else if (identifier == "vn") {
-			Vector3 normal;
-			s >> normal.x >> normal.y >> normal.z;
-			// 法線の X も位置同様反転して座標系を合わせる
-			normal.x *= -1.0f;
+		else if (identifier == kObjIdentifierNormal) {
+			Vector3 normal = ParseNormal(s);
 			normals.push_back(normal);
 		}
 		// 面: "f v1/vt1/vn1 v2/vt2/vn2 v3/vt3/vn3"
-		else if (identifier == "f") {
-			// 本実装は三角形のみ対応
-			VertexData triangle[3];
-			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
-				std::string vertexDefinition;
-				s >> vertexDefinition;
-
-				// "pos/tex/normal" を '/' で分割してインデックスを取得
-				std::istringstream v(vertexDefinition);
-				uint32_t elementIndices[3];
-				for (int32_t element = 0; element < 3; ++element) {
-					std::string index;
-					std::getline(v, index, '/');
-					// OBJ は 1 始まりなので -1 して参照する
-					elementIndices[element] = std::stoi(index);
-				}
-
-				// インデックスから実データを取得（配列アクセスは安全のためファイル側の整合性に依存）
-				Vector4 position = positions[elementIndices[0] - 1];
-				Vector2 texcoord = texcoords[elementIndices[1] - 1];
-				Vector3 normal = normals[elementIndices[2] - 1];
-				triangle[faceVertex] = { position, texcoord, normal };
-			}
-			// 頂点の登録順を逆にして回り順を調整（必要に応じてここを変更して面の向きを制御）
-			modelData.vertices.push_back(triangle[2]);
-			modelData.vertices.push_back(triangle[1]);
-			modelData.vertices.push_back(triangle[0]);
+		else if (identifier == kObjIdentifierFace) {
+			ParseFace(s, positions, texcoords, normals, modelData);
 		}
 		// マテリアルライブラリ参照: "mtllib filename.mtl"
-		else if (identifier == "mtllib") {
+		else if (identifier == kObjIdentifierMaterialLib) {
 			std::string materialFilename;
 			s >> materialFilename;
 			modelData.material = LoadMaterialTemplateFile(directoryPath, materialFilename);
@@ -166,14 +131,11 @@ ModelData Model::LoadObjFile(const std::string& directoryPath, const std::string
 	return modelData;
 }
 
-/// Upload ヒープ上にバッファリソースを確保して返すユーティリティ
-/// - device に対して CreateCommittedResource を呼ぶ（Upload ヒープ）
-/// - 呼び出し側は必ずサイズと用途を正しく指定すること（安全性の担保は呼び出し元に依存）
-Microsoft::WRL::ComPtr<ID3D12Resource> Model::CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes)
+Microsoft::WRL::ComPtr<ID3D12Resource> Model::CreateBufferResource(const Microsoft::WRL::ComPtr<ID3D12Device>& device, size_t sizeInBytes)
 {
 	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory = nullptr;
 	HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
-	(void)dxgiFactory; // 将来的にファクトリを使う場合に備えて取得している（現状は未使用）
+	(void)dxgiFactory;
 
 	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
 	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -221,9 +183,84 @@ void Model::CreateMaterialData()
 	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 
 	// デフォルトマテリアル値
-	materialData_->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	// ライティングはこのスプライト系モデルでは無効にしている（必要なら true に変更）
-	materialData_->enableLighting = false;
-	// UV トランスフォームは単位行列で初期化
+	materialData_->color = Vector4(
+		kDefaultMaterialColorR,
+		kDefaultMaterialColorG,
+		kDefaultMaterialColorB,
+		kDefaultMaterialColorA
+	);
+	materialData_->enableLighting = kDefaultLightingEnabled;
 	materialData_->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
+}
+
+// ===== ヘルパー関数 =====
+
+Vector4 Model::ParseVertexPosition(std::istringstream& stream)
+{
+	Vector4 position;
+	stream >> position.x >> position.y >> position.z;
+	// 右手系 OBJ を左手系レンダラーに合わせるため X 軸を反転
+	position.x *= kCoordinateFlipScale;
+	position.w = kDefaultPositionW;
+	return position;
+}
+
+Vector2 Model::ParseTexCoord(std::istringstream& stream)
+{
+	Vector2 texcoord;
+	stream >> texcoord.x >> texcoord.y;
+	// OBJ の V は上方向が +、DirectX は下方向が + なので反転
+	texcoord.y = 1.0f - texcoord.y;
+	return texcoord;
+}
+
+Vector3 Model::ParseNormal(std::istringstream& stream)
+{
+	Vector3 normal;
+	stream >> normal.x >> normal.y >> normal.z;
+	// 法線の X も位置同様反転して座標系を合わせる
+	normal.x *= kCoordinateFlipScale;
+	return normal;
+}
+
+void Model::ParseFace(
+	std::istringstream& stream,
+	const std::vector<Vector4>& positions,
+	const std::vector<Vector2>& texcoords,
+	const std::vector<Vector3>& normals,
+	ModelData& modelData)
+{
+	// 本実装は三角形のみ対応
+	VertexData triangle[kFaceVertexCount];
+	
+	for (int32_t faceVertex = 0; faceVertex < kFaceVertexCount; ++faceVertex) {
+		std::string vertexDefinition;
+		stream >> vertexDefinition;
+
+		// "pos/tex/normal" を '/' で分割してインデックスを取得
+		uint32_t elementIndices[kFaceElementCount];
+		ParseVertexIndices(vertexDefinition, elementIndices);
+
+		// インデックスから実データを取得
+		Vector4 position = positions[elementIndices[0] - kObjIndexOffset];
+		Vector2 texcoord = texcoords[elementIndices[1] - kObjIndexOffset];
+		Vector3 normal = normals[elementIndices[2] - kObjIndexOffset];
+		triangle[faceVertex] = { position, texcoord, normal };
+	}
+	
+	// 頂点の登録順を逆にして回り順を調整
+	modelData.vertices.push_back(triangle[2]);
+	modelData.vertices.push_back(triangle[1]);
+	modelData.vertices.push_back(triangle[0]);
+}
+
+void Model::ParseVertexIndices(const std::string& vertexDefinition, uint32_t* outIndices)
+{
+	std::istringstream v(vertexDefinition);
+	
+	for (int32_t element = 0; element < kFaceElementCount; ++element) {
+		std::string index;
+		std::getline(v, index, kFaceDelimiter);
+		outIndices[element] = std::stoi(index);
+	}
 }

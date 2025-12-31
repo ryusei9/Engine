@@ -6,6 +6,47 @@
 #include <imgui.h>
 
 class Enemy;
+
+/// <summary>
+/// 敵攻撃の調整用定数（マジックナンバー排除）
+/// </summary>
+namespace EnemyAttackDefaults {
+	// 共通
+	inline constexpr float kPi = 3.1415926535f;
+	inline constexpr float kDelta60Hz = 1.0f / 60.0f;
+
+	// Pattern1: 扇形
+	inline constexpr float kFanMoveSpeedY = 0.02f;
+	inline constexpr float kFanMoveRangeY = 2.0f;
+	inline constexpr float kFanShotIntervalSec = 2.0f;
+	inline constexpr int32_t kFanShotCount = 5;
+	inline constexpr float kFanBaseAngle = kPi;          // 左向き
+	inline constexpr float kFanSpread = kPi / 3.0f;      // 扇の広がり
+	inline constexpr float kFanBulletSpeed = 0.15f;
+
+	// Pattern2: 自機狙い
+	inline constexpr float kAimedShotIntervalSec = 2.0f;
+	inline constexpr float kAimedBulletSpeed = 0.18f;
+	inline constexpr float kBulletSpeedScale = 0.5f;     // 速度スケール
+	inline constexpr float kAimedMinLen = 0.01f;
+
+	// Pattern3: 突進＋全方位
+	inline constexpr float kRushStartX = 5.0f;
+	inline constexpr float kRushSpeedX = 0.08f;
+	inline constexpr float kRushShotIntervalSec = 0.3f;
+	inline constexpr int32_t kRushRingCount = 12;
+	inline constexpr float kRushRingSpeed = 0.13f;
+	inline constexpr float kRushLeftEndX = -4.0f;
+	inline constexpr float kRushRespawnX = 4.0f;
+	inline constexpr float kRushResetX = 3.0f;
+
+	// Pattern遷移
+	inline constexpr float kPattern1DurationSec = 10.0f;
+
+	// Pattern4: 待機（イージング）
+	inline constexpr float kWaitEasingDurationSec = 2.0f;
+}
+
 /// <summary>
 /// ビヘイビア基底クラス
 /// </summary>
@@ -74,7 +115,7 @@ private:
     bool rushing_ = false;
 };
 
-// パターン4: 待機（イージング移動）
+// パターン4: 待機（イージング）
 class EnemyAttackPatternWait : public EnemyAttackPattern {
 public:
 	// 更新
@@ -88,7 +129,7 @@ public:
 private:
     bool easing_ = false;
     float easingTime_ = 0.0f;
-    float easingDuration_ = 2.0f;
+    float easingDuration_ = EnemyAttackDefaults::kWaitEasingDurationSec;
     Vector3 startPos_;
 };
 

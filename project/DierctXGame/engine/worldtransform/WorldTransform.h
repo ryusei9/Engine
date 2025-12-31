@@ -14,9 +14,9 @@ class WorldTransform
 public:
 	/*------構造体------*/
 	struct TransformationMatrix {
-		Matrix4x4 WVP; // ワールドビュー射影行列
-		Matrix4x4 World; // ワールド行列
-		Matrix4x4 WorldInversedTranspose; // ビュー行列
+		Matrix4x4 WVP;                    // ワールドビュー射影行列
+		Matrix4x4 World;                  // ワールド行列
+		Matrix4x4 WorldInversedTranspose; // ワールド逆行列の転置
 	};
 
 	/*------メンバ関数------*/
@@ -30,8 +30,25 @@ public:
 	// パイプラインの設定
 	void SetPipeline();
 
-	// BufferResourceの作成
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes);
+	// BufferResourceの作成（大きい引数はconst参照渡し）
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(
+		const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+		size_t sizeInBytes);
+
+	// 状態設定（OAOO：同じ処理の使い回し） - ヘッダーにインライン定義
+	void SetTransform(const Vector3& scale, const Vector3& rotate, const Vector3& translate) {
+		scale_ = scale;
+		rotate_ = rotate;
+		translate_ = translate;
+	}
+	void SetScale(const Vector3& scale) { scale_ = scale; }
+	void SetRotate(const Vector3& rotate) { rotate_ = rotate; }
+	void SetTranslate(const Vector3& translate) { translate_ = translate; }
+
+	// 取得（コピー回避のためconst参照を返す） - ヘッダーにインライン定義
+	const Vector3& GetScale() const { return scale_; }
+	const Vector3& GetRotate() const { return rotate_; }
+	const Vector3& GetTranslate() const { return translate_; }
 
 	/*------メンバ変数------*/
 

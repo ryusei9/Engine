@@ -21,6 +21,59 @@
 // 前方宣言
 class Object3dCommon;
 
+// Object3d用の定数
+namespace Object3dConstants {
+	// デフォルトのリソースディレクトリ
+	constexpr const char* kDefaultResourceDirectory = "resources";
+	constexpr const char* kDefaultSkyboxFilePath = "resources/skybox.dds";
+	
+	// 球体の分割数
+	constexpr uint32_t kSphereSubdivision = 32;
+	constexpr uint32_t kSphereVerticesPerQuad = 6;
+	
+	// ライトのデフォルト値
+	constexpr float kDefaultLightIntensity = 3.0f;
+	constexpr float kDefaultPointLightIntensity = 1.0f;
+	constexpr float kDefaultPointLightRadius = 10.0f;
+	constexpr float kDefaultPointLightDecay = 1.0f;
+	constexpr float kDefaultSpotLightIntensity = 4.0f;
+	constexpr float kDefaultSpotLightDistance = 7.0f;
+	constexpr float kDefaultSpotLightDecay = 2.0f;
+	
+	// マテリアルのデフォルト値
+	constexpr float kDefaultMaterialColorR = 1.0f;
+	constexpr float kDefaultMaterialColorG = 1.0f;
+	constexpr float kDefaultMaterialColorB = 1.0f;
+	constexpr float kDefaultMaterialColorA = 1.0f;
+	constexpr float kDefaultShininess = 50.0f;
+	constexpr float kDefaultEnvironmentCoefficient = 0.0f;
+	constexpr bool kDefaultLightingEnabled = true;
+	
+	// ポジションのデフォルト値
+	constexpr float kDefaultLightPositionY = 2.0f;
+	constexpr float kDefaultDirectionalLightDirectionY = -1.0f;
+	
+	// スポットライトの角度
+	constexpr float kSpotLightAngleDivisor = 3.0f;
+	constexpr float kSpotLightFalloffAngleDivisor = 6.0f;
+	
+	// OBJ形式の定数
+	constexpr int32_t kFaceVertexCount = 3;
+	constexpr int32_t kFaceElementCount = 3;
+	constexpr int32_t kObjIndexOffset = 1;
+	constexpr float kCoordinateFlipScale = -1.0f;
+	constexpr float kDefaultPositionW = 1.0f;
+	
+	// 識別子文字列
+	constexpr const char* kObjIdentifierVertex = "v";
+	constexpr const char* kObjIdentifierTexCoord = "vt";
+	constexpr const char* kObjIdentifierNormal = "vn";
+	constexpr const char* kObjIdentifierFace = "f";
+	constexpr const char* kObjIdentifierMaterialLib = "mtllib";
+	constexpr const char* kMtlIdentifierTexture = "map_Kd";
+	constexpr char kFaceDelimiter = '/';
+}
+
 /// <summary>
 /// 3Dオブジェクト
 /// </summary>
@@ -82,71 +135,61 @@ public:
 	// .objファイルの読み取り
 	static ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
 
-	// カメラリソースの作成
-	void CreateCameraResource();
-
-	// ポイントライトの作成
-	void CreatePointLightResource();
-
-	// スポットライトの作成
-	void CreateSpotLightResource();
-
 	// ImGui描画
 	void DrawImGui();
 
-	/*------ゲッター------*/
-
-	// スケールの取得
+	// ゲッター
 	const Vector3& GetScale() const { return worldTransform.scale_; }
-
-	// 回転の取得
 	const Vector3& GetRotate() const { return worldTransform.rotate_; }
-
-	// 座標の取得
 	const Vector3& GetTranslate() const { return worldTransform.translate_; }
 
-	/*------セッター------*/
-
-	// モデルの設定
+	// セッター
 	void SetModel(Model* model) { model_ = model; }
-
-	// モデルの設定（ファイルパスから読み込み）
 	void SetModel(const std::string& filePath);
-
-	// スケールの設定
 	void SetScale(const Vector3& scale) { worldTransform.scale_ = scale; }
-
-	// 回転の設定
 	void SetRotate(const Vector3& rotate) { worldTransform.rotate_ = rotate; }
-
-	// 座標の設定
 	void SetTranslate(const Vector3& translate) { worldTransform.translate_ = translate; }
-
-	// ワールド変換の設定
 	void SetWorldTransform(const WorldTransform& worldTransform) { this->worldTransform = worldTransform; }
-
-	// カメラの設定
 	void SetCamera(Camera* camera) { camera_ = camera; }
-
-	// スカイボックスのファイルパス設定
 	void SetSkyboxFilePath(std::string filePath);
-
-	// ライトの明るさのセット
 	void SetPointLight(float intensity) { pointLightData_->intensity = intensity; }
-
 	void SetSpotLight(float intensity) { spotLightData_->intensity = intensity; }
-
 	void SetDirectionalLight(float intensity) { directionalLightData_->intensity = intensity; }
-
-	// マテリアルデータのセット
-	void SetMaterialColor(Vector4 color) { materialData_->color = color; }
+	void SetMaterialColor(const Vector4& color) { materialData_->color = color; }
 
 private:
 	// BufferResourceの作成
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(const Microsoft::WRL::ComPtr<ID3D12Device>& device, size_t sizeInBytes);
+	
+	// リソース作成
 	void CreateVertexData();
 	void CreateMaterialData();
 	void CreateDirectionalLightData();
+	void CreateCameraResource();
+	void CreatePointLightResource();
+	void CreateSpotLightResource();
+
+	// OBJパース用ヘルパー関数
+	static Vector4 ParseVertexPosition(std::istringstream& stream);
+	static Vector2 ParseTexCoord(std::istringstream& stream);
+	static Vector3 ParseNormal(std::istringstream& stream);
+	static void ParseFace(
+		std::istringstream& stream,
+		const std::vector<Vector4>& positions,
+		const std::vector<Vector2>& texcoords,
+		const std::vector<Vector3>& normals,
+		ModelData& modelData);
+	static void ParseVertexIndices(const std::string& vertexDefinition, uint32_t* outIndices);
+
+	// 球体頂点生成
+	void GenerateSphereVertices();
+	VertexData CalculateSphereVertex(float lat, float lon, float u, float v) const;
+
+	// 描画ヘルパー
+	void BindVertexBuffer();
+	void SetMaterialCBV();
+	void SetLightingCBVs();
+	void SetTextureSRVs();
 
 	// Model共通データ
 	Model* model_ = nullptr;
@@ -173,28 +216,29 @@ private:
 	PointLight* pointLightData_ = nullptr;
 	SpotLight* spotLightData_ = nullptr;
 
-	// バッファリソースの使い道を補足するバッファビュー
-	// 頂点バッファビューを作成する
+	// 頂点バッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 
+	// ワールド変換
 	WorldTransform worldTransform;
 
-		Camera* camera_ = nullptr;
+	// カメラ
+	Camera* camera_ = nullptr;
 
-	// 分割数
-	uint32_t kSubdivision_ = 32;
+	// 球体の分割数
+	uint32_t kSubdivision_ = Object3dConstants::kSphereSubdivision;
 
 	// 緯度・経度の分割数に応じた角度の計算
 	float kLatEvery_ = std::numbers::pi_v<float> / float(kSubdivision_);
 	float kLonEvery_ = 2.0f * std::numbers::pi_v<float> / float(kSubdivision_);
 
 	// 球体の頂点数の計算
-	uint32_t totalVertexCount_ = kSubdivision_ * kSubdivision_ * 6;
+	uint32_t totalVertexCount_ = kSubdivision_ * kSubdivision_ * Object3dConstants::kSphereVerticesPerQuad;
 
-	// ファイル名
+	// ファイルパス
 	std::string filePath_;
 
-	// 追加
+	// スカイボックスのGPUハンドル
 	D3D12_GPU_DESCRIPTOR_HANDLE skyboxGpuHandle_{};
 };
 

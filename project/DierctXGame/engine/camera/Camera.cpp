@@ -19,30 +19,61 @@
 //   ・行列の掛け合わせ順はレンダリング側のシェーダ期待順に合わせてある（view * projection）。
 //
 
-void Camera::Update()
-{
-	// worldMatrix_ を作成：スケール・回転・平行移動からワールド変換行列を合成する
-	worldMatrix_ = MakeAffineMatrix::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-
-	// viewMatrix_ は worldMatrix_ の逆行列（カメラ座標系へ変換）
-	viewMatrix_ = Inverse::Inverse(worldMatrix_);
-
-	// projectionMatrix_ は透視投影行列を生成（垂直方向の FOV, アスペクト比, ニア/ファークリップ）
-	projectionMatrix_ = MakePerspectiveFovMatrix(fovY_, aspectRatio_, nearClip_, farClip_);
-
-	// 最終的なワールド→クリップ空間変換を用意（描画時に直接使う）
-	viewProjectionMatrix_ = Multiply::Multiply(viewMatrix_, projectionMatrix_);
-}
+using namespace CameraConstants;
 
 Camera::Camera()
-	: transform_({{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}})
-	, fovY_(0.45f) // 垂直方向の視野角（ラジアン）
-	, aspectRatio_(float(WinApp::kClientWidth) / float(WinApp::kClientHeight)) // 初期アスペクト比（ウィンドウサイズ依存）
-	, nearClip_(0.1f)
-	, farClip_(100.0f)
-	// 初期時点で各行列を正しく初期化しておく（transform_ の初期値に基づく）
+	: transform_({
+		{kDefaultScaleX, kDefaultScaleY, kDefaultScaleZ}, 
+		{kDefaultRotateX, kDefaultRotateY, kDefaultRotateZ}, 
+		{kDefaultTranslateX, kDefaultTranslateY, kDefaultTranslateZ}
+	})
+	, fovY_(kDefaultFovY)
+	, aspectRatio_(CalculateAspectRatio())
+	, nearClip_(kDefaultNearClip)
+	, farClip_(kDefaultFarClip)
 	, worldMatrix_(MakeAffineMatrix::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate))
 	, viewMatrix_(Inverse::Inverse(worldMatrix_))
 	, projectionMatrix_(MakePerspectiveFovMatrix(fovY_, aspectRatio_, nearClip_, farClip_))
 	, viewProjectionMatrix_(Multiply::Multiply(viewMatrix_, projectionMatrix_))
-{}
+{
+}
+
+void Camera::Update()
+{
+	UpdateWorldMatrix();
+	UpdateViewMatrix();
+	UpdateProjectionMatrix();
+	UpdateViewProjectionMatrix();
+}
+
+// ===== ヘルパー関数 =====
+
+void Camera::UpdateWorldMatrix()
+{
+	// worldMatrix_ を作成：スケール・回転・平行移動からワールド変換行列を合成する
+	worldMatrix_ = MakeAffineMatrix::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+}
+
+void Camera::UpdateViewMatrix()
+{
+	// viewMatrix_ は worldMatrix_ の逆行列（カメラ座標系へ変換）
+	viewMatrix_ = Inverse::Inverse(worldMatrix_);
+}
+
+void Camera::UpdateProjectionMatrix()
+{
+	// projectionMatrix_ は透視投影行列を生成（垂直方向の FOV, アスペクト比, ニア/ファークリップ）
+	projectionMatrix_ = MakePerspectiveFovMatrix(fovY_, aspectRatio_, nearClip_, farClip_);
+}
+
+void Camera::UpdateViewProjectionMatrix()
+{
+	// 最終的なワールド→クリップ空間変換を用意（描画時に直接使う）
+	viewProjectionMatrix_ = Multiply::Multiply(viewMatrix_, projectionMatrix_);
+}
+
+float Camera::CalculateAspectRatio()
+{
+	// 初期アスペクト比（ウィンドウサイズ依存）
+	return static_cast<float>(WinApp::kClientWidth) / static_cast<float>(WinApp::kClientHeight);
+}

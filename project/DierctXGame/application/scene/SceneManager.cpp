@@ -19,9 +19,9 @@ void SceneManager::Initialize(WinApp* winApp)
 	nowScene_ = std::make_unique<TitleScene>();
 	nowScene_->Initialize(directXCommon_, winApp_);
 
-	// シーンの初期設定
-	currentSceneNo_ = 0;
-	prevSceneNo_ = -1;
+	// シーンの初期設定（定数化）
+	currentSceneNo_ = SceneDefaults::kInitialSceneNo;
+	prevSceneNo_ = SceneDefaults::kNoPrevSceneNo;
 }
 
 void SceneManager::Update()
@@ -59,7 +59,9 @@ void SceneManager::Update()
 void SceneManager::Draw()
 {
 	// 実行中シーンを描画
-	nowScene_->Draw();
+	if (nowScene_) {
+		nowScene_->Draw();
+	}
 }
 
 void SceneManager::DrawImGui()

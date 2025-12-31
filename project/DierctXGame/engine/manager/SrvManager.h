@@ -3,13 +3,27 @@
 #include <queue>
 #include "DirectXCommon.h"
 
+// SrvManager用の定数
+namespace SrvManagerConstants {
+	// 最大SRV数(最大テクスチャ枚数)
+	constexpr uint32_t kMaxSRVCount = 512;
+	
+	// デスクリプタの初期化値
+	constexpr uint32_t kInitialUseIndex = 0;
+	
+	// デフォルトのMipLevels
+	constexpr UINT kDefaultMipLevels = 1;
+	
+	// 構造化バッファの初期要素
+	constexpr UINT kDefaultFirstElement = 0;
+}
+
 /// <summary>
 /// SRV管理
 /// </summary>
 class SrvManager
 {
 public:
-	// メンバ関数
 	// 初期化
 	void Initialize();
 
@@ -31,44 +45,49 @@ public:
 	// グラフィックスルートデスクリプタテーブル設定
 	void SetGraphicsRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex);
 
-	/// <summary>
-	/// SRVの指定番号のCPUデスクリプタハンドルを取得する
-	/// </summary>
+	// SRVの指定番号のCPUデスクリプタハンドルを取得する
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(uint32_t index);
 
-	/// <summary>
-	/// SRVの指定番号のGPUデスクリプタハンドルを取得する
-	/// </summary>
+	// SRVの指定番号のGPUデスクリプタハンドルを取得する
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(uint32_t index);
 
-	// ディスクリプタヒープの取得
-	ID3D12DescriptorHeap* GetDescriptorHeap() { return descriptorHeap_.Get(); }
+	// ゲッター
+	ID3D12DescriptorHeap* GetDescriptorHeap() const { return descriptorHeap_.Get(); }
+	uint32_t GetDescriptorSize() const { return descriptorSize_; }
+	uint32_t GetUseIndex() const { return useIndex_; }
+	size_t GetFreeSlotCount() const { return freeIndices_.size(); }
+	uint32_t GetMaxSRVCount() const { return SrvManagerConstants::kMaxSRVCount; }
 
-	/// <summary>
-	/// 指定されたSRVインデックスが最大SRV数を超えているか確認する
-	/// </summary>
-	/// <param name="srvIndex">確認するSRVインデックス</param>
-	/// <returns>最大SRV数を超えていなければtrue、超えていればfalse</returns>
-	bool IsWithinMaxSRVCount(uint32_t srvIndex) const
-	{
-		return srvIndex < kMaxSRVCount_;
-	}
+	// 指定されたSRVインデックスが最大SRV数を超えているか確認する
+	bool IsWithinMaxSRVCount(uint32_t srvIndex) const;
+	
+	// 空きスロットがあるかチェック
+	bool HasFreeSlot() const { return !freeIndices_.empty(); }
 
-	// 最大SRV数(最大テクスチャ枚数)
+	// 後方互換性のための静的メンバ
 	static const uint32_t kMaxSRVCount_;
 
 private:
-	// メンバ変数
+	// SRV作成の共通処理
+	void CreateSRVInternal(uint32_t srvIndex, ID3D12Resource* pResource, const D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc);
+	
+	// インデックスの検証
+	bool ValidateIndex(uint32_t srvIndex) const;
+	
+	// 空きインデックスの初期化
+	void InitializeFreeIndices();
+
+	// DirectXCommon
 	DirectXCommon* directXCommon_ = nullptr;
 
 	// SRV用のデスクリプタサイズ
-	uint32_t descriptorSize_;
+	uint32_t descriptorSize_ = 0;
 
 	// SRV用デスクリプタヒープ
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap_;
 
 	// 次に使用するSRVインデックス
-	uint32_t useIndex_ = 0;
+	uint32_t useIndex_ = SrvManagerConstants::kInitialUseIndex;
 
 	// 空いているSRVインデックスリスト
 	std::queue<uint32_t> freeIndices_;

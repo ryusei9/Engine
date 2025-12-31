@@ -39,13 +39,13 @@ public:
 	WorldTransform& GetWorldTransform() { return worldTransform_; }
 
 	// スケールを取得
-	Vector3 GetScale() const { return worldTransform_.scale_; }
+	const Vector3& GetScale() const { return worldTransform_.GetScale(); }
 
 	// 回転を取得
-	Vector3 GetRotation() const { return  worldTransform_.rotate_; }
+	const Vector3& GetRotation() const { return worldTransform_.GetRotate(); }
 
 	// 座標を取得
-	Vector3 GetPosition() { return  worldTransform_.translate_; }
+	const Vector3& GetPosition() const { return worldTransform_.GetTranslate(); }
 
 	// シリアルナンバーを取得
 	uint32_t GetSerialNumber() const { return serialNumber_; }
@@ -58,13 +58,13 @@ public:
 	void SetHp(int hp) { hp_ = hp; }
 
 	// スケールを設定
-	void SetScale(const Vector3& scale) { worldTransform_.scale_ = scale; }
+	void SetScale(const Vector3& scale) { worldTransform_.SetScale(scale); }
 
 	// 回転を設定
-	void SetRotation(const Vector3& rotation) { worldTransform_.rotate_ = rotation; }
+	void SetRotation(const Vector3& rotation) { worldTransform_.SetRotate(rotation); }
 
 	// 座標を設定
-	void SetPosition(const Vector3& position) { worldTransform_.translate_ = position; }
+	void SetPosition(const Vector3& position) { worldTransform_.SetTranslate(position); }
 
 	// シリアルナンバーを設定
 	void SetSerialNumber(uint32_t serialNumber) { serialNumber_ = serialNumber; }
@@ -83,7 +83,7 @@ protected:
 	Camera* camera_ = nullptr;
 
 	// ヒットポイント
-	int hp_ = 10;
+	uint32_t hp_ = 10;
 
 	// 生存フラグ
 	bool isAlive_ = true;

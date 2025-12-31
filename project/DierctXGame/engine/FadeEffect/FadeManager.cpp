@@ -1,5 +1,6 @@
 #include "FadeManager.h"
 #include <imgui.h>
+#include "DirectXCommon.h"
 
 //
 // FadeManager
@@ -17,100 +18,128 @@
 //   - スプライトは内部で生成して Upload / GPU へ配置するため、Initialize を必ず呼ぶこと。
 //
 
+using namespace FadeManagerConstants;
+
 void FadeManager::Initialize()
 {
 	// フェード用スプライトを生成・初期化する
-	// - 使用するテクスチャは "resources/fadeWhite.png"（透過白）を想定
-	// - 初期アルファ値 alpha_ を反映した色でスプライトの色をセットしておく
 	fadeSprite_ = std::make_unique<Sprite>();
-	fadeSprite_->Initialize(DirectXCommon::GetInstance(), "resources/fadeWhite.png");
-	fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, alpha_ });
+	fadeSprite_->Initialize(DirectXCommon::GetInstance(), kFadeTextureFilePath);
+	fadeSprite_->SetColor({ kDefaultColorR, kDefaultColorG, kDefaultColorB, alpha_ });
 }
 
 void FadeManager::Update()
 {
-	// 状態に応じて alpha_ を増減し、状態遷移と完了コールバックを処理する
-	//
-	// 動作仕様:
-	// - FadeIn: alpha を増加させ、1.0 に到達したら Finish に遷移して onFinished_ を呼ぶ
-	// - FadeOut: alpha を減少させ、0.0 に到達したら Finish に遷移して onFinished_ を呼ぶ
-	// - Finish / None: alpha の更新は行わない（必要なら外部から値を操作できる）
-	//
-	// 実装メモ:
-	// - fadeSpeed_ はフレーム固定の増分として扱う（例: 0.02 => 約50フレームで変化）
-	// - より滑らかな時間制御をしたければ引数で deltaTime を受け取るように拡張する
+	// 状態に応じてアルファ値を更新
 	if (fadeState_ == EffectState::FadeIn) {
-		alpha_ += fadeSpeed_;
-		if (alpha_ >= 1.0f) {
-			alpha_ = 1.0f;
-			fadeState_ = EffectState::Finish;
-			if (onFinished_) onFinished_();
-		}
+		UpdateFadeIn();
 	} else if (fadeState_ == EffectState::FadeOut) {
-		alpha_ -= fadeSpeed_;
-		if (alpha_ <= 0.0f) {
-			alpha_ = 0.0f;
-			fadeState_ = EffectState::Finish;
-			if (onFinished_) onFinished_();
-		}
+		UpdateFadeOut();
 	}
 
-	// スプライトのアルファを常に反映して更新
-	fadeSprite_->SetColor({ 1.0f, 1.0f, 1.0f, alpha_ });
+	// スプライトのアルファを常に反映
+	UpdateSpriteColor();
 	fadeSprite_->Update();
 }
 
 void FadeManager::Draw()
 {
-	// 描画条件:
-	// - フェード中（FadeIn/FadeOut）のとき常に描画する
-	// - 完了状態 (Finish) でも alpha_ > 0.0f であれば描画する（フェードイン完了直後に画面が白いまま残る場合など）
-	// - None のときは描画しない
-	if (fadeState_ == EffectState::FadeIn || fadeState_ == EffectState::FadeOut ||
-		(fadeState_ == EffectState::Finish && alpha_ > 0.0f)) {
+	// 描画が必要な場合のみ描画
+	if (ShouldDraw()) {
 		fadeSprite_->Draw();
 	}
 }
 
 void FadeManager::FadeInStart(float fadeSpeed, std::function<void()> onFinished)
 {
-	// フェードインを開始する
-	// - fadeSpeed: 毎フレームの alpha 増分（正の値）
-	// - onFinished: フェード完了時に呼ばれるコールバック（nullptr 可）
+	// フェードインを開始
 	fadeState_ = EffectState::FadeIn;
 	fadeSpeed_ = fadeSpeed;
-	alpha_ = 0.0f;
+	alpha_ = kMinAlpha;
 	onFinished_ = onFinished;
 }
 
 void FadeManager::FadeOutStart(float fadeSpeed, std::function<void()> onFinished)
 {
-	// フェードアウトを開始する
-	// - fadeSpeed: 毎フレームの alpha 減分（正の値）
-	// - onFinished: フェード完了時に呼ばれるコールバック（nullptr 可）
+	// フェードアウトを開始
 	fadeState_ = EffectState::FadeOut;
 	fadeSpeed_ = fadeSpeed;
-	alpha_ = 1.0f;
+	alpha_ = kMaxAlpha;
 	onFinished_ = onFinished;
 }
 
 void FadeManager::DrawImGui()
 {
 #ifdef USE_IMGUI
-	// デバッグ用 ImGui: フェード状態とパラメータを表示・編集できる
 	ImGui::Begin("FadeManager");
+	
+	// 状態表示
 	const char* stateStr = "";
 	switch (fadeState_) {
-	case EffectState::None: stateStr = "None"; break;
-	case EffectState::FadeIn: stateStr = "FadeIn"; break;
-	case EffectState::FadeOut: stateStr = "FadeOut"; break;
-	case EffectState::Finish: stateStr = "Finish"; break;
+		case EffectState::None:    stateStr = "None"; break;
+		case EffectState::FadeIn:  stateStr = "FadeIn"; break;
+		case EffectState::FadeOut: stateStr = "FadeOut"; break;
+		case EffectState::Finish:  stateStr = "Finish"; break;
 	}
 	ImGui::Text("Fade State: %s", stateStr);
 
-	// alpha_ / fadeSpeed_ を直接操作できる（デバッグ用）
-	ImGui::SliderFloat("Alpha", &alpha_, 0.0f, 1.0f);
-	ImGui::SliderFloat("Fade Speed", &fadeSpeed_, 0.01f, 1.0f);
+	// パラメータ調整
+	ImGui::SliderFloat("Alpha", &alpha_, kMinAlpha, kMaxAlpha);
+	ImGui::SliderFloat("Fade Speed", &fadeSpeed_, kImGuiSpeedMin, kImGuiSpeedMax);
+	
 	ImGui::End();
 #endif
+}
+
+// ===== ヘルパー関数 =====
+
+void FadeManager::UpdateFadeIn()
+{
+	alpha_ += fadeSpeed_;
+	
+	if (alpha_ >= kMaxAlpha) {
+		alpha_ = kMaxAlpha;
+		OnFadeComplete();
+	}
+}
+
+void FadeManager::UpdateFadeOut()
+{
+	alpha_ -= fadeSpeed_;
+	
+	if (alpha_ <= kMinAlpha) {
+		alpha_ = kMinAlpha;
+		OnFadeComplete();
+	}
+}
+
+void FadeManager::UpdateSpriteColor()
+{
+	fadeSprite_->SetColor({ kDefaultColorR, kDefaultColorG, kDefaultColorB, alpha_ });
+}
+
+void FadeManager::ClampAlpha()
+{
+	if (alpha_ < kMinAlpha) {
+		alpha_ = kMinAlpha;
+	} else if (alpha_ > kMaxAlpha) {
+		alpha_ = kMaxAlpha;
+	}
+}
+
+void FadeManager::OnFadeComplete()
+{
+	fadeState_ = EffectState::Finish;
+	
+	if (onFinished_) {
+		onFinished_();
+	}
+}
+
+bool FadeManager::ShouldDraw() const
+{
+	// フェード中、または完了状態でアルファが残っている場合に描画
+	return fadeState_ == EffectState::FadeIn || 
+	       fadeState_ == EffectState::FadeOut ||
+	       (fadeState_ == EffectState::Finish && alpha_ > kMinAlpha);
 }

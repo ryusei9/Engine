@@ -7,6 +7,21 @@
 class Player; // 前方宣言
 
 /// <summary>
+/// 敵キャラクターの調整用定数（マジックナンバー排除）
+/// </summary>
+namespace EnemyDefaults {
+	inline constexpr float kMoveSpeed        = 0.1f;
+	inline constexpr int32_t kInitialHp      = 1;
+	inline constexpr float kRespawnTimeSec   = 3.0f;
+	inline constexpr float kColliderRadius   = 1.0f;
+	inline constexpr float kShotIntervalSec  = 5.0f;   // 発射間隔
+	inline constexpr float kDeathDurationSec = 1.0f;   // 落下演出 duration
+	inline constexpr float kFallSpeed        = -0.02f; // 落下速度
+	inline constexpr float kRotationSpeed    = 0.01f;  // 回転速度
+	inline constexpr int32_t kInvalidColliderId = -1;
+}
+
+/// <summary>
 /// 敵キャラクタークラス
 /// </summary>
 class Enemy : public BaseCharacter
@@ -19,6 +34,7 @@ public:
 		Dying,
 		Dead
 	};
+
 	/*------メンバ関数------*/
 	// コンストラクタ
 	Enemy();
@@ -59,7 +75,7 @@ public:
 	float GetRadius() const { return radius_; }
 
 	// プレイヤーへのポインタを取得
-	Player* GetPlayer() const { return player_; } // プレイヤーへのポインタを取得
+	Player* GetPlayer() const { return player_; }
 
 	// 敵の弾リストを取得
 	std::list<std::unique_ptr<EnemyBullet>>& GetBullets() { return bullets_; }
@@ -82,26 +98,27 @@ public:
 	int GetColliderId() const { return colliderId_; }
 
 	// Z軸の座標を設定
-	void SetZ(float z) {worldTransform_.translate_.z = z;}
+	void SetZ(float z) { worldTransform_.translate_.z = z; }
 
 private:
 	/*------メンバ変数------*/
 	// 敵の移動速度
-	float moveSpeed_ = 0.1f;
+	float moveSpeed_ = EnemyDefaults::kMoveSpeed;
+
 	// 敵のヒットポイント
-	int32_t hp_ = 1;
+	int32_t hp_ = EnemyDefaults::kInitialHp;
+
 	// 敵のシリアルナンバー
 	uint32_t serialNumber_ = 0;
-	// 敵のワールド変換
-	//Transform worldTransform_;
+
 	// 敵のカメラ
 	Camera* camera_ = nullptr;
 
 	// 敵のリスポーンタイム
-	float respawnTime_ = 3.0f;
+	float respawnTime_ = EnemyDefaults::kRespawnTimeSec;
 	
 	// 敵の半径
-	float radius_ = 1.0f;
+	float radius_ = EnemyDefaults::kColliderRadius;
 
 	// パーティクルマネージャーへのポインタ
 	ParticleManager* particleManager_ = nullptr;
@@ -123,7 +140,7 @@ private:
 
 	// 敵の弾リスト
 	std::list<std::unique_ptr<EnemyBullet>> bullets_;
-	float shotInterval_ = 5.0f; // 1秒ごとに発射
+	float shotInterval_ = EnemyDefaults::kShotIntervalSec; // 発射間隔（秒）
 	float shotTimer_ = 0.0f;
 
 	// 敵の攻撃パターン
@@ -136,15 +153,15 @@ private:
 	bool controlEnabled_ = false;
 
 	// コライダーID
-	int32_t colliderId_ = -1;
+	int32_t colliderId_ = EnemyDefaults::kInvalidColliderId;
 
 	// ステート用変数
 	EnemyState state_ = EnemyState::Alive;
 
 	// 死亡演出用変数
-	float deathTimer_ = 1.0f;      // 落下演出 duration
-	float fallSpeed_ = -0.02f;     // 落下速度
-	float rotationSpeed_ = 0.01f;   // 回転速度
+	float deathTimer_ = EnemyDefaults::kDeathDurationSec; // 落下演出 duration
+	float fallSpeed_ = EnemyDefaults::kFallSpeed;         // 落下速度
+	float rotationSpeed_ = EnemyDefaults::kRotationSpeed; // 回転速度
 	bool deathEffectPlayed_ = false;
 };
 

@@ -3,7 +3,7 @@
 #include <DirectXCommon.h>
 #include <WinApp.h>
 
-// シーンの種類
+// シーンの種類（意味付けのためenumを明示）
 enum SCENE { TITLE, GAMEPLAY, GAMEOVER };
 
 /// <summary>
@@ -31,13 +31,13 @@ public:
 	virtual void DrawImGui() = 0;
 
 	// シーン番号の取得
-	int32_t GetSceneNo() { return sceneNo_; }
+	int32_t GetSceneNo() const { return sceneNo_; }
 
 	// シーン番号の設定
 	void SetSceneNo(int32_t sceneNo) { sceneNo_ = sceneNo; }
 
 public:
-	// シーン番号
+	// シーン番号（デフォルトはTITLE）
 	static int32_t sceneNo_;
 };
 

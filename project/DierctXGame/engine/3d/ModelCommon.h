@@ -10,10 +10,11 @@ public:
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
-	/*------ゲッター------*/
+	// ゲッター
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 	
 private:
-	DirectXCommon* dxCommon_;
+	// メンバ変数
+	DirectXCommon* dxCommon_ = nullptr;
 };
 

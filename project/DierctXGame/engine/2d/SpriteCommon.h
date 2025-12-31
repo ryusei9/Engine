@@ -2,6 +2,33 @@
 #include "DirectXCommon.h"
 #include "SrvManager.h"
 
+/// SpriteCommon調整用定数（マジックナンバー排除）
+namespace SpriteCommonDefaults {
+	// ルートパラメータ数（CBV x2, DescriptorTable x1）
+	inline constexpr uint32_t kRootParamCount = 3;
+
+	// 静的サンプラ数
+	inline constexpr uint32_t kStaticSamplerCount = 1;
+
+	// ディスクリプタレンジ数（テクスチャSRV）
+	inline constexpr uint32_t kDescRangeCount = 1;
+
+	// SRV ベースシェーダレジスタ
+	inline constexpr uint32_t kSrvBaseRegister = 0;
+
+	// CBV シェーダレジスタ（マテリアル・WVP共に b0）
+	inline constexpr uint32_t kCbvRegister = 0;
+
+	// 入力要素数（POSITION, TEXCOORD）
+	inline constexpr uint32_t kInputElementCount = 2;
+
+	// レンダーターゲット数
+	inline constexpr uint32_t kRenderTargetCount = 1;
+
+	// サンプル数
+	inline constexpr uint32_t kSampleCount = 1;
+}
+
 /// <summary>
 /// スプライト共通部
 /// </summary>
@@ -43,7 +70,7 @@ private:	// メンバ変数
 
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc_{};
 
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs_[2] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs_[SpriteCommonDefaults::kInputElementCount] = {};
 
 	/// BlendStateの設定
 	D3D12_BLEND_DESC blendDesc_{};

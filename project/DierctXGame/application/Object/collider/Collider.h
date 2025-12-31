@@ -2,8 +2,11 @@
 #include <cstdint>
 #include "Vector3.h"
 
+// 前方宣言
+class Collider;
+
 /// <summary>
-/// コライダー基底クラス
+/// コライダーのデフォルト値定義
 /// </summary>
 namespace ColliderDefaults {
 	// 未設定（無効）識別ID
@@ -12,6 +15,9 @@ namespace ColliderDefaults {
 	inline constexpr float kDefaultRadius = 1.0f;
 }
 
+/// <summary>
+/// コライダー基底クラス
+/// </summary>
 class Collider
 {
 public:
@@ -33,7 +39,7 @@ public:
 	// 既存の互換性維持のためポインタのまま（必要なら派生側でconst許容へ拡張可）
 	virtual void OnCollision([[maybe_unused]] Collider* other) {}
 
-	// 中心座標の取得
+	// 中心座標の取得（純粋仮想関数）
 	virtual Vector3 GetCenterPosition() const = 0;
 
 	/*------ゲッター------*/
@@ -45,6 +51,7 @@ public:
 	float GetRadius() const { return radius_; }
 
 	/*------セッター------*/
+
 	// 識別IDを設定
 	void SetTypeID(uint32_t typeID) { typeID_ = typeID; }
 
@@ -53,6 +60,7 @@ public:
 
 private:
 	/*------メンバ変数------*/
+
 	// 識別ID（未設定はkInvalidTypeId）
 	uint32_t typeID_ = ColliderDefaults::kInvalidTypeId;
 

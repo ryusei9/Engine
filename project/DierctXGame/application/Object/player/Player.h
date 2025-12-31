@@ -2,9 +2,15 @@
 #include "BaseCharacter.h"
 #include "ParticleManager.h"
 #include "ParticleEmitter.h"
+#include <memory>
+#include <list>
+#include <string>
+#include <cstdint>
 
-class PlayerBullet;        // 前方宣言
-class PlayerChargeBullet;  // 前方宣言
+// 前方宣言
+class PlayerBullet;
+class PlayerChargeBullet;
+struct Vector3;
 
 /// <summary>
 /// プレイヤー調整用定数（マジックナンバー排除）
@@ -19,9 +25,9 @@ namespace PlayerDefaults {
 	inline constexpr float kChargeReadySec    = 3.0f;
 
 	// パーティクル
-	inline constexpr uint32_t kThrusterRate   = 60;     // 1秒間に60個
+	inline constexpr uint32_t kThrusterRate   = 60;
 	inline constexpr uint32_t kThrusterCount  = 3;
-	inline constexpr float    kThrusterOffsetX = 0.2f;  // 左オフセット
+	inline constexpr float    kThrusterOffsetX = 0.2f;
 	inline constexpr float    kExplosionRate  = 1.0f;
 	inline constexpr uint32_t kExplosionCount = 0;
 
@@ -30,6 +36,42 @@ namespace PlayerDefaults {
 	inline constexpr Vector3  kInitRotate = { 0.0f, 0.0f, 0.0f };
 	inline constexpr Vector3  kInitTranslate = { 0.0f, 0.0f, 0.0f };
 }
+
+/// <summary>
+/// プレイヤーのパラメータ構造体（JSONから読み込み）
+/// </summary>
+struct PlayerParameters {
+	// 基本パラメータ
+	float moveSpeed = PlayerDefaults::kMoveSpeed;
+	float radius = PlayerDefaults::kRadius;
+	float respawnWaitSec = PlayerDefaults::kRespawnWaitSec;
+
+	// チャージ関連
+	float chargeReadySec = PlayerDefaults::kChargeReadySec;
+
+	// パーティクルパラメータ
+	uint32_t thrusterRate = PlayerDefaults::kThrusterRate;
+	uint32_t thrusterCount = PlayerDefaults::kThrusterCount;
+	float thrusterOffsetX = PlayerDefaults::kThrusterOffsetX;
+	float explosionRate = PlayerDefaults::kExplosionRate;
+	uint32_t explosionCount = PlayerDefaults::kExplosionCount;
+
+	// スラスター計算パラメータ
+	float thrusterBasePower = 2.0f;
+	float thrusterVelocityMultiplier = 1.5f;
+
+	// 初期Transform
+	Vector3 initScale = PlayerDefaults::kInitScale;
+	Vector3 initRotate = PlayerDefaults::kInitRotate;
+	Vector3 initTranslate = PlayerDefaults::kInitTranslate;
+
+	// モデルファイル名
+	std::string modelFileName = "player.obj";
+
+	// パーティクルテクスチャファイル名
+	std::string thrusterTexture = "resources/circle2.png";
+	std::string explosionTexture = "resources/circle2.png";
+};
 
 /// <summary>
 /// プレイヤークラス
@@ -44,6 +86,9 @@ public:
 
 	// 初期化
 	void Initialize() override;
+
+	// パラメータファイルから初期化
+	void Initialize(const std::string& parameterFileName);
 
 	// 更新
 	void Update() override;
@@ -80,26 +125,43 @@ public:
 	// プレイヤーのチャージ弾を取得
 	std::list<std::unique_ptr<PlayerChargeBullet>>& GetChargeBullets() { return chargeBullets_; }
 
+	// プレイヤーのコントロール有効フラグを取得
 	bool GetPlayerControlEnabled() const { return controlEnabled_; }
 
-	// プレイヤーの死亡フラグの取得
+	// プレイヤーの生存状態を取得
 	bool GetIsAlive() const { return isAlive_; }
 
+	// パラメータを取得
+	const PlayerParameters& GetParameters() const { return parameters_; }
+
 	/*------セッター------*/
+
+	// プレイヤーのコントロール有効フラグを設定
 	void SetPlayerControlEnabled(bool enabled) { controlEnabled_ = enabled; }
+
+	// パラメータを設定
+	void SetParameters(const PlayerParameters& parameters);
 
 private:
 	/*------メンバ変数------*/
 
-	std::list<std::unique_ptr<PlayerBullet>>        bullets_;        // 武器
-	std::list<std::unique_ptr<PlayerChargeBullet>>  chargeBullets_;  // チャージ弾
+	// パラメータ（JSONから読み込み）
+	PlayerParameters parameters_;
+
+	// 武器
+	std::list<std::unique_ptr<PlayerBullet>> bullets_;
+
+	// チャージ弾
+	std::list<std::unique_ptr<PlayerChargeBullet>> chargeBullets_;
 
 	// プレイヤーの移動速度
 	float moveSpeed_ = PlayerDefaults::kMoveSpeed;
 
-	Vector3 velocity_ = { 0.0f, 0.0f, 0.0f }; // 速度ベクトル
+	// 速度ベクトル
+	Vector3 velocity_ = { 0.0f, 0.0f, 0.0f };
 	
-	float radius_ = PlayerDefaults::kRadius; // 半径
+	// 半径
+	float radius_ = PlayerDefaults::kRadius;
 	
 	// リスポーンタイマー
 	float respawnTimer_ = 0.0f;
@@ -110,9 +172,11 @@ private:
 	// プレイヤーのカメラ
 	Camera* camera_ = nullptr;
 
-	bool isShot_ = false; // 発射フラグ
+	// 発射フラグ
+	bool isShot_ = false;
 
-	ParticleManager* particleManager_ = nullptr; // パーティクルマネージャー
+	// パーティクルマネージャー
+	ParticleManager* particleManager_ = nullptr;
 
 	// スラスターパーティクルエミッター
 	std::unique_ptr<ParticleEmitter> thrusterEmitter_;

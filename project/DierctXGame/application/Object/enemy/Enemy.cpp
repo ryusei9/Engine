@@ -3,6 +3,14 @@
 #include <Object3dCommon.h>
 #include <ParticleEmitter.h>
 #include <PlayerChargeBullet.h>
+#include "JsonLoader.h"
+#include <imgui.h>
+
+namespace {
+	constexpr float kUpdateDeltaTime = 1.0f / 60.0f;
+	constexpr float kDeathDeltaTime = 1.0f / 120.0f;
+	constexpr float kRotationSpeedHalf = 0.005f;
+}
 
 Enemy::Enemy()
 {
@@ -14,6 +22,25 @@ Enemy::Enemy()
 
 void Enemy::Initialize()
 {
+	// デフォルトパラメータで初期化
+	Initialize("enemyParameters");
+}
+
+void Enemy::Initialize(const std::string& parameterFileName)
+{
+	// パラメータファイルから読み込み
+	parameters_ = JsonLoader::LoadEnemyParameters(parameterFileName);
+
+	// パラメータを各メンバ変数に適用
+	moveSpeed_ = parameters_.moveSpeed;
+	hp_ = parameters_.initialHp;
+	respawnTime_ = parameters_.respawnTimeSec;
+	radius_ = parameters_.colliderRadius;
+	shotInterval_ = parameters_.shotIntervalSec;
+	deathTimer_ = parameters_.deathDurationSec;
+	fallSpeed_ = parameters_.fallSpeed;
+	rotationSpeed_ = parameters_.rotationSpeed;
+
 	// 敵の初期化
 	BaseCharacter::Initialize();
 	// 敵のコライダーの設定
@@ -45,7 +72,7 @@ void Enemy::Initialize()
 	// 敵死亡時のパーティクルエミッターを初期化
 	enemyDeathEmitter_ = std::make_unique<ParticleEmitter>(particleManager_, "explosion");
 	enemyDeathEmitter_->SetUseRingParticle(true);
-	enemyDeathEmitter_->SetExplosion(true); // 爆発エミッターに設定
+	enemyDeathEmitter_->SetExplosion(true);
 
 	// 敵ヒット時のパーティクル設定
 	enemyHitEmitter_ = std::make_unique<ParticleEmitter>(particleManager_, "explosion");
@@ -55,14 +82,15 @@ void Enemy::Initialize()
 	// 煙用のパーティクルエミッターを初期化
 	particleManager_->GetInstance()->SetParticleType(ParticleType::Normal);
 	smokeEmitter_ = std::make_unique<ParticleEmitter>(particleManager_, "smoke");
-	smokeEmitter_->SetParticleRate(60);         // 調整値は将来定数化候補
-	smokeEmitter_->SetParticleCount(3);
+	smokeEmitter_->SetParticleRate(parameters_.smokeParticleRate);
+	smokeEmitter_->SetParticleCount(parameters_.smokeParticleCount);
 	smokeEmitter_->SetSmoke(true);
 
-	SetRadius(EnemyDefaults::kColliderRadius); // コライダーの半径を設定
+	SetRadius(parameters_.colliderRadius);
 
 	// 敵の攻撃パターンを初期化
 	attack_ = std::make_unique<EnemyAttack>();
+	attack_->Initialize("enemyAttackParameters"); // パラメータファイルから読み込み
 	// デフォルトの攻撃パターンを設定
 	attack_->SetPattern(1);
 }
@@ -85,14 +113,14 @@ void Enemy::Update()
 		Move();
 		// 敵の攻撃
 		if (controlEnabled_) {
-			attack_->Update(this, player_, bullets_, 1.0f / 60.0f);
+			attack_->Update(this, player_, bullets_, kUpdateDeltaTime);
 		}
 		if (hp_ <= 0) {
 			// 死亡演出へ移行
 			state_ = EnemyState::Dying;
-			object3d_->SetPointLight(0.0f);                  // 光消す(optional)
-			object3d_->SetDirectionalLight(1.0f);            // 光消す(optional)
-			object3d_->SetMaterialColor(Vector4(0.3f, 0.3f, 0.3f, 1.0f)); // グレー化
+			object3d_->SetPointLight(0.0f);
+			object3d_->SetDirectionalLight(1.0f);
+			object3d_->SetMaterialColor(Vector4(0.3f, 0.3f, 0.3f, 1.0f));
 		}
 	}
 
@@ -108,25 +136,23 @@ void Enemy::Update()
 
 	// 死亡演出
 	if (state_ == EnemyState::Dying) {
-		// 120fps相当の減算（将来的にdeltaTime導入推奨）
-		deathTimer_ -= 1.0f / 120.0f;
+		deathTimer_ -= kDeathDeltaTime;
 
 		// 回転
 		Vector3 r = worldTransform_.GetRotate();
-		r.x += EnemyDefaults::kRotationSpeed / 2.0f;
-		r.y -= EnemyDefaults::kRotationSpeed;
-		r.z -= EnemyDefaults::kRotationSpeed;
+		r.x += kRotationSpeedHalf;
+		r.y -= parameters_.rotationSpeed;
+		r.z -= parameters_.rotationSpeed;
 		worldTransform_.SetRotate(r);
 
 		// 落下（-Y方向）
 		Vector3 t = worldTransform_.GetTranslate();
-		t.y += EnemyDefaults::kFallSpeed;
+		t.y += parameters_.fallSpeed;
 		worldTransform_.SetTranslate(t);
 
 		// 煙の向き・速度
-		Vector3 leftDir = { 0.0f, 2.0f, 0.0f };
-		// 勢いの強さはvelocityの大きさで調整
-		float power = 2.0f + 0.1f * 1.5f; // 調整値（必要なら定数化）
+		Vector3 leftDir = { 0.0f, parameters_.smokeUpwardForce, 0.0f };
+		float power = parameters_.smokePower + parameters_.smokePowerMultiplier * 1.5f;
 		Vector3 particleVelocity = leftDir * power;
 
 		// パーティクル更新
@@ -146,12 +172,12 @@ void Enemy::Update()
 #ifdef _DEBUG
 		// 敵が死んでいる場合
 		// 敵のリスポーンタイムを減少
-		respawnTime_ -= 1.0f / 60.0f;
+		respawnTime_ -= kUpdateDeltaTime;
 		if (respawnTime_ <= 0.0f) {
 			// リスポーンタイムが0以下になったら
 			state_ = EnemyState::Alive;
-			hp_ = EnemyDefaults::kInitialHp;
-			respawnTime_ = EnemyDefaults::kRespawnTimeSec; // リスポーンタイムを既定値に設定
+			hp_ = parameters_.initialHp;
+			respawnTime_ = parameters_.respawnTimeSec;
 			hasPlayedDeathParticle_ = false;
 		}
 #endif
@@ -165,7 +191,9 @@ void Enemy::Draw()
 		// 敵の描画
 		BaseCharacter::Draw();
 		// 弾の描画
-		for (auto& bullet : bullets_) bullet->Draw();
+		for (auto& bullet : bullets_) {
+			bullet->Draw();
+		}
 	}
 }
 
@@ -199,13 +227,15 @@ void Enemy::OnCollision(Collider* other)
 {
 	// 敵の衝突判定
 	// 生きていない場合は無視
-	if (state_ != EnemyState::Alive) return;
+	if (state_ != EnemyState::Alive) {
+		return;
+	}
 
 	// チャージ弾と衝突した場合
 	if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerChargeBullet)) {
 		auto* chargeBullet = dynamic_cast<PlayerChargeBullet*>(other);
 		if (chargeBullet) {
-			hp_ -= static_cast<int>(chargeBullet->GetDamage()); // チャージ弾
+			hp_ -= static_cast<int>(chargeBullet->GetDamage());
 		}
 		PlayHitParticle();
 	}
@@ -221,9 +251,9 @@ void Enemy::PlayDeathParticleOnce()
 	// 敵死亡時に一度だけパーティクルを出す
 	if (!hasPlayedDeathParticle_) {
 		if (enemyDeathEmitter_) {
-			enemyDeathEmitter_->SetPosition(worldTransform_.GetTranslate()); // 位置をセット
-			enemyDeathEmitter_->SetParticleRate(8); // 例: rate調整（必要なら専用定数へ）
-			enemyDeathEmitter_->SetParticleCount(8);
+			enemyDeathEmitter_->SetPosition(worldTransform_.GetTranslate());
+			enemyDeathEmitter_->SetParticleRate(parameters_.deathParticleRate);
+			enemyDeathEmitter_->SetParticleCount(parameters_.deathParticleCount);
 			enemyDeathEmitter_->Update();
 		}
 		hasPlayedDeathParticle_ = true;
@@ -234,9 +264,9 @@ void Enemy::PlayHitParticle()
 {
 	if (!hasPlayedHitParticle_) {
 		if (enemyHitEmitter_) {
-			enemyHitEmitter_->SetPosition(worldTransform_.GetTranslate()); // 位置をセット
-			enemyHitEmitter_->SetParticleRate(1);
-			enemyHitEmitter_->SetParticleCount(0);
+			enemyHitEmitter_->SetPosition(worldTransform_.GetTranslate());
+			enemyHitEmitter_->SetParticleRate(parameters_.hitParticleRate);
+			enemyHitEmitter_->SetParticleCount(parameters_.hitParticleCount);
 			enemyHitEmitter_->Update();
 		}
 		hasPlayedHitParticle_ = true;
@@ -245,8 +275,19 @@ void Enemy::PlayHitParticle()
 
 Vector3 Enemy::GetCenterPosition() const
 {
-	const Vector3 offset = { 0.0f, 0.0f, 0.0f }; // エネミーの中心を考慮
+	const Vector3 offset = { 0.0f, 0.0f, 0.0f };
 	return worldTransform_.GetTranslate() + offset;
+}
+
+void Enemy::SetParameters(const EnemyParameters& parameters)
+{
+	parameters_ = parameters;
+	// パラメータを各メンバ変数に適用
+	moveSpeed_ = parameters_.moveSpeed;
+	radius_ = parameters_.colliderRadius;
+	shotInterval_ = parameters_.shotIntervalSec;
+	fallSpeed_ = parameters_.fallSpeed;
+	rotationSpeed_ = parameters_.rotationSpeed;
 }
 
 

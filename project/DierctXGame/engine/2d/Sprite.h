@@ -8,17 +8,25 @@
 #include "MakeIdentity4x4.h"
 #include "TextureManager.h"
 #include "Material.h"
+#include <string>
+#include <cstdint>
+#include <wrl/client.h>
 
 // 前方宣言
 class SpriteCommon;
+struct TransformationMatrix;
 
-// 座標変換データ
+/// <summary>
+/// 座標変換データ
+/// </summary>
 struct TransformationMatrix {
 	Matrix4x4 wvp;
 	Matrix4x4 world;
 };
 
+/// <summary>
 /// スプライト調整用定数（マジックナンバー排除）
+/// </summary>
 namespace SpriteDefaults {
 	// 頂点・インデックス数
 	inline constexpr uint32_t kVertexCount = 6;
@@ -55,11 +63,13 @@ namespace SpriteDefaults {
 }
 
 /// <summary>
-/// スプライト
+/// スプライトクラス
 /// </summary>
 class Sprite
 {
 public:
+	/*------メンバ関数------*/
+
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon, std::string textureFilePath);
 
@@ -128,15 +138,26 @@ public:
 	void SetTextureSize(const Vector2& textureSize) { textureSize_ = textureSize; }
 
 private:
+	/*------プライベートメンバ関数------*/
+
 	// BufferResourceの作成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(const Microsoft::WRL::ComPtr<ID3D12Device>& device, size_t sizeInBytes);
+
+	// 頂点データの作成
 	void CreateVertexData();
+
+	// マテリアルデータの作成
 	void CreateMaterialData();
+
+	// WVPデータの作成
 	void CreateWVPData();
 
 	// テクスチャサイズをイメージに合わせる
 	void AdjustTextureSize();
 
+	/*------メンバ変数------*/
+
+	// スプライト共通部
 	SpriteCommon* spriteCommon_ = nullptr;
 
 	// バッファリソース
@@ -150,13 +171,14 @@ private:
 	uint32_t* indexData_ = nullptr;
 	TransformationMatrix* transformationMatrixData_ = nullptr;
 
-	// バッファリソースの使い道を補足するバッファビュー
-	// 頂点バッファビューを作成する
+	// バッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 	D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
 
+	// DirectX共通部
 	DirectXCommon* dxCommon_ = nullptr;
 
+	// マテリアルデータ
 	Material* materialData_ = nullptr;
 
 	// スプライト個々の座標

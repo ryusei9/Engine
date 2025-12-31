@@ -3,11 +3,40 @@
 #include <cassert>
 #include "Logger.h"
 
-//
-// SpriteCommon: スプライト描画に必要な共通設定（RootSignature / PSO 等）を管理するシングルトン
-// - 初期化は SrvManager を渡して呼ぶ
-// - 描画前に DrawSettings() を呼んでルートシグネチャや PSO をコマンドリストに設定する
-//
+namespace {
+	// ディスクリプタヒープ配列サイズ
+	constexpr uint32_t kDescriptorHeapCount = 1;
+
+	// ブレンド設定用定数
+	constexpr BOOL kBlendEnable = TRUE;
+	constexpr BOOL kBlendDisable = FALSE;
+
+	// カリングモード
+	constexpr D3D12_CULL_MODE kCullModeNone = D3D12_CULL_MODE_NONE;
+
+	// 塗りつぶしモード
+	constexpr D3D12_FILL_MODE kFillModeSolid = D3D12_FILL_MODE_SOLID;
+
+	// デプス設定
+	constexpr BOOL kDepthEnable = TRUE;
+	constexpr D3D12_DEPTH_WRITE_MASK kDepthWriteMaskAll = D3D12_DEPTH_WRITE_MASK_ALL;
+	constexpr D3D12_COMPARISON_FUNC kDepthFuncLessEqual = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+	// セマンティック名
+	constexpr const char* kSemanticPosition = "POSITION";
+	constexpr const char* kSemanticTexcoord = "TEXCOORD";
+
+	// セマンティックインデックス
+	constexpr UINT kSemanticIndex = 0;
+
+	// シェーダファイルパス
+	constexpr const wchar_t* kVertexShaderPath = L"Resources/shaders/Sprite.VS.hlsl";
+	constexpr const wchar_t* kPixelShaderPath = L"Resources/shaders/Sprite.PS.hlsl";
+
+	// シェーダモデル
+	constexpr const wchar_t* kVertexShaderModel = L"vs_6_0";
+	constexpr const wchar_t* kPixelShaderModel = L"ps_6_0";
+}
 
 std::shared_ptr<SpriteCommon> SpriteCommon::sInstance_ = nullptr;
 
@@ -32,7 +61,7 @@ void SpriteCommon::Initialize(SrvManager* srvManager)
 	// SRV マネージャを保存
 	srvManager_ = srvManager;
 
-	// ルートシグネチャ / PSO を構築
+	// グラフィックスパイプラインを構築
 	GraphicsPipelineInitialize();
 }
 
@@ -41,14 +70,17 @@ void SpriteCommon::Initialize(SrvManager* srvManager)
 // - 呼び出しタイミング: スプライト描画直前
 void SpriteCommon::DrawSettings()
 {
+	// ディスクリプタヒープを設定
 	ID3D12DescriptorHeap* heaps[] = { srvManager_->GetDescriptorHeap() };
-	dxCommon_->GetCommandList()->SetDescriptorHeaps(_countof(heaps), heaps);
+	dxCommon_->GetCommandList()->SetDescriptorHeaps(kDescriptorHeapCount, heaps);
 
-	// ルートシグネチャをコマンドリストに設定
+	// ルートシグネチャを設定
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature_.Get());
-	// パイプラインステートオブジェクトを設定
+
+	// パイプラインステートを設定
 	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState_.Get());
-	// プリミティブトポロジを設定（トライアングルリスト）
+
+	// プリミティブトポロジを設定
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
@@ -63,37 +95,34 @@ void SpriteCommon::RootSignatureInitialize()
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
-	// ルートパラメータを用意（CBV x2, DescriptorTable x1）
-	D3D12_ROOT_PARAMETER rootParameters[SpriteCommonDefaults::kRootParamCount] = {};
+	// ルートパラメータを用意
+	D3D12_ROOT_PARAMETER rootParameters[SpriteCommonDefaults::kRootParamCount]{};
 
-	// SRV 用のディスクリプタレンジ（テクスチャ1枚想定）
-	D3D12_DESCRIPTOR_RANGE descriptorRange[SpriteCommonDefaults::kDescRangeCount] = {};
+	// ディスクリプタレンジ（SRV）
+	D3D12_DESCRIPTOR_RANGE descriptorRange[SpriteCommonDefaults::kDescRangeCount]{};
 	descriptorRange[0].BaseShaderRegister = SpriteCommonDefaults::kSrvBaseRegister;
 	descriptorRange[0].NumDescriptors = 1;
 	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	// CBV（ピクセル／頂点それぞれ1個ずつ）をルートパラメータに設定
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	// ディスクリプタテーブル（SRV）をルートパラメータに設定
-	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	// ルートパラメータ0: CBV（マテリアル）
+	rootParameters[SpriteCommonDefaults::kRootParamIndexMaterial].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[SpriteCommonDefaults::kRootParamIndexMaterial].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[SpriteCommonDefaults::kRootParamIndexMaterial].Descriptor.ShaderRegister = SpriteCommonDefaults::kCbvRegister;
 
-	// シェーダでの可視化範囲を設定
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	// ルートパラメータ1: CBV（WVP）
+	rootParameters[SpriteCommonDefaults::kRootParamIndexWVP].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[SpriteCommonDefaults::kRootParamIndexWVP].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[SpriteCommonDefaults::kRootParamIndexWVP].Descriptor.ShaderRegister = SpriteCommonDefaults::kCbvRegister;
 
-	// CBV のレジスタ番号を設定（b0/b0 を使用）
-	rootParameters[0].Descriptor.ShaderRegister = SpriteCommonDefaults::kCbvRegister;
-	rootParameters[1].Descriptor.ShaderRegister = SpriteCommonDefaults::kCbvRegister;
+	// ルートパラメータ2: DescriptorTable（テクスチャ）
+	rootParameters[SpriteCommonDefaults::kRootParamIndexTexture].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[SpriteCommonDefaults::kRootParamIndexTexture].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[SpriteCommonDefaults::kRootParamIndexTexture].DescriptorTable.pDescriptorRanges = descriptorRange;
+	rootParameters[SpriteCommonDefaults::kRootParamIndexTexture].DescriptorTable.NumDescriptorRanges = SpriteCommonDefaults::kDescRangeCount;
 
-	// DescriptorTable にディスクリプタレンジを設定
-	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
-
-	// 静的サンプラを設定（1つのバイリニアサンプラ）
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[SpriteCommonDefaults::kStaticSamplerCount] = {};
+	// 静的サンプラを設定
+	D3D12_STATIC_SAMPLER_DESC staticSamplers[SpriteCommonDefaults::kStaticSamplerCount]{};
 	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -104,44 +133,51 @@ void SpriteCommon::RootSignatureInitialize()
 	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	descriptionRootSignature.pStaticSamplers = staticSamplers;
-	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
+	descriptionRootSignature.NumStaticSamplers = SpriteCommonDefaults::kStaticSamplerCount;
 
-	// ルートパラメータ配列をルートシグネチャ記述子にセット
+	// ルートパラメータを設定
 	descriptionRootSignature.pParameters = rootParameters;
-	descriptionRootSignature.NumParameters = _countof(rootParameters);
+	descriptionRootSignature.NumParameters = SpriteCommonDefaults::kRootParamCount;
 
-	// ルートシグネチャをシリアライズして生成
-	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
-	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
+	// ルートシグネチャをシリアライズ
+	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob;
+	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
 
-	hr = D3D12SerializeRootSignature(&descriptionRootSignature,
-		D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
+	hr = D3D12SerializeRootSignature(
+		&descriptionRootSignature,
+		D3D_ROOT_SIGNATURE_VERSION_1,
+		&signatureBlob,
+		&errorBlob);
+
 	if (FAILED(hr)) {
 		Logger::Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
 		assert(false);
 	}
 
-	rootSignature_ = nullptr;
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
-		signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
+	// ルートシグネチャを作成
+	hr = dxCommon_->GetDevice()->CreateRootSignature(
+		0,
+		signatureBlob->GetBufferPointer(),
+		signatureBlob->GetBufferSize(),
+		IID_PPV_ARGS(&rootSignature_));
 	assert(SUCCEEDED(hr));
 
-	// 頂点入力レイアウトを設定（POSITION, TEXCOORD）
-	inputElementDescs_[0].SemanticName = "POSITION";
-	inputElementDescs_[0].SemanticIndex = 0;
+	// 入力レイアウトを設定
+	inputElementDescs_[0].SemanticName = kSemanticPosition;
+	inputElementDescs_[0].SemanticIndex = kSemanticIndex;
 	inputElementDescs_[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	inputElementDescs_[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
-	inputElementDescs_[1].SemanticName = "TEXCOORD";
-	inputElementDescs_[1].SemanticIndex = 0;
+	inputElementDescs_[1].SemanticName = kSemanticTexcoord;
+	inputElementDescs_[1].SemanticIndex = kSemanticIndex;
 	inputElementDescs_[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 	inputElementDescs_[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
 	inputLayoutDesc_.pInputElementDescs = inputElementDescs_;
-	inputLayoutDesc_.NumElements = _countof(inputElementDescs_);
+	inputLayoutDesc_.NumElements = SpriteCommonDefaults::kInputElementCount;
 
-	// ブレンド設定（アルファ混合）
-	blendDesc_.RenderTarget[0].BlendEnable = TRUE;
+	// ブレンド設定
+	blendDesc_.RenderTarget[0].BlendEnable = kBlendEnable;
 	blendDesc_.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
 	blendDesc_.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
 	blendDesc_.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
@@ -151,20 +187,20 @@ void SpriteCommon::RootSignatureInitialize()
 	blendDesc_.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
 	// ラスタライザ設定
-	rasterizerDesc_.CullMode = D3D12_CULL_MODE_NONE;
-	rasterizerDesc_.FillMode = D3D12_FILL_MODE_SOLID;
+	rasterizerDesc_.CullMode = kCullModeNone;
+	rasterizerDesc_.FillMode = kFillModeSolid;
 
-	// シェーダをコンパイルしてバイナリを保存（VS, PS）
-	vertexShaderBlob_ = dxCommon_->CompileShader(L"Resources/shaders/Sprite.VS.hlsl", L"vs_6_0");
+	// シェーダをコンパイル
+	vertexShaderBlob_ = dxCommon_->CompileShader(kVertexShaderPath, kVertexShaderModel);
 	assert(vertexShaderBlob_ != nullptr);
 
-	pixelShaderBlob_ = dxCommon_->CompileShader(L"Resources/shaders/Sprite.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob_ = dxCommon_->CompileShader(kPixelShaderPath, kPixelShaderModel);
 	assert(pixelShaderBlob_ != nullptr);
 
-	// デプスステンシル設定（Depth 有効、書き込み有効、比較関数 LessEqual）
-	depthStencilDesc_.DepthEnable = true;
-	depthStencilDesc_.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc_.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	// デプスステンシル設定
+	depthStencilDesc_.DepthEnable = kDepthEnable;
+	depthStencilDesc_.DepthWriteMask = kDepthWriteMaskAll;
+	depthStencilDesc_.DepthFunc = kDepthFuncLessEqual;
 }
 
 // グラフィックスパイプライン（PSO）を作成
@@ -172,8 +208,10 @@ void SpriteCommon::RootSignatureInitialize()
 // - 生成された graphicsPipelineState_ をメンバに保持する
 void SpriteCommon::GraphicsPipelineInitialize()
 {
+	// ルートシグネチャを初期化
 	RootSignatureInitialize();
-	HRESULT hr;
+
+	// パイプラインステート記述子を作成
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 	graphicsPipelineStateDesc.pRootSignature = rootSignature_.Get();
 	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc_;
@@ -183,14 +221,16 @@ void SpriteCommon::GraphicsPipelineInitialize()
 	graphicsPipelineStateDesc.PS = { pixelShaderBlob_->GetBufferPointer(), pixelShaderBlob_->GetBufferSize() };
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc_;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-
 	graphicsPipelineStateDesc.NumRenderTargets = SpriteCommonDefaults::kRenderTargetCount;
 	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	graphicsPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	graphicsPipelineStateDesc.SampleDesc.Count = SpriteCommonDefaults::kSampleCount;
 	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
-	hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState_));
+	// パイプラインステートを作成
+	HRESULT hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(
+		&graphicsPipelineStateDesc,
+		IID_PPV_ARGS(&graphicsPipelineState_));
 	assert(SUCCEEDED(hr));
 }
 

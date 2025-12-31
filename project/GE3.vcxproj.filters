@@ -173,5 +173,11 @@
     <None Include="resources\shaders\Sprite.hlsli" />
     <None Include="resources\test.json" />
     <None Include="tools\level_editor\__init__.py" />
+    <None Include="resources\enemyParameters.json" />
+    <None Include="resources\enemyAttackParameters.json" />
+    <None Include="resources\enemyBulletParameters.json" />
+    <None Include="resources\playerParameters.json" />
+    <None Include="resources\playerBulletParameters.json" />
+    <None Include="resources\playerChargeBulletParameters.json" />
   </ItemGroup>
 </Project>

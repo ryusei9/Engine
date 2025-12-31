@@ -1,0 +1,15 @@
+{
+  "damage": 30.0,
+  "radius": 0.5,
+  "scaleFactor": 10.0,
+  "serialStart": 1,
+  "baseBullet": {
+    "lifeFrames": 360,
+    "speed": 0.25,
+    "radius": 0.5,
+    "initScale": [1.0, 1.0, 1.0],
+    "initRotate": [0.0, 0.0, 0.0],
+    "velocityDirection": [1.0, 0.0, 0.0],
+    "modelFileName": "player_bullet.obj"
+  }
+}

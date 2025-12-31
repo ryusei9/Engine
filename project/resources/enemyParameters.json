@@ -1,0 +1,19 @@
+{
+  "moveSpeed": 0.1,
+  "initialHp": 1,
+  "respawnTimeSec": 3.0,
+  "colliderRadius": 0.1,
+  "shotIntervalSec": 5.0,
+  "deathDurationSec": 1.0,
+  "fallSpeed": -0.02,
+  "rotationSpeed": 0.01,
+  "smokeParticleRate": 60,
+  "smokeParticleCount": 3,
+  "deathParticleRate": 8,
+  "deathParticleCount": 8,
+  "hitParticleRate": 1,
+  "hitParticleCount": 0,
+  "smokePower": 2.0,
+  "smokePowerMultiplier": 0.1,
+  "smokeUpwardForce": 2.0
+}

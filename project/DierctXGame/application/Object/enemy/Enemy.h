@@ -4,7 +4,13 @@
 #include <ParticleEmitter.h>
 #include <EnemyBullet.h>
 #include "EnemyAttack.h"
-class Player; // 前方宣言
+#include <memory>
+#include <list>
+#include <cstdint>
+#include <string>
+
+// 前方宣言
+class Player;
 
 /// <summary>
 /// 敵キャラクターの調整用定数（マジックナンバー排除）
@@ -22,6 +28,36 @@ namespace EnemyDefaults {
 }
 
 /// <summary>
+/// 敵の調整パラメータ構造体（JSONから読み込み）
+/// </summary>
+struct EnemyParameters {
+	// 基本パラメータ
+	float moveSpeed = EnemyDefaults::kMoveSpeed;
+	int32_t initialHp = EnemyDefaults::kInitialHp;
+	float respawnTimeSec = EnemyDefaults::kRespawnTimeSec;
+	float colliderRadius = EnemyDefaults::kColliderRadius;
+	float shotIntervalSec = EnemyDefaults::kShotIntervalSec;
+	
+	// 死亡演出パラメータ
+	float deathDurationSec = EnemyDefaults::kDeathDurationSec;
+	float fallSpeed = EnemyDefaults::kFallSpeed;
+	float rotationSpeed = EnemyDefaults::kRotationSpeed;
+	
+	// パーティクルパラメータ
+	int smokeParticleRate = 60;
+	int smokeParticleCount = 3;
+	int deathParticleRate = 8;
+	int deathParticleCount = 8;
+	int hitParticleRate = 1;
+	int hitParticleCount = 0;
+	
+	// 煙エフェクトパラメータ
+	float smokePower = 2.0f;
+	float smokePowerMultiplier = 0.1f;
+	float smokeUpwardForce = 2.0f;
+};
+
+/// <summary>
 /// 敵キャラクタークラス
 /// </summary>
 class Enemy : public BaseCharacter
@@ -36,11 +72,15 @@ public:
 	};
 
 	/*------メンバ関数------*/
+
 	// コンストラクタ
 	Enemy();
 
 	// 初期化
 	void Initialize() override;
+
+	// パラメータファイルから初期化
+	void Initialize(const std::string& parameterFileName);
 
 	// 更新
 	void Update() override;
@@ -83,25 +123,35 @@ public:
 	// 敵のステートを取得
 	EnemyState GetState() const { return state_; }
 
+	// エネミー操作有効化フラグの取得
+	bool GetControlEnabled() const { return controlEnabled_; }
+
+	// コライダーIDの取得
+	int GetColliderId() const { return colliderId_; }
+
+	// パラメータの取得
+	const EnemyParameters& GetParameters() const { return parameters_; }
+
 	/*------セッター------*/
 
 	// プレイヤーへのポインタを設定
 	void SetPlayer(Player* player) { player_ = player; }
 
-	// エネミー操作有効化フラグの取得
-	bool GetControlEnabled() const { return controlEnabled_; }
-
 	// エネミー操作有効化フラグの設定
 	void SetControlEnabled(bool enabled) { controlEnabled_ = enabled; } 
-
-	// コライダーIDの取得
-	int GetColliderId() const { return colliderId_; }
 
 	// Z軸の座標を設定
 	void SetZ(float z) { worldTransform_.translate_.z = z; }
 
+	// パラメータの設定
+	void SetParameters(const EnemyParameters& parameters);
+
 private:
 	/*------メンバ変数------*/
+
+	// 敵の調整パラメータ（JSONから読み込み）
+	EnemyParameters parameters_;
+
 	// 敵の移動速度
 	float moveSpeed_ = EnemyDefaults::kMoveSpeed;
 
@@ -140,7 +190,11 @@ private:
 
 	// 敵の弾リスト
 	std::list<std::unique_ptr<EnemyBullet>> bullets_;
-	float shotInterval_ = EnemyDefaults::kShotIntervalSec; // 発射間隔（秒）
+
+	// 発射間隔（秒）
+	float shotInterval_ = EnemyDefaults::kShotIntervalSec;
+
+	// 発射タイマー
 	float shotTimer_ = 0.0f;
 
 	// 敵の攻撃パターン
@@ -158,10 +212,16 @@ private:
 	// ステート用変数
 	EnemyState state_ = EnemyState::Alive;
 
-	// 死亡演出用変数
-	float deathTimer_ = EnemyDefaults::kDeathDurationSec; // 落下演出 duration
-	float fallSpeed_ = EnemyDefaults::kFallSpeed;         // 落下速度
-	float rotationSpeed_ = EnemyDefaults::kRotationSpeed; // 回転速度
+	// 落下演出 duration
+	float deathTimer_ = EnemyDefaults::kDeathDurationSec;
+
+	// 落下速度
+	float fallSpeed_ = EnemyDefaults::kFallSpeed;
+
+	// 回転速度
+	float rotationSpeed_ = EnemyDefaults::kRotationSpeed;
+
+	// 死亡エフェクト再生フラグ
 	bool deathEffectPlayed_ = false;
 };
 

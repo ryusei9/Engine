@@ -3,7 +3,12 @@
 #include <CollisionTypeIdDef.h>
 #include <PlayerBullet.h>
 #include <PlayerChargeBullet.h>
+#include "JsonLoader.h"
+#include <cmath>
+
+#ifdef USE_IMGUI
 #include <imgui.h>
+#endif
 
 Player::Player()
 {
@@ -15,6 +20,20 @@ Player::Player()
 
 void Player::Initialize()
 {
+	// デフォルトパラメータで初期化
+	Initialize("playerParameters");
+}
+
+void Player::Initialize(const std::string& parameterFileName)
+{
+	// パラメータファイルから読み込み
+	parameters_ = JsonLoader::LoadPlayerParameters(parameterFileName);
+
+	// パラメータを各メンバ変数に適用
+	moveSpeed_ = parameters_.moveSpeed;
+	radius_ = parameters_.radius;
+	respawnTimer_ = parameters_.respawnWaitSec;
+
 	// プレイヤーの初期化
 	BaseCharacter::Initialize();
 
@@ -23,27 +42,28 @@ void Player::Initialize()
 
 	worldTransform_.Initialize();
 	// 初期Transform
-	worldTransform_.SetScale(PlayerDefaults::kInitScale);
-	worldTransform_.SetRotate(PlayerDefaults::kInitRotate);
-	worldTransform_.SetTranslate(PlayerDefaults::kInitTranslate);
+	worldTransform_.SetScale(parameters_.initScale);
+	worldTransform_.SetRotate(parameters_.initRotate);
+	worldTransform_.SetTranslate(parameters_.initTranslate);
 
 	// プレイヤーのカメラを取得
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
 
 	// 3Dオブジェクト
 	object3d_ = std::make_unique<Object3d>();
-	object3d_->Initialize("player.obj");
+	object3d_->Initialize(parameters_.modelFileName);
 
-	SetRadius(radius_); // コライダーの半径を設定
+	SetRadius(parameters_.radius); // コライダーの半径を設定
 
 	// パーティクルグループの作成
-	particleManager_->GetInstance()->CreateParticleGroup("thruster", "resources/circle2.png");
-	particleManager_->GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
+	particleManager_ = ParticleManager::GetInstance();
+	particleManager_->CreateParticleGroup("thruster", parameters_.thrusterTexture);
+	particleManager_->CreateParticleGroup("explosion", parameters_.explosionTexture);
 
 	// エミッター初期化
 	thrusterEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "thruster");
-	thrusterEmitter_->SetParticleRate(PlayerDefaults::kThrusterRate);
-	thrusterEmitter_->SetParticleCount(PlayerDefaults::kThrusterCount);
+	thrusterEmitter_->SetParticleRate(parameters_.thrusterRate);
+	thrusterEmitter_->SetParticleCount(parameters_.thrusterCount);
 	thrusterEmitter_->SetThruster(true); // スラスターエミッターを有効化
 
 	explosionEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "explosion");
@@ -80,13 +100,13 @@ void Player::Update()
 	float yRad = worldTransform_.GetRotate().y;
 	Vector3 leftDir = { -std::cos(yRad), 0.0f, std::sin(yRad) };
 
-	// 勢いの強さ（調整式は必要なら定数化）
-	float power = 2.0f + velocity_.x * 1.5f;
+	// 勢いの強さ（パラメータから取得）
+	float power = parameters_.thrusterBasePower + velocity_.x * parameters_.thrusterVelocityMultiplier;
 	Vector3 particleVelocity = leftDir * power;
 
 	// パーティクル更新
 	const Vector3& pos = worldTransform_.GetTranslate();
-	thrusterEmitter_->SetPosition(pos - Vector3(PlayerDefaults::kThrusterOffsetX, 0.0f, 0.0f));
+	thrusterEmitter_->SetPosition(pos - Vector3(parameters_.thrusterOffsetX, 0.0f, 0.0f));
 	thrusterEmitter_->SetVelocity(particleVelocity);
 	thrusterEmitter_->Update();
 
@@ -104,9 +124,13 @@ void Player::Update()
 void Player::Draw()
 {
 	// 死亡していなければ描画
-	if (!isAlive_) return;
+	if (!isAlive_) {
+		return;
+	}
 	BaseCharacter::Draw();
-	for (auto& bullet : bullets_) bullet->Draw();
+	for (auto& bullet : bullets_) {
+		bullet->Draw();
+	}
 }
 
 void Player::Move()
@@ -115,10 +139,18 @@ void Player::Move()
 	velocity_ = { 0.0f, 0.0f, 0.0f };
 
 	// 入力
-	if (input_->PushKey(DIK_W)) { velocity_.y += moveSpeed_; }
-	if (input_->PushKey(DIK_S)) { velocity_.y -= moveSpeed_; }
-	if (input_->PushKey(DIK_A)) { velocity_.x -= moveSpeed_; }
-	if (input_->PushKey(DIK_D)) { velocity_.x += moveSpeed_; }
+	if (input_->PushKey(DIK_W)) { 
+		velocity_.y += moveSpeed_; 
+	}
+	if (input_->PushKey(DIK_S)) { 
+		velocity_.y -= moveSpeed_; 
+	}
+	if (input_->PushKey(DIK_A)) { 
+		velocity_.x -= moveSpeed_; 
+	}
+	if (input_->PushKey(DIK_D)) { 
+		velocity_.x += moveSpeed_; 
+	}
 
 	// 速度を座標に反映
 	worldTransform_.SetTranslate(worldTransform_.GetTranslate() + velocity_);
@@ -133,7 +165,7 @@ void Player::Attack()
 			chargeTime_ = 0.0f;
 		}
 		chargeTime_ += PlayerDefaults::kDelta60Hz; // 1フレーム分加算
-		if (chargeTime_ >= PlayerDefaults::kChargeReadySec) {
+		if (chargeTime_ >= parameters_.chargeReadySec) {
 			chargeReady_ = true;
 		}
 	}
@@ -141,14 +173,14 @@ void Player::Attack()
 		// チャージショット
 		if (isCharging_ && chargeReady_) {
 			auto chargeBullet = std::make_unique<PlayerChargeBullet>();
-			chargeBullet->Initialize(worldTransform_.GetTranslate());
+			chargeBullet->Initialize(worldTransform_.GetTranslate(), "playerChargeBulletParameters");
 			chargeBullet->Update();
 			bullets_.push_back(std::move(chargeBullet));
 		}
 		// 通常ショット
-		else if (isCharging_ && chargeTime_ < PlayerDefaults::kChargeReadySec) {
+		else if (isCharging_ && chargeTime_ < parameters_.chargeReadySec) {
 			auto bullet = std::make_unique<PlayerBullet>();
-			bullet->Initialize(worldTransform_.GetTranslate());
+			bullet->Initialize(worldTransform_.GetTranslate(), "playerBulletParameters");
 			bullet->Update();
 			bullets_.push_back(std::move(bullet));
 		}
@@ -165,13 +197,14 @@ void Player::OnCollision(Collider* other)
 		if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy) ||
 			other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyBullet)) {
 			isAlive_ = false;
-			respawnTimer_ = PlayerDefaults::kRespawnWaitSec;
+			respawnTimer_ = parameters_.respawnWaitSec;
 			PlayDeathParticleOnce();
 		}
 	}
 }
 
-void Player::DrawImGui() {
+void Player::DrawImGui()
+{
 #ifdef USE_IMGUI
 	object3d_->DrawImGui();
 	ImGui::Begin("Player Info");
@@ -184,18 +217,28 @@ void Player::DrawImGui() {
 
 Vector3 Player::GetCenterPosition() const
 {
-	const Vector3 offset = { 0.0f, 0.0f, 0.0f }; // プレイヤーの中心を考慮
+	const Vector3 offset = { 0.0f, 0.0f, 0.0f };
 	return worldTransform_.GetTranslate() + offset;
 }
 
-void Player::PlayDeathParticleOnce() {
+void Player::PlayDeathParticleOnce()
+{
 	if (!hasPlayedDeathParticle_) {
 		if (explosionEmitter_) {
 			explosionEmitter_->SetPosition(worldTransform_.GetTranslate());
-			explosionEmitter_->SetParticleRate(static_cast<uint32_t>(PlayerDefaults::kExplosionRate));
-			explosionEmitter_->SetParticleCount(PlayerDefaults::kExplosionCount);
+			explosionEmitter_->SetParticleRate(static_cast<uint32_t>(parameters_.explosionRate));
+			explosionEmitter_->SetParticleCount(parameters_.explosionCount);
 			explosionEmitter_->Update();
 		}
 		hasPlayedDeathParticle_ = true;
 	}
+}
+
+void Player::SetParameters(const PlayerParameters& parameters)
+{
+	parameters_ = parameters;
+	// パラメータを各メンバ変数に適用
+	moveSpeed_ = parameters_.moveSpeed;
+	radius_ = parameters_.radius;
+	SetRadius(parameters_.radius);
 }

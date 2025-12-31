@@ -1,0 +1,23 @@
+{
+  "fanMoveSpeedY": 0.02,
+  "fanMoveRangeY": 2.0,
+  "fanShotIntervalSec": 2.0,
+  "fanShotCount": 5,
+  "fanBaseAngle": 3.1415926535,
+  "fanSpread": 1.0471975512,
+  "fanBulletSpeed": 0.15,
+  "aimedShotIntervalSec": 2.0,
+  "aimedBulletSpeed": 0.18,
+  "bulletSpeedScale": 0.5,
+  "aimedMinLen": 0.01,
+  "rushStartX": 5.0,
+  "rushSpeedX": 0.08,
+  "rushShotIntervalSec": 0.3,
+  "rushRingCount": 12,
+  "rushRingSpeed": 0.13,
+  "rushLeftEndX": -4.0,
+  "rushRespawnX": 4.0,
+  "rushResetX": 3.0,
+  "pattern1DurationSec": 10.0,
+  "waitEasingDurationSec": 2.0
+}

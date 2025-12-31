@@ -5,15 +5,40 @@
 #include "MakePerspectiveFovMatrix.h"
 #include "Multiply.h"
 #include "MakeOrthographicMatrix.h"
+#include <cassert>
 
-/// 初期化
-/// - dxCommon を保存し、テクスチャパスをメンバに保持する
-/// - 頂点 / マテリアル / WVP のバッファを作成し、テクスチャサイズに合わせてスプライトサイズを設定する
-/// - 副作用: GPU 用バッファを確保して Map する
+namespace {
+	// 頂点インデックスの定義（ファイル内限定）
+	constexpr uint32_t kTriangle1Index0 = 0;
+	constexpr uint32_t kTriangle1Index1 = 1;
+	constexpr uint32_t kTriangle1Index2 = 2;
+	constexpr uint32_t kTriangle2Index0 = 1;
+	constexpr uint32_t kTriangle2Index1 = 3;
+	constexpr uint32_t kTriangle2Index2 = 2;
+
+	// アンカーポイント計算用定数
+	constexpr float kAnchorLeft = 0.0f;
+	constexpr float kAnchorRight = 1.0f;
+	constexpr float kAnchorTop = 0.0f;
+	constexpr float kAnchorBottom = 1.0f;
+
+	// 法線ベクトル（スプライトは常に-Z方向）
+	constexpr Vector3 kSpriteNormal = { 0.0f, 0.0f, -1.0f };
+
+	// スプライトのZ座標（常に0）
+	constexpr float kSpriteDepth = 0.0f;
+
+	// 同次座標のW成分
+	constexpr float kHomogeneousW = 1.0f;
+
+	// スプライトのZ軸スケール（常に1）
+	constexpr float kSpriteScaleZ = 1.0f;
+}
+
 void Sprite::Initialize(DirectXCommon* dxCommon, std::string textureFilePath)
 {
 	dxCommon_ = dxCommon;
-	filePath_ = textureFilePath; // メンバー変数に値を設定
+	filePath_ = textureFilePath;
 	
 	// 頂点データの作成
 	CreateVertexData();
@@ -28,203 +53,202 @@ void Sprite::Initialize(DirectXCommon* dxCommon, std::string textureFilePath)
 	AdjustTextureSize();
 }
 
-/// 毎フレーム更新
-/// - アンカーポイント・テクスチャ領域に基づいて頂点／インデックスデータを更新する
-/// - ワールド行列（スプライトの位置・回転・スケール）を計算して WVP を更新する
-/// - 入力: メンバ変数 `position_`/`size_`/`rotation_`/`anchorPoint_`/`textureLeftTop_`/`textureSize_`
-/// - 出力: `vertexData_`（GPU マップ済み領域）、`transformationMatrixData_`（WVP）
 void Sprite::Update()
 {
-	float left = 0.0f - anchorPoint_.x;
-	float right = 1.0f - anchorPoint_.x;
-	float top = 0.0f - anchorPoint_.y;
-	float bottom = 1.0f - anchorPoint_.y;
+	// アンカーポイントを考慮した頂点座標の計算
+	float left = kAnchorLeft - anchorPoint_.x;
+	float right = kAnchorRight - anchorPoint_.x;
+	float top = kAnchorTop - anchorPoint_.y;
+	float bottom = kAnchorBottom - anchorPoint_.y;
 
+	// テクスチャメタデータの取得
 	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(filePath_);
-	float tex_left = textureLeftTop_.x / metadata.width;
-	float tex_right = (textureLeftTop_.x + textureSize_.x) / metadata.width;
-	float tex_top = textureLeftTop_.y / metadata.height;
-	float tex_bottom = (textureLeftTop_.y + textureSize_.y) / metadata.height;
+	
+	// テクスチャ座標の正規化
+	float tex_left = textureLeftTop_.x / static_cast<float>(metadata.width);
+	float tex_right = (textureLeftTop_.x + textureSize_.x) / static_cast<float>(metadata.width);
+	float tex_top = textureLeftTop_.y / static_cast<float>(metadata.height);
+	float tex_bottom = (textureLeftTop_.y + textureSize_.y) / static_cast<float>(metadata.height);
 
 	// 左右反転
 	if (isFlipX_) {
 		left = -left;
 		right = -right;
 	}
+	
 	// 上下反転
 	if (isFlipY_) {
 		top = -top;
 		bottom = -bottom;
 	}
 
-	// 頂点リソースにデータを書き込む
-	vertexData_[0].position = { left, bottom, 0.0f, 1.0f };
+	// 頂点データの更新（左下、左上、右下、右上の順）
+	vertexData_[0].position = { left, bottom, kSpriteDepth, kHomogeneousW };
 	vertexData_[0].texcoord = { tex_left, tex_bottom };
-	vertexData_[0].normal = { 0.0f, 0.0f, -1.0f };
-	vertexData_[1].position = { left, top, 0.0f, 1.0f };
-	vertexData_[1].texcoord = { tex_left, tex_top };
-	vertexData_[1].normal = { 0.0f, 0.0f, -1.0f };
-	vertexData_[2].position = { right, bottom, 0.0f, 1.0f };
-	vertexData_[2].texcoord = { tex_right, tex_bottom };
-	vertexData_[2].normal = { 0.0f, 0.0f, -1.0f };
-	vertexData_[3].position = { right, top, 0.0f, 1.0f };
-	vertexData_[3].texcoord = { tex_right, tex_top };
-	vertexData_[3].normal = { 0.0f, 0.0f, -1.0f };
+	vertexData_[0].normal = kSpriteNormal;
 
-	// インデックスリソースにデータを書き込む
-	indexData_[0] = 0; indexData_[1] = 1; indexData_[2] = 2;
-	indexData_[3] = 1; indexData_[4] = 3; indexData_[5] = 2;
+	vertexData_[1].position = { left, top, kSpriteDepth, kHomogeneousW };
+	vertexData_[1].texcoord = { tex_left, tex_top };
+	vertexData_[1].normal = kSpriteNormal;
+
+	vertexData_[2].position = { right, bottom, kSpriteDepth, kHomogeneousW };
+	vertexData_[2].texcoord = { tex_right, tex_bottom };
+	vertexData_[2].normal = kSpriteNormal;
+
+	vertexData_[3].position = { right, top, kSpriteDepth, kHomogeneousW };
+	vertexData_[3].texcoord = { tex_right, tex_top };
+	vertexData_[3].normal = kSpriteNormal;
+
+	// インデックスデータの更新（三角形1、三角形2）
+	indexData_[0] = kTriangle1Index0;
+	indexData_[1] = kTriangle1Index1;
+	indexData_[2] = kTriangle1Index2;
+	indexData_[3] = kTriangle2Index0;
+	indexData_[4] = kTriangle2Index1;
+	indexData_[5] = kTriangle2Index2;
 
 	// Transform変数を作る
 	Transform transform{
-		{size_.x, size_.y, 1.0f},
+		{size_.x, size_.y, kSpriteScaleZ},
 		{0.0f, 0.0f, rotation_},
-		{position_.x, position_.y, 0.0f}
+		{position_.x, position_.y, kSpriteDepth}
 	};
 
+	// ワールド・ビュー・プロジェクション行列の計算
 	Matrix4x4 worldMatrix = MakeAffineMatrix::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 	Matrix4x4 viewMatrix = MakeIdentity4x4::MakeIdentity4x4();
 	Matrix4x4 projectionMatrix = MakeOrthographicMatrix::MakeOrthographicMatrix(
 		0.0f, 0.0f,
-		float(WinApp::kClientWidth), float(WinApp::kClientHeight),
-		SpriteDefaults::kOrthoNear, SpriteDefaults::kOrthoFar);
+		static_cast<float>(WinApp::kClientWidth),
+		static_cast<float>(WinApp::kClientHeight),
+		SpriteDefaults::kOrthoNear,
+		SpriteDefaults::kOrthoFar);
 
 	transformationMatrixData_->wvp = Multiply::Multiply(worldMatrix, Multiply::Multiply(viewMatrix, projectionMatrix));
 	transformationMatrixData_->world = worldMatrix;
 }
 
-/// 描画
-/// - 頂点／インデックスビューをコマンドリストにバインドし、マテリアル・WVP・テクスチャをルートに設定して描画コマンドを発行する
-/// - 前提: `vertexResource_`／`indexResource_`／`materialResource_`／`wvpResource_` が有効であること
 void Sprite::Draw()
 {
-	// VBVを設定
+	// 頂点バッファビューを設定
 	dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView_);
+	
+	// インデックスバッファビューを設定
 	dxCommon_->GetCommandList()->IASetIndexBuffer(&indexBufferView_);
 
-	// 第一引数の0はRootParameter配列の0番目
+	// マテリアルCBufferの場所を設定（RootParameter配列の0番目）
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
 
-	// wvp用のCBufferの場所を設定
+	// WVP用CBufferの場所を設定（RootParameter配列の1番目）
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource_->GetGPUVirtualAddress());
 
+	// テクスチャDescriptorTableを設定（RootParameter配列の2番目）
 	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(filePath_));
-	// 描画
+	
+	// 描画コマンド（インデックス付き描画）
 	dxCommon_->GetCommandList()->DrawIndexedInstanced(SpriteDefaults::kIndexCount, 1, 0, 0, 0);
 }
 
-/// GPU 用バッファ作成ユーティリティ
-/// - device に対して Upload ヒープでコミット済みバッファを作成し返す
-/// - 成功を assert しているため、呼び出し元は失敗しない前提で使用する
 Microsoft::WRL::ComPtr<ID3D12Resource> Sprite::CreateBufferResource(const Microsoft::WRL::ComPtr<ID3D12Device>& device, size_t sizeInBytes)
 {
 	// DXGIファクトリーの生成
 	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory = nullptr;
-	// 関数が成功したかどうか
 	HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
-	// 頂点リソース用のヒープの設定
-	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
+	assert(SUCCEEDED(hr));
 
-	// UploadHeapを使う
+	// ヒーププロパティの設定（UploadHeap）
+	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
 	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
 
-	// 頂点リソースの設定
+	// リソースデスクの設定（バッファリソース）
 	D3D12_RESOURCE_DESC resourceDesc{};
-
-	// バッファリソース。テクスチャの場合はまた別の設定をする
 	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	// リソースのサイズ
 	resourceDesc.Width = sizeInBytes;
-
-	// バッファの場合はこれらは1にする決まり
 	resourceDesc.Height = 1;
 	resourceDesc.DepthOrArraySize = 1;
 	resourceDesc.MipLevels = 1;
 	resourceDesc.SampleDesc.Count = 1;
-
-	// バッファの場合はこれにする決まり
 	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
-	// 実際に頂点リソースを作る
+	// リソースの作成
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
-	hr = device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE,
-		&resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource));
+	hr = device->CreateCommittedResource(
+		&uploadHeapProperties,
+		D3D12_HEAP_FLAG_NONE,
+		&resourceDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&resource));
 	assert(SUCCEEDED(hr));
+
 	return resource;
 }
 
-/// 頂点 / インデックス用バッファの作成と Map
-/// - vertexResource_/indexResource_ を確保し、vertexData_/indexData_ へマップする
-/// - VertexData 構造のレイアウトに合わせて VertexBufferView / IndexBufferView を設定する
 void Sprite::CreateVertexData()
 {
+	// 頂点リソースの作成
 	vertexResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(VertexData) * SpriteDefaults::kVertexCount);
+	
+	// インデックスリソースの作成
 	indexResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(uint32_t) * SpriteDefaults::kIndexCount);
 
-	// リソースの先頭のアドレスから使う
+	// 頂点バッファビューの設定
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
-	// 使用するリソースのサイズは頂点6つ分のサイズ
 	vertexBufferView_.SizeInBytes = sizeof(VertexData) * SpriteDefaults::kVertexCount;
-	// 1頂点当たりのサイズ
 	vertexBufferView_.StrideInBytes = sizeof(VertexData);
 
-	// リソースの先頭のアドレスから使う
+	// インデックスバッファビューの設定
 	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
-
-	// 使用するリソースのサイズはインデックス6つ分のサイズ
 	indexBufferView_.SizeInBytes = sizeof(uint32_t) * SpriteDefaults::kIndexCount;
-
-	// インデックスはuint_32とする
 	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
 
-	// 書き込むためのアドレスを取得
+	// 頂点データのマッピング
 	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
 
+	// インデックスデータのマッピング
 	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
 }
 
-/// マテリアル用定数バッファの作成と初期化
-/// - materialResource_ を確保し materialData_ にマップしてデフォルト値を書き込む
 void Sprite::CreateMaterialData()
 {
+	// マテリアルリソースの作成
 	materialResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(Material));
 
-	// ...Mapしてデータを書き込む。色は白を設定しておくといい
+	// マテリアルデータのマッピング
 	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 
+	// 初期カラーの設定（白）
 	materialData_->color = SpriteDefaults::kInitColor;
 
-	// SpriteはLightingしないのでfalseを設定する
+	// スプライトはライティングしない
 	materialData_->enableLighting = false;
 
-	// 単位行列で初期化
+	// UV変換行列を単位行列で初期化
 	materialData_->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
 }
 
-/// WVP 用定数バッファの作成
-/// - wvpResource_ を確保し transformationMatrixData_ をマップして単位行列で初期化する
 void Sprite::CreateWVPData()
 {
+	// WVPリソースの作成
 	wvpResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(TransformationMatrix));
 
-	// 書き込むためのアドレスを取得
+	// WVPデータのマッピング
 	wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData_));
 
-	// 単位行列を書き込んでおく
+	// 単位行列で初期化
 	transformationMatrixData_->wvp = MakeIdentity4x4::MakeIdentity4x4();
 	transformationMatrixData_->world = MakeIdentity4x4::MakeIdentity4x4();
 }
 
-/// テクスチャ情報からスプライトの `size_` を自動設定する
-/// - TextureManager からテクスチャメタデータを取得して `textureSize_` に反映
-/// - 初期はスプライトの `size_` をテクスチャサイズに合わせる
 void Sprite::AdjustTextureSize()
 {
 	// テクスチャメタデータを取得
 	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(filePath_);
 
+	// テクスチャサイズを設定
 	textureSize_.x = static_cast<float>(metadata.width);
 	textureSize_.y = static_cast<float>(metadata.height);
-	// 画像サイズをテクスチャサイズに合わせる
+
+	// スプライトサイズをテクスチャサイズに合わせる
 	size_ = textureSize_;
 }

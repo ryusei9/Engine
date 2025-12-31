@@ -1,21 +1,15 @@
 #include "ModelManager.h"
 
-//
-// ModelManager: 3Dモデルの読み込み・管理を行うシングルトン
-// - 生のファイルパス（キー）でモデルを1つだけ読み込み、内部 map に保持する。
-// - 他モジュールは GetInstance()->FindModel(filePath) でポインタを取得して描画等に利用する。
-// - 実装の注意点:
-//   - 現状はスレッドセーフではない（呼び出しはメインスレッド前提）
-//   - モデルのライフタイムは ModelManager が所有する unique_ptr によって管理される
-//
-
-using namespace ModelManagerConstants;
+namespace {
+	using namespace ModelManagerConstants;
+}
 
 std::shared_ptr<ModelManager> ModelManager::sInstance_ = nullptr;
 
 // シングルトン取得
 // - 初回呼び出し時にインスタンスを生成して返す
-std::shared_ptr<ModelManager> ModelManager::GetInstance() {
+std::shared_ptr<ModelManager> ModelManager::GetInstance()
+{
 	if (sInstance_ == nullptr) {
 		sInstance_ = std::make_shared<ModelManager>();
 	}
@@ -27,6 +21,7 @@ std::shared_ptr<ModelManager> ModelManager::GetInstance() {
 // - 呼び出しタイミング: アプリ開始時など 1 回
 void ModelManager::Initialize()
 {
+	// ModelCommon を生成して初期化
 	modelCommon_ = std::make_unique<ModelCommon>();
 	modelCommon_->Initialize(DirectXCommon::GetInstance());
 }
@@ -40,7 +35,7 @@ void ModelManager::Initialize()
 // - 副作用: TextureManager によるテクスチャ読み込み等は Model::Initialize 内で発生する
 void ModelManager::LoadModel(const std::string& filePath)
 {
-	// 読み込み済みかチェック（存在するなら再読み込みを行わない）
+	// 読み込み済みかチェック（冪等性の保証）
 	if (IsModelLoaded(filePath)) {
 		return;
 	}
@@ -48,7 +43,7 @@ void ModelManager::LoadModel(const std::string& filePath)
 	// Model を生成して初期化
 	std::unique_ptr<Model> model = CreateAndInitializeModel(filePath);
 
-	// マップに格納（所有権を移動）
+	// マップに登録（所有権を移動）
 	RegisterModel(filePath, std::move(model));
 }
 
@@ -57,6 +52,7 @@ void ModelManager::LoadModel(const std::string& filePath)
 // - 見つからなければ nullptr を返す（呼び出し側で nullptr チェックが必要）。
 Model* ModelManager::FindModel(const std::string& filePath)
 {
+	// マップから検索
 	if (models_.contains(filePath)) {
 		return models_.at(filePath).get();
 	}
@@ -67,6 +63,7 @@ Model* ModelManager::FindModel(const std::string& filePath)
 // - 現状は明示的な処理なし。ただし将来的にリソース解放や map の clear を入れる場所
 void ModelManager::Finalize()
 {
+	// 全モデルを解放
 	models_.clear();
 	modelCommon_.reset();
 }
@@ -75,6 +72,7 @@ void ModelManager::Finalize()
 // - GetModel と FindModel の機能は重複するが、コードベースの呼び出し方に合わせて両方用意している
 Model* ModelManager::GetModel(const std::string& fileName)
 {
+	// FindModel のエイリアス
 	return FindModel(fileName);
 }
 

@@ -266,6 +266,12 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\enemyAttackParameters.json" />
+    <None Include="resources\enemyBulletParameters.json" />
+    <None Include="resources\enemyParameters.json" />
+    <None Include="resources\playerBulletParameters.json" />
+    <None Include="resources\playerChargeBulletParameters.json" />
+    <None Include="resources\playerParameters.json" />
     <None Include="resources\shaders\Particle.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

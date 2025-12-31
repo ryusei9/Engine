@@ -1,0 +1,19 @@
+{
+  "moveSpeed": 0.1,
+  "radius": 0.1,
+  "respawnWaitSec": 2.0,
+  "chargeReadySec": 3.0,
+  "thrusterRate": 60,
+  "thrusterCount": 3,
+  "thrusterOffsetX": 0.2,
+  "explosionRate": 1.0,
+  "explosionCount": 0,
+  "thrusterBasePower": 2.0,
+  "thrusterVelocityMultiplier": 1.5,
+  "initScale": [1.0, 1.0, 1.0],
+  "initRotate": [0.0, 0.0, 0.0],
+  "initTranslate": [0.0, 0.0, 0.0],
+  "modelFileName": "player.obj",
+  "thrusterTexture": "resources/circle2.png",
+  "explosionTexture": "resources/circle2.png"
+}

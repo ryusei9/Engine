@@ -1,0 +1,7 @@
+{
+  "lifeFrames": 180,
+  "radius": 0.05,
+  "initScale": [1.0, 1.0, 1.0],
+  "initRotate": [0.0, 0.0, 0.0],
+  "modelFileName": "player_bullet.obj"
+}

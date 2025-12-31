@@ -4,9 +4,15 @@
 #include <Camera.h>
 #include <Collider.h>
 #include <WorldTransform.h>
-/// <sumary>
+#include <memory>
+#include <cstdint>
+
+// 前方宣言
+struct Vector3;
+
+/// <summary>
 /// キャラクターの基底クラス
-/// <sumary>
+/// </summary>
 class BaseCharacter : public Collider
 {
 public:
@@ -54,6 +60,7 @@ public:
 	bool IsAlive() const { return isAlive_; }
 
 	/*------セッター------*/
+
 	// ヒットポイントを設定
 	void SetHp(int hp) { hp_ = hp; }
 
@@ -71,7 +78,9 @@ public:
 
 protected:
 	/*------メンバ変数------*/
-	std::unique_ptr<Object3d> object3d_; // 3Dオブジェクト
+
+	// 3Dオブジェクト
+	std::unique_ptr<Object3d> object3d_;
 
 	// ワールド変換
 	WorldTransform worldTransform_;

@@ -3,6 +3,7 @@
 #include "Transform.h"
 #include "Object3dCommon.h"
 #include <cmath>
+#include <imgui.h>
 
 /*
  CameraManager.cpp
@@ -196,6 +197,7 @@ void CameraManager::DrawImGuiCameraTransform()
 	Vector3 camPos = mainCamera_->GetTranslate();
 	Vector3 camRot = mainCamera_->GetRotate();
 	float camFovY = mainCamera_->GetFovY();
+#ifdef USE_IMGUI
 	
 	if (ImGui::DragFloat3("Camera Position", &camPos.x)) {
 		mainCamera_->SetTranslate(camPos);
@@ -208,14 +210,17 @@ void CameraManager::DrawImGuiCameraTransform()
 	if (ImGui::DragFloat("Camera FovY", &camFovY, kFovYStep, kMinFovY, kMaxFovY)) {
 		mainCamera_->SetFovY(camFovY);
 	}
+#endif
 }
 
 void CameraManager::DrawImGuiMatrix(const char* label, const Matrix4x4& matrix)
 {
+#ifdef USE_IMGUI
 	ImGui::Text("%s:", label);
 	for (int i = 0; i < kMatrixRows; ++i) {
 		ImGui::Text("| %.2f %.2f %.2f %.2f |", 
 			matrix.m[i][0], matrix.m[i][1], matrix.m[i][2], matrix.m[i][3]);
 	}
+#endif
 }
 

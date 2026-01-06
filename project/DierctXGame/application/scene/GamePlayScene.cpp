@@ -178,6 +178,10 @@ void GamePlayScene::Update()
 			if (bullet && bullet->IsAlive()) {
 				Camera* cam = cameraManager_->GetMainCamera();
 				Vector3 bulletPos = bullet->GetTranslate();
+				// 画面外の場合は消す
+				if (!IsInCameraView(bulletPos)) {
+					bullet->SetIsAlive(false);
+				}
 				bulletPos.z = cam->GetTranslate().z + 10.0f; // プレイヤーと同じ奥行
 				bullet->SetTranslate(bulletPos);
 			}
@@ -475,6 +479,7 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		newEnemy->SetPosition(enemyData.translation);
 		newEnemy->SetRotation(enemyData.rotation);
 		newEnemy->SetPlayer(player_.get());
+		newEnemy->SetMoveType(enemyData.move);
 		enemies_.push_back(std::move(newEnemy));
 	}
 }

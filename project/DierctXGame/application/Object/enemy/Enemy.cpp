@@ -5,6 +5,7 @@
 #include <PlayerChargeBullet.h>
 #include "JsonLoader.h"
 #include <imgui.h>
+#include <CurveLibrary.h>
 
 namespace {
 	constexpr float kUpdateDeltaTime = 1.0f / 60.0f;
@@ -97,6 +98,18 @@ void Enemy::Initialize(const std::string& parameterFileName)
 
 void Enemy::Update()
 {
+	// カーブ移動の開始判定
+	if (state_ == EnemyState::Alive &&
+		!curveMoveManager_ &&
+		moveType_ != EnemyMove::None)
+	{
+		// ★ static_cast を削除（既に同じ型）
+		const CurveData* curve = CurveLibrary::GetCurve(moveType_);
+		if (curve) {
+			StartCurveMove(*curve);
+		}
+	}
+	
 	// 弾の削除
 	bullets_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) {
 		return !bullet->IsAlive();
@@ -110,11 +123,29 @@ void Enemy::Update()
 	// 生きてる時だけ通常ロジック
 	if (state_ == EnemyState::Alive) {
 		BaseCharacter::Update();
-		Move();
+		if (curveMoveManager_) {
+			curveMoveManager_->Update(kUpdateDeltaTime);
+			SetPosition(curveMoveManager_->GetPosition());
+
+			if (curveMoveManager_->IsFinished()) {
+				curveMoveManager_.reset();
+			}
+			
+			// カーブ移動中は他の処理をスキップ
+			worldTransform_.Update();
+			object3d_->SetCamera(camera_);
+			object3d_->SetScale(worldTransform_.GetScale());
+			object3d_->SetRotate(worldTransform_.GetRotate());
+			object3d_->SetTranslate(worldTransform_.GetTranslate());
+			object3d_->Update();
+			return;
+		}
+		
 		// 敵の攻撃
 		if (controlEnabled_) {
 			attack_->Update(this, player_, bullets_, kUpdateDeltaTime);
 		}
+		
 		if (hp_ <= 0) {
 			// 死亡演出へ移行
 			state_ = EnemyState::Dying;
@@ -179,6 +210,7 @@ void Enemy::Update()
 			hp_ = parameters_.initialHp;
 			respawnTime_ = parameters_.respawnTimeSec;
 			hasPlayedDeathParticle_ = false;
+			deathEffectPlayed_ = false;
 		}
 #endif
 	}
@@ -273,6 +305,12 @@ void Enemy::PlayHitParticle()
 	}
 }
 
+void Enemy::StartCurveMove(const CurveData& curve)
+{
+	curveMoveManager_ = std::make_unique<CurveMoveManager>();
+	curveMoveManager_->Start(curve);
+}
+
 Vector3 Enemy::GetCenterPosition() const
 {
 	const Vector3 offset = { 0.0f, 0.0f, 0.0f };
@@ -289,5 +327,4 @@ void Enemy::SetParameters(const EnemyParameters& parameters)
 	fallSpeed_ = parameters_.fallSpeed;
 	rotationSpeed_ = parameters_.rotationSpeed;
 }
-
 

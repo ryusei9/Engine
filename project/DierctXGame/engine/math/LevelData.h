@@ -3,7 +3,20 @@
 #include <vector>
 #include "Vector3.h"
 
-// 1つのオブジェクト情報
+// EnemyMove列挙型（グローバルスコープで定義）
+enum class EnemyMove {
+	None = 0,
+	WaveMinusZ = 1,
+	WavePlusZ = 2,
+};
+
+// カーブデータ構造体（共通定義）
+struct CurveData {
+    std::string fileName;
+    std::vector<Vector3> points;
+    std::vector<float> times;
+};
+
 // レベルデータ構造体
 struct LevelData {
 	// オブジェクトデータ構造体
@@ -30,13 +43,9 @@ struct LevelData {
         std::string fileName;   // ファイル名
         Vector3 translation; // 位置
         Vector3 rotation;   // 回転
+        EnemyMove move = EnemyMove::None;
 	};
 	std::vector<EnemyData> enemies; // 敵のデータ
 
-    struct CurveData {
-        std::string fileName;
-        std::vector<Vector3> points;
-        std::vector<float> times;
-    };
     std::vector<CurveData> curves;
 };

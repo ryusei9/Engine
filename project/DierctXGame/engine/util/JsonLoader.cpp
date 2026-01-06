@@ -46,7 +46,7 @@ LevelData* JsonLoader::Load(const std::string& fileName)
 				levelData->objects.push_back(obj);
 			}
 			else if (objectJson.contains("type") && objectJson["type"] == "CURVE") {
-				LevelData::CurveData curveData;
+				CurveData curveData;
 
 				if (objectJson.contains("name")) {
 					curveData.fileName = objectJson["name"].get<std::string>();
@@ -112,6 +112,13 @@ LevelData* JsonLoader::Load(const std::string& fileName)
 					enemyData.rotation.y = -(float)transform["rotation"][2] * kDeg2Rad;
 					enemyData.rotation.z = -(float)transform["rotation"][1] * kDeg2Rad;
 				}
+
+				// ★ ここだけ追加
+				if (objectJson.contains("enemy_move")) {
+					enemyData.move =
+						static_cast<EnemyMove>(objectJson["enemy_move"].get<uint32_t>());
+				}
+
 				levelData->enemies.push_back(enemyData);
 			}
 		}
@@ -666,4 +673,74 @@ PlayerChargeBulletParameters JsonLoader::LoadPlayerChargeBulletParameters(const 
 	}
 
 	return params;
+}
+
+std::unordered_map<std::string, CurveData> JsonLoader::LoadEnemyCurves(const std::string& fileName)
+{
+	const std::string fullpath = kDefaultBaseDirectory + fileName + kExtension;
+
+	std::ifstream file(fullpath);
+	if (file.fail()) {
+		assert(!"カーブファイルを開けませんでした");
+	}
+
+	nlohmann::json deserialized;
+	file >> deserialized;
+
+	assert(deserialized.is_object());
+	assert(deserialized.contains("objects"));
+	assert(deserialized["objects"].is_array());
+
+	std::unordered_map<std::string, CurveData> curveMap;
+
+	for (const auto& objectJson : deserialized["objects"]) {
+		// CURVEタイプのみ処理
+		if (!objectJson.contains("type") || objectJson["type"] != "CURVE") {
+			continue;
+		}
+
+		CurveData curveData;
+
+		// カーブ名を取得
+		std::string curveName;
+		if (objectJson.contains("name")) {
+			curveName = objectJson["name"].get<std::string>();
+		}
+
+		// 親のY座標を取得
+		float parentY = 0.0f;
+		if (objectJson.contains("transform") && objectJson["transform"].contains("translation")) {
+			parentY = objectJson["transform"]["translation"][1].get<float>();
+		}
+
+		// カーブの制御点を読み込む
+		if (objectJson.contains("curve")) {
+			const auto& curve = objectJson["curve"];
+			for (const auto& spline : curve["splines"]) {
+				for (const auto& point : spline["points"]) {
+					Vector3 v;
+					v.x = point["co"][0].get<float>();
+					v.y = point["co"][2].get<float>();
+					v.z = point["co"][1].get<float>() + parentY - 10.0f;
+
+					curveData.points.push_back(v);
+
+					// timeを読み込む
+					if (point.contains("time")) {
+						curveData.times.push_back(point["time"].get<float>());
+					}
+					else {
+						curveData.times.push_back(1.0f); // fallback
+					}
+				}
+			}
+		}
+
+		// カーブ名をキーとしてマップに追加
+		if (!curveName.empty()) {
+			curveMap[curveName] = curveData;
+		}
+	}
+
+	return curveMap;
 }

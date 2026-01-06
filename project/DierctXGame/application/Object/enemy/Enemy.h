@@ -8,6 +8,8 @@
 #include <list>
 #include <cstdint>
 #include <string>
+#include <CurveMoveManager.h>
+#include "LevelData.h" // EnemyMove と CurveData の定義
 
 // 前方宣言
 class Player;
@@ -106,6 +108,8 @@ public:
 	// 敵ヒット時にパーティクルを出す
 	void PlayHitParticle();
 
+	void StartCurveMove(const CurveData& curve);
+
 	/*------ゲッター------*/
 
 	// 中心座標を取得する純粋仮想関数
@@ -145,6 +149,8 @@ public:
 
 	// パラメータの設定
 	void SetParameters(const EnemyParameters& parameters);
+
+	void SetMoveType(EnemyMove type) { moveType_ = type; }
 
 private:
 	/*------メンバ変数------*/
@@ -223,5 +229,11 @@ private:
 
 	// 死亡エフェクト再生フラグ
 	bool deathEffectPlayed_ = false;
+
+	// カーブ移動マネージャー
+	std::unique_ptr<CurveMoveManager> curveMoveManager_;
+
+	// 敵の動きパターン
+	EnemyMove moveType_ = EnemyMove::None;
 };
 

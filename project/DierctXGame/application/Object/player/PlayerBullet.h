@@ -95,6 +95,9 @@ public:
 	// 座標の設定
 	void SetTranslate(const Vector3& translate) { worldTransform_.SetTranslate(translate); }
 
+	// 生存フラグの設定
+	void SetIsAlive(bool isAlive) { isAlive_ = isAlive; }
+
 	// パラメータの設定
 	void SetParameters(const PlayerBulletParameters& parameters);
 

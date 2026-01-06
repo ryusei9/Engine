@@ -114,6 +114,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CurveLibrary.cpp" />
+    <ClCompile Include="CurveMoveManager.cpp" />
     <ClCompile Include="DierctXGame\application\Object\enemy\Boss.cpp" />
     <ClCompile Include="DierctXGame\engine\manager\CameraManager.cpp" />
     <ClCompile Include="DierctXGame\application\Object\player\PlayerChargeBullet.cpp" />
@@ -177,6 +179,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DierctXGame\application\Object\player\PlayerBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CurveLibrary.h" />
+    <ClInclude Include="CurveMoveManager.h" />
     <ClInclude Include="DierctXGame\application\Object\enemy\Boss.h" />
     <ClInclude Include="DierctXGame\engine\manager\CameraManager.h" />
     <ClInclude Include="DierctXGame\application\Object\base\BaseCharacter.h" />
@@ -269,6 +273,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <None Include="resources\enemyAttackParameters.json" />
     <None Include="resources\enemyBulletParameters.json" />
     <None Include="resources\enemyParameters.json" />
+    <None Include="resources\Enemy_Curves.json" />
     <None Include="resources\playerBulletParameters.json" />
     <None Include="resources\playerChargeBulletParameters.json" />
     <None Include="resources\playerParameters.json" />

@@ -83,6 +83,8 @@
     <ClCompile Include="DierctXGame\application\Object\player\PlayerBullet.cpp" />
     <ClCompile Include="DierctXGame\application\scene\GameOverScene.cpp" />
     <ClCompile Include="DierctXGame\application\Object\enemy\Boss.cpp" />
+    <ClCompile Include="CurveMoveManager.cpp" />
+    <ClCompile Include="CurveLibrary.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DierctXGame\engine\manager\CameraManager.h" />
@@ -164,6 +166,8 @@
     <ClInclude Include="DierctXGame\engine\posteffect\PostEffectBase.h" />
     <ClInclude Include="DierctXGame\application\scene\GameOverScene.h" />
     <ClInclude Include="DierctXGame\application\Object\enemy\Boss.h" />
+    <ClInclude Include="CurveMoveManager.h" />
+    <ClInclude Include="CurveLibrary.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Particle.hlsli" />
@@ -179,5 +183,6 @@
     <None Include="resources\playerParameters.json" />
     <None Include="resources\playerBulletParameters.json" />
     <None Include="resources\playerChargeBulletParameters.json" />
+    <None Include="resources\Enemy_Curves.json" />
   </ItemGroup>
 </Project>

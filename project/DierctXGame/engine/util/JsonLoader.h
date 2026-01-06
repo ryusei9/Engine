@@ -1,20 +1,20 @@
 #pragma once
-#include <string>
-#include <fstream>
-#include <vector>
 #include <json.hpp>
-#include <LevelData.h>
-#include <Enemy.h> // EnemyParametersの完全型を取得
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include "LevelData.h" // CurveData と EnemyMove の定義を含む
+#include "Vector3.h"
+
+// ★ EnemyMove の定義を削除（LevelData.h に統一）
 
 // 前方宣言
-struct Vector3;
+struct EnemyParameters;
 struct EnemyAttackParameters;
 struct EnemyBulletParameters;
 struct PlayerParameters;
-struct PlayerBulletParameters; // 追加
-struct PlayerChargeBulletParameters; // 追加
-
-// 無名名前空間は使用しない（ヘッダーファイルのため）
+struct PlayerBulletParameters;
+struct PlayerChargeBulletParameters;
 
 // プレイヤースポーンデータ構造体
 struct PlayerSpawnData {
@@ -29,13 +29,6 @@ struct EnemySpawnData {
 	Vector3 rotation;
 };
 
-// カーブデータ構造体
-struct CurveData {
-	std::string fileName;
-	std::vector<Vector3> points;
-	std::vector<float> times;
-};
-
 // ステージデータ構造体（データテーブル用）
 struct StageData {
 	// 自キャラの発生データ
@@ -45,6 +38,8 @@ struct StageData {
 	// ステージの制限時間（秒）
 	int timeLimit = 0;
 };
+
+
 
 /// <summary>
 /// Jsonファイルを読み込むクラス
@@ -72,11 +67,14 @@ public:
 	// プレイヤーのパラメータをJSONファイルから読み込む
 	static PlayerParameters LoadPlayerParameters(const std::string& fileName);
 
-	// プレイヤー弾のパラメータをJSONファイルから読み込む // 追加
+	// プレイヤー弾のパラメータをJSONファイルから読み込む
 	static PlayerBulletParameters LoadPlayerBulletParameters(const std::string& fileName);
 
-	// プレイヤーチャージ弾のパラメータをJSONファイルから読み込む // 追加
+	// プレイヤーチャージ弾のパラメータをJSONファイルから読み込む
 	static PlayerChargeBulletParameters LoadPlayerChargeBulletParameters(const std::string& fileName);
+
+	// 敵のカーブデータをJSONファイルから読み込む
+	static std::unordered_map<std::string, CurveData> LoadEnemyCurves(const std::string& fileName);
 
 	// オブジェクトを走査するための再帰関数
 	static LevelData::ObjectData ConvertJsonToObject(const nlohmann::json& jsonNode);

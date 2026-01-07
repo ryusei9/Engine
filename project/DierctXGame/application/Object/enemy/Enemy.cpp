@@ -215,10 +215,6 @@ void Enemy::DrawImGui()
 #endif
 }
 
-void Enemy::Move()
-{
-}
-
 void Enemy::Attack()
 {
 }
@@ -291,3 +287,48 @@ void Enemy::SetParameters(const EnemyParameters& parameters)
 }
 
 
+void Enemy::Move()
+{
+	// プレイヤーが設定されていない、またはコントロールが無効な場合は何もしない
+	if (!player_ || !controlEnabled_) {
+		return;
+	}
+
+	// カメラのZ座標 + 10.0f（プレイヤーと同じ奥行き）を目標とする
+	Camera* camera = Object3dCommon::GetInstance()->GetDefaultCamera();
+	if (!camera) {
+		return;
+	}
+
+	float targetZ = camera->GetTranslate().z + 10.0f;
+	Vector3 currentPos = worldTransform_.GetTranslate();
+
+	// 目標に到達していない場合
+	if (!hasReachedTarget_) {
+		// 目標Z座標との差分を計算
+		float deltaZ = targetZ - currentPos.z;
+
+		// 十分近づいたら到達フラグを立てる
+		if (std::abs(deltaZ) > 0.1f) {
+			// 移動中フラグを立てる
+			isMoving_ = true;
+			// Lerpで滑らかに移動（補間係数0.2で滑らかに）
+			currentPos.z = std::lerp(currentPos.z, targetZ, 0.2f);
+			worldTransform_.SetTranslate(currentPos);
+		} else {
+			// 目標に到達したらぴったり合わせる
+			currentPos.z = targetZ;
+			worldTransform_.SetTranslate(currentPos);
+			
+			// 移動完了時の処理
+			if (isMoving_) {
+				isMoving_ = false;
+				hasReachedTarget_ = true;
+			}
+		}
+	} else {
+		// 到達後はプレイヤーのZ軸に完全に追従
+		currentPos.z = targetZ;
+		worldTransform_.SetTranslate(currentPos);
+	}
+}

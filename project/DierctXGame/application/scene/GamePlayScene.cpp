@@ -183,7 +183,7 @@ void GamePlayScene::Update()
 			Vector3 enemyPos = enemy->GetPosition();
 			bool inView = IsInCameraView(enemyPos);
 			enemy->SetControlEnabled(inView);
-			enemy->SetZ(cam->GetTranslate().z + 10.0f);
+			//enemy->SetZ(cam->GetTranslate().z + 10.0f);
 
 			// 敵の弾の奥行き調整
 			for (auto& bullet : enemy->GetBullets()) {

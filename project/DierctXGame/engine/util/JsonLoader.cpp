@@ -107,7 +107,7 @@ LevelData* JsonLoader::Load(const std::string& fileName)
 					const auto& transform = objectJson["transform"];
 					enemyData.translation.x = (float)transform["translation"][0];
 					enemyData.translation.y = (float)transform["translation"][2];
-					enemyData.translation.z = (float)transform["translation"][1];
+					enemyData.translation.z = (float)transform["translation"][1] + 10.0f;
 					enemyData.rotation.x = -(float)transform["rotation"][0] * kDeg2Rad;
 					enemyData.rotation.y = -(float)transform["rotation"][2] * kDeg2Rad;
 					enemyData.rotation.z = -(float)transform["rotation"][1] * kDeg2Rad;

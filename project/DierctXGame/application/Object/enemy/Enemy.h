@@ -223,5 +223,11 @@ private:
 
 	// 死亡エフェクト再生フラグ
 	bool deathEffectPlayed_ = false;
+
+	// 移動中フラグ
+	bool isMoving_ = false;
+
+	// 目標到達フラグ
+	bool hasReachedTarget_ = false;
 };
 

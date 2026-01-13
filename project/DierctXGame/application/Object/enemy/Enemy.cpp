@@ -98,18 +98,6 @@ void Enemy::Initialize(const std::string& parameterFileName)
 
 void Enemy::Update()
 {
-	// カーブ移動の開始判定
-	if (state_ == EnemyState::Alive &&
-		!curveMoveManager_ &&
-		moveType_ != EnemyMove::None)
-	{
-		// ★ static_cast を削除（既に同じ型）
-		const CurveData* curve = CurveLibrary::GetCurve(moveType_);
-		if (curve) {
-			StartCurveMove(*curve);
-		}
-	}
-	
 	// 弾の削除
 	bullets_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) {
 		return !bullet->IsAlive();

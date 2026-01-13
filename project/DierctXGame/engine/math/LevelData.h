@@ -6,8 +6,8 @@
 // EnemyMove列挙型（グローバルスコープで定義）
 enum class EnemyMove {
 	None = 0,
-	WaveMinusZ = 1,
-	WavePlusZ = 2,
+	WaveMinusZ,
+	WavePlusZ,
 };
 
 // カーブデータ構造体（共通定義）
@@ -38,14 +38,15 @@ struct LevelData {
 	};
 	std::vector<PlayerData> players; // プレイヤーのデータ
 
-	// 敵データ構造体
+    // ★ 敵は「アンカー」と「動きの種類」だけ持つ
     struct EnemyData {
-        std::string fileName;   // ファイル名
-        Vector3 translation; // 位置
-        Vector3 rotation;   // 回転
-        EnemyMove move = EnemyMove::None;
-	};
-	std::vector<EnemyData> enemies; // 敵のデータ
+        std::string fileName;
+        Vector3 translation;   // ← 最終到達点（アンカー）
+        Vector3 rotation;
+        EnemyMove move;        // enumで指定
+    };
+    std::vector<EnemyData> enemies;
 
+    // ★ カーブは共有
     std::vector<CurveData> curves;
 };

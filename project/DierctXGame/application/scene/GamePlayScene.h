@@ -19,6 +19,7 @@
 #include <Skybox.h>
 #include <FadeManager.h>
 #include <CameraManager.h>
+#include <CameraState.h>
 
 /// 調整用定数（マジックナンバー排除）
 namespace GamePlayDefaults {
@@ -78,7 +79,7 @@ public:
 	void DrawImGuiImportObjectsFromJson();
 
 	// スタートカメライージング更新
-	void UpdateStartCameraEasing();
+	//void UpdateStartCameraEasing();
 
 public:
 	// ステート
@@ -98,52 +99,52 @@ public:
 		CenterPlayer
 	};
 
-	template<typename T>
-	T MyMin(const T& a, const T& b) {
-		return (a < b) ? a : b;
-	}
+	// ステート遷移関数
+	void TransitionToGameplayState();
+	void TransitionToClearHoldState();
+	void TransitionToClearZoomState();
+	void TransitionToClearFlyAwayState();
 
-	template<typename T>
-	T MyMax(const T& a, const T& b) {
-		return (a > b) ? a : b;
-	}
+	// ゲームクリア通知
+	void OnGameClear();
 
-private:
-	// 衝突判定と応答
-	void CheckAllCollisions();
+	// アクセサー
+	CameraManager* GetCameraManager() { return cameraManager_.get(); }
+	Player* GetPlayer() { return player_.get(); }
+	std::vector<std::unique_ptr<Enemy>>& GetEnemies() { return enemies_; }
+	const LevelData* GetLevelData() const { return levelData_; }
+	const std::vector<Vector3>& GetCurvePoints() const { return curvePoints_; }
+	Vector3 GetStartCameraPos() const { return startCameraPos_; }
+	Vector3 GetEndCameraPos() const { return endCameraPos_; }
+	Vector3 GetStartCameraRot() const { return startCameraRot_; }
+	Vector3 GetEndCameraRot() const { return endCameraRot_; }
+	float GetStartCameraDuration() const { return kStartCameraDuration_; }
+	float GetGameClearMoveDuration() const { return kGameClearMoveDuration_; }
+	float GetGameClearPlayerLaunchSpeed() const { return kGameClearPlayerLaunchSpeed_; }
+	bool IsGameClearFadeStarted() const { return gameClearFadeStarted_; }
 
-	// カメラルートの読み込み
-	void LoadLevel(const LevelData* levelData);
-
-	// カーブに沿ってプレイヤーを移動させる
-	void UpdateCameraOnCurve();
-
-	// プレイヤーがカメラの視界内に収まるように制限する
+	void SetCameraMode(CameraMode mode) { cameraMode_ = mode; }
+	void ShowGameClearText();
+	void HideGameClearText();
+	void StartGameClearFade();
 	void RestrictPlayerInsideCameraView();
 
-	// プレイヤーがカメラに追従する
-	void UpdatePlayerFollowCamera();
-
-	// カメラの中に入っているか
+private:
+	
+	void CheckAllCollisions();
+	void LoadLevel(const LevelData* levelData);
+	void UpdateGameClear();
 	bool IsInCameraView(const Vector3& worldPos);
 
-	// ゲームクリアの演出更新
-	void UpdateGameClear();
+	// カメラステート管理
+	std::unique_ptr<CameraState> currentCameraState_;
+	void ChangeState(std::unique_ptr<CameraState> newState);
 
-	// スプライトコモン
-	SpriteCommon* spriteCommon_ = nullptr;
-
-	// ダイレクトXコモン
-	DirectXCommon* directXCommon_ = nullptr;
-
-	// WinApp
-	WinApp* winApp_ = nullptr;
+	// スプライト
+	std::unique_ptr<Sprite> sprite_;
 
 	// 当たり判定マネージャ
 	std::unique_ptr<CollisionManager> collisionManager_;
-
-	// スプライト
-	std::unique_ptr<Sprite> sprite_ = nullptr;
 
 	// 入力
 	Input* input_ = nullptr;
@@ -189,18 +190,27 @@ private:
 
 	// カメラマネージャー
 	std::unique_ptr<CameraManager> cameraManager_;
+	CameraMode cameraMode_ = CameraMode::Free;
 
-	// カメラモードの状態
-	CameraMode cameraMode_ = CameraMode::DynamicFollow;
+	// スタート演出用カメラ
+	Vector3 startCameraPos_ = { 0.0f, 1.0f, -25.0f };
+	Vector3 endCameraPos_ = { 0.0f, 1.0f, -10.0f };
+	Vector3 startCameraRot_ = { 0.1f, 0.0f, 0.0f };
+	Vector3 endCameraRot_ = { 0.1f, 0.0f, 0.0f };
+	const float kStartCameraDuration_ = 3.0f;
 
-	// --- スタート演出用 ---
-	bool  isStartCameraEasing_ = GamePlayDefaults::kStartCameraEasing;
-	float startCameraTimer_    = 0.0f;
-	const float kStartCameraDuration_ = GamePlayDefaults::kStartCameraDurationSec;
-	Vector3 startCameraPos_ = GamePlayDefaults::kStartCamPos;
-	Vector3 startCameraRot_ = GamePlayDefaults::kStartCamRot;
-	Vector3 endCameraPos_   = GamePlayDefaults::kEndCamPos;
-	Vector3 endCameraRot_   = GamePlayDefaults::kEndCamRot;
+	// カーブ追従
+	std::vector<Vector3> curvePoints_;
+	const float kDeltaTime_ = 1.0f / 60.0f;
+
+	// ゲームオーバー
+	bool isGameOver_ = false;
+	float gameOverTimer_ = 0.0f;
+	bool fadeStarted_ = false;
+
+	// ゲームクリア
+	bool isGameClear_ = false;
+	bool isEnd_ = false;
 
 	// タイトルに戻るテキスト
 	std::unique_ptr<Object3d> backToTitle_;
@@ -208,87 +218,16 @@ private:
 	// タイトルに戻るテキストのワールド変換
 	WorldTransform textTitle_;
 
-	// カーブ座標リスト
-	std::vector<Vector3> curvePoints_;
-
-	// カーブ進行度（0.0～1.0）
-	float curveProgress_ = 0.0f;
-
-	// カーブの現在インデックス
-	size_t curveIndex_ = 0;
-
-	// カメラ移動速度（1フレームあたりの進行度）
-	float curveSpeed_ = GamePlayDefaults::kCurveSpeed;
-
-	// ゲームオーバー処理用タイマー
-	float gameOverTimer_ = GamePlayDefaults::kGameOverTimerSec;
-
-	// ゲームオーバーフラグ
-	bool isGameOver_ = false;
-
-	// フェード開始フラグ
-	bool fadeStarted_ = false;
-
-	// カメラ
-	std::unique_ptr<Camera> camera_;
-
-	// ゲーム終了フラグ
-	bool isEnd_ = false;
-
-	// 仮ゲームクリア
-	bool isGameClear_ = false;
-
-	// ゲームクリア時のカメラ遷移・発射制御用
-	// 待機フェーズ
-	bool gameClearCameraWaiting_ = false;
-
-	// 待機タイマー
-	float gameClearWaitTimer_ = 0.0f;
-
-	// カメラ移動フェーズ
-	bool gameClearCameraMoving_ = false;
-
-	// カメラ移動タイマー
-	float gameClearMoveTimer_ = 0.0f;
-
-	// カメラ移動時間
-	const float kGameClearMoveDuration_ = GamePlayDefaults::kGameClearMoveDurationSec;
-
-	// カメラ開始位置と目標位置
-	Vector3 gameClearCamStartPos_  = { 0.0f, 0.0f, 0.0f };
-	Vector3 gameClearCamTargetPos_ = { 0.0f, 0.0f, 0.0f };
-
-	// プレイヤー発射フェーズ
-	bool gameClearPlayerLaunched_ = false;
-
-	// フェード開始フラグ
-	bool gameClearFadeStarted_ = false;
-
-	// プレイヤー発射速度（単位: ワールド単位 / 秒）
-	const float kGameClearPlayerLaunchSpeed_ = GamePlayDefaults::kGameClearPlayerLaunchSpeed;
-
-	// ゲームクリア演出用テキスト
+	// ゲームクリアテキスト
 	std::unique_ptr<Object3d> gameClearText_;
-
-	// スペースキーを押してねテキスト
+	WorldTransform gameClearTextTransform_;
 	std::unique_ptr<Object3d> pressSpaceKeyText_;
-
-	// ゲームクリア演出用テキストの表示フラグ
+	WorldTransform pressSpaceKeyTransform_;
 	bool gameClearTextVisible_ = false;
 
-	// ゲームクリア演出用テキストのワールド変換
-	WorldTransform gameClearTextTransform_;
-
-	// スペースキーを押してねテキストのワールド変換
-	WorldTransform pressSpaceKeyTransform_;
-
-	// カーブセグメントタイマー
-	float segmentTimer_ = 0.0f;
-
-	// 現在のセグメントの所要時間
-	float currentSegmentDuration_ = GamePlayDefaults::kSegmentDefaultDurationSec;
-
-	// デルタタイム
-	const float kDeltaTime_ = GamePlayDefaults::kDeltaTime60Hz;
+	// ゲームクリア演出
+	const float kGameClearMoveDuration_ = 2.0f;
+	const float kGameClearPlayerLaunchSpeed_ = 5.0f;
+	bool gameClearFadeStarted_ = false;
 };
 

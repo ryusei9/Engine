@@ -83,6 +83,7 @@
     <ClCompile Include="DierctXGame\application\Object\player\PlayerBullet.cpp" />
     <ClCompile Include="DierctXGame\application\scene\GameOverScene.cpp" />
     <ClCompile Include="DierctXGame\application\Object\enemy\Boss.cpp" />
+    <ClCompile Include="DierctXGame\application\scene\CameraState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DierctXGame\engine\manager\CameraManager.h" />
@@ -164,6 +165,7 @@
     <ClInclude Include="DierctXGame\engine\posteffect\PostEffectBase.h" />
     <ClInclude Include="DierctXGame\application\scene\GameOverScene.h" />
     <ClInclude Include="DierctXGame\application\Object\enemy\Boss.h" />
+    <ClInclude Include="DierctXGame\application\scene\CameraState.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Particle.hlsli" />

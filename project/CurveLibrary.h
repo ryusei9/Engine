@@ -7,10 +7,10 @@
 class CurveLibrary
 {
 public:
-    static void Load(const std::string& filePath);
+    static void Initialize(const std::vector<CurveData>& curves);
 
-    static const CurveData* GetCurve(EnemyMove type);
+    static const CurveData& Get(const std::string& name);
 
 private:
-    static std::unordered_map<EnemyMove, CurveData> curves_;
+    static std::unordered_map<std::string, CurveData> curves_;
 };

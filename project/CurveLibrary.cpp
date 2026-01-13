@@ -1,28 +1,19 @@
 #include "CurveLibrary.h"
 #include "JsonLoader.h"
 
-std::unordered_map<EnemyMove, CurveData> CurveLibrary::curves_;
+std::unordered_map<std::string, CurveData> CurveLibrary::curves_;
 
-void CurveLibrary::Load(const std::string& filePath)
+void CurveLibrary::Initialize(const std::vector<CurveData>& curves)
 {
     curves_.clear();
-
-    // JSONからカーブデータを名前ベースで読み込む
-    auto curveMap = JsonLoader::LoadEnemyCurves(filePath);
-
-    // Enemy_Wave_-Z が存在するかチェック
-    if (curveMap.find("Enemy_Wave_-Z") != curveMap.end()) {
-        curves_[EnemyMove::WaveMinusZ] = curveMap["Enemy_Wave_-Z"];
-    }else {
-        curves_[EnemyMove::WavePlusZ] = curveMap["Enemy_Wave_+Z"];
+    for (const auto& c : curves) {
+        curves_[c.fileName] = c;
     }
 }
 
-const CurveData* CurveLibrary::GetCurve(EnemyMove type)
+const CurveData& CurveLibrary::Get(const std::string& name)
 {
-    auto it = curves_.find(type);
-    if (it == curves_.end()) {
-        return nullptr;
-    }
-    return &it->second;
+    auto it = curves_.find(name);
+    assert(it != curves_.end() && "Curve not found");
+    return it->second;
 }

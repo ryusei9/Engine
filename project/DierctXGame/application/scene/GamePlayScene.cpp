@@ -7,6 +7,7 @@
 #include <iostream>
 #include <Multiply.h>
 #include <cmath>
+#include <CurveLibrary.h>
 #undef min
 #undef max
 
@@ -424,10 +425,24 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		// 敵オブジェクトの生成
 		auto newEnemy = std::make_unique<Enemy>();
 		newEnemy->Initialize();
-		newEnemy->SetPosition(enemyData.translation);
-		newEnemy->SetRotation(enemyData.rotation);
+		// 最終到達点（EnemySpawn）
+		Vector3 anchor = enemyData.translation;
+
+		// カーブ取得（ローカル）
+		CurveData curve = CurveLibrary::Get(enemyData.move);
+
+		// カーブをワールド座標へ変換
+		for (auto& p : curve.points) {
+			p += anchor;
+		}
+
+		// 初期位置はカーブの先頭
+		newEnemy->SetPosition(curve.points.front());
+
+		newEnemy->StartCurveMove(curve);
+		//newEnemy->SetMoveType(enemyData.move);
 		newEnemy->SetPlayer(player_.get());
-		newEnemy->SetMoveType(enemyData.move);
+
 		enemies_.push_back(std::move(newEnemy));
 	}
 }

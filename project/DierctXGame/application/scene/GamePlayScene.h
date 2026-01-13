@@ -290,5 +290,14 @@ private:
 
 	// デルタタイム
 	const float kDeltaTime_ = GamePlayDefaults::kDeltaTime60Hz;
+
+	// WASDで移動
+	std::unique_ptr<Object3d> wasdGuide_ = nullptr;
+
+	WorldTransform wasdGuideTransform_;
+
+	// スペースキーで弾を撃つ
+	std::unique_ptr<Object3d> spaceKeyGuide_ = nullptr;
+	WorldTransform spaceKeyGuideTransform_;
 };
 

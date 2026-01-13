@@ -100,6 +100,24 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	pressSpaceKeyTransform_.Initialize();
 	pressSpaceKeyTransform_.SetScale(Vector3(0.4f, 0.4f, 0.4f));
 	pressSpaceKeyTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
+
+	// WASD
+	wasdGuide_ = make_unique<Object3d>();
+	wasdGuide_->Initialize("WASD.obj");
+
+	// WASDトランスフォーム初期化
+	wasdGuideTransform_.Initialize();
+	wasdGuideTransform_.SetScale(Vector3(0.2f, 0.2f, 0.2f));
+	wasdGuideTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
+
+	// スペースキーで発射
+	spaceKeyGuide_ = make_unique<Object3d>();
+	spaceKeyGuide_->Initialize("SpaceShot.obj");
+
+	// スペースキートランスフォーム初期化
+	spaceKeyGuideTransform_.Initialize();
+	spaceKeyGuideTransform_.SetScale(Vector3(0.2f, 0.2f, 0.2f));
+	spaceKeyGuideTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
 }
 
 void GamePlayScene::Update()
@@ -224,6 +242,27 @@ void GamePlayScene::Update()
 	backToTitle_->SetWorldTransform(textTitle_);
 	backToTitle_->Update();
 
+	// カメラ位置を取得
+	Camera* cam = cameraManager_->GetMainCamera();
+	if (cam) {
+		// テキストの位置調整
+		Vector3 camPos = cam->GetTranslate();
+		wasdGuideTransform_.translate_.x = camPos.x - 1.2f;
+		wasdGuideTransform_.translate_.y = camPos.y + 0.5f;
+		wasdGuideTransform_.translate_.z = camPos.z + 5.0f;
+
+		spaceKeyGuideTransform_.translate_.x = camPos.x - 1.0f;
+		spaceKeyGuideTransform_.translate_.y = camPos.y + 0.32f;
+		spaceKeyGuideTransform_.translate_.z = camPos.z + 5.0f;
+	}
+	// WASDガイドの更新
+	wasdGuide_->SetWorldTransform(wasdGuideTransform_);
+	wasdGuide_->Update();
+
+	// スペースキーガイドの更新
+	spaceKeyGuide_->SetWorldTransform(spaceKeyGuideTransform_);
+	spaceKeyGuide_->Update();
+
 	// フェードマネージャの更新
 	fadeManager_->Update();
 
@@ -331,7 +370,12 @@ void GamePlayScene::Draw()
 	if (gameClearTextVisible_ && gameClearText_) {
 		gameClearText_->Draw();
 		pressSpaceKeyText_->Draw();
+	}else {
+		wasdGuide_->Draw();
+		spaceKeyGuide_->Draw();
 	}
+
+	
 
 	/*------skyboxの描画------*/
 	skybox_->DrawSettings();
@@ -372,6 +416,14 @@ void GamePlayScene::DrawImGui()
 	ImGui::SliderFloat3("clear Text Position", &gameClearTextTransform_.translate_.x, -10.0f, 10.0f);
 	ImGui::SliderFloat3("clear Text rotation", &gameClearTextTransform_.rotate_.x, -3.14f, 3.14f);
 	ImGui::SliderFloat3("clear Text Scale", &gameClearTextTransform_.scale_.x, 0.1f, 10.0f);
+
+	ImGui::SliderFloat3("WASD Position", &wasdGuideTransform_.translate_.x, -10.0f, 10.0f);
+	ImGui::SliderFloat3("WASD Rotation", &wasdGuideTransform_.rotate_.x, -3.14f, 3.14f);
+	ImGui::SliderFloat3("WASD Scale", &wasdGuideTransform_.scale_.x, -0.1f, 10.0f);
+
+	ImGui::SliderFloat3("Space Position", &spaceKeyGuideTransform_.translate_.x, -10.0f, 10.0f);
+	ImGui::SliderFloat3("Space Rotation", &spaceKeyGuideTransform_.rotate_.x, -3.14f, 3.14f);
+	ImGui::SliderFloat3("Space Scale", &spaceKeyGuideTransform_.scale_.x, -0.1f, 10.0f);
 	// レベルデータから生成したオブジェクトのImGui調整
 	DrawImGuiImportObjectsFromJson();
 	ImGui::End();

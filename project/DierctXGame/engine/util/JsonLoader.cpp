@@ -98,7 +98,7 @@ LevelData* JsonLoader::Load(const std::string& fileName)
 				}
 				levelData->players.push_back(playerData);
 			}
-			else if (type == "EnemySpawn") {
+			else if (objectJson.contains("type") && objectJson["type"] == "EnemySpawn") {
 				LevelData::EnemyData enemyData;
 				if (objectJson.contains("File_name")) {
 					enemyData.fileName = objectJson["File_name"].get<std::string>();
@@ -112,11 +112,13 @@ LevelData* JsonLoader::Load(const std::string& fileName)
 					enemyData.rotation.y = -(float)transform["rotation"][2] * kDeg2Rad;
 					enemyData.rotation.z = -(float)transform["rotation"][1] * kDeg2Rad;
 				}
-
-				// ★ ここだけ追加
+				
 				if (objectJson.contains("enemy_move")) {
-					enemyData.move =
-						static_cast<EnemyMove>(objectJson["enemy_move"].get<uint32_t>());
+					int moveValue = objectJson["enemy_move"].get<int>();
+					enemyData.move = static_cast<EnemyMove>(moveValue);
+				}
+				else {
+					enemyData.move = EnemyMove::None;
 				}
 
 				levelData->enemies.push_back(enemyData);
@@ -126,74 +128,74 @@ LevelData* JsonLoader::Load(const std::string& fileName)
 
 	return levelData;
 }
-
-std::vector<StageData> JsonLoader::LoadStageData(const std::string& fileName)
-{
-	const std::string fullpath = kDefaultBaseDirectory + fileName + kExtension;
-
-	std::ifstream file(fullpath);
-	if (file.fail()) {
-		assert(!"ステージデータファイルを開けませんでした");
-	}
-
-	nlohmann::json deserialized;
-	file >> deserialized;
-
-	assert(deserialized.is_object());
-	assert(deserialized.contains("stages"));
-	assert(deserialized["stages"].is_array());
-
-	std::vector<StageData> stageDataTable;
-
-	for (const auto& stageJson : deserialized["stages"]) {
-		StageData stageData;
-
-		// プレイヤースポーンデータの読み込み
-		if (stageJson.contains("playerSpawn")) {
-			const auto& playerSpawn = stageJson["playerSpawn"];
-			if (playerSpawn.contains("translation")) {
-				stageData.playerSpawnData.translation.x = playerSpawn["translation"][0].get<float>();
-				stageData.playerSpawnData.translation.y = playerSpawn["translation"][1].get<float>();
-				stageData.playerSpawnData.translation.z = playerSpawn["translation"][2].get<float>();
-			}
-			if (playerSpawn.contains("rotation")) {
-				stageData.playerSpawnData.rotation.x = playerSpawn["rotation"][0].get<float>() * kDeg2Rad;
-				stageData.playerSpawnData.rotation.y = playerSpawn["rotation"][1].get<float>() * kDeg2Rad;
-				stageData.playerSpawnData.rotation.z = playerSpawn["rotation"][2].get<float>() * kDeg2Rad;
-			}
-		}
-
-		// 敵スポーンデータの読み込み
-		if (stageJson.contains("enemySpawns") && stageJson["enemySpawns"].is_array()) {
-			for (const auto& enemyJson : stageJson["enemySpawns"]) {
-				EnemySpawnData enemyData;
-				if (enemyJson.contains("fileName")) {
-					enemyData.fileName = enemyJson["fileName"].get<std::string>();
-				}
-				if (enemyJson.contains("translation")) {
-					enemyData.translation.x = enemyJson["translation"][0].get<float>();
-					enemyData.translation.y = enemyJson["translation"][1].get<float>();
-					enemyData.translation.z = enemyJson["translation"][2].get<float>();
-				}
-				if (enemyJson.contains("rotation")) {
-					enemyData.rotation.x = enemyJson["rotation"][0].get<float>() * kDeg2Rad;
-					enemyData.rotation.y = enemyJson["rotation"][1].get<float>() * kDeg2Rad;
-					enemyData.rotation.z = enemyJson["rotation"][2].get<float>() * kDeg2Rad;
-				}
-				stageData.enemySpawnDatas.push_back(enemyData);
-			}
-		}
-
-		// 時間制限の読み込み
-		if (stageJson.contains("timeLimit")) {
-			stageData.timeLimit = stageJson["timeLimit"].get<int>();
-		}
-
-		stageDataTable.push_back(stageData);
-	}
-
-	return stageDataTable;
-}
+//
+//std::vector<StageData> JsonLoader::LoadStageData(const std::string& fileName)
+//{
+//	const std::string fullpath = kDefaultBaseDirectory + fileName + kExtension;
+//
+//	std::ifstream file(fullpath);
+//	if (file.fail()) {
+//		assert(!"ステージデータファイルを開けませんでした");
+//	}
+//
+//	nlohmann::json deserialized;
+//	file >> deserialized;
+//
+//	assert(deserialized.is_object());
+//	assert(deserialized.contains("stages"));
+//	assert(deserialized["stages"].is_array());
+//
+//	std::vector<StageData> stageDataTable;
+//
+//	for (const auto& stageJson : deserialized["stages"]) {
+//		StageData stageData;
+//
+//		// プレイヤースポーンデータの読み込み
+//		if (stageJson.contains("playerSpawn")) {
+//			const auto& playerSpawn = stageJson["playerSpawn"];
+//			if (playerSpawn.contains("translation")) {
+//				stageData.playerSpawnData.translation.x = playerSpawn["translation"][0].get<float>();
+//				stageData.playerSpawnData.translation.y = playerSpawn["translation"][1].get<float>();
+//				stageData.playerSpawnData.translation.z = playerSpawn["translation"][2].get<float>();
+//			}
+//			if (playerSpawn.contains("rotation")) {
+//				stageData.playerSpawnData.rotation.x = playerSpawn["rotation"][0].get<float>() * kDeg2Rad;
+//				stageData.playerSpawnData.rotation.y = playerSpawn["rotation"][1].get<float>() * kDeg2Rad;
+//				stageData.playerSpawnData.rotation.z = playerSpawn["rotation"][2].get<float>() * kDeg2Rad;
+//			}
+//		}
+//
+//		// 敵スポーンデータの読み込み
+//		if (stageJson.contains("enemySpawns") && stageJson["enemySpawns"].is_array()) {
+//			for (const auto& enemyJson : stageJson["enemySpawns"]) {
+//				EnemySpawnData enemyData;
+//				if (enemyJson.contains("fileName")) {
+//					enemyData.fileName = enemyJson["fileName"].get<std::string>();
+//				}
+//				if (enemyJson.contains("translation")) {
+//					enemyData.translation.x = enemyJson["translation"][0].get<float>();
+//					enemyData.translation.y = enemyJson["translation"][1].get<float>();
+//					enemyData.translation.z = enemyJson["translation"][2].get<float>();
+//				}
+//				if (enemyJson.contains("rotation")) {
+//					enemyData.rotation.x = enemyJson["rotation"][0].get<float>() * kDeg2Rad;
+//					enemyData.rotation.y = enemyJson["rotation"][1].get<float>() * kDeg2Rad;
+//					enemyData.rotation.z = enemyJson["rotation"][2].get<float>() * kDeg2Rad;
+//				}
+//				stageData.enemySpawnDatas.push_back(enemyData);
+//			}
+//		}
+//
+//		// 時間制限の読み込み
+//		if (stageJson.contains("timeLimit")) {
+//			stageData.timeLimit = stageJson["timeLimit"].get<int>();
+//		}
+//
+//		stageDataTable.push_back(stageData);
+//	}
+//
+//	return stageDataTable;
+//}
 
 StageData JsonLoader::GetStageData(const std::vector<StageData>& stageDataTable, int stageIndex)
 {
@@ -245,6 +247,17 @@ LevelData::ObjectData JsonLoader::ConvertJsonToObject(const nlohmann::json& json
 	}
 
 	return objectData;
+}
+
+EnemyMove JsonLoader::ParseEnemyMove(const std::string& move)
+{
+	if (move == "Enemy_Wave_-Z") {
+		return EnemyMove::WaveMinusZ;
+	}
+	if (move == "Enemy_Wave_+Z") {
+		return EnemyMove::WavePlusZ;
+	}
+	return EnemyMove::None;
 }
 
 EnemyParameters JsonLoader::LoadEnemyParameters(const std::string& fileName)

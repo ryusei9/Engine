@@ -78,4 +78,7 @@ public:
 
 	// オブジェクトを走査するための再帰関数
 	static LevelData::ObjectData ConvertJsonToObject(const nlohmann::json& jsonNode);
+
+	// EnemyMove文字列をEnemyMove列挙型に変換する
+	static EnemyMove ParseEnemyMove(const std::string& move);
 };

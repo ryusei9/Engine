@@ -47,7 +47,11 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	
 	// レベルデータのロード
 	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
+
+	CurveLibrary::Initialize(levelData_->curves);
+
 	LoadLevel(levelData_);
+
 
 	// プレイヤー配置データからプレイヤーを配置
 	if (!levelData_->players.empty()) {
@@ -477,21 +481,24 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		// 敵オブジェクトの生成
 		auto newEnemy = std::make_unique<Enemy>();
 		newEnemy->Initialize();
-		// 最終到達点（EnemySpawn）
-		Vector3 anchor = enemyData.translation;
+		//Vector3 anchor = enemyData.translation; // 最終到達点
 
-		// カーブ取得（ローカル）
-		CurveData curve = CurveLibrary::Get(enemyData.move);
+		if (enemyData.move != EnemyMove::None) {
+			const CurveData& baseCurve = CurveLibrary::Get(enemyData.move);
 
-		// カーブをワールド座標へ変換
-		for (auto& p : curve.points) {
-			p += anchor;
+			// Enemy 専用にコピー
+			CurveData curve = baseCurve;
+
+			Vector3 anchor = enemyData.translation;
+			Vector3 offset = anchor - curve.points.back();
+
+			for (auto& p : curve.points) {
+				p += offset;
+			}
+
+			newEnemy->SetPosition(curve.points.front());
+			newEnemy->StartCurveMove(curve);
 		}
-
-		// 初期位置はカーブの先頭
-		newEnemy->SetPosition(curve.points.front());
-
-		newEnemy->StartCurveMove(curve);
 		//newEnemy->SetMoveType(enemyData.move);
 		newEnemy->SetPlayer(player_.get());
 

@@ -296,7 +296,7 @@ void Enemy::PlayHitParticle()
 void Enemy::StartCurveMove(const CurveData& curve)
 {
 	curveMoveManager_ = std::make_unique<CurveMoveManager>();
-	curveMoveManager_->Start(curve);
+	curveMoveManager_->Start(CurveData(curve)); // ← 明示コピー
 }
 
 Vector3 Enemy::GetCenterPosition() const

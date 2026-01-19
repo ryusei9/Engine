@@ -9,8 +9,8 @@ class CurveLibrary
 public:
     static void Initialize(const std::vector<CurveData>& curves);
 
-    static const CurveData& Get(const std::string& name);
+    static const CurveData& Get(EnemyMove type);
 
 private:
-    static std::unordered_map<std::string, CurveData> curves_;
+    static std::unordered_map<EnemyMove, CurveData> curves_;
 };

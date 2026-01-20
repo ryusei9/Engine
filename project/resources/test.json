@@ -527,7 +527,8 @@
                     1.0
                 ]
             },
-            "disabled": false
+            "disabled": false,
+            "enemy_move": 1
         },
         {
             "type": "EnemySpawn",
@@ -571,7 +572,7 @@
                     1.0
                 ]
             },
-            "enemy_move": 1
+            "enemy_move": 2
         },
         {
             "type": "EnemySpawn",
@@ -592,7 +593,8 @@
                     1.0,
                     1.0
                 ]
-            }
+            },
+            "enemy_move": 2
         },
         {
             "type": "EnemySpawn",
@@ -613,7 +615,8 @@
                     0.9999999403953552,
                     1.0
                 ]
-            }
+            },
+            "enemy_move": 1
         },
         {
             "type": "EnemySpawn",
@@ -635,7 +638,7 @@
                     1.0
                 ]
             },
-            "enemy_move": 1
+            "enemy_move": 2
         },
         {
             "type": "EnemySpawn",
@@ -656,7 +659,8 @@
                     1.0,
                     1.0
                 ]
-            }
+            },
+            "enemy_move": 2
         },
         {
             "type": "EnemySpawn",
@@ -721,7 +725,8 @@
                     1.0,
                     1.0
                 ]
-            }
+            },
+            "enemy_move": 2
         },
         {
             "type": "EnemySpawn",
@@ -742,7 +747,8 @@
                     1.0,
                     1.0
                 ]
-            }
+            },
+            "enemy_move": 2
         },
         {
             "type": "EnemySpawn",

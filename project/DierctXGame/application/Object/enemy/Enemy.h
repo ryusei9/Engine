@@ -152,6 +152,8 @@ public:
 
 	void SetMoveType(EnemyMove type) { moveType_ = type; }
 
+	void SetMoveCurve(std::shared_ptr<CurveData> curve) {moveCurve_ = curve;}
+
 private:
 	/*------メンバ変数------*/
 
@@ -235,5 +237,7 @@ private:
 
 	// 敵の動きパターン
 	EnemyMove moveType_ = EnemyMove::None;
+
+	std::shared_ptr<CurveData> moveCurve_;
 };
 

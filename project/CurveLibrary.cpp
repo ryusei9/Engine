@@ -3,23 +3,22 @@
 
 std::unordered_map<EnemyMove, CurveData> CurveLibrary::curves_;
 
-void CurveLibrary::Initialize(
-	const std::vector<CurveData>& curves)
+void CurveLibrary::Register(EnemyMove type, const CurveData& curve)
 {
-    curves_.clear();
-
-    for (const auto& curve : curves) {
-        if (curve.fileName == "Enemy_Wave_-Z") {
-            curves_[EnemyMove::WaveMinusZ] = curve;
-        }
-        else if (curve.fileName == "Enemy_Wave_+Z") {
-            curves_[EnemyMove::WavePlusZ] = curve;
-        }
-    }
+    curves_[type] = curve;
 }
 
 const CurveData& CurveLibrary::Get(EnemyMove type) {
     auto it = curves_.find(type);
     assert(it != curves_.end() && "Curve not found for EnemyMove");
     return it->second;
+}
+
+const CurveData* CurveLibrary::TryGet(EnemyMove type)
+{
+    auto it = curves_.find(type);
+    if (it == curves_.end()) {
+        return nullptr;
+    }
+    return &it->second;
 }

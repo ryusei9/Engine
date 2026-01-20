@@ -44,12 +44,26 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	// プレイヤーの初期化
 	player_ = std::make_unique<Player>();
 	player_->Initialize();
-	
-	// レベルデータのロード
-	levelData_ = JsonLoader::Load("test"); // "resources/level1.json"など
 
-	CurveLibrary::Initialize(levelData_->curves);
+	// --- Enemy用カーブ読み込み ---
+	LevelData* enemyCurveData = JsonLoader::Load("Enemy_Curves");
 
+	// CurveLibrary 初期化（必須）
+	CurveLibrary::Clear();
+
+	for (const auto& curve : enemyCurveData->curves) {
+		if (curve.fileName == "Enemy_Wave_-Z") {
+			CurveLibrary::Register(EnemyMove::WaveMinusZ, curve);
+		}
+		else if (curve.fileName == "Enemy_Wave_+Z") {
+			CurveLibrary::Register(EnemyMove::WavePlusZ, curve);
+		}
+	}
+
+	// --- レベルデータ読み込み ---
+	levelData_ = JsonLoader::Load("test");
+
+	// Enemy生成（この時点で CurveLibrary は完成している）
 	LoadLevel(levelData_);
 
 
@@ -481,26 +495,20 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		// 敵オブジェクトの生成
 		auto newEnemy = std::make_unique<Enemy>();
 		newEnemy->Initialize();
-		//Vector3 anchor = enemyData.translation; // 最終到達点
+		newEnemy->SetPosition(enemyData.translation);
+		newEnemy->SetMoveType(enemyData.move);
+		newEnemy->SetPlayer(player_.get());
 
 		if (enemyData.move != EnemyMove::None) {
 			const CurveData& baseCurve = CurveLibrary::Get(enemyData.move);
 
-			// Enemy 専用にコピー
-			CurveData curve = baseCurve;
-
-			Vector3 anchor = enemyData.translation;
-			Vector3 offset = anchor - curve.points.back();
-
-			for (auto& p : curve.points) {
-				p += offset;
+			auto curve = std::make_shared<CurveData>(baseCurve);
+			for (auto& p : curve->points) {
+				p += enemyData.translation;
 			}
 
-			newEnemy->SetPosition(curve.points.front());
-			newEnemy->StartCurveMove(curve);
+			newEnemy->SetMoveCurve(curve);
 		}
-		//newEnemy->SetMoveType(enemyData.move);
-		newEnemy->SetPlayer(player_.get());
 
 		enemies_.push_back(std::move(newEnemy));
 	}

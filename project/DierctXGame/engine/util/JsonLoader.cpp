@@ -77,6 +77,8 @@ LevelData* JsonLoader::Load(const std::string& fileName)
 								curveData.times.push_back(1.0f); // fallback
 							}
 
+
+
 							index++;
 						}
 					}
@@ -114,11 +116,14 @@ LevelData* JsonLoader::Load(const std::string& fileName)
 				}
 				
 				if (objectJson.contains("enemy_move")) {
-					int moveValue = objectJson["enemy_move"].get<int>();
-					enemyData.move = static_cast<EnemyMove>(moveValue);
+					int v = objectJson["enemy_move"].get<int>();
+
+					if (v == 1) enemyData.move = EnemyMove::WaveMinusZ;
+					else if (v == 2) enemyData.move = EnemyMove::WavePlusZ;
+					else enemyData.move = EnemyMove::None;
 				}
 				else {
-					enemyData.move = EnemyMove::None;
+					enemyData.move = EnemyMove::WaveMinusZ; // デフォルト
 				}
 
 				levelData->enemies.push_back(enemyData);

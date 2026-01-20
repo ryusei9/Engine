@@ -108,6 +108,10 @@ void Enemy::Update()
 		bullet->Update();
 	}
 
+	if (!curveMoveManager_ && moveCurve_) {
+		StartCurveMove(*moveCurve_);
+	}
+	
 	// 生きてる時だけ通常ロジック
 	if (state_ == EnemyState::Alive) {
 		BaseCharacter::Update();

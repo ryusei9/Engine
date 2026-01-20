@@ -41,13 +41,25 @@ void TextureManager::LoadTexture(const std::string& filePath)
 	std::wstring filePathW = StringUtility::ConvertString(filePath);
 	HRESULT hr;
 	if (filePathW.ends_with(L".dds")) {
+		// **デバッグ: メタデータを事前に確認**
+		DirectX::TexMetadata metadata;
+		hr = DirectX::GetMetadataFromDDSFile(filePathW.c_str(), DirectX::DDS_FLAGS_NONE, metadata);
+		if (SUCCEEDED(hr)) {
+			char debugInfo[512];
+			sprintf_s(debugInfo, "[DDS Load] Path:%s, IsCubemap:%d, ArraySize:%zu, Format:%d\n",
+				filePath.c_str(), metadata.IsCubemap(), metadata.arraySize, metadata.format);
+			OutputDebugStringA(debugInfo);
+		}
+		
 		hr = DirectX::LoadFromDDSFile(filePathW.c_str(), DirectX::DDS_FLAGS_NONE, nullptr, image);
 	} else {
 		hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	}
 	if (!SUCCEEDED(hr)) {
 		OutputDebugStringA(("Texture load failed: " + filePath + "\n").c_str());
-		OutputDebugStringA(("HRESULT: " + std::to_string(hr) + "\n").c_str());
+		char hrHex[64];
+		sprintf_s(hrHex, "HRESULT: 0x%08X\n", static_cast<unsigned int>(hr));
+		OutputDebugStringA(hrHex);
 	}
 	assert(SUCCEEDED(hr));
 
@@ -65,6 +77,13 @@ void TextureManager::LoadTexture(const std::string& filePath)
 	// 使用するメタデータ／イメージ配列を参照
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 	const DirectX::Image* mipImage = mipImages.GetImages();
+
+	// **デバッグ: キューブマップかどうか確認**
+	if (metadata.IsCubemap()) {
+		OutputDebugStringA(("Creating CUBEMAP SRV for: " + filePath + "\n").c_str());
+	} else {
+		OutputDebugStringA(("Creating TEXTURE2D SRV for: " + filePath + "\n").c_str());
+	}
 
 	// textureDatas に要素を追加して参照を取得（デフォルト構築を利用）
 	TextureData& textureData = textureDatas[filePath];

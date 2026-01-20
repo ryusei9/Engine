@@ -89,6 +89,6 @@ private:
 	bool isGameStart_ = false;
 
 	// キューブ
-	std::unique_ptr<Skybox> cube_ = nullptr;
+	
 };
 

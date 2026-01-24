@@ -166,7 +166,7 @@
                     1.0
                 ]
             },
-            "curve_role": 1,
+            "curve_role": 2,
             "curve": {
                 "splines": [
                     {

@@ -12,11 +12,12 @@ from common_export.export_scene import MYADDON_OT_export_scene
 from .editor_menu import TOPBAR_MT_editor_menu
 from .disabled import MYADDON_OT_disabled
 from .disabled import OBJECT_PT_disabled
-from .spawn import MYADDON_OT_spawn_import_symbol
+from .spawn import MYADDON_OT_spawn_import_symbol, register_enemy_props, unregister_enemy_props
 from .spawn import MYADDON_OT_spawn_create_symbol
 from .spawn import SpawnNames
 from .spawn import PlayerSpawnCreateSymbol
 from .spawn import EnemySpawnCreateSymbol
+from .spawn import MYADDON_PT_enemy_spawn_panel
 
 #ブレンダーに登録するアドオン情報
 bl_info = {
@@ -46,7 +47,8 @@ classes = (
     MYADDON_OT_spawn_import_symbol,
     MYADDON_OT_spawn_create_symbol,
     PlayerSpawnCreateSymbol,
-    EnemySpawnCreateSymbol
+    EnemySpawnCreateSymbol,
+    MYADDON_PT_enemy_spawn_panel
 )
 #メニュー項目描画
 def draw_menu_manual(self, context):
@@ -54,9 +56,11 @@ def draw_menu_manual(self, context):
 
 #アドオン有効化時コールバック
 def register():
+    register_enemy_props()
     #Blenderにクラスを登録
     for cls in classes:
         bpy.utils.register_class(cls)
+    
     #メニュー項目を追加
     bpy.types.TOPBAR_MT_editor_menus.append(TOPBAR_MT_editor_menu.submenu)
     #3Dビューに描画関数を追加
@@ -65,6 +69,7 @@ def register():
 
 #アドオン無効化時コールバック
 def unregister():
+    
     #メニュー項目を削除
     bpy.types.TOPBAR_MT_editor_menus.remove(TOPBAR_MT_editor_menu.submenu)
     #3Dビューから描画関数を削除
@@ -72,6 +77,7 @@ def unregister():
     #Blenderからクラスを登録解除
     for cls in classes:
         bpy.utils.unregister_class(cls)
+    unregister_enemy_props()
     print("レベルエディタが無効化されました")
     
 #テスト実行用コード

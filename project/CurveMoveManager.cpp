@@ -2,25 +2,37 @@
 
 void CurveMoveManager::Start(const CurveData& curve)
 {
-    curve_ = &curve;
+    curve_ = curve;
     currentIndex_ = 0;
     timer_ = 0.0f;
     finished_ = false;
+
+    // ★ 防御
+    assert(curve_.points.size() == curve_.times.size());
+
+    if (!curve_.points.empty()) {
+        position_ = curve_.points[0];
+    }
 }
 
 void CurveMoveManager::Update(float deltaTime)
 {
-    if (finished_ || !curve_) return;
+    if (finished_) return;
 
     // 最後の制御点に到達したら終了
-    if (currentIndex_ >= curve_->points.size() - 1) {
+    if (currentIndex_ >= curve_.points.size() - 1) {
         finished_ = true;
         return;
     }
 
     timer_ += deltaTime;
 
-    float duration = curve_->times[currentIndex_ + 1];
+    if (currentIndex_ + 1 >= curve_.times.size()) {
+        finished_ = true;
+        return;
+    }
+
+    float duration = curve_.times[currentIndex_ + 1];
     if (duration <= 0.0f) duration = 0.0001f;
 
     float t = timer_ / duration;
@@ -37,10 +49,10 @@ void CurveMoveManager::Update(float deltaTime)
     uint32_t i3 = ClampIndex(currentIndex_ + 2);
 
     position_ = CatmullRom(
-        curve_->points[i0],
-        curve_->points[i1],
-        curve_->points[i2],
-        curve_->points[i3],
+        curve_.points[i0],
+        curve_.points[i1],
+        curve_.points[i2],
+        curve_.points[i3],
         t
     );
 }
@@ -49,7 +61,7 @@ uint32_t CurveMoveManager::ClampIndex(uint32_t i) const
 {
 	// インデックスのクランプ
     if (i < 0) return 0;
-    uint32_t max = static_cast<uint32_t>(curve_->points.size()) - 1;
+    uint32_t max = static_cast<uint32_t>(curve_.points.size()) - 1;
     if (i > max) return max;
     return i;
 }

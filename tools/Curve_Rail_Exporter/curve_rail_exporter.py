@@ -15,6 +15,24 @@ import os
 from bpy_extras.io_utils import ExportHelper
 from mathutils import Vector
 
+# =========================
+# Operator: Curve Role 初期化
+# =========================
+class CURVE_OT_init_role(bpy.types.Operator):
+    bl_idname = "curve.init_role"
+    bl_label = "Initialize Curve Role"
+    bl_description = "Initialize curve role (CAMERA / ENEMY)"
+
+    def execute(self, context):
+        obj = context.object
+        if not obj or obj.type != 'CURVE':
+            return {'CANCELLED'}
+
+        if "curve_role" not in obj:
+            obj["curve_role"] = "CAMERA"
+
+        return {'FINISHED'}
+
 # ----------------------------
 # ユーティリティ
 # ----------------------------
@@ -56,6 +74,25 @@ def get_curve_control_points_world(obj: bpy.types.Object):
         result.append(sdict)
     return result
 
+# ==================================================
+# Enum Property
+# ==================================================
+
+def register_props():
+    bpy.types.Object.curve_role = bpy.props.EnumProperty(
+        name="Curve Role",
+        description="Role of this curve",
+        items=[
+            ("None", "None", ""),
+            ("Enemy_Wave_-Z", "Wave -Z", ""),
+            ("Enemy_Wave_+Z", "Wave +Z", ""),
+        ],
+        default='None'
+    )
+
+def unregister_props():
+    del bpy.types.Object.curve_role
+
 # ----------------------------
 # Export Operator
 # ----------------------------
@@ -81,13 +118,11 @@ class CURVE_RAIL_OT_export_json(bpy.types.Operator):
                     if "is_rail" not in o:
                         o["is_rail"] = False
                     objs.append(o)
-                elif not self.include_empty_objects:
-                    # skip non-curve
-                    continue
+                
             print("export_mode =", self.export_mode)
-        else:  # RAILS
+        else:  # ALL
             for o in context.scene.objects:
-                if o.type == 'CURVE' and o.get("is_rail", False):
+                if o.type == 'CURVE':
                     objs.append(o)
 
         if not objs:
@@ -98,6 +133,7 @@ class CURVE_RAIL_OT_export_json(bpy.types.Operator):
         for o in objs:
             entry = {
                 "name": o.name,
+                "curve_role": o.curve_role,
                 "is_rail": bool(o.get("is_rail", False)),
                 "location": vec_to_list(o.matrix_world.translation),
                 "splines": get_curve_control_points_world(o),
@@ -136,19 +172,30 @@ class CURVE_RAIL_PT_panel(bpy.types.Panel):
         layout = self.layout
         obj = context.active_object
 
-        col = layout.column(align=True)
-        col.label(text="Rail Flag")
-        if obj and obj.type == 'CURVE':
-            if "is_rail" in obj:
-                col.prop(obj, '["is_rail"]', text="Rail")
-            else:
-                col.label(text="(Rail 未設定 - Export時に自動設定)", icon="INFO")
-        row = col.row(align=True)
+        if not obj or obj.type != 'CURVE':
+            layout.label(text="Select a curve")
+            return
 
-        op = row.operator(CURVE_RAIL_OT_export_json.bl_idname, text="Export Selected")
-        op.export_mode = 'SELECTED'
-        op2 = row.operator(CURVE_RAIL_OT_export_json.bl_idname, text="Export Rails")
-        op2.export_mode = 'ALL'
+        col = layout.column()
+
+        # ---- Curve Role ----
+        col.label(text="Curve Role")
+
+        col.prop(obj, "curve_role", text="Role")
+
+        col.separator()
+        #col.label(text="Rail Flag")
+        #if obj and obj.type == 'CURVE':
+            #if "is_rail" in obj:
+                #col.prop(obj, '["is_rail"]', text="Rail")
+            #else:
+                #col.label(text="(Rail 未設定 - Export時に自動設定)", icon="INFO")
+        #row = col.row(align=True)
+
+        #op = row.operator(CURVE_RAIL_OT_export_json.bl_idname, text="Export Selected")
+        #op.export_mode = 'SELECTED'
+        #op2 = row.operator(CURVE_RAIL_OT_export_json.bl_idname, text="Export Rails")
+        #op2.export_mode = 'ALL'
 # ----------------------------
 # Helper operator: プレビュー（コンソール出力）
 # ----------------------------
@@ -255,6 +302,7 @@ class CURVE_PT_time_adjust_panel(bpy.types.Panel):
 # registration
 # ----------------------------
 classes = (
+    CURVE_OT_init_role,
     CURVE_RAIL_OT_export_json,
     CURVE_RAIL_PT_panel,
     CURVE_RAIL_OT_print_points,
@@ -263,6 +311,7 @@ classes = (
 )
 
 def register():
+    register_props()
     bpy.utils.register_class(RailPointTime)
     bpy.types.Curve.time_settings = bpy.props.CollectionProperty(type=RailPointTime)
     for c in classes:
@@ -273,6 +322,7 @@ def unregister():
     bpy.utils.unregister_class(RailPointTime)
     for c in reversed(classes):
         bpy.utils.unregister_class(c)
+    unregister_props()
 
 # スクリプト単体実行用
 if __name__ == "__main__":

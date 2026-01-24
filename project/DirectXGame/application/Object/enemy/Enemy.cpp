@@ -115,27 +115,25 @@ void Enemy::Update()
 	// 生きてる時だけ通常ロジック
 	if (state_ == EnemyState::Alive) {
 		BaseCharacter::Update();
+		bool isCurveMoving = false;
+
 		if (curveMoveManager_) {
 			curveMoveManager_->Update(kUpdateDeltaTime);
 			SetPosition(curveMoveManager_->GetPosition());
 
-			if (curveMoveManager_->IsFinished()) {
+			isCurveMoving = !curveMoveManager_->IsFinished();
+
+			if (!isCurveMoving) {
 				curveMoveManager_.reset();
 			}
-			
-			// カーブ移動中は他の処理をスキップ
-			worldTransform_.Update();
-			object3d_->SetCamera(camera_);
-			object3d_->SetScale(worldTransform_.GetScale());
-			object3d_->SetRotate(worldTransform_.GetRotate());
-			object3d_->SetTranslate(worldTransform_.GetTranslate());
-			object3d_->Update();
-			return;
 		}
-		
-		// 敵の攻撃
-		if (controlEnabled_) {
-			attack_->Update(this, player_, bullets_, kUpdateDeltaTime);
+
+		// ↓ カーブ中は「移動ロジック」だけをスキップ
+		if (!isCurveMoving) {
+			// 通常移動・AI・攻撃
+			if (controlEnabled_) {
+				attack_->Update(this, player_, bullets_, kUpdateDeltaTime);
+			}
 		}
 		
 		if (hp_ <= 0) {

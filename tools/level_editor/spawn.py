@@ -1,6 +1,32 @@
 import bpy
 import os
 import bpy.ops
+
+# =========================
+# Enemy Move Type Enum
+# =========================
+def enemy_move_items(self, context):
+    bpy.types.Object.enemy_move = bpy.props.EnumProperty(
+        name="Enemy Move",
+        items=[
+            ("None", "None", ""),
+            ("Enemy_Wave_-Z", "Wave -Z", ""),
+            ("Enemy_Wave_+Z", "Wave +Z", ""),
+        ],
+         default=0
+    )
+
+def register_enemy_props():
+    bpy.types.Object.enemy_move = bpy.props.EnumProperty(
+        name="Enemy Move",
+        description="Enemy movement curve",
+        items=enemy_move_items,
+         default=0
+    )
+
+def unregister_enemy_props():
+    del bpy.types.Object.enemy_move
+
 #オペレータ 出現ポイントのシンボルを読み込む
 class MYADDON_OT_spawn_import_symbol(bpy.types.Operator):
     bl_idname = "myaddon.myaddon_ot_spawn_import_symbol"
@@ -63,7 +89,7 @@ class MYADDON_OT_spawn_create_symbol(bpy.types.Operator):
     bl_description = "出現ポイントのシンボルを配置します"
     bl_options = {'REGISTER', 'UNDO'}
 
-    type: bpy.props.StringProperty(name = "type",default = "Player")
+    type = bpy.props.StringProperty(name = "type",default = "Player")
 
     def execute(self, context):
         #プロトタイプオブジェクトを取得
@@ -122,3 +148,25 @@ class EnemySpawnCreateSymbol(bpy.types.Operator):
         #敵出現ポイントのシンボルを作成
         bpy.ops.myaddon.myaddon_ot_spawn_create_symbol('EXEC_DEFAULT', type="Enemy")
         return {'FINISHED'}
+    
+class MYADDON_PT_enemy_spawn_panel(bpy.types.Panel):
+    bl_label = "Enemy Spawn"
+    bl_idname = "MYADDON_PT_enemy_spawn_panel"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'Spawn'
+
+    def draw(self, context):
+        layout = self.layout
+        obj = context.active_object
+
+        if not obj:
+            return
+
+        # EnemySpawn のみ表示
+        if obj.get("type") != "EnemySpawn":
+            layout.label(text="Select EnemySpawn")
+            return
+
+        layout.label(text="Enemy Movement")
+        layout.prop(obj, "enemy_move", text="")

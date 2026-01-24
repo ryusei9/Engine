@@ -495,7 +495,7 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		// 敵オブジェクトの生成
 		auto newEnemy = std::make_unique<Enemy>();
 		newEnemy->Initialize();
-		newEnemy->SetPosition(enemyData.translation);
+		//newEnemy->SetPosition(enemyData.translation);
 		newEnemy->SetMoveType(enemyData.move);
 		newEnemy->SetPlayer(player_.get());
 

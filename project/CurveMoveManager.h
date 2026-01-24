@@ -32,7 +32,7 @@ private:
     /*------メンバ変数------*/
 
 	// カーブデータ
-    const CurveData* curve_ = nullptr;
+    CurveData curve_;
 
 	// 現在のインデックス
     uint32_t currentIndex_ = 0;

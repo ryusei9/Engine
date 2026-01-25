@@ -120,6 +120,8 @@ LevelData* JsonLoader::Load(const std::string& fileName)
 
 					if (v == 1) enemyData.move = EnemyMove::WaveMinusZ;
 					else if (v == 2) enemyData.move = EnemyMove::WavePlusZ;
+					else if (v == 3) enemyData.move = EnemyMove::WavePlusY;
+					else if (v == 4) enemyData.move = EnemyMove::WaveMinusY;
 					else enemyData.move = EnemyMove::None;
 				}
 				else {
@@ -261,6 +263,12 @@ EnemyMove JsonLoader::ParseEnemyMove(const std::string& move)
 	}
 	if (move == "Enemy_Wave_+Z") {
 		return EnemyMove::WavePlusZ;
+	}
+	if (move == "Enemy_Wave_-Y") {
+		return EnemyMove::WaveMinusY;
+	}
+	if (move == "Enemy_Wave_+Y") {
+		return EnemyMove::WavePlusY;
 	}
 	return EnemyMove::None;
 }

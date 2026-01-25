@@ -8,6 +8,8 @@ enum class EnemyMove {
 	None = 0,
 	WaveMinusZ,
 	WavePlusZ,
+	WaveMinusY,
+	WavePlusY
 };
 
 // カーブデータ構造体（共通定義）

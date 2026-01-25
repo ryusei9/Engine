@@ -58,6 +58,12 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 		else if (curve.fileName == "Enemy_Wave_+Z") {
 			CurveLibrary::Register(EnemyMove::WavePlusZ, curve);
 		}
+		else if (curve.fileName == "Enemy_Wave_+Y") {
+			CurveLibrary::Register(EnemyMove::WavePlusY, curve);
+		}
+		else if (curve.fileName == "Enemy_Wave_-Y") {
+			CurveLibrary::Register(EnemyMove::WaveMinusY, curve);
+		}
 	}
 
 	// --- レベルデータ読み込み ---
@@ -523,7 +529,7 @@ void GamePlayScene::DrawImGuiImportObjectsFromJson()
 		if (ImGui::SliderFloat3("position", &pos.x, -10.0f, 10.0f)) {
 			enemy->SetPosition(pos);
 		}
-		if (ImGui::SliderFloat3("Rotation", &rot.x, -180.0f, 180.0f)) {
+		if (ImGui::SliderFloat3("Rotation", &rot.x, -3.14f, 3.14f)) {
 			enemy->SetRotation(rot);
 		}
 		if (ImGui::SliderFloat3("Scale", &scale.x, 0.01f, 10.0f)) {

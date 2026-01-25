@@ -528,7 +528,7 @@
                 ]
             },
             "disabled": false,
-            "enemy_move": 1
+            "enemy_move": 3
         },
         {
             "type": "EnemySpawn",
@@ -550,7 +550,7 @@
                     1.0
                 ]
             },
-            "enemy_move": 1
+            "enemy_move": 4
         },
         {
             "type": "EnemySpawn",
@@ -572,7 +572,7 @@
                     1.0
                 ]
             },
-            "enemy_move": 2
+            "enemy_move": 3
         },
         {
             "type": "EnemySpawn",
@@ -594,7 +594,7 @@
                     1.0
                 ]
             },
-            "enemy_move": 2
+            "enemy_move": 4
         },
         {
             "type": "EnemySpawn",
@@ -616,7 +616,7 @@
                     1.0
                 ]
             },
-            "enemy_move": 1
+            "enemy_move": 3
         },
         {
             "type": "EnemySpawn",
@@ -638,7 +638,7 @@
                     1.0
                 ]
             },
-            "enemy_move": 2
+            "enemy_move": 3
         },
         {
             "type": "EnemySpawn",
@@ -660,7 +660,7 @@
                     1.0
                 ]
             },
-            "enemy_move": 2
+            "enemy_move": 3
         },
         {
             "type": "EnemySpawn",
@@ -682,7 +682,7 @@
                     1.0
                 ]
             },
-            "enemy_move": 1
+            "enemy_move": 3
         },
         {
             "type": "EnemySpawn",
@@ -704,7 +704,7 @@
                     1.0
                 ]
             },
-            "enemy_move": 1
+            "enemy_move": 3
         },
         {
             "type": "EnemySpawn",
@@ -726,7 +726,7 @@
                     1.0
                 ]
             },
-            "enemy_move": 2
+            "enemy_move": 4
         },
         {
             "type": "EnemySpawn",
@@ -748,7 +748,7 @@
                     1.0
                 ]
             },
-            "enemy_move": 2
+            "enemy_move": 3
         },
         {
             "type": "EnemySpawn",
@@ -770,7 +770,7 @@
                     1.0
                 ]
             },
-            "enemy_move": 1
+            "enemy_move": 4
         }
     ]
 }

@@ -94,6 +94,8 @@ void Enemy::Initialize(const std::string& parameterFileName)
 	attack_->Initialize("enemyAttackParameters"); // パラメータファイルから読み込み
 	// デフォルトの攻撃パターンを設定
 	attack_->SetPattern(1);
+
+	hasStartedCurveMove_ = false;
 }
 
 void Enemy::Update()
@@ -108,40 +110,30 @@ void Enemy::Update()
 		bullet->Update();
 	}
 
-	if (!curveMoveManager_ && moveCurve_) {
-		StartCurveMove(*moveCurve_);
-	}
-	
-	// 生きてる時だけ通常ロジック
+
 	if (state_ == EnemyState::Alive) {
 		BaseCharacter::Update();
-		bool isCurveMoving = false;
 
-		if (curveMoveManager_) {
-			curveMoveManager_->Update(kUpdateDeltaTime);
-			SetPosition(curveMoveManager_->GetPosition());
+		switch (moveState_) {
+		case EnemyMoveState::Idle:
+			UpdateIdle();
+			break;
 
-			isCurveMoving = !curveMoveManager_->IsFinished();
+		case EnemyMoveState::CurveMove:
+			UpdateCurveMove();
+			break;
 
-			if (!isCurveMoving) {
-				curveMoveManager_.reset();
-			}
+		case EnemyMoveState::FollowZ:
+			UpdateFollowZ();
+			break;
 		}
 
-		// ↓ カーブ中は「移動ロジック」だけをスキップ
-		if (!isCurveMoving) {
-			// 通常移動・AI・攻撃
-			if (controlEnabled_) {
-				attack_->Update(this, player_, bullets_, kUpdateDeltaTime);
-			}
+		if (controlEnabled_) {
+			attack_->Update(this, player_, bullets_, kUpdateDeltaTime);
 		}
-		
+
 		if (hp_ <= 0) {
-			// 死亡演出へ移行
-			state_ = EnemyState::Dying;
-			object3d_->SetPointLight(0.0f);
-			object3d_->SetDirectionalLight(1.0f);
-			object3d_->SetMaterialColor(Vector4(0.3f, 0.3f, 0.3f, 1.0f));
+			EnterDyingState();
 		}
 	}
 
@@ -295,10 +287,64 @@ void Enemy::PlayHitParticle()
 	}
 }
 
-void Enemy::StartCurveMove(const CurveData& curve)
+void Enemy::StartCurveMove()
 {
+	if(!moveCurve_ || moveState_ != EnemyMoveState::Idle) return;
+
 	curveMoveManager_ = std::make_unique<CurveMoveManager>();
-	curveMoveManager_->Start(CurveData(curve)); // ← 明示コピー
+	curveMoveManager_->Start(*moveCurve_);
+
+	// 開始位置をカーブ先頭に
+	SetPosition(moveCurve_->points[0]);
+
+	moveState_ = EnemyMoveState::CurveMove;
+}
+
+void Enemy::UpdateIdle()
+{
+
+}
+
+void Enemy::UpdateCurveMove()
+{
+	if (!curveMoveManager_) return;
+
+	curveMoveManager_->Update(kUpdateDeltaTime);
+
+	Vector3 pos = curveMoveManager_->GetPosition();
+	SetPosition(pos);
+
+	if (curveMoveManager_->IsFinished()) {
+		curveMoveManager_.reset();
+
+		// ★ カーブ終了時に「追従Z」を確定
+		desiredZ_ = player_->GetPosition().z;
+		moveState_ = EnemyMoveState::FollowZ;
+	}
+}
+
+void Enemy::UpdateFollowZ()
+{
+	Vector3 pos = worldTransform_.GetTranslate();
+
+	float targetZ = player_->GetPosition().z;
+	float currentZ = pos.z;
+
+	// なめらか補間
+	float dz = targetZ - currentZ;
+	currentZ += dz * zFollowSpeed_ * kUpdateDeltaTime;
+
+	pos.z = currentZ;
+	SetPosition(pos);
+}
+
+void Enemy::EnterDyingState()
+{
+	// 死亡演出へ移行
+	state_ = EnemyState::Dying;
+	object3d_->SetPointLight(0.0f);
+	object3d_->SetDirectionalLight(1.0f);
+	object3d_->SetMaterialColor(Vector4(0.3f, 0.3f, 0.3f, 1.0f));
 }
 
 Vector3 Enemy::GetCenterPosition() const
@@ -317,4 +363,5 @@ void Enemy::SetParameters(const EnemyParameters& parameters)
 	fallSpeed_ = parameters_.fallSpeed;
 	rotationSpeed_ = parameters_.rotationSpeed;
 }
+
 

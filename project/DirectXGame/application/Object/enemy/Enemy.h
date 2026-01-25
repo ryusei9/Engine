@@ -73,6 +73,8 @@ public:
 		Dead
 	};
 
+	
+
 	/*------メンバ関数------*/
 
 	// コンストラクタ
@@ -108,7 +110,28 @@ public:
 	// 敵ヒット時にパーティクルを出す
 	void PlayHitParticle();
 
-	void StartCurveMove(const CurveData& curve);
+	void StartCurveMove();
+
+	bool HasStartedCurve() const { return hasStartedCurveMove_; }
+
+	bool HasMoveCurve() const { return moveCurve_ != nullptr; }
+
+	/*------ステート------*/
+
+	enum class EnemyMoveState {
+		Idle,        // まだカーブ開始前（待機）
+		CurveMove,   // カーブ再生中
+		FollowZ,     // カーブ終了後：Zだけ追従
+	};
+
+
+	void UpdateIdle();
+
+	void UpdateCurveMove();
+
+	void UpdateFollowZ();
+
+	void EnterDyingState();
 
 	/*------ゲッター------*/
 
@@ -238,6 +261,19 @@ private:
 	// 敵の動きパターン
 	EnemyMove moveType_ = EnemyMove::None;
 
+	// 移動用カーブデータ
 	std::shared_ptr<CurveData> moveCurve_;
+
+	// カーブ移動開始フラグ
+	bool hasStartedCurveMove_ = false;
+
+	bool curveStarted_ = false;
+
+	EnemyMoveState moveState_ = EnemyMoveState::Idle;
+
+	// Z追従用
+	float zFollowSpeed_ = 8.0f;   // 補間速度
+	float desiredZ_ = 0.0f;       // 追従目標Z
+
 };
 

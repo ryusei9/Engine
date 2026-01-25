@@ -203,7 +203,7 @@ void CameraManager::DrawImGuiCameraTransform()
 		mainCamera_->SetTranslate(camPos);
 	}
 	
-	if (ImGui::DragFloat3("Camera Rotation", &camRot.x)) {
+	if (ImGui::SliderFloat3("Camera Rotation", &camRot.x,3.14f,0.1f)) {
 		mainCamera_->SetRotate(camRot);
 	}
 	

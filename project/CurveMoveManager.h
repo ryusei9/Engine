@@ -25,6 +25,8 @@ public:
 
 	// 位置の取得
     Vector3 GetPosition() const { return position_; }
+
+	Vector3 GetOffset() const { return curveOffset; }
 private:
 	// インデックスのクランプ
     uint32_t ClampIndex(uint32_t i) const;
@@ -45,5 +47,9 @@ private:
 
 	// 現在の位置
     Vector3 position_;
+
+    float baseZ_ = 0.0f;
+
+    Vector3 curveOffset;
 };
 

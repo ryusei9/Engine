@@ -48,6 +48,9 @@ namespace GamePlayDefaults {
 
 	// 時間ステップ
 	inline constexpr float kDeltaTime60Hz = 1.0f / 60.0f;
+
+	// 動き出すまでのエネミーとカメラの距離X
+	inline constexpr float startDistanceX_ = 7.0f;
 }
 
 /// <summary>

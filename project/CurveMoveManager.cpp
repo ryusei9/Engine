@@ -7,6 +7,9 @@ void CurveMoveManager::Start(const CurveData& curve)
     timer_ = 0.0f;
     finished_ = false;
 
+    
+    position_ = curve_.points[0];
+    
     // ★ 防御
     assert(curve_.points.size() == curve_.times.size());
 
@@ -19,18 +22,12 @@ void CurveMoveManager::Update(float deltaTime)
 {
     if (finished_) return;
 
-    // 最後の制御点に到達したら終了
     if (currentIndex_ >= curve_.points.size() - 1) {
         finished_ = true;
         return;
     }
 
     timer_ += deltaTime;
-
-    if (currentIndex_ + 1 >= curve_.times.size()) {
-        finished_ = true;
-        return;
-    }
 
     float duration = curve_.times[currentIndex_ + 1];
     if (duration <= 0.0f) duration = 0.0001f;
@@ -48,13 +45,16 @@ void CurveMoveManager::Update(float deltaTime)
     uint32_t i2 = ClampIndex(currentIndex_ + 1);
     uint32_t i3 = ClampIndex(currentIndex_ + 2);
 
-    position_ = CatmullRom(
+    Vector3 p = CatmullRom(
         curve_.points[i0],
         curve_.points[i1],
         curve_.points[i2],
         curve_.points[i3],
         t
     );
+
+
+    position_ = p;
 }
 
 uint32_t CurveMoveManager::ClampIndex(uint32_t i) const

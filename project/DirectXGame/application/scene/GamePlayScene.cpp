@@ -98,7 +98,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	startCameraTimer_ = 0.0f;
 	cameraManager_->SetCameraPosition(startCameraPos_);
 	cameraManager_->SetCameraRotation(startCameraRot_);
-
+	
 	// ゲームオーバー用タイマー初期化
 	gameOverTimer_ = GamePlayDefaults::kGameOverTimerSec;
 
@@ -202,12 +202,20 @@ void GamePlayScene::Update()
 		if (!isStartCameraEasing_) {
 			Camera* cam = cameraManager_->GetMainCamera();
 
+			if (!enemy->HasStartedCurve()) {
+
+				float dx = enemy->GetPosition().x - cam->GetTranslate().x;
+
+				if (dx <= GamePlayDefaults::startDistanceX_) {
+					enemy->StartCurveMove();
+				}
+			}
+
 			// 敵の奥行き調整
 			Vector3 enemyPos = enemy->GetPosition();
 			bool inView = IsInCameraView(enemyPos);
 			enemy->SetControlEnabled(inView);
-			enemy->SetZ(cam->GetTranslate().z + 10.0f);
-
+			//enemy->SetZ(cam->GetTranslate().z + 10.0f);
 			// 敵の弾の奥行き調整
 			for (auto& bullet : enemy->GetBullets()) {
 				if (bullet && bullet->IsAlive()) {
@@ -443,7 +451,8 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		// 敵オブジェクトの生成
 		auto newEnemy = std::make_unique<Enemy>();
 		newEnemy->Initialize();
-		//newEnemy->SetPosition(enemyData.translation);
+		
+		newEnemy->SetPosition(enemyData.translation);
 		newEnemy->SetMoveType(enemyData.move);
 		newEnemy->SetPlayer(player_.get());
 
@@ -451,8 +460,20 @@ void GamePlayScene::CreateObjectsFromLevelData()
 			const CurveData& baseCurve = CurveLibrary::Get(enemyData.move);
 
 			auto curve = std::make_shared<CurveData>(baseCurve);
+			// --- アンカー補正（X/Y） ---
 			for (auto& p : curve->points) {
-				p += enemyData.translation;
+				p.x += enemyData.translation.x;
+				p.y += enemyData.translation.y;
+			}
+
+			// --- ★ Z をプレイヤーに合わせる ---
+			float playerZ = player_->GetPosition().z;
+			float curveEndZ = curve->points.back().z;
+
+			float zOffset = playerZ - curveEndZ;
+				
+			for (auto& p : curve->points) {
+				p.z += zOffset;
 			}
 
 			newEnemy->SetMoveCurve(curve);

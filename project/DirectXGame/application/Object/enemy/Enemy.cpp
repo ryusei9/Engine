@@ -51,7 +51,7 @@ void Enemy::Initialize(const std::string& parameterFileName)
 	worldTransform_.Initialize();
 	// 初期Transform（定数で意味付け）
 	worldTransform_.SetScale(Vector3{ 1.0f, 1.0f, 1.0f });
-	worldTransform_.SetRotate(Vector3{ 0.0f, 0.0f, 0.0f });
+	worldTransform_.SetRotate(Vector3{ 0.0f, 3.0f, 0.0f });
 	worldTransform_.SetTranslate(Vector3{ 10.0f, 0.0f, 0.0f });
 
 	// 敵のカメラを取得
@@ -312,13 +312,15 @@ void Enemy::UpdateCurveMove()
 	curveMoveManager_->Update(kUpdateDeltaTime);
 
 	Vector3 pos = curveMoveManager_->GetPosition();
+
+	pos.z = player_->GetPosition().z; // Zはプレイヤー追従
 	SetPosition(pos);
 
 	if (curveMoveManager_->IsFinished()) {
 		curveMoveManager_.reset();
 
 		// ★ カーブ終了時に「追従Z」を確定
-		desiredZ_ = player_->GetPosition().z;
+		//desiredZ_ = player_->GetPosition().z;
 		moveState_ = EnemyMoveState::FollowZ;
 	}
 }

@@ -51,11 +51,19 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	titleGuide_ = std::make_unique<Object3d>();
 	titleGuide_->Initialize("titleGuide.obj");
 
-	// キューブの初期化
-	cube_ = std::make_unique<Skybox>();
-	cube_->Initialize("resources/Voxel_Enemy_Body.dds");
+	particleManager_ = ParticleManager::GetInstance();
 
-	cube_->SetTranslate(Vector3(1.0f, 1.0f, 1.0f));
+	particleManager_->GetInstance()->SetParticleType(ParticleType::Normal);
+	// テクスチャ"Voxel_Enemy_Body.dds"を使用
+	particleManager_->GetInstance()->CreateParticleGroup("Normal", "resources/Voxel_Enemy_Body.dds");
+
+	// タイトルシーン用パーティクルエミッターの初期化
+	titleParticleEmitter_ = std::make_unique<ParticleEmitter>(particleManager_, "Normal");
+	titleParticleEmitter_->SetPosition({ 0.0f, 0.0f, 0.0f });
+	titleParticleEmitter_->SetParticleRate(200); // 1秒あたり20個発生
+	
+	titleParticleEmitter_->SetUseRingParticle(false);
+
 }
 
 void TitleScene::Update()
@@ -75,6 +83,8 @@ void TitleScene::Update()
 	{
 		SetSceneNo(GAMEPLAY);
 	}
+	titleParticleEmitter_->SetParticleCount(20);
+	titleParticleEmitter_->Update();
 
 	// オブジェクトの更新
 	// プレイヤー
@@ -95,9 +105,7 @@ void TitleScene::Update()
 	titleGuide_->SetRotate(titleGuideRotate);
 	titleGuide_->SetScale(titleGuideScale);
 
-	// キューブ
-	cube_->Update();
-
+	
 	// フェードマネージャの更新
 	fadeManager_->Update();
 
@@ -126,9 +134,7 @@ void TitleScene::Draw()
 	// ガイドオブジェクトの描画
 	titleGuide_->Draw();
 
-	/*------キューブの描画------*/
-	cube_->DrawSettings();
-	cube_->Draw();
+	
 
 	/*------スプライトの更新------*/
 	SpriteCommon::GetInstance()->DrawSettings();

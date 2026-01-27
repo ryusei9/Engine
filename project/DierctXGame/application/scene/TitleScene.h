@@ -11,6 +11,8 @@
 #include <FadeManager.h>
 #include <CameraManager.h>
 #include <Skybox.h>
+#include <ParticleManager.h>
+#include <ParticleEmitter.h>
 
 /// <summary>
 /// タイトルシーン	
@@ -88,7 +90,9 @@ private:
 	// ゲームスタートフラグ
 	bool isGameStart_ = false;
 
-	// キューブ
+	// パーティクル
+	ParticleManager* particleManager_ = nullptr;
 	
+	std::unique_ptr<ParticleEmitter> titleParticleEmitter_ = nullptr;
 };
 

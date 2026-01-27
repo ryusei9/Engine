@@ -83,8 +83,8 @@
     <ClCompile Include="DirectXGame\application\Object\player\PlayerBullet.cpp" />
     <ClCompile Include="DirectXGame\application\scene\GameOverScene.cpp" />
     <ClCompile Include="DirectXGame\application\Object\enemy\Boss.cpp" />
-    <ClCompile Include="CurveMoveManager.cpp" />
-    <ClCompile Include="CurveLibrary.cpp" />
+    <ClCompile Include="DirectXGame\engine\manager\CurveMoveManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\util\CurveLibrary.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXGame\engine\manager\CameraManager.h" />
@@ -166,8 +166,8 @@
     <ClInclude Include="DirectXGame\engine\posteffect\PostEffectBase.h" />
     <ClInclude Include="DirectXGame\application\scene\GameOverScene.h" />
     <ClInclude Include="DirectXGame\application\Object\enemy\Boss.h" />
-    <ClInclude Include="CurveMoveManager.h" />
-    <ClInclude Include="CurveLibrary.h" />
+    <ClInclude Include="DirectXGame\engine\manager\CurveMoveManager.h" />
+    <ClInclude Include="DirectXGame\engine\util\CurveLibrary.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Particle.hlsli" />

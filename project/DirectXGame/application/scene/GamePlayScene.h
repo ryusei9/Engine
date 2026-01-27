@@ -19,6 +19,8 @@
 #include <Skybox.h>
 #include <FadeManager.h>
 #include <CameraManager.h>
+#include <GrayscalePostEffect.h>
+#include <PostEffectManager.h>
 
 /// 調整用定数（マジックナンバー排除）
 namespace GamePlayDefaults {
@@ -86,12 +88,11 @@ public:
 public:
 	// ステート
 	enum class GameSceneState {
-		Start,
-		Play,
-		GameClear,
-		GameOver,
+		InGame,
 		Pause
 	};
+
+	GameSceneState gameSceneState_ = GameSceneState::InGame;
 
 	// カメラモード
 	enum class CameraMode {
@@ -100,6 +101,12 @@ public:
 		DynamicFollow,
 		CenterPlayer
 	};
+
+	enum class PauseMenu {
+		Resume,
+		ToTitle,
+	};
+	PauseMenu pauseMenu_ = PauseMenu::Resume;
 
 	template<typename T>
 	T MyMin(const T& a, const T& b) {
@@ -132,6 +139,18 @@ private:
 
 	// ゲームクリアの演出更新
 	void UpdateGameClear();
+
+	// InGameの更新処理
+	void UpdateGame();
+
+	// ポーズ画面の更新処理
+	void UpdatePause();
+
+	// ポーズ画面へ移行
+	void EnterPause();
+
+	// ポーズ画面から復帰
+	void ExitPause();
 
 	// スプライトコモン
 	SpriteCommon* spriteCommon_ = nullptr;
@@ -302,5 +321,29 @@ private:
 	// スペースキーで弾を撃つ
 	std::unique_ptr<Object3d> spaceKeyGuide_ = nullptr;
 	WorldTransform spaceKeyGuideTransform_;
+
+	// escでポーズ
+	std::unique_ptr<Object3d> escGuide_ = nullptr;
+	WorldTransform escGuideTransform_;
+
+	// ゲームに戻る
+	std::unique_ptr<Object3d> resumeGame_ = nullptr;
+	WorldTransform resumeGameTransform_;
+
+	// タイトルに戻る
+	std::unique_ptr<Object3d> backToTitleText_ = nullptr;
+	WorldTransform backToTitleTransform_;
+
+	// 一時停止中
+	std::unique_ptr<Object3d> pauseText_ = nullptr;
+	WorldTransform pauseTextTransform_;
+
+	// WSでメニュー選択
+	std::unique_ptr<Object3d> wsGuide_ = nullptr;
+	WorldTransform wsGuideTransform_;
+
+	// SPACEキーで決定
+	std::unique_ptr<Object3d> spaceGuide_ = nullptr;
+	WorldTransform spaceGuideTransform_;
 };
 

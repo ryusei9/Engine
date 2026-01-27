@@ -118,8 +118,6 @@ protected:
 
 	std::unique_ptr<GrayscalePostEffect> grayscalePostEffect_ = nullptr;
 
-	std::unique_ptr<PostEffectManager> postEffectManager_ = nullptr;
-
 	DirectXCommon* dxCommon_ = nullptr;
 };
 

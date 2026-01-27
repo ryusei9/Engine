@@ -143,6 +143,55 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	spaceKeyGuideTransform_.Initialize();
 	spaceKeyGuideTransform_.SetScale(Vector3(0.2f, 0.2f, 0.2f));
 	spaceKeyGuideTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
+
+	// escでポーズ
+	escGuide_ = make_unique<Object3d>();
+	escGuide_->Initialize("pause.obj");
+
+	escGuideTransform_.Initialize();
+	escGuideTransform_.SetScale(Vector3(0.2f, 0.2f, 0.2f));
+	escGuideTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
+
+	// ゲームに戻る
+	resumeGame_ = make_unique<Object3d>();
+	resumeGame_->Initialize("BackToGame.obj");
+
+	resumeGameTransform_.Initialize();
+	resumeGameTransform_.SetScale(Vector3(0.2f, 0.2f, 0.2f));
+	resumeGameTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
+
+	backToTitleText_ = make_unique<Object3d>();
+	backToTitleText_->Initialize("BackToTitle2.obj");
+
+	backToTitleTransform_.Initialize();
+	backToTitleTransform_.SetScale(Vector3(0.2f, 0.2f, 0.2f));
+	backToTitleTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
+
+	// 一時停止中
+	pauseText_ = make_unique<Object3d>();
+	pauseText_->Initialize("pauseText.obj");
+
+	pauseTextTransform_.Initialize();
+	pauseTextTransform_.SetScale(Vector3(0.4f, 0.4f, 0.4f));
+	pauseTextTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
+
+	// WSガイド
+	wsGuide_ = make_unique<Object3d>();
+	wsGuide_->Initialize("pauseGuide.obj");
+
+	wsGuideTransform_.Initialize();
+	wsGuideTransform_.SetScale(Vector3(0.1f, 0.1f, 0.1f));
+	wsGuideTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
+
+	// SPACEガイド
+	spaceGuide_ = make_unique<Object3d>();
+	spaceGuide_->Initialize("space.obj");
+
+	spaceGuideTransform_.Initialize();
+	spaceGuideTransform_.SetScale(Vector3(0.1f, 0.1f, 0.1f));
+	spaceGuideTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
+	
+	PostEffectManager::GetInstance()->SetEffectEnabled(0, false);
 }
 
 void GamePlayScene::Update()
@@ -150,10 +199,13 @@ void GamePlayScene::Update()
 	// 入力の更新
 	input_->Update();
 
-	// Tキーでタイトルシーンに切り替える
-	if (input_->TriggerKey(DIK_T))
-	{
-		SetSceneNo(TITLE);
+	if (Input::GetInstance()->TriggerKey(DIK_ESCAPE)) {
+		if (gameSceneState_ == GameSceneState::InGame) {
+			EnterPause();
+		}
+		else {
+			ExitPause();
+		}
 	}
 
 	// プレイヤーが死んでいるかチェック
@@ -183,72 +235,12 @@ void GamePlayScene::Update()
 			fadeStarted_ = true;
 		}
 	}
-	// ゲームクリア時の更新
-	UpdateGameClear();
-	// ゲームオーバーじゃないとき
-	if (!isGameOver_) {
-		// プレイヤーの更新
-		player_->Update();
-
-		// カメラ追従更新
-		// プレイヤー操作が有効なときのみカメラ追従を更新
-		if (!isStartCameraEasing_) {
-			UpdatePlayerFollowCamera();
-			// プレイヤーの移動制限
-			RestrictPlayerInsideCameraView();
-		}
-
-		// プレイヤーの弾の奥行き調整
-		for (auto& bullet : player_->GetBullets()) {
-			if (bullet && bullet->IsAlive()) {
-				Camera* cam = cameraManager_->GetMainCamera();
-				Vector3 bulletPos = bullet->GetTranslate();
-				// 画面外の場合は消す
-				if (!IsInCameraView(bulletPos)) {
-					bullet->SetIsAlive(false);
-				}
-				bulletPos.z = cam->GetTranslate().z + 10.0f; // プレイヤーと同じ奥行
-				bullet->SetTranslate(bulletPos);
-			}
-		}
+	
+	if (gameSceneState_ == GameSceneState::InGame) {
+		UpdateGame();   // 敵・弾・プレイヤー全部
 	}
-
-	// 読み込んだ全オブジェクトの更新
-	for (auto& obj : objects_) {
-		obj->Update();
-	}
-
-	// 敵の更新
-	for (auto& enemy : enemies_) {
-		enemy->SetPlayer(player_.get());
-		enemy->Update();
-		// スタート演出中でなければ敵の奥行き調整を行う
-		if (!isStartCameraEasing_) {
-			Camera* cam = cameraManager_->GetMainCamera();
-
-			if (!enemy->HasStartedCurve()) {
-
-				float dx = enemy->GetPosition().x - cam->GetTranslate().x;
-
-				if (dx <= GamePlayDefaults::startDistanceX_) {
-					enemy->StartCurveMove();
-				}
-			}
-
-			// 敵の奥行き調整
-			Vector3 enemyPos = enemy->GetPosition();
-			bool inView = IsInCameraView(enemyPos);
-			enemy->SetControlEnabled(inView);
-			//enemy->SetZ(cam->GetTranslate().z + 10.0f);
-			// 敵の弾の奥行き調整
-			for (auto& bullet : enemy->GetBullets()) {
-				if (bullet && bullet->IsAlive()) {
-					Vector3 bulletPos = bullet->GetPosition();
-					bulletPos.z = cam->GetTranslate().z + 10.0f; // プレイヤーと同じ奥行
-					bullet->SetPosition(bulletPos);
-				}
-			}
-		}
+	else if (gameSceneState_ == GameSceneState::Pause) {
+		UpdatePause();  // UI だけ
 	}
 
 	// ゲームクリアテキストの更新
@@ -291,6 +283,35 @@ void GamePlayScene::Update()
 		spaceKeyGuideTransform_.translate_.x = camPos.x - 1.0f;
 		spaceKeyGuideTransform_.translate_.y = camPos.y + 0.32f;
 		spaceKeyGuideTransform_.translate_.z = camPos.z + 5.0f;
+
+		escGuideTransform_.translate_.x = camPos.x - 1.3f;
+		escGuideTransform_.translate_.y = camPos.y - 1.5f;
+		escGuideTransform_.translate_.z = camPos.z + 5.0f;
+
+		// ゲームに戻るテキストの位置調整
+		resumeGameTransform_.translate_.x = camPos.x;
+		resumeGameTransform_.translate_.y = camPos.y - 1.0f;
+		resumeGameTransform_.translate_.z = camPos.z + 5.0f;
+
+		// タイトルに戻るテキストの位置調整
+		backToTitleTransform_.translate_.x = camPos.x;
+		backToTitleTransform_.translate_.y = camPos.y - 1.3f;
+		backToTitleTransform_.translate_.z = camPos.z + 5.0f;
+
+		// 一時停止中テキストの位置調整
+		pauseTextTransform_.translate_.x = camPos.x;
+		pauseTextTransform_.translate_.y = camPos.y;
+		pauseTextTransform_.translate_.z = camPos.z + 5.0f;
+
+		// WSガイドの更新
+		wsGuideTransform_.translate_.x = camPos.x - 1.5f;
+		wsGuideTransform_.translate_.y = camPos.y - 1.4f;
+		wsGuideTransform_.translate_.z = camPos.z + 5.0f;
+
+		// スペースキーガイドの更新
+		spaceGuideTransform_.translate_.x = camPos.x - 1.63f;
+		spaceGuideTransform_.translate_.y = camPos.y - 1.5f;
+		spaceGuideTransform_.translate_.z = camPos.z + 5.0f;
 	}
 	// WASDガイドの更新
 	wasdGuide_->SetWorldTransform(wasdGuideTransform_);
@@ -299,6 +320,29 @@ void GamePlayScene::Update()
 	// スペースキーガイドの更新
 	spaceKeyGuide_->SetWorldTransform(spaceKeyGuideTransform_);
 	spaceKeyGuide_->Update();
+
+	escGuide_->SetWorldTransform(escGuideTransform_);
+	escGuide_->Update();
+
+	// ゲームに戻るテキストの更新
+	resumeGame_->SetWorldTransform(resumeGameTransform_);
+	resumeGame_->Update();
+
+	// タイトルに戻るテキストの更新
+	backToTitleText_->SetWorldTransform(backToTitleTransform_);
+	backToTitleText_->Update();
+
+	// 一時停止中テキストの更新
+	pauseText_->SetWorldTransform(pauseTextTransform_);
+	pauseText_->Update();
+
+	// WSガイドの更新
+	wsGuide_->SetWorldTransform(wsGuideTransform_);
+	wsGuide_->Update();
+
+	// スペースキーガイドの更新
+	spaceGuide_->SetWorldTransform(spaceGuideTransform_);
+	spaceGuide_->Update();
 
 	// フェードマネージャの更新
 	fadeManager_->Update();
@@ -324,60 +368,14 @@ void GamePlayScene::Update()
 		break;
 	}
 
-	// スタート演出カメラ初期化
-	if (isStartCameraEasing_) {
-		player_->SetPlayerControlEnabled(false); // プレイヤー操作無効化
-		// ルートカメラの更新開始
-		UpdateStartCameraEasing();
-		cameraManager_->Update();
-		Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
-		return; // 他の更新をスキップ（必要に応じて調整）
-	}
-
-	// 通常のカメラ更新（ゲームクリア時にカメライージング中なら上で更新済み）
-	if (!gameClearCameraMoving_) {
-		cameraManager_->Update();
-	}
+	
 	Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
 
 	// スプライトの更新
 	sprite_->SetPosition(spritePosition_);
 	sprite_->Update();
 
-	// 衝突マネージャの更新
-	collisionManager_->Update();
-	CheckAllCollisions();// 衝突判定と応答
-
-	// 敵
-	enemies_.erase(
-		std::remove_if(enemies_.begin(), enemies_.end(),
-			[&](const std::unique_ptr<Enemy>& e) {
-				if (!e->IsAlive()) {
-					collisionManager_->RemoveCollider(e.get());
-					return true;
-				}
-				return false;
-			}),
-		enemies_.end()
-	);
-
-	// プレイヤー弾
-	playerBullets_->erase(
-		std::remove_if(playerBullets_->begin(), playerBullets_->end(),
-			[](const std::unique_ptr<PlayerBullet>& b) {
-				return !b->IsAlive();
-			}),
-		playerBullets_->end()
-	);
-
-	// チャージ弾
-	playerChargeBullets_->erase(
-		std::remove_if(playerChargeBullets_->begin(), playerChargeBullets_->end(),
-			[](const std::unique_ptr<PlayerChargeBullet>& b) {
-				return !b->IsAlive();
-			}),
-		playerChargeBullets_->end()
-	);
+	
 }
 
 void GamePlayScene::Draw()
@@ -408,11 +406,20 @@ void GamePlayScene::Draw()
 		gameClearText_->Draw();
 		pressSpaceKeyText_->Draw();
 	}else {
-		wasdGuide_->Draw();
-		spaceKeyGuide_->Draw();
+		if (gameSceneState_ == GameSceneState::InGame) {
+			wasdGuide_->Draw();
+			spaceKeyGuide_->Draw();
+			escGuide_->Draw();
+		}
 	}
 
-	
+	if (gameSceneState_ == GameSceneState::Pause) {
+		resumeGame_->Draw();
+		backToTitleText_->Draw();
+		pauseText_->Draw();
+		wsGuide_->Draw();
+		spaceGuide_->Draw();
+	}
 
 	/*------skyboxの描画------*/
 	skybox_->DrawSettings();
@@ -461,6 +468,10 @@ void GamePlayScene::DrawImGui()
 	ImGui::SliderFloat3("Space Position", &spaceKeyGuideTransform_.translate_.x, -10.0f, 10.0f);
 	ImGui::SliderFloat3("Space Rotation", &spaceKeyGuideTransform_.rotate_.x, -3.14f, 3.14f);
 	ImGui::SliderFloat3("Space Scale", &spaceKeyGuideTransform_.scale_.x, -0.1f, 10.0f);
+
+	ImGui::SliderFloat3("WS Position", &wsGuideTransform_.translate_.x, -10.0f, 10.0f);
+	ImGui::SliderFloat3("WS Rotation", &wsGuideTransform_.rotate_.x, -3.14f, 3.14f);
+	ImGui::SliderFloat3("WS Scale", &wsGuideTransform_.scale_.x, -0.1f, 10.0f);
 	// レベルデータから生成したオブジェクトのImGui調整
 	DrawImGuiImportObjectsFromJson();
 	ImGui::End();
@@ -939,4 +950,169 @@ void GamePlayScene::UpdateGameClear()
 			}
 		}
 	}
+}
+
+void GamePlayScene::UpdateGame()
+{
+
+	// ゲームクリア時の更新
+	UpdateGameClear();
+	// ゲームオーバーじゃないとき
+	if (!isGameOver_) {
+		// プレイヤーの更新
+		player_->Update();
+
+		// カメラ追従更新
+		// プレイヤー操作が有効なときのみカメラ追従を更新
+		if (!isStartCameraEasing_) {
+			UpdatePlayerFollowCamera();
+			// プレイヤーの移動制限
+			RestrictPlayerInsideCameraView();
+		}
+
+		// プレイヤーの弾の奥行き調整
+		for (auto& bullet : player_->GetBullets()) {
+			if (bullet && bullet->IsAlive()) {
+				Camera* cam = cameraManager_->GetMainCamera();
+				Vector3 bulletPos = bullet->GetTranslate();
+				// 画面外の場合は消す
+				if (!IsInCameraView(bulletPos)) {
+					bullet->SetIsAlive(false);
+				}
+				bulletPos.z = cam->GetTranslate().z + 10.0f; // プレイヤーと同じ奥行
+				bullet->SetTranslate(bulletPos);
+			}
+		}
+	}
+
+	// 読み込んだ全オブジェクトの更新
+	for (auto& obj : objects_) {
+		obj->Update();
+	}
+
+	// 敵の更新
+	for (auto& enemy : enemies_) {
+		enemy->SetPlayer(player_.get());
+		enemy->Update();
+		// スタート演出中でなければ敵の奥行き調整を行う
+		if (!isStartCameraEasing_) {
+			Camera* cam = cameraManager_->GetMainCamera();
+
+			if (!enemy->HasStartedCurve()) {
+
+				float dx = enemy->GetPosition().x - cam->GetTranslate().x;
+
+				if (dx <= GamePlayDefaults::startDistanceX_) {
+					enemy->StartCurveMove();
+				}
+			}
+
+			// 敵の奥行き調整
+			Vector3 enemyPos = enemy->GetPosition();
+			bool inView = IsInCameraView(enemyPos);
+			enemy->SetControlEnabled(inView);
+			//enemy->SetZ(cam->GetTranslate().z + 10.0f);
+			// 敵の弾の奥行き調整
+			for (auto& bullet : enemy->GetBullets()) {
+				if (bullet && bullet->IsAlive()) {
+					Vector3 bulletPos = bullet->GetPosition();
+					bulletPos.z = cam->GetTranslate().z + 10.0f; // プレイヤーと同じ奥行
+					bullet->SetPosition(bulletPos);
+				}
+			}
+		}
+	}
+
+	// スタート演出カメラ初期化
+	if (isStartCameraEasing_) {
+		player_->SetPlayerControlEnabled(false); // プレイヤー操作無効化
+		// ルートカメラの更新開始
+		UpdateStartCameraEasing();
+		cameraManager_->Update();
+		Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
+		return; // 他の更新をスキップ（必要に応じて調整）
+	}
+
+	// 通常のカメラ更新（ゲームクリア時にカメライージング中なら上で更新済み）
+	if (!gameClearCameraMoving_) {
+		cameraManager_->Update();
+	}
+
+	// 衝突マネージャの更新
+	collisionManager_->Update();
+	CheckAllCollisions();// 衝突判定と応答
+
+	// 敵
+	enemies_.erase(
+		std::remove_if(enemies_.begin(), enemies_.end(),
+			[&](const std::unique_ptr<Enemy>& e) {
+				if (!e->IsAlive()) {
+					collisionManager_->RemoveCollider(e.get());
+					return true;
+				}
+				return false;
+			}),
+		enemies_.end()
+	);
+
+	// プレイヤー弾
+	playerBullets_->erase(
+		std::remove_if(playerBullets_->begin(), playerBullets_->end(),
+			[](const std::unique_ptr<PlayerBullet>& b) {
+				return !b->IsAlive();
+			}),
+		playerBullets_->end()
+	);
+
+	// チャージ弾
+	playerChargeBullets_->erase(
+		std::remove_if(playerChargeBullets_->begin(), playerChargeBullets_->end(),
+			[](const std::unique_ptr<PlayerChargeBullet>& b) {
+				return !b->IsAlive();
+			}),
+		playerChargeBullets_->end()
+	);
+}
+
+void GamePlayScene::UpdatePause()
+{
+	// ポーズ中のUI更新など
+	if (pauseMenu_ == PauseMenu::Resume) {
+		resumeGame_->SetMaterialColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+		backToTitleText_->SetMaterialColor(Vector4(0.3f, 0.3f, 0.3f, 1.0f));
+		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+			ExitPause();
+		}
+
+		if (Input::GetInstance()->TriggerKey(DIK_S)) {
+			pauseMenu_ = PauseMenu::ToTitle;
+		}
+	}
+	else if (pauseMenu_ == PauseMenu::ToTitle) {
+		resumeGame_->SetMaterialColor(Vector4(0.3f, 0.3f, 0.3f, 1.0f));
+		backToTitleText_->SetMaterialColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+			fadeManager_->FadeInStart(GamePlayDefaults::kDeltaTime60Hz * 1.2f, [this]() { // 0.02f相当
+				SetSceneNo(TITLE);
+				});
+			fadeStarted_ = true;
+		}
+
+		if (Input::GetInstance()->TriggerKey(DIK_W)) {
+			pauseMenu_ = PauseMenu::Resume;
+		}
+	}
+	
+}
+
+void GamePlayScene::EnterPause()
+{
+	gameSceneState_ = GameSceneState::Pause;
+	PostEffectManager::GetInstance()->SetEffectEnabled(1, true);
+}
+
+void GamePlayScene::ExitPause()
+{
+	gameSceneState_ = GameSceneState::InGame;
+	PostEffectManager::GetInstance()->SetEffectEnabled(1, false);
 }

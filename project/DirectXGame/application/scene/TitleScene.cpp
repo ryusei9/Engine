@@ -50,6 +50,8 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	// ガイドオブジェクトの初期化
 	titleGuide_ = std::make_unique<Object3d>();
 	titleGuide_->Initialize("titleGuide.obj");
+
+	PostEffectManager::GetInstance()->SetEffectEnabled(1, false);
 }
 
 void TitleScene::Update()

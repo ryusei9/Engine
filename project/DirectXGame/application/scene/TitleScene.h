@@ -10,6 +10,7 @@
 #include <Player.h>
 #include <FadeManager.h>
 #include <CameraManager.h>
+#include <PostEffectManager.h>
 
 /// 調整用定数（マジックナンバー排除）
 namespace TitleDefaults {

@@ -6,6 +6,7 @@
 #include <CameraManager.h>
 #include <Input.h>
 #include <Player.h>
+#include <PostEffectManager.h>
 
 /// 調整用定数（マジックナンバー排除）
 namespace GameOverDefaults {

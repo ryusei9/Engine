@@ -85,13 +85,13 @@ void SRFramework::Initialize()
 	grayscalePostEffect_->Initialize(dxCommon_);
 
 	// ポストエフェクトマネージャにポストエフェクトを追加
-	postEffectManager_ = std::make_unique<PostEffectManager>();
-	postEffectManager_->Initialize(dxCommon_);
-	postEffectManager_->AddEffect(std::move(noisePostEffect_));
-	postEffectManager_->AddEffect(std::move(grayscalePostEffect_));
+	
+	PostEffectManager::GetInstance()->Initialize(dxCommon_);
+	PostEffectManager::GetInstance()->AddEffect(std::move(noisePostEffect_));
+	PostEffectManager::GetInstance()->AddEffect(std::move(grayscalePostEffect_));
 
-	postEffectManager_->SetEffectEnabled(0, false);
-	postEffectManager_->SetEffectEnabled(1, false);
+	PostEffectManager::GetInstance()->SetEffectEnabled(0, false);
+	PostEffectManager::GetInstance()->SetEffectEnabled(1, false);
 
 	imGuiManager_->Initialize(winApp_.get());
 
@@ -145,7 +145,7 @@ void SRFramework::Update()
 	sceneManager_->Update();
 	camera_->Update();
 
-	postEffectManager_->SetTimeParams(GetNowTimeInSeconds());
+	PostEffectManager::GetInstance()->SetTimeParams(GetNowTimeInSeconds());
 	// パーティクルマネージャの更新
 	ParticleManager::GetInstance()->Update();
 }
@@ -176,7 +176,7 @@ void SRFramework::PrePostEffect()
 {
 	// [D3D12_RESOURCE_STATE_DEPTH_WRITE]（書き込み
 	dxCommon_->PreRenderScene();
-	postEffectManager_->PreRenderAll();
+	PostEffectManager::GetInstance()->PreRenderAll();
 }
 
 void SRFramework::DrawPostEffect()
@@ -187,9 +187,9 @@ void SRFramework::DrawPostEffect()
 	dxCommon_->TransitionRenderTextureToShaderResource();
 	dxCommon_->DrawRenderTexture();
 	dxCommon_->TransitionRenderTextureToRenderTarget();
-	postEffectManager_->PreBarrierAll();
-	postEffectManager_->DrawAll();
-	postEffectManager_->PostBarrierAll();
+	PostEffectManager::GetInstance()->PreBarrierAll();
+	PostEffectManager::GetInstance()->DrawAll();
+	PostEffectManager::GetInstance()->PostBarrierAll();
 
 	// --- ここでの深度バッファ状態 ---
     // [D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE]（SRV用）のまま

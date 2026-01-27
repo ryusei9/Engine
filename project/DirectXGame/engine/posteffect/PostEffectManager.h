@@ -9,6 +9,18 @@
 class PostEffectManager
 {
 public:
+	// シングルトンインスタンス
+	static PostEffectManager* GetInstance() {
+		static PostEffectManager instance;
+		return &instance;
+	}
+
+	// コンストラクタ・デストラクタ
+	PostEffectManager() = default;
+	~PostEffectManager() = default;
+	PostEffectManager(const PostEffectManager&) = delete;
+	PostEffectManager& operator=(const PostEffectManager&) = delete;
+	
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 

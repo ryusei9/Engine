@@ -48,6 +48,8 @@ void GameOverScene::Initialize(DirectXCommon* /*directXCommon*/, WinApp* winApp)
 	playerTransform_.Initialize();
 	playerTransform_.SetTranslate(GameOverDefaults::kPlayerInitTranslate);
 	playerTransform_.SetRotate(GameOverDefaults::kPlayerInitRotate);
+
+	PostEffectManager::GetInstance()->SetEffectEnabled(1, false);
 }
 
 void GameOverScene::Update()

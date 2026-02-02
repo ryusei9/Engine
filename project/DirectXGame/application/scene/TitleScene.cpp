@@ -69,7 +69,7 @@ void TitleScene::Update()
 	// フェードが完了したらシーン切り替え
 	if (fadeManager_->GetFadeState() == FadeManager::EffectState::Finish && isGameStart_)
 	{
-		SetSceneNo(GAMEPLAY);
+		RequestSceneChange(GAMEPLAY);
 	}
 
 	// オブジェクトの更新

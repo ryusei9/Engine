@@ -23,6 +23,16 @@ void BaseCharacter::Update()
 	object3d_->Update();
 }
 
+void BaseCharacter::UpdateTransform()
+{
+	// ワールド変換の更新
+	object3d_->SetCamera(camera_);
+	object3d_->SetTranslate(worldTransform_.GetTranslate());
+	object3d_->SetRotate(worldTransform_.GetRotate());
+	object3d_->SetScale(worldTransform_.GetScale());
+	object3d_->Update();
+}
+
 void BaseCharacter::Draw()
 {
 	// 3Dオブジェクトの描画

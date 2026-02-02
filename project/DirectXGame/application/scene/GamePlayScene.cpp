@@ -13,42 +13,56 @@
 
 void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
-	// スプライトの初期化
-	sprite_ = std::make_unique<Sprite>();
-
-	sprite_->Initialize(directXCommon, "resources/BackToTitle.png");
-	// 入力の初期化
+	directXCommon_ = directXCommon;
 	input_ = Input::GetInstance();
 
-	// オーディオの初期化
+	// 各サブシステムの初期化
+	InitializeSprite();
+	InitializeAudio();
+	InitializeFade();
+	InitializeEnemyCurves();
+	InitializePlayer();
+	InitializeLevelData();
+	InitializeSkybox();
+	InitializeCollisionManager();
+	InitializeCamera();
+	InitializeUIObjects();
+	InitializeGameTimers();
+	InitializePostEffects();
+}
+
+void GamePlayScene::InitializeSprite()
+{
+	sprite_ = std::make_unique<Sprite>();
+	sprite_->Initialize(directXCommon_, "resources/BackToTitle.png");
+}
+
+void GamePlayScene::InitializeAudio()
+{
 	Audio::GetInstance()->Initialize();
 	soundData1_ = Audio::GetInstance()->SoundLoadWave("resources/Alarm01.wav");
+}
 
-	// フェードマネージャの初期化
+void GamePlayScene::InitializeFade()
+{
 	fadeManager_ = std::make_unique<FadeManager>();
 	fadeManager_->Initialize();
+	fadeManager_->FadeOutStart(GamePlayDefaults::kDeltaTime60Hz * 1.2f);
+}
 
-	// フェード開始
-	fadeManager_->FadeOutStart(GamePlayDefaults::kDeltaTime60Hz * 1.2f); // 0.02f相当
-
-	// タイトルに戻るテキストのトランスフォームの初期化
-	textTitle_.Initialize();
-	textTitle_.SetTranslate(Vector3{ 3.333f, 2.857f, 10.000f });
-	textTitle_.SetRotate(Vector3{ -1.495f, 0.0f, 0.0f });
-
-	// オブジェクト3Dの初期化
-	backToTitle_ = std::make_unique<Object3d>();
-	backToTitle_->Initialize("BackToTitle.obj");
-	backToTitle_->SetWorldTransform(textTitle_);
-
-	// プレイヤーの初期化
+void GamePlayScene::InitializePlayer()
+{
 	player_ = std::make_unique<Player>();
 	player_->Initialize();
 
-	// --- Enemy用カーブ読み込み ---
-	LevelData* enemyCurveData = JsonLoader::Load("Enemy_Curves");
+	// プレイヤーの弾のリストを取得
+	playerBullets_ = &player_->GetBullets();
+	playerChargeBullets_ = &player_->GetChargeBullets();
+}
 
-	// CurveLibrary 初期化（必須）
+void GamePlayScene::InitializeEnemyCurves()
+{
+	LevelData* enemyCurveData = JsonLoader::Load("Enemy_Curves");
 	CurveLibrary::Clear();
 
 	for (const auto& curve : enemyCurveData->curves) {
@@ -65,13 +79,13 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 			CurveLibrary::Register(EnemyMove::WaveMinusY, curve);
 		}
 	}
+}
 
-	// --- レベルデータ読み込み ---
+void GamePlayScene::InitializeLevelData()
+{
 	levelData_ = JsonLoader::Load("test");
-
-	// Enemy生成（この時点で CurveLibrary は完成している）
 	LoadLevel(levelData_);
-
+	CreateObjectsFromLevelData();
 
 	// プレイヤー配置データからプレイヤーを配置
 	if (!levelData_->players.empty()) {
@@ -79,72 +93,76 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 		player_->SetPosition(playerData.translation);
 		player_->SetRotation(playerData.rotation);
 	}
+}
 
-	// プレイヤーの弾のリストを取得
-	playerBullets_ = &player_->GetBullets();
-	playerChargeBullets_ = &player_->GetChargeBullets();
-
-	// スカイボックスの初期化
+void GamePlayScene::InitializeSkybox()
+{
 	skybox_ = std::make_unique<Skybox>();
 	skybox_->Initialize("resources/rostock_laage_airport_4k.dds");
+}
 
-	// オブジェクト生成
-	CreateObjectsFromLevelData();
-
-	// 衝突マネージャの生成
+void GamePlayScene::InitializeCollisionManager()
+{
 	collisionManager_ = std::make_unique<CollisionManager>();
 	collisionManager_->Initialize();
+}
 
-	// カメラマネージャーの初期化
+void GamePlayScene::InitializeCamera()
+{
 	cameraManager_ = std::make_unique<CameraManager>();
 	cameraManager_->Initialize(Object3dCommon::GetInstance()->GetDefaultCamera());
-	
+
 	// スタート演出用カメラ初期化
 	isStartCameraEasing_ = true;
 	startCameraTimer_ = 0.0f;
 	cameraManager_->SetCameraPosition(startCameraPos_);
 	cameraManager_->SetCameraRotation(startCameraRot_);
-	
-	// ゲームオーバー用タイマー初期化
-	gameOverTimer_ = GamePlayDefaults::kGameOverTimerSec;
+}
 
-	// ゲームクリアテキストの初期化
+void GamePlayScene::InitializeUIObjects()
+{
+	// タイトルに戻るテキスト
+	textTitle_.Initialize();
+	textTitle_.SetTranslate(Vector3{ 3.333f, 2.857f, 10.000f });
+	textTitle_.SetRotate(Vector3{ -1.495f, 0.0f, 0.0f });
+
+	backToTitle_ = std::make_unique<Object3d>();
+	backToTitle_->Initialize("BackToTitle.obj");
+	backToTitle_->SetWorldTransform(textTitle_);
+
+	// ゲームクリアテキスト
 	gameClearText_ = std::make_unique<Object3d>();
 	gameClearText_->Initialize("StageClear.obj");
-	
-	// ゲームクリアテキストのトランスフォーム初期化
+
 	gameClearTextTransform_.Initialize();
 	gameClearTextTransform_.SetScale(Vector3(0.528f, 0.528f, 0.528f));
 	gameClearTextTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
 
-	// スペースキーを押してくださいテキストの初期化
+	// スペースキーを押してくださいテキスト
 	pressSpaceKeyText_ = std::make_unique<Object3d>();
 	pressSpaceKeyText_->Initialize("PressSpaceKey.obj");
 
-	// スペースキーを押してくださいテキストのトランスフォーム初期化
 	pressSpaceKeyTransform_.Initialize();
 	pressSpaceKeyTransform_.SetScale(Vector3(0.4f, 0.4f, 0.4f));
 	pressSpaceKeyTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
 
-	// WASD
+	// WASDガイド
 	wasdGuide_ = make_unique<Object3d>();
 	wasdGuide_->Initialize("WASD.obj");
 
-	// WASDトランスフォーム初期化
 	wasdGuideTransform_.Initialize();
 	wasdGuideTransform_.SetScale(Vector3(0.2f, 0.2f, 0.2f));
 	wasdGuideTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
 
-	// スペースキーで発射
+	// スペースキーで発射ガイド
 	spaceKeyGuide_ = make_unique<Object3d>();
 	spaceKeyGuide_->Initialize("SpaceShot.obj");
 
-	// スペースキートランスフォーム初期化
 	spaceKeyGuideTransform_.Initialize();
 	spaceKeyGuideTransform_.SetScale(Vector3(0.2f, 0.2f, 0.2f));
 	spaceKeyGuideTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
 
-	// escでポーズ
+	// ESCでポーズガイド
 	escGuide_ = make_unique<Object3d>();
 	escGuide_->Initialize("pause.obj");
 
@@ -160,6 +178,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	resumeGameTransform_.SetScale(Vector3(0.2f, 0.2f, 0.2f));
 	resumeGameTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
 
+	// タイトルに戻るテキスト
 	backToTitleText_ = make_unique<Object3d>();
 	backToTitleText_->Initialize("BackToTitle2.obj");
 
@@ -167,7 +186,7 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	backToTitleTransform_.SetScale(Vector3(0.2f, 0.2f, 0.2f));
 	backToTitleTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
 
-	// 一時停止中
+	// 一時停止中テキスト
 	pauseText_ = make_unique<Object3d>();
 	pauseText_->Initialize("pauseText.obj");
 
@@ -183,253 +202,65 @@ void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	wsGuideTransform_.SetScale(Vector3(0.1f, 0.1f, 0.1f));
 	wsGuideTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
 
-	// SPACEガイド
+	// スペースキーガイド
 	spaceGuide_ = make_unique<Object3d>();
 	spaceGuide_->Initialize("space.obj");
 
 	spaceGuideTransform_.Initialize();
 	spaceGuideTransform_.SetScale(Vector3(0.1f, 0.1f, 0.1f));
 	spaceGuideTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
-	
+}
+
+void GamePlayScene::InitializeGameTimers()
+{
+	gameOverTimer_ = GamePlayDefaults::kGameOverTimerSec;
+}
+
+void GamePlayScene::InitializePostEffects()
+{
 	PostEffectManager::GetInstance()->SetEffectEnabled(0, false);
 }
 
 void GamePlayScene::Update()
 {
-	// 入力の更新
-	input_->Update();
+	// 入力処理
+	UpdateInput();
 
-	if (Input::GetInstance()->TriggerKey(DIK_ESCAPE)) {
-		if (gameSceneState_ == GameSceneState::InGame) {
-			EnterPause();
-		}
-		else {
-			ExitPause();
-		}
-	}
+	// フェードとシーン遷移
+	UpdateFadeAndTransitions();
 
-	// プレイヤーが死んでいるかチェック
-	if (!player_->GetIsAlive()) {
-		// ゲームオーバー処理開始
-		isGameOver_ = true;
-	}
-
-	// フェード処理
-	// ゲームオーバー時の更新
-	if (isGameOver_ && !fadeStarted_) {
-		gameOverTimer_ -= GamePlayDefaults::kDeltaTime60Hz; // 60FPS想定
-		if (gameOverTimer_ <= 0.0f) {
-			fadeManager_->FadeInStart(GamePlayDefaults::kDeltaTime60Hz * 1.2f, [this]() { // 0.02f相当
-				SetSceneNo(GAMEOVER);
-				});
-			fadeStarted_ = true;
-		}
-	}
-	// ゲームクリア時のフェード処理
-	if (isEnd_ && !fadeStarted_) {
-		gameOverTimer_ -= GamePlayDefaults::kDeltaTime60Hz; // 60FPS想定
-		if (gameOverTimer_ <= 0.0f) {
-			fadeManager_->FadeInStart(GamePlayDefaults::kDeltaTime60Hz * 1.2f, [this]() { // 0.02f相当
-				SetSceneNo(TITLE);
-				});
-			fadeStarted_ = true;
-		}
-	}
-	
+	// 状態に応じた更新
 	if (gameSceneState_ == GameSceneState::InGame) {
-		UpdateGame();   // 敵・弾・プレイヤー全部
+		UpdateGame();
 	}
 	else if (gameSceneState_ == GameSceneState::Pause) {
-		UpdatePause();  // UI だけ
+		UpdatePause();
 	}
 
-	// ゲームクリアテキストの更新
-	if (gameClearTextVisible_ && gameClearText_) {
-		// カメラ位置を取得して Y を +1.2 する
-		Camera* cam = cameraManager_->GetMainCamera();
-		if (cam) {
-			// テキストの位置調整
-			Vector3 camPos = cam->GetTranslate();
-			gameClearTextTransform_.translate_.x = camPos.x;
-			gameClearTextTransform_.translate_.y = camPos.y + 0.6f;
-			gameClearTextTransform_.translate_.z = camPos.z + 5.0f;
-
-			pressSpaceKeyTransform_.translate_ = camPos + Vector3(0.0f, -0.6f, 5.0f);
-
-			gameClearText_->SetWorldTransform(gameClearTextTransform_);
-			pressSpaceKeyText_->SetWorldTransform(pressSpaceKeyTransform_);
-
-			gameClearText_->Update();
-			pressSpaceKeyText_->Update();
-		}
-	}
-
-	// skyboxの更新
-	skybox_->Update();
-
-	// タイトルに戻るテキストの更新
-	backToTitle_->SetWorldTransform(textTitle_);
-	backToTitle_->Update();
-
-	// カメラ位置を取得
-	Camera* cam = cameraManager_->GetMainCamera();
-	if (cam) {
-		// テキストの位置調整
-		Vector3 camPos = cam->GetTranslate();
-		wasdGuideTransform_.translate_.x = camPos.x - 1.2f;
-		wasdGuideTransform_.translate_.y = camPos.y + 0.5f;
-		wasdGuideTransform_.translate_.z = camPos.z + 5.0f;
-
-		spaceKeyGuideTransform_.translate_.x = camPos.x - 1.0f;
-		spaceKeyGuideTransform_.translate_.y = camPos.y + 0.32f;
-		spaceKeyGuideTransform_.translate_.z = camPos.z + 5.0f;
-
-		escGuideTransform_.translate_.x = camPos.x - 1.3f;
-		escGuideTransform_.translate_.y = camPos.y - 1.5f;
-		escGuideTransform_.translate_.z = camPos.z + 5.0f;
-
-		// ゲームに戻るテキストの位置調整
-		resumeGameTransform_.translate_.x = camPos.x;
-		resumeGameTransform_.translate_.y = camPos.y - 1.0f;
-		resumeGameTransform_.translate_.z = camPos.z + 5.0f;
-
-		// タイトルに戻るテキストの位置調整
-		backToTitleTransform_.translate_.x = camPos.x;
-		backToTitleTransform_.translate_.y = camPos.y - 1.3f;
-		backToTitleTransform_.translate_.z = camPos.z + 5.0f;
-
-		// 一時停止中テキストの位置調整
-		pauseTextTransform_.translate_.x = camPos.x;
-		pauseTextTransform_.translate_.y = camPos.y;
-		pauseTextTransform_.translate_.z = camPos.z + 5.0f;
-
-		// WSガイドの更新
-		wsGuideTransform_.translate_.x = camPos.x - 1.5f;
-		wsGuideTransform_.translate_.y = camPos.y - 1.4f;
-		wsGuideTransform_.translate_.z = camPos.z + 5.0f;
-
-		// スペースキーガイドの更新
-		spaceGuideTransform_.translate_.x = camPos.x - 1.63f;
-		spaceGuideTransform_.translate_.y = camPos.y - 1.5f;
-		spaceGuideTransform_.translate_.z = camPos.z + 5.0f;
-	}
-	// WASDガイドの更新
-	wasdGuide_->SetWorldTransform(wasdGuideTransform_);
-	wasdGuide_->Update();
-
-	// スペースキーガイドの更新
-	spaceKeyGuide_->SetWorldTransform(spaceKeyGuideTransform_);
-	spaceKeyGuide_->Update();
-
-	escGuide_->SetWorldTransform(escGuideTransform_);
-	escGuide_->Update();
-
-	// ゲームに戻るテキストの更新
-	resumeGame_->SetWorldTransform(resumeGameTransform_);
-	resumeGame_->Update();
-
-	// タイトルに戻るテキストの更新
-	backToTitleText_->SetWorldTransform(backToTitleTransform_);
-	backToTitleText_->Update();
-
-	// 一時停止中テキストの更新
-	pauseText_->SetWorldTransform(pauseTextTransform_);
-	pauseText_->Update();
-
-	// WSガイドの更新
-	wsGuide_->SetWorldTransform(wsGuideTransform_);
-	wsGuide_->Update();
-
-	// スペースキーガイドの更新
-	spaceGuide_->SetWorldTransform(spaceGuideTransform_);
-	spaceGuide_->Update();
-
-	// フェードマネージャの更新
-	fadeManager_->Update();
+	// UIの更新
+	UpdateUIObjects();
 
 	// カメラの更新
-	switch (cameraMode_) {
-	case CameraMode::Free:
-		// なにもしない
-		break;
-	case CameraMode::FollowPlayer:
-		// プレイヤーについて行く
-		cameraManager_->SetCameraPosition(player_->GetWorldTransform().GetTranslate() + Vector3{ 0.0f, 1.0f, -10.0f });
-		cameraManager_->SetCameraRotation(Vector3{ 0.1f, 0.0f, 0.0f });
-		break;
-	case CameraMode::DynamicFollow:
-		// プレイヤーを注視しつつ追従
-		cameraManager_->MoveTargetAndCamera(player_->GetWorldTransform(), Vector3{ 0.0f, 1.0f, -10.0f });
-		cameraManager_->LookAtTarget(player_->GetPosition());
-		break;
-	case CameraMode::CenterPlayer:
-		// プレイヤーを中心に注視
-		cameraManager_->LookAtTarget(player_->GetPosition(), true);
-		break;
-	}
-
-	
-	Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
-
-	// スプライトの更新
-	sprite_->SetPosition(spritePosition_);
-	sprite_->Update();
-
+	UpdateCameraSystem();
 	
 }
 
 void GamePlayScene::Draw()
 {
-	/*------UIの描画------*/
+	// スプライトの描画準備
 	SpriteCommon::GetInstance()->DrawSettings();
 
-	/*------オブジェクトの描画------*/
-	Object3dCommon::GetInstance()->DrawSettings();
+	// ゲームオブジェクトの描画
+	DrawGameObjects();
 
-	// 読み込んだ全オブジェクトの描画
-	for (auto& obj : objects_) {
-		obj->Draw();
-	}
+	// UIの描画
+	DrawUI();
 
-	if (!isGameOver_) {
-		// プレイヤーの描画
-		player_->Draw();
-	}
-
-	// 敵の描画
-	for (auto& enemy : enemies_) {
-		enemy->Draw();
-	}
-
-	// クリアテキストの描画
-	if (gameClearTextVisible_ && gameClearText_) {
-		gameClearText_->Draw();
-		pressSpaceKeyText_->Draw();
-	}else {
-		if (gameSceneState_ == GameSceneState::InGame) {
-			wasdGuide_->Draw();
-			spaceKeyGuide_->Draw();
-			escGuide_->Draw();
-		}
-	}
-
-	if (gameSceneState_ == GameSceneState::Pause) {
-		resumeGame_->Draw();
-		backToTitleText_->Draw();
-		pauseText_->Draw();
-		wsGuide_->Draw();
-		spaceGuide_->Draw();
-	}
-
-	/*------skyboxの描画------*/
-	skybox_->DrawSettings();
-	skybox_->Draw();
-
-	/*------スプライトの更新------*/
-	SpriteCommon::GetInstance()->DrawSettings();
+	// スカイボックスの描画
+	DrawSkybox();
 
 	// フェードの描画
-	fadeManager_->Draw();
+	DrawFade();
 }
 
 void GamePlayScene::Finalize()
@@ -750,16 +581,26 @@ void GamePlayScene::UpdateCameraOnCurve()
 	}
 }
 
+/// <summary>
+/// プレイヤーをカメラビュー内に制限
+/// - ワールド座標をNDC（正規化デバイス座標）に変換し、範囲外を制限
+/// - NDCは -1～1 の範囲で画面内を表現（左上が-1,-1、右下が1,1）
+/// - 変換手順: ワールド座標 → ビュープロジェクション変換 → クリップ座標 → NDC（w除算）
+/// - 制限後、逆変換でワールド座標に戻す
+/// </summary>
 void GamePlayScene::RestrictPlayerInsideCameraView() {
 	Camera* cam = cameraManager_->GetMainCamera();
 	Matrix4x4 viewProj = cam->GetViewProjectionMatrix();
 
 	Vector3 playerPos = player_->GetPosition();
 
-	// ワールド座標 → クリップ座標
+	// ステップ1: ワールド座標 → クリップ座標
+	// ビュープロジェクション行列を使用して同次座標系に変換
 	Vector4 clipPos = Multiply::Multiply(viewProj, Vector4{ playerPos.x, playerPos.y, playerPos.z, 1.0f });
 
-	// NDC座標へ変換
+	// ステップ2: クリップ座標 → NDC（正規化デバイス座標）
+	// w成分で除算することで、透視変換後の画面座標系に変換
+	// NDC空間: x, y が -1～1 の範囲が画面内を表す
 	Vector3 ndcPos = {
 		clipPos.x / clipPos.w,
 		clipPos.y / clipPos.w,
@@ -945,7 +786,7 @@ void GamePlayScene::UpdateGameClear()
 				gameClearFadeStarted_ = true;
 				// フェードを開始してタイトルへ戻るコールバック（重複防止済み）
 				fadeManager_->FadeInStart(GamePlayDefaults::kDeltaTime60Hz * 1.2f, [this]() { // 0.02f相当
-					SetSceneNo(TITLE);
+					RequestSceneChange(TITLE);
 					});
 			}
 		}
@@ -954,94 +795,211 @@ void GamePlayScene::UpdateGameClear()
 
 void GamePlayScene::UpdateGame()
 {
-
 	// ゲームクリア時の更新
 	UpdateGameClear();
-	// ゲームオーバーじゃないとき
-	if (!isGameOver_) {
-		// プレイヤーの更新
-		player_->Update();
 
-		// カメラ追従更新
-		// プレイヤー操作が有効なときのみカメラ追従を更新
-		if (!isStartCameraEasing_) {
-			UpdatePlayerFollowCamera();
-			// プレイヤーの移動制限
-			RestrictPlayerInsideCameraView();
+	// スタート演出カメラ処理
+	if (isStartCameraEasing_) {
+		player_->SetPlayerControlEnabled(false); // プレイヤー操作無効化
+		UpdateStartCameraEasing();
+		cameraManager_->Update();
+		Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
+		//return; // 他の更新をスキップ
+	}
+
+	// ゲームオブジェクトの更新
+	UpdateGameObjects();
+
+	// 通常のカメラ更新（ゲームクリア演出中は除く）
+	if (!gameClearCameraMoving_) {
+		cameraManager_->Update();
+	}
+
+	// 衝突判定の更新
+	UpdateCollisionSystem();
+}
+
+void GamePlayScene::UpdatePause()
+{
+	// ポーズ中のUI更新など
+	if (pauseMenu_ == PauseMenu::Resume) {
+		resumeGame_->SetMaterialColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+		backToTitleText_->SetMaterialColor(Vector4(0.3f, 0.3f, 0.3f, 1.0f));
+		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+			ExitPause();
 		}
 
-		// プレイヤーの弾の奥行き調整
-		for (auto& bullet : player_->GetBullets()) {
-			if (bullet && bullet->IsAlive()) {
-				Camera* cam = cameraManager_->GetMainCamera();
-				Vector3 bulletPos = bullet->GetTranslate();
-				// 画面外の場合は消す
-				if (!IsInCameraView(bulletPos)) {
-					bullet->SetIsAlive(false);
-				}
-				bulletPos.z = cam->GetTranslate().z + 10.0f; // プレイヤーと同じ奥行
-				bullet->SetTranslate(bulletPos);
-			}
+		if (Input::GetInstance()->TriggerKey(DIK_S)) {
+			pauseMenu_ = PauseMenu::ToTitle;
+		}
+	}
+	else if (pauseMenu_ == PauseMenu::ToTitle) {
+		resumeGame_->SetMaterialColor(Vector4(0.3f, 0.3f, 0.3f, 1.0f));
+		backToTitleText_->SetMaterialColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+			fadeManager_->FadeInStart(GamePlayDefaults::kDeltaTime60Hz * 1.2f, [this]() {
+				RequestSceneChange(TITLE);
+				});
+			fadeStarted_ = true;
+		}
+
+		if (Input::GetInstance()->TriggerKey(DIK_W)) {
+			pauseMenu_ = PauseMenu::Resume;
+		}
+	}
+}
+
+void GamePlayScene::EnterPause()
+{
+	gameSceneState_ = GameSceneState::Pause;
+	PostEffectManager::GetInstance()->SetEffectEnabled(1, true);
+}
+
+void GamePlayScene::ExitPause()
+{
+	gameSceneState_ = GameSceneState::InGame;
+	PostEffectManager::GetInstance()->SetEffectEnabled(1, false);
+}
+
+void GamePlayScene::UpdateInput()
+{
+	input_->Update();
+
+	// ESCキーでポーズの切り替え
+	if (Input::GetInstance()->TriggerKey(DIK_ESCAPE)) {
+		if (gameSceneState_ == GameSceneState::InGame) {
+			EnterPause();
+		}
+		else {
+			ExitPause();
+		}
+	}
+}
+
+void GamePlayScene::UpdateFadeAndTransitions()
+{
+	// プレイヤーが死んでいるかチェック
+	if (!player_->GetIsAlive()) {
+		isGameOver_ = true;
+	}
+
+	// ゲームオーバー時の更新
+	if (isGameOver_ && !fadeStarted_) {
+		gameOverTimer_ -= GamePlayDefaults::kDeltaTime60Hz;
+		if (gameOverTimer_ <= 0.0f) {
+			fadeManager_->FadeInStart(GamePlayDefaults::kDeltaTime60Hz * 1.2f, [this]() {
+				RequestSceneChange(GAMEOVER);
+				});
+			fadeStarted_ = true;
 		}
 	}
 
+	// ゲームクリア時のフェード処理
+	if (isEnd_ && !fadeStarted_) {
+		gameOverTimer_ -= GamePlayDefaults::kDeltaTime60Hz;
+		if (gameOverTimer_ <= 0.0f) {
+			fadeManager_->FadeInStart(GamePlayDefaults::kDeltaTime60Hz * 1.2f, [this]() {
+				RequestSceneChange(TITLE);
+				});
+			fadeStarted_ = true;
+		}
+	}
+
+	// フェードマネージャの更新
+	fadeManager_->Update();
+}
+
+// ゲームオブジェクトの更新
+void GamePlayScene::UpdateGameObjects()
+{
 	// 読み込んだ全オブジェクトの更新
 	for (auto& obj : objects_) {
 		obj->Update();
 	}
 
+	// ゲームオーバーでない場合のみプレイヤー更新
+	if (!isGameOver_) {
+		player_->Update();
+
+		// カメラ追従更新
+		if (!isStartCameraEasing_) {
+			UpdatePlayerFollowCamera();
+			RestrictPlayerInsideCameraView();
+		}
+
+		// プレイヤーの弾の奥行き調整
+		UpdatePlayerBullets();
+	}
+
 	// 敵の更新
+	UpdateEnemies();
+
+	// 不要になったオブジェクトの削除
+	CleanupDestroyedObjects();
+}
+
+// プレイヤーの弾の更新
+void GamePlayScene::UpdatePlayerBullets()
+{
+	Camera* cam = cameraManager_->GetMainCamera();
+	for (auto& bullet : player_->GetBullets()) {
+		if (bullet && bullet->IsAlive()) {
+			Vector3 bulletPos = bullet->GetTranslate();
+			// 画面外の場合は消す
+			if (!IsInCameraView(bulletPos)) {
+				bullet->SetIsAlive(false);
+			}
+			bulletPos.z = cam->GetTranslate().z + 10.0f;
+			bullet->SetTranslate(bulletPos);
+		}
+	}
+}
+
+// 敵の更新
+void GamePlayScene::UpdateEnemies()
+{
 	for (auto& enemy : enemies_) {
 		enemy->SetPlayer(player_.get());
 		enemy->Update();
-		// スタート演出中でなければ敵の奥行き調整を行う
+
+		// スタート演出中でなければ敵の制御を行う
 		if (!isStartCameraEasing_) {
-			Camera* cam = cameraManager_->GetMainCamera();
+			UpdateEnemyBehavior(enemy.get());
+		}
+	}
+}
 
-			if (!enemy->HasStartedCurve()) {
+// 個別の敵の挙動更新
+void GamePlayScene::UpdateEnemyBehavior(Enemy* enemy)
+{
+	Camera* cam = cameraManager_->GetMainCamera();
 
-				float dx = enemy->GetPosition().x - cam->GetTranslate().x;
-
-				if (dx <= GamePlayDefaults::startDistanceX_) {
-					enemy->StartCurveMove();
-				}
-			}
-
-			// 敵の奥行き調整
-			Vector3 enemyPos = enemy->GetPosition();
-			bool inView = IsInCameraView(enemyPos);
-			enemy->SetControlEnabled(inView);
-			//enemy->SetZ(cam->GetTranslate().z + 10.0f);
-			// 敵の弾の奥行き調整
-			for (auto& bullet : enemy->GetBullets()) {
-				if (bullet && bullet->IsAlive()) {
-					Vector3 bulletPos = bullet->GetPosition();
-					bulletPos.z = cam->GetTranslate().z + 10.0f; // プレイヤーと同じ奥行
-					bullet->SetPosition(bulletPos);
-				}
-			}
+	// カーブ移動の開始判定
+	if (!enemy->HasStartedCurve()) {
+		float dx = enemy->GetPosition().x - cam->GetTranslate().x;
+		if (dx <= GamePlayDefaults::startDistanceX_) {
+			enemy->StartCurveMove();
 		}
 	}
 
-	// スタート演出カメラ初期化
-	if (isStartCameraEasing_) {
-		player_->SetPlayerControlEnabled(false); // プレイヤー操作無効化
-		// ルートカメラの更新開始
-		UpdateStartCameraEasing();
-		cameraManager_->Update();
-		Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
-		return; // 他の更新をスキップ（必要に応じて調整）
+	// 敵が画面内にいるかチェック
+	Vector3 enemyPos = enemy->GetPosition();
+	bool inView = IsInCameraView(enemyPos);
+	enemy->SetControlEnabled(inView);
+
+	// 敵の弾の奥行き調整
+	for (auto& bullet : enemy->GetBullets()) {
+		if (bullet && bullet->IsAlive()) {
+			Vector3 bulletPos = bullet->GetPosition();
+			bulletPos.z = cam->GetTranslate().z + 10.0f;
+			bullet->SetPosition(bulletPos);
+		}
 	}
+}
 
-	// 通常のカメラ更新（ゲームクリア時にカメライージング中なら上で更新済み）
-	if (!gameClearCameraMoving_) {
-		cameraManager_->Update();
-	}
-
-	// 衝突マネージャの更新
-	collisionManager_->Update();
-	CheckAllCollisions();// 衝突判定と応答
-
+// 破壊されたオブジェクトのクリーンアップ
+void GamePlayScene::CleanupDestroyedObjects()
+{
 	// 敵
 	enemies_.erase(
 		std::remove_if(enemies_.begin(), enemies_.end(),
@@ -1074,45 +1032,192 @@ void GamePlayScene::UpdateGame()
 	);
 }
 
-void GamePlayScene::UpdatePause()
+// カメラの更新処理
+void GamePlayScene::UpdateCameraSystem()
 {
-	// ポーズ中のUI更新など
-	if (pauseMenu_ == PauseMenu::Resume) {
-		resumeGame_->SetMaterialColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
-		backToTitleText_->SetMaterialColor(Vector4(0.3f, 0.3f, 0.3f, 1.0f));
-		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-			ExitPause();
-		}
-
-		if (Input::GetInstance()->TriggerKey(DIK_S)) {
-			pauseMenu_ = PauseMenu::ToTitle;
-		}
+	// カメラモードに応じた更新
+	switch (cameraMode_) {
+	case CameraMode::Free:
+		break;
+	case CameraMode::FollowPlayer:
+		cameraManager_->SetCameraPosition(player_->GetWorldTransform().GetTranslate() + Vector3{ 0.0f, 1.0f, -10.0f });
+		cameraManager_->SetCameraRotation(Vector3{ 0.1f, 0.0f, 0.0f });
+		break;
+	case CameraMode::DynamicFollow:
+		cameraManager_->MoveTargetAndCamera(player_->GetWorldTransform(), Vector3{ 0.0f, 1.0f, -10.0f });
+		cameraManager_->LookAtTarget(player_->GetPosition());
+		break;
+	case CameraMode::CenterPlayer:
+		cameraManager_->LookAtTarget(player_->GetPosition(), true);
+		break;
 	}
-	else if (pauseMenu_ == PauseMenu::ToTitle) {
-		resumeGame_->SetMaterialColor(Vector4(0.3f, 0.3f, 0.3f, 1.0f));
-		backToTitleText_->SetMaterialColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
-		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-			fadeManager_->FadeInStart(GamePlayDefaults::kDeltaTime60Hz * 1.2f, [this]() { // 0.02f相当
-				SetSceneNo(TITLE);
-				});
-			fadeStarted_ = true;
-		}
 
-		if (Input::GetInstance()->TriggerKey(DIK_W)) {
-			pauseMenu_ = PauseMenu::Resume;
-		}
-	}
-	
+	Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
 }
 
-void GamePlayScene::EnterPause()
+// UIの更新
+void GamePlayScene::UpdateUIObjects()
 {
-	gameSceneState_ = GameSceneState::Pause;
-	PostEffectManager::GetInstance()->SetEffectEnabled(1, true);
+	Camera* cam = cameraManager_->GetMainCamera();
+	if (!cam) return;
+
+	Vector3 camPos = cam->GetTranslate();
+
+	// ゲームクリアテキストの更新
+	if (gameClearTextVisible_ && gameClearText_) {
+		gameClearTextTransform_.translate_.x = camPos.x;
+		gameClearTextTransform_.translate_.y = camPos.y + 0.6f;
+		gameClearTextTransform_.translate_.z = camPos.z + 5.0f;
+
+		pressSpaceKeyTransform_.translate_ = camPos + Vector3(0.0f, -0.6f, 5.0f);
+
+		gameClearText_->SetWorldTransform(gameClearTextTransform_);
+		pressSpaceKeyText_->SetWorldTransform(pressSpaceKeyTransform_);
+
+		gameClearText_->Update();
+		pressSpaceKeyText_->Update();
+	}
+
+	// 各種ガイドテキストの位置更新
+	UpdateGuideTextPositions(camPos);
+
+	// タイトルに戻るテキストの更新
+	backToTitle_->SetWorldTransform(textTitle_);
+	backToTitle_->Update();
+
+	// スカイボックスの更新
+	skybox_->Update();
+
+	// スプライトの更新
+	sprite_->SetPosition(spritePosition_);
+	sprite_->Update();
 }
 
-void GamePlayScene::ExitPause()
+// ガイドテキストの位置更新
+void GamePlayScene::UpdateGuideTextPositions(const Vector3& camPos)
 {
-	gameSceneState_ = GameSceneState::InGame;
-	PostEffectManager::GetInstance()->SetEffectEnabled(1, false);
+	// WASDガイド
+	wasdGuideTransform_.translate_.x = camPos.x - 1.2f;
+	wasdGuideTransform_.translate_.y = camPos.y + 0.5f;
+	wasdGuideTransform_.translate_.z = camPos.z + 5.0f;
+	wasdGuide_->SetWorldTransform(wasdGuideTransform_);
+	wasdGuide_->Update();
+
+	// スペースキーガイド
+	spaceKeyGuideTransform_.translate_.x = camPos.x - 1.0f;
+	spaceKeyGuideTransform_.translate_.y = camPos.y + 0.32f;
+	spaceKeyGuideTransform_.translate_.z = camPos.z + 5.0f;
+	spaceKeyGuide_->SetWorldTransform(spaceKeyGuideTransform_);
+	spaceKeyGuide_->Update();
+
+	// ESCガイド
+	escGuideTransform_.translate_.x = camPos.x - 1.3f;
+	escGuideTransform_.translate_.y = camPos.y - 1.5f;
+	escGuideTransform_.translate_.z = camPos.z + 5.0f;
+	escGuide_->SetWorldTransform(escGuideTransform_);
+	escGuide_->Update();
+
+	// ゲームに戻るテキスト
+	resumeGameTransform_.translate_.x = camPos.x;
+	resumeGameTransform_.translate_.y = camPos.y - 1.0f;
+	resumeGameTransform_.translate_.z = camPos.z + 5.0f;
+	resumeGame_->SetWorldTransform(resumeGameTransform_);
+	resumeGame_->Update();
+
+	// タイトルに戻るテキスト
+	backToTitleTransform_.translate_.x = camPos.x;
+	backToTitleTransform_.translate_.y = camPos.y - 1.3f;
+	backToTitleTransform_.translate_.z = camPos.z + 5.0f;
+	backToTitleText_->SetWorldTransform(backToTitleTransform_);
+	backToTitleText_->Update();
+
+	// 一時停止中テキスト
+	pauseTextTransform_.translate_.x = camPos.x;
+	pauseTextTransform_.translate_.y = camPos.y;
+	pauseTextTransform_.translate_.z = camPos.z + 5.0f;
+	pauseText_->SetWorldTransform(pauseTextTransform_);
+	pauseText_->Update();
+
+	// WSガイド
+	wsGuideTransform_.translate_.x = camPos.x - 1.5f;
+	wsGuideTransform_.translate_.y = camPos.y - 1.4f;
+	wsGuideTransform_.translate_.z = camPos.z + 5.0f;
+	wsGuide_->SetWorldTransform(wsGuideTransform_);
+	wsGuide_->Update();
+
+	// スペースキーガイド
+	spaceGuideTransform_.translate_.x = camPos.x - 1.63f;
+	spaceGuideTransform_.translate_.y = camPos.y - 1.5f;
+	spaceGuideTransform_.translate_.z = camPos.z + 5.0f;
+	spaceGuide_->SetWorldTransform(spaceGuideTransform_);
+	spaceGuide_->Update();
+}
+
+// 衝突判定の更新
+void GamePlayScene::UpdateCollisionSystem()
+{
+	collisionManager_->Update();
+	CheckAllCollisions();
+}
+
+// ゲームオブジェクトの描画
+void GamePlayScene::DrawGameObjects()
+{
+	Object3dCommon::GetInstance()->DrawSettings();
+
+	// レベルデータから読み込んだオブジェクト
+	for (auto& obj : objects_) {
+		obj->Draw();
+	}
+
+	// プレイヤーの描画
+	if (!isGameOver_) {
+		player_->Draw();
+	}
+
+	// 敵の描画
+	for (auto& enemy : enemies_) {
+		enemy->Draw();
+	}
+}
+
+// UIの描画
+void GamePlayScene::DrawUI()
+{
+	// クリアテキストの描画
+	if (gameClearTextVisible_ && gameClearText_) {
+		gameClearText_->Draw();
+		pressSpaceKeyText_->Draw();
+	}
+	else {
+		// インゲーム中のガイド表示
+		if (gameSceneState_ == GameSceneState::InGame) {
+			wasdGuide_->Draw();
+			spaceKeyGuide_->Draw();
+			escGuide_->Draw();
+		}
+	}
+
+	// ポーズ中のUI描画
+	if (gameSceneState_ == GameSceneState::Pause) {
+		resumeGame_->Draw();
+		backToTitleText_->Draw();
+		pauseText_->Draw();
+		wsGuide_->Draw();
+		spaceGuide_->Draw();
+	}
+}
+
+// スカイボックスの描画
+void GamePlayScene::DrawSkybox()
+{
+	skybox_->DrawSettings();
+	skybox_->Draw();
+}
+
+// フェードの描画
+void GamePlayScene::DrawFade()
+{
+	SpriteCommon::GetInstance()->DrawSettings();
+	fadeManager_->Draw();
 }

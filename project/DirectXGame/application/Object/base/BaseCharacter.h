@@ -35,13 +35,6 @@ public:
 	virtual void Update();
 
 	/// <summary>
-	/// トランスフォーム更新処理
-	/// - ワールド変換のみを更新
-	/// - 派生クラスで主に他の処理をしない演出のときなどに使う
-	/// </summary>
-	virtual void UpdateTransform();
-
-	/// <summary>
 	/// 描画処理
 	/// - 3Dオブジェクトを描画
 	/// - 派生クラスで追加の描画処理が必要な場合はオーバーライド

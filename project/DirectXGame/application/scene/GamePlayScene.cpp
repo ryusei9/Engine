@@ -11,6 +11,8 @@
 #undef min
 #undef max
 
+using MyEngine::Camera;
+
 void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
 	directXCommon_ = directXCommon;
@@ -285,24 +287,72 @@ void GamePlayScene::DrawImGui()
 	if (ImGui::Combo("Camera Mode", &cameraModeIndex, cameraModeItems, IM_ARRAYSIZE(cameraModeItems))) {
 		cameraMode_ = static_cast<CameraMode>(cameraModeIndex);
 	}
-	ImGui::SliderFloat3("text Position", &textTitle_.translate_.x, -10.0f, 10.0f);
-	ImGui::SliderFloat3("text rotation", &textTitle_.rotate_.x, -3.14f, 3.14f);
+	// textTitle_ の編集
+	Vector3 textPos = textTitle_.GetTranslate();
+	Vector3 textRot = textTitle_.GetRotate();
+	if (ImGui::SliderFloat3("text Position", &textPos.x, -10.0f, 10.0f)) {
+		textTitle_.SetTranslate(textPos);
+	}
+	if (ImGui::SliderFloat3("text rotation", &textRot.x, -3.14f, 3.14f)) {
+		textTitle_.SetRotate(textRot);
+	}
 
-	ImGui::SliderFloat3("clear Text Position", &gameClearTextTransform_.translate_.x, -10.0f, 10.0f);
-	ImGui::SliderFloat3("clear Text rotation", &gameClearTextTransform_.rotate_.x, -3.14f, 3.14f);
-	ImGui::SliderFloat3("clear Text Scale", &gameClearTextTransform_.scale_.x, 0.1f, 10.0f);
+	// gameClearTextTransform_ の編集
+	Vector3 clearPos = gameClearTextTransform_.GetTranslate();
+	Vector3 clearRot = gameClearTextTransform_.GetRotate();
+	Vector3 clearScale = gameClearTextTransform_.GetScale();
+	if (ImGui::SliderFloat3("clear Text Position", &clearPos.x, -10.0f, 10.0f)) {
+		gameClearTextTransform_.SetTranslate(clearPos);
+	}
+	if (ImGui::SliderFloat3("clear Text rotation", &clearRot.x, -3.14f, 3.14f)) {
+		gameClearTextTransform_.SetRotate(clearRot);
+	}
+	if (ImGui::SliderFloat3("clear Text Scale", &clearScale.x, 0.1f, 10.0f)) {
+		gameClearTextTransform_.SetScale(clearScale);
+	}
 
-	ImGui::SliderFloat3("WASD Position", &wasdGuideTransform_.translate_.x, -10.0f, 10.0f);
-	ImGui::SliderFloat3("WASD Rotation", &wasdGuideTransform_.rotate_.x, -3.14f, 3.14f);
-	ImGui::SliderFloat3("WASD Scale", &wasdGuideTransform_.scale_.x, -0.1f, 10.0f);
+	// wasdGuideTransform_ の編集
+	Vector3 wasdPos = wasdGuideTransform_.GetTranslate();
+	Vector3 wasdRot = wasdGuideTransform_.GetRotate();
+	Vector3 wasdScale = wasdGuideTransform_.GetScale();
+	if (ImGui::SliderFloat3("WASD Position", &wasdPos.x, -10.0f, 10.0f)) {
+		wasdGuideTransform_.SetTranslate(wasdPos);
+	}
+	if (ImGui::SliderFloat3("WASD Rotation", &wasdRot.x, -3.14f, 3.14f)) {
+		wasdGuideTransform_.SetRotate(wasdRot);
+	}
+	if (ImGui::SliderFloat3("WASD Scale", &wasdScale.x, -0.1f, 10.0f)) {
+		wasdGuideTransform_.SetScale(wasdScale);
+	}
 
-	ImGui::SliderFloat3("Space Position", &spaceKeyGuideTransform_.translate_.x, -10.0f, 10.0f);
-	ImGui::SliderFloat3("Space Rotation", &spaceKeyGuideTransform_.rotate_.x, -3.14f, 3.14f);
-	ImGui::SliderFloat3("Space Scale", &spaceKeyGuideTransform_.scale_.x, -0.1f, 10.0f);
+	// spaceKeyGuideTransform_ の編集
+	Vector3 spacePos = spaceKeyGuideTransform_.GetTranslate();
+	Vector3 spaceRot = spaceKeyGuideTransform_.GetRotate();
+	Vector3 spaceScale = spaceKeyGuideTransform_.GetScale();
+	if (ImGui::SliderFloat3("Space Position", &spacePos.x, -10.0f, 10.0f)) {
+		spaceKeyGuideTransform_.SetTranslate(spacePos);
+	}
+	if (ImGui::SliderFloat3("Space Rotation", &spaceRot.x, -3.14f, 3.14f)) {
+		spaceKeyGuideTransform_.SetRotate(spaceRot);
+	}
+	if (ImGui::SliderFloat3("Space Scale", &spaceScale.x, -0.1f, 10.0f)) {
+		spaceKeyGuideTransform_.SetScale(spaceScale);
+	}
 
-	ImGui::SliderFloat3("WS Position", &wsGuideTransform_.translate_.x, -10.0f, 10.0f);
-	ImGui::SliderFloat3("WS Rotation", &wsGuideTransform_.rotate_.x, -3.14f, 3.14f);
-	ImGui::SliderFloat3("WS Scale", &wsGuideTransform_.scale_.x, -0.1f, 10.0f);
+	// wsGuideTransform_ の編集
+	Vector3 wsPos = wsGuideTransform_.GetTranslate();
+	Vector3 wsRot = wsGuideTransform_.GetRotate();
+	Vector3 wsScale = wsGuideTransform_.GetScale();
+	if (ImGui::SliderFloat3("WS Position", &wsPos.x, -10.0f, 10.0f)) {
+		wsGuideTransform_.SetTranslate(wsPos);
+	}
+	if (ImGui::SliderFloat3("WS Rotation", &wsRot.x, -3.14f, 3.14f)) {
+		wsGuideTransform_.SetRotate(wsRot);
+	}
+	if (ImGui::SliderFloat3("WS Scale", &wsScale.x, -0.1f, 10.0f)) {
+		wsGuideTransform_.SetScale(wsScale);
+	}
+
 	// レベルデータから生成したオブジェクトのImGui調整
 	DrawImGuiImportObjectsFromJson();
 	ImGui::End();
@@ -1065,11 +1115,9 @@ void GamePlayScene::UpdateUIObjects()
 
 	// ゲームクリアテキストの更新
 	if (gameClearTextVisible_ && gameClearText_) {
-		gameClearTextTransform_.translate_.x = camPos.x;
-		gameClearTextTransform_.translate_.y = camPos.y + 0.6f;
-		gameClearTextTransform_.translate_.z = camPos.z + 5.0f;
+		gameClearTextTransform_.SetTranslate(Vector3(camPos.x, camPos.y + 0.6f, camPos.z + 5.0f));
 
-		pressSpaceKeyTransform_.translate_ = camPos + Vector3(0.0f, -0.6f, 5.0f);
+		pressSpaceKeyTransform_.SetTranslate(camPos + Vector3(0.0f, -0.6f, 5.0f));
 
 		gameClearText_->SetWorldTransform(gameClearTextTransform_);
 		pressSpaceKeyText_->SetWorldTransform(pressSpaceKeyTransform_);
@@ -1097,58 +1145,74 @@ void GamePlayScene::UpdateUIObjects()
 void GamePlayScene::UpdateGuideTextPositions(const Vector3& camPos)
 {
 	// WASDガイド
-	wasdGuideTransform_.translate_.x = camPos.x - 1.2f;
-	wasdGuideTransform_.translate_.y = camPos.y + 0.5f;
-	wasdGuideTransform_.translate_.z = camPos.z + 5.0f;
+	Vector3 wasdPos = wasdGuideTransform_.GetTranslate();
+	wasdPos.x = camPos.x - 1.2f;
+	wasdPos.y = camPos.y + 0.5f;
+	wasdPos.z = camPos.z + 5.0f;
+	wasdGuideTransform_.SetTranslate(wasdPos);
 	wasdGuide_->SetWorldTransform(wasdGuideTransform_);
 	wasdGuide_->Update();
 
 	// スペースキーガイド
-	spaceKeyGuideTransform_.translate_.x = camPos.x - 1.0f;
-	spaceKeyGuideTransform_.translate_.y = camPos.y + 0.32f;
-	spaceKeyGuideTransform_.translate_.z = camPos.z + 5.0f;
+	Vector3 spacePos = spaceKeyGuideTransform_.GetTranslate();
+	spacePos.x = camPos.x - 1.0f;
+	spacePos.y = camPos.y + 0.32f;
+	spacePos.z = camPos.z + 5.0f;
+	spaceKeyGuideTransform_.SetTranslate(spacePos);
 	spaceKeyGuide_->SetWorldTransform(spaceKeyGuideTransform_);
 	spaceKeyGuide_->Update();
 
 	// ESCガイド
-	escGuideTransform_.translate_.x = camPos.x - 1.3f;
-	escGuideTransform_.translate_.y = camPos.y - 1.5f;
-	escGuideTransform_.translate_.z = camPos.z + 5.0f;
+	Vector3 escPos = escGuideTransform_.GetTranslate();
+	escPos.x = camPos.x - 1.3f;
+	escPos.y = camPos.y - 1.5f;
+	escPos.z = camPos.z + 5.0f;
+	escGuideTransform_.SetTranslate(escPos);
 	escGuide_->SetWorldTransform(escGuideTransform_);
 	escGuide_->Update();
 
 	// ゲームに戻るテキスト
-	resumeGameTransform_.translate_.x = camPos.x;
-	resumeGameTransform_.translate_.y = camPos.y - 1.0f;
-	resumeGameTransform_.translate_.z = camPos.z + 5.0f;
+	Vector3 resumePos = resumeGameTransform_.GetTranslate();
+	resumePos.x = camPos.x;
+	resumePos.y = camPos.y - 1.0f;
+	resumePos.z = camPos.z + 5.0f;
+	resumeGameTransform_.SetTranslate(resumePos);
 	resumeGame_->SetWorldTransform(resumeGameTransform_);
 	resumeGame_->Update();
 
 	// タイトルに戻るテキスト
-	backToTitleTransform_.translate_.x = camPos.x;
-	backToTitleTransform_.translate_.y = camPos.y - 1.3f;
-	backToTitleTransform_.translate_.z = camPos.z + 5.0f;
+	Vector3 backPos = backToTitleTransform_.GetTranslate();
+	backPos.x = camPos.x;
+	backPos.y = camPos.y - 1.3f;
+	backPos.z = camPos.z + 5.0f;
+	backToTitleTransform_.SetTranslate(backPos);
 	backToTitleText_->SetWorldTransform(backToTitleTransform_);
 	backToTitleText_->Update();
 
 	// 一時停止中テキスト
-	pauseTextTransform_.translate_.x = camPos.x;
-	pauseTextTransform_.translate_.y = camPos.y;
-	pauseTextTransform_.translate_.z = camPos.z + 5.0f;
+	Vector3 pausePos = pauseTextTransform_.GetTranslate();
+	pausePos.x = camPos.x;
+	pausePos.y = camPos.y;
+	pausePos.z = camPos.z + 5.0f;
+	pauseTextTransform_.SetTranslate(pausePos);
 	pauseText_->SetWorldTransform(pauseTextTransform_);
 	pauseText_->Update();
 
 	// WSガイド
-	wsGuideTransform_.translate_.x = camPos.x - 1.5f;
-	wsGuideTransform_.translate_.y = camPos.y - 1.4f;
-	wsGuideTransform_.translate_.z = camPos.z + 5.0f;
+	Vector3 wsPos = wsGuideTransform_.GetTranslate();
+	wsPos.x = camPos.x - 1.5f;
+	wsPos.y = camPos.y - 1.4f;
+	wsPos.z = camPos.z + 5.0f;
+	wsGuideTransform_.SetTranslate(wsPos);
 	wsGuide_->SetWorldTransform(wsGuideTransform_);
 	wsGuide_->Update();
 
 	// スペースキーガイド
-	spaceGuideTransform_.translate_.x = camPos.x - 1.63f;
-	spaceGuideTransform_.translate_.y = camPos.y - 1.5f;
-	spaceGuideTransform_.translate_.z = camPos.z + 5.0f;
+	Vector3 spaceGuidePos = spaceGuideTransform_.GetTranslate();
+	spaceGuidePos.x = camPos.x - 1.63f;
+	spaceGuidePos.y = camPos.y - 1.5f;
+	spaceGuidePos.z = camPos.z + 5.0f;
+	spaceGuideTransform_.SetTranslate(spaceGuidePos);
 	spaceGuide_->SetWorldTransform(spaceGuideTransform_);
 	spaceGuide_->Update();
 }

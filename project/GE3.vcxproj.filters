@@ -79,8 +79,8 @@
     <ClCompile Include="DirectXGame\application\Object\base\BaseCharacter.cpp">
       <Filter>DirectXGame\Application\Object\Base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\Object\collider\Collider.cpp">
-      <Filter>DirectXGame\Application\Object\Collider</Filter>
+    <ClCompile Include="DirectXGame\engine\3d\collider\Collider.cpp">
+      <Filter>DirectXGame\Engine\3D\Collider</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\Object\enemy\Boss.cpp">
       <Filter>DirectXGame\Application\Object\Enemy</Filter>
@@ -261,11 +261,11 @@
     <ClInclude Include="DirectXGame\application\Object\base\BaseCharacter.h">
       <Filter>DirectXGame\Application\Object\Base</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\Object\collider\Collider.h">
-      <Filter>DirectXGame\Application\Object\Collider</Filter>
+    <ClInclude Include="DirectXGame\engine\3d\collider\Collider.h">
+      <Filter>DirectXGame\Engine\3D\Collider</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\Object\collider\CollisionTypeIdDef.h">
-      <Filter>DirectXGame\Application\Object\Collider</Filter>
+    <ClInclude Include="DirectXGame\engine\3d\collider\CollisionTypeIdDef.h">
+      <Filter>DirectXGame\Engine\3D\Collider</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\Object\enemy\Boss.h">
       <Filter>DirectXGame\Application\Object\Enemy</Filter>
@@ -550,9 +550,6 @@
     <Filter Include="DirectXGame\Application\Object\Base">
       <UniqueIdentifier>{84a42a18-76f3-46c1-b83f-44b9cc04900d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DirectXGame\Application\Object\Collider">
-      <UniqueIdentifier>{6c22e46d-2932-49dc-9420-d77cca5507a5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="DirectXGame\Application\Object\Enemy">
       <UniqueIdentifier>{e9ce1889-3cab-4436-8b89-e647af775c67}</UniqueIdentifier>
     </Filter>
@@ -636,6 +633,9 @@
     </Filter>
     <Filter Include="External">
       <UniqueIdentifier>{a6093a8b-addc-4ba8-b6fb-e20dac9167ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectXGame\Engine\3D\Collider">
+      <UniqueIdentifier>{6c22e46d-2932-49dc-9420-d77cca5507a5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -139,10 +139,26 @@ void TitleScene::DrawImGui()
 #ifdef USE_IMGUI
 	ImGui::Begin("TitleScene");
 	// プレイヤーの位置
-	ImGui::DragFloat3("playerTranslate", &playerTransform_.translate_.x);
-	ImGui::DragFloat3("titlePosition", &titleLogoTransform_.translate_.x);
-	ImGui::SliderFloat3("titleRotate", &titleLogoTransform_.rotate_.x, -3.14f, 3.14f);
-	ImGui::SliderFloat3("titleScale", &titleLogoTransform_.scale_.x, 0.0f, 10.0f);
+	// プレイヤーの位置
+	Vector3 playerPos = playerTransform_.GetTranslate();
+	if (ImGui::DragFloat3("playerTranslate", &playerPos.x)) {
+		playerTransform_.SetTranslate(playerPos);
+	}
+
+	// タイトルロゴのトランスフォーム
+	Vector3 titlePos = titleLogoTransform_.GetTranslate();
+	Vector3 titleRot = titleLogoTransform_.GetRotate();
+	Vector3 titleScale = titleLogoTransform_.GetScale();
+
+	if (ImGui::DragFloat3("titlePosition", &titlePos.x)) {
+		titleLogoTransform_.SetTranslate(titlePos);
+	}
+	if (ImGui::SliderFloat3("titleRotate", &titleRot.x, -3.14f, 3.14f)) {
+		titleLogoTransform_.SetRotate(titleRot);
+	}
+	if (ImGui::SliderFloat3("titleScale", &titleScale.x, 0.0f, 10.0f)) {
+		titleLogoTransform_.SetScale(titleScale);
+	}
 	// ガイドの位置
 	ImGui::DragFloat3("titleGuidePosition", &titleGuidePosition_.x);
 	ImGui::SliderFloat3("titleGuideRotate", &titleGuideRotate_.x, -3.14f, 3.14f);
@@ -173,11 +189,20 @@ void TitleScene::CameraMove()
 	// カメラの向きを計算
 	Vector3 toPlayer = playerPos - cameraPos;
 	float yaw = std::atan2(toPlayer.z, toPlayer.x); // Y軸回転
-	
+
 	// カメラの位置と回転を設定
 	Vector3 cameraRotate = { 0, -yaw + TitleDefaults::kPiOver2, 0.0f }; // 必要に応じて符号やオフセット調整
 	player_->SetRotation(cameraRotate);
-	skydomeTransform_.rotate_.y = cameraRotate.y;
-	titleLogoTransform_.rotate_.y = camera_->GetRotate().y;
+
+	
+	// skydomeの回転を設定
+	Vector3 skydomeRot = skydomeTransform_.GetRotate();
+	skydomeRot.y = cameraRotate.y;
+	skydomeTransform_.SetRotate(skydomeRot);
+
+	// タイトルロゴの回転を設定
+	Vector3 titleRot = titleLogoTransform_.GetRotate();
+	titleRot.y = camera_->GetRotate().y;
+	titleLogoTransform_.SetRotate(titleRot);
 }
 

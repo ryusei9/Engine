@@ -5,30 +5,32 @@
 /// <summary>
 /// ImGuiの管理
 /// </summary>
-class ImGuiManager
-{
-public:
-	/// 初期化
-	void Initialize(WinApp* winApp_);
+namespace MyEngine {
+	class ImGuiManager
+	{
+	public:
+		/// 初期化
+		void Initialize(WinApp* winApp_);
 
-	/// ImGui受付開始
-	void Begin();
+		/// ImGui受付開始
+		void Begin();
 
-	/// ImGui受付終了
-	void End();
+		/// ImGui受付終了
+		void End();
 
-	/// 描画
-	void Draw();
+		/// 描画
+		void Draw();
 
-	/// <summary>
-	/// 終了
-	/// </summary>
-	void Finalize();
-private:
-	WinApp* winApp_;
+		/// <summary>
+		/// 終了
+		/// </summary>
+		void Finalize();
+	private:
+		WinApp* winApp_;
 
-	DirectXCommon* dxCommon_;
+		DirectXCommon* dxCommon_;
 
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap_;
-};
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap_;
+	};
+}
 

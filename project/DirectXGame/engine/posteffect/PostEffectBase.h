@@ -2,80 +2,82 @@
 #include "DirectXCommon.h"
 #include <wrl.h>
 #include "SrvManager.h"
+namespace MyEngine
+{
+    /// <summary>
+    /// ポストエフェクト用のベースクラス
+    /// </summary>
+    class PostEffectBase {
+    public:
+        // デストラクタ
+        virtual ~PostEffectBase() = default;
 
-/// <summary>
-/// ポストエフェクト用のベースクラス
-/// </summary>
-class PostEffectBase {
-public:
-	// デストラクタ
-    virtual ~PostEffectBase() = default;
+        // 初期化（リソース生成など）
+        virtual void Initialize(DirectXCommon* dxCommon);
 
-    // 初期化（リソース生成など）
-    virtual void Initialize(DirectXCommon* dxCommon);
+        // ルートシグネイチャの作成
+        virtual void CreateRootSignature() = 0;
 
-    // ルートシグネイチャの作成
-	virtual void CreateRootSignature() = 0;
+        // PSOの作成
+        virtual void CreatePipelineStateObject() = 0;
 
-    // PSOの作成
-	virtual void CreatePipelineStateObject() = 0;
+        // 描画前の準備（レンダーターゲット切り替えなど）
+        virtual void PreRender() = 0;
 
-    // 描画前の準備（レンダーターゲット切り替えなど）
-    virtual void PreRender() = 0;
+        // ポストエフェクト本体の描画
+        virtual void Draw() = 0;
 
-    // ポストエフェクト本体の描画
-    virtual void Draw() = 0;
+        // 描画後の後始末（バリア戻しなど）
+        virtual void PostRender() = 0;
 
-    // 描画後の後始末（バリア戻しなど）
-    virtual void PostRender() = 0;
+        // ビューポートの初期化
+        virtual void ViewPortInitialize();
 
-	// ビューポートの初期化
-    virtual void ViewPortInitialize();
+        // シザー矩形の初期化
+        virtual void ScissorRectInitialize();
 
-	// シザー矩形の初期化
-	virtual void ScissorRectInitialize();
+        // レンダーターゲットからレンダーターゲットへ遷移
+        virtual void TransitionRenderTextureToRenderTarget();
 
-	// レンダーターゲットからレンダーターゲットへ遷移
-    virtual void TransitionRenderTextureToRenderTarget();
+        // レンダーターゲットからシェーダーリソースへ遷移
+        virtual void TransitionRenderTextureToShaderResource();
 
-	// レンダーターゲットからシェーダーリソースへ遷移
-	virtual void TransitionRenderTextureToShaderResource();
+        // レンダーターゲットの作成
+        virtual void CreateRenderTexture(UINT width, UINT height, DXGI_FORMAT format, const Vector4& clearColor);
 
-	// レンダーターゲットの作成
-    virtual void CreateRenderTexture(UINT width, UINT height, DXGI_FORMAT format, const Vector4& clearColor);
+        // 名前や種類を返す（切り替えUI用）
+        virtual const char* GetName() const = 0;
 
-    // 名前や種類を返す（切り替えUI用）
-    virtual const char* GetName() const = 0;
+        // 出力SRVハンドルを取得
+        virtual D3D12_GPU_DESCRIPTOR_HANDLE GetOutputSRV() const = 0;
 
-    // 出力SRVハンドルを取得
-    virtual D3D12_GPU_DESCRIPTOR_HANDLE GetOutputSRV() const = 0;
+        // 時間パラメータをセット
+        virtual void SetTimeParams(float) {};
 
-	// 時間パラメータをセット
-    virtual void SetTimeParams(float) {};
+        // 入力テクスチャをセット
+        virtual void SetInputSRV(D3D12_GPU_DESCRIPTOR_HANDLE handle) { inputSRV_ = handle; }
 
-    // 入力テクスチャをセット
-    virtual void SetInputSRV(D3D12_GPU_DESCRIPTOR_HANDLE handle) { inputSRV_ = handle; }
+    protected:
+        uint32_t srvIndex_ = 0; // SRVインデックス（動的割り当て用）
 
-protected:
-    uint32_t srvIndex_ = 0; // SRVインデックス（動的割り当て用）
+        DirectXCommon* dxCommon_ = nullptr; // DirectX共通処理
 
-	DirectXCommon* dxCommon_ = nullptr; // DirectX共通処理
+        ID3D12GraphicsCommandList* commandList_ = nullptr; // コマンドリスト
 
-	ID3D12GraphicsCommandList* commandList_ = nullptr; // コマンドリスト
+        D3D12_RESOURCE_STATES renderTextureState_ = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
-    D3D12_RESOURCE_STATES renderTextureState_ = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        Microsoft::WRL::ComPtr<ID3D12Resource> renderTexture_;
 
-    Microsoft::WRL::ComPtr<ID3D12Resource> renderTexture_;
+        Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap_; // レンダーターゲットビュー用ヒープ
 
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap_; // レンダーターゲットビュー用ヒープ
+        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle_; // レンダーターゲットビューのハンドル
 
-    D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle_; // レンダーターゲットビューのハンドル
+        const Vector4 kRenderTargetClearValue_ = { 0.1f, 0.25f, 0.5f, 1.0f };
 
-    const Vector4 kRenderTargetClearValue_ = { 0.1f, 0.25f, 0.5f, 1.0f };
+        D3D12_VIEWPORT viewport_{};
 
-    D3D12_VIEWPORT viewport_{};
+        D3D12_RECT scissorRect_{};
 
-    D3D12_RECT scissorRect_{};
-
-    D3D12_GPU_DESCRIPTOR_HANDLE inputSRV_ = {};
-};
+        D3D12_GPU_DESCRIPTOR_HANDLE inputSRV_ = {};
+    };
+}

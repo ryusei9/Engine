@@ -129,7 +129,7 @@ public:
 	bool GetPlayerControlEnabled() const { return controlEnabled_; }
 
 	// プレイヤーの生存状態を取得
-	bool GetIsAlive() const { return isAlive_; }
+	bool GetIsAlive() const { return IsAlive(); }
 
 	// パラメータを取得
 	const PlayerParameters& GetParameters() const { return parameters_; }
@@ -144,6 +144,8 @@ public:
 
 private:
 	/*------メンバ変数------*/
+
+	WorldTransform& worldTransform_;
 
 	// パラメータ（JSONから読み込み）
 	PlayerParameters parameters_;
@@ -170,7 +172,7 @@ private:
 	uint32_t serialNumber_ = 0;
 	
 	// プレイヤーのカメラ
-	Camera* camera_ = nullptr;
+	MyEngine::Camera* camera_ = nullptr;
 
 	// 発射フラグ
 	bool isShot_ = false;

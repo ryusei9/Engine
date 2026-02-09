@@ -3,18 +3,19 @@
 #include <string>
 #include "Enemy.h" // EnemyMove用
 #include "LevelData.h" // CurveData用
+namespace MyEngine {
+    class CurveLibrary
+    {
+    public:
+        static void Register(EnemyMove move, const CurveData& curve);
 
-class CurveLibrary
-{
-public:
-    static void Register(EnemyMove move, const CurveData& curve);
+        static const CurveData& Get(EnemyMove type);
 
-    static const CurveData& Get(EnemyMove type);
+        const CurveData* TryGet(EnemyMove type);
 
-    const CurveData* TryGet(EnemyMove type);
+        static void Clear() { curves_.clear(); }
 
-	static void Clear() { curves_.clear(); }  
-
-private:
-    static std::unordered_map<EnemyMove, CurveData> curves_;
-};
+    private:
+        static std::unordered_map<EnemyMove, CurveData> curves_;
+    };
+}

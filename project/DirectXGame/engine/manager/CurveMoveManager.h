@@ -7,49 +7,50 @@
 /// <summary>
 /// カーブ移動管理クラス
 /// </summary>
-class CurveMoveManager
-{
-public:
-    /*------メンバ関数------*/
+namespace MyEngine {
+    class CurveMoveManager
+    {
+    public:
+        /*------メンバ関数------*/
 
-	// カーブ移動開始
-    void Start(const CurveData& curve);
+        // カーブ移動開始
+        void Start(const CurveData& curve);
 
-	// カーブ移動更新
-    void Update(float deltaTime);
+        // カーブ移動更新
+        void Update(float deltaTime);
 
-    /*------ゲッター------*/
+        /*------ゲッター------*/
 
-    // 終わりの取得
-    bool IsFinished() const { return finished_; }
+        // 終わりの取得
+        bool IsFinished() const { return finished_; }
 
-	// 位置の取得
-    Vector3 GetPosition() const { return position_; }
+        // 位置の取得
+        Vector3 GetPosition() const { return position_; }
 
-	Vector3 GetOffset() const { return curveOffset; }
-private:
-	// インデックスのクランプ
-    uint32_t ClampIndex(uint32_t i) const;
-private:
-    /*------メンバ変数------*/
+        Vector3 GetOffset() const { return curveOffset; }
+    private:
+        // インデックスのクランプ
+        uint32_t ClampIndex(uint32_t i) const;
+    private:
+        /*------メンバ変数------*/
 
-	// カーブデータ
-    CurveData curve_;
+        // カーブデータ
+        CurveData curve_;
 
-	// 現在のインデックス
-    uint32_t currentIndex_ = 0;
+        // 現在のインデックス
+        uint32_t currentIndex_ = 0;
 
-	// タイマー
-    float timer_ = 0.0f;
+        // タイマー
+        float timer_ = 0.0f;
 
-	// 終了フラグ
-    bool finished_ = false;
+        // 終了フラグ
+        bool finished_ = false;
 
-	// 現在の位置
-    Vector3 position_;
+        // 現在の位置
+        Vector3 position_;
 
-    float baseZ_ = 0.0f;
+        float baseZ_ = 0.0f;
 
-    Vector3 curveOffset;
-};
-
+        Vector3 curveOffset;
+    };
+}

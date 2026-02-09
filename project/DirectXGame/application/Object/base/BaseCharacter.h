@@ -7,6 +7,7 @@
 #include <memory>
 #include <cstdint>
 
+using namespace MyEngine;
 // 前方宣言
 struct Vector3;
 
@@ -74,13 +75,14 @@ public:
 	/// ヒットポイントを取得
 	/// </summary>
 	/// <returns>現在のHP</returns>
-	int GetHp() const { return hp_; }
+	uint32_t GetHp() const { return hp_; }
 
 	/// <summary>
 	/// ワールド変換を取得
 	/// </summary>
 	/// <returns>WorldTransformの参照</returns>
 	WorldTransform& GetWorldTransform() { return worldTransform_; }
+	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
 
 	/// <summary>
 	/// スケールを取得
@@ -118,7 +120,7 @@ public:
 	/// ヒットポイントを設定
 	/// </summary>
 	/// <param name="hp">設定するHP値</param>
-	void SetHp(int hp) { hp_ = hp; }
+	void SetHp(uint32_t hp) { hp_ = hp; }
 
 	/// <summary>
 	/// スケールを設定
@@ -144,11 +146,35 @@ public:
 	/// <param name="serialNumber">設定するシリアルナンバー</param>
 	void SetSerialNumber(uint32_t serialNumber) { serialNumber_ = serialNumber; }
 
-protected:
-	/*------メンバ変数------*/
+	/// <summary>
+	/// 生存状態を設定
+	/// </summary>
+	/// <param name="isAlive">生存フラグ</param>
+	void SetIsAlive(bool isAlive) { isAlive_ = isAlive; }
 
-	// 3Dオブジェクト（描画用）
-	std::unique_ptr<Object3d> object3d_;
+protected:
+	/*------プロテクテッドアクセサ------*/
+	
+	/// <summary>
+	/// Object3dへのアクセス（派生クラス用）
+	/// </summary>
+	Object3d* GetObject3d() { return object3d_.get(); }
+	const Object3d* GetObject3d() const { return object3d_.get(); }
+
+	/// <summary>
+	/// Inputへのアクセス（派生クラス用）
+	/// </summary>
+	Input* GetInput() { return input_; }
+	const Input* GetInput() const { return input_; }
+
+	/// <summary>
+	/// Cameraへのアクセス（派生クラス用）
+	/// </summary>
+	MyEngine::Camera* GetCamera() { return camera_; }
+	const MyEngine::Camera* GetCamera() const { return camera_; }
+
+private:
+	/*------メンバ変数------*/
 
 	// ワールド変換（位置・回転・スケール管理）
 	WorldTransform worldTransform_;
@@ -157,7 +183,7 @@ protected:
 	Input* input_ = nullptr;
 
 	// カメラ（Object3dCommon経由で取得）
-	Camera* camera_ = nullptr;
+	MyEngine::Camera* camera_ = nullptr;
 
 	// ヒットポイント
 	uint32_t hp_ = 10;
@@ -165,6 +191,10 @@ protected:
 	// 生存フラグ（falseで死亡扱い）
 	bool isAlive_ = true;
 
+protected:
+
+	// 3Dオブジェクト（描画用）
+	std::unique_ptr<Object3d> object3d_;
 	// シリアルナンバー（キャラクター識別用）
 	uint32_t serialNumber_ = 0;
 

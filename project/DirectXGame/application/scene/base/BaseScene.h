@@ -4,7 +4,7 @@
 #include <WinApp.h>
 #include <cstdint>
 #include <optional>
-
+using namespace MyEngine;
 // シーンの種類（意味付けのためenumを明示）
 enum SCENE { TITLE, GAMEPLAY, GAMEOVER };
 

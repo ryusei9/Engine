@@ -2,41 +2,41 @@
 #include <windows.h>
 #include <wrl.h>
 #include <cstdint>
+namespace MyEngine {
+	// WindowsAPI
+	class WinApp
+	{
+	public:	// 静的メンバ関数
+		static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
-// WindowsAPI
-class WinApp
-{
-public:	// 静的メンバ関数
-	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+		// メンバ関数
+		// 初期化
+		void Initialize();
 
-	// メンバ関数
-	// 初期化
-	void Initialize();
+		/*------ゲッター------*/
 
-	/*------ゲッター------*/
+		// ウィンドウハンドルの取得
+		HWND GetHwnd() const { return hwnd_; }
 
-	// ウィンドウハンドルの取得
-	HWND GetHwnd() const { return hwnd_; }
+		// HINSTANCEの取得
+		HINSTANCE GetHInstance() const { return wc_.hInstance; }
 
-	// HINSTANCEの取得
-	HINSTANCE GetHInstance() const { return wc_.hInstance; }
+		// 終了
+		void Finalize();
 
-	// 終了
-	void Finalize();
+		// メッセージの処理
+		bool ProcessMessage();
 
-	// メッセージの処理
-	bool ProcessMessage();
+		// 定数
+		// クライアント領域のサイズ
+		static const int32_t kClientWidth = 1280;
+		static const int32_t kClientHeight = 720;
 
-	// 定数
-	// クライアント領域のサイズ
-	static const int32_t kClientWidth = 1280;
-	static const int32_t kClientHeight = 720;
+	private:
+		// ウィンドウハンドル
+		HWND hwnd_ = nullptr;
 
-private:
-	// ウィンドウハンドル
-	HWND hwnd_ = nullptr;
-
-	// ウィンドウクラスの設定
-	WNDCLASS wc_{};
-};
-
+		// ウィンドウクラスの設定
+		WNDCLASS wc_{};
+	};
+}

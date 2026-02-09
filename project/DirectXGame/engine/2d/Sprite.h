@@ -12,204 +12,203 @@
 #include <cstdint>
 #include <wrl/client.h>
 
-// 前方宣言
-class SpriteCommon;
-struct TransformationMatrix;
+namespace MyEngine{
 
-/// <summary>
-/// 座標変換データ
-/// </summary>
-struct TransformationMatrix {
-	Matrix4x4 wvp;
-	Matrix4x4 world;
-};
+	// 前方宣言
+	class SpriteCommon;
+	struct TransformationMatrix;
 
-/// <summary>
-/// スプライト調整用定数（マジックナンバー排除）
-/// </summary>
-namespace SpriteDefaults {
-	// 頂点・インデックス数
-	inline constexpr uint32_t kVertexCount = 6;
-	inline constexpr uint32_t kIndexCount  = 6;
+	/// <summary>
+	/// 座標変換データ
+	/// </summary>
+	struct TransformationMatrix {
+		Matrix4x4 wvp;
+		Matrix4x4 world;
+	};
 
-	// 初期座標
-	inline constexpr Vector2 kInitPos{ 0.0f, 0.0f };
+	/// <summary>
+	/// スプライト調整用定数（マジックナンバー排除）
+	/// </summary>
+	namespace SpriteDefaults {
+		// 頂点・インデックス数
+		inline constexpr uint32_t kVertexCount = 6;
+		inline constexpr uint32_t kIndexCount = 6;
 
-	// 初期回転角
-	inline constexpr float kInitRotation = 0.0f;
+		// 初期座標
+		inline constexpr Vector2 kInitPos{ 0.0f, 0.0f };
 
-	// 初期サイズ
-	inline constexpr Vector2 kInitSize{ 640.0f, 360.0f };
+		// 初期回転角
+		inline constexpr float kInitRotation = 0.0f;
 
-	// 初期アンカーポイント
-	inline constexpr Vector2 kInitAnchor{ 0.0f, 0.0f };
+		// 初期サイズ
+		inline constexpr Vector2 kInitSize{ 640.0f, 360.0f };
 
-	// 初期フリップ
-	inline constexpr bool kInitFlipX = false;
-	inline constexpr bool kInitFlipY = false;
+		// 初期アンカーポイント
+		inline constexpr Vector2 kInitAnchor{ 0.0f, 0.0f };
 
-	// テクスチャ左上座標
-	inline constexpr Vector2 kInitTexLeftTop{ 0.0f, 0.0f };
+		// 初期フリップ
+		inline constexpr bool kInitFlipX = false;
+		inline constexpr bool kInitFlipY = false;
 
-	// テクスチャ切り出しサイズ
-	inline constexpr Vector2 kInitTexSize{ 100.0f, 100.0f };
+		// テクスチャ左上座標
+		inline constexpr Vector2 kInitTexLeftTop{ 0.0f, 0.0f };
 
-	// 初期カラー（白）
-	inline constexpr Vector4 kInitColor{ 1.0f, 1.0f, 1.0f, 1.0f };
+		// テクスチャ切り出しサイズ
+		inline constexpr Vector2 kInitTexSize{ 100.0f, 100.0f };
 
-	// 正射影範囲
-	inline constexpr float kOrthoNear = 0.0f;
-	inline constexpr float kOrthoFar  = 100.0f;
+		// 初期カラー（白）
+		inline constexpr Vector4 kInitColor{ 1.0f, 1.0f, 1.0f, 1.0f };
+
+		// 正射影範囲
+		inline constexpr float kOrthoNear = 0.0f;
+		inline constexpr float kOrthoFar = 100.0f;
+	}
+
+
+	/// <summary>
+	/// スプライトクラス
+	/// </summary>
+	class Sprite
+	{
+	public:
+		/*------メンバ関数------*/
+
+		// 初期化
+		void Initialize(DirectXCommon* dxCommon, std::string textureFilePath);
+
+		// 更新
+		void Update();
+
+		// 描画
+		void Draw();
+
+		/*------ゲッター------*/
+
+		// スプライト個々の座標の取得
+		const Vector2& GetPosition() const { return position_; }
+
+		// スプライト個々の回転角の取得
+		float GetRotation() const { return rotation_; }
+
+		// スプライト個々の色の取得
+		const Vector4& GetColor() const { return materialData_->color; }
+
+		// スプライト個々のサイズの取得
+		const Vector2& GetSize() const { return size_; }
+
+		// アンカーポイントの取得
+		const Vector2& GetAnchorPoint() const { return anchorPoint_; }
+
+		// 左右フリップの取得
+		bool GetIsFlipX() const { return isFlipX_; }
+
+		// 上下フリップの取得
+		bool GetIsFlipY() const { return isFlipY_; }
+
+		// テクスチャ左上座標の取得
+		const Vector2& GetTextureLeftTop() const { return textureLeftTop_; }
+
+		// テクスチャ切り出しサイズの取得
+		const Vector2& GetTextureSize() const { return textureSize_; }
+
+		/*------セッター------*/
+
+		// スプライト個々の座標の設定
+		void SetPosition(const Vector2& position) { position_ = position; }
+
+		// スプライト個々の回転角の設定
+		void SetRotation(float rotation) { rotation_ = rotation; }
+
+		// スプライト個々の色の設定
+		void SetColor(const Vector4& color) { materialData_->color = color; }
+
+		// スプライト個々のサイズの設定
+		void SetSize(const Vector2& size) { size_ = size; }
+
+		// アンカーポイントの設定
+		void SetAnchorPoint(const Vector2& anchorPoint) { anchorPoint_ = anchorPoint; }
+
+		// 左右フリップの設定
+		void SetIsFlipX(bool isFlipX) { isFlipX_ = isFlipX; }
+
+		// 上下フリップの設定
+		void SetIsFlipY(bool isFlipY) { isFlipY_ = isFlipY; }
+
+		// テクスチャ左上座標の設定
+		void SetTextureLeftTop(const Vector2& textureLeftTop) { textureLeftTop_ = textureLeftTop; }
+
+		// テクスチャ切り出しサイズの設定
+		void SetTextureSize(const Vector2& textureSize) { textureSize_ = textureSize; }
+
+	private:
+		/*------プライベートメンバ関数------*/
+
+		// 頂点データの作成
+		void CreateVertexData();
+
+		// マテリアルデータの作成
+		void CreateMaterialData();
+
+		// WVPデータの作成
+		void CreateWVPData();
+
+		// テクスチャサイズをイメージに合わせる
+		void AdjustTextureSize();
+
+		/*------メンバ変数------*/
+
+		// スプライト共通部
+		SpriteCommon* spriteCommon_ = nullptr;
+
+		// バッファリソース
+		Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
+		Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
+		Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
+		Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
+
+		// バッファリソース内のデータを指すポインタ
+		VertexData* vertexData_ = nullptr;
+		uint32_t* indexData_ = nullptr;
+		TransformationMatrix* transformationMatrixData_ = nullptr;
+
+		// バッファビュー
+		D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
+		D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
+
+		// DirectX共通部
+		DirectXCommon* dxCommon_ = nullptr;
+
+		// マテリアルデータ
+		Material* materialData_ = nullptr;
+
+		// スプライト個々の座標
+		Vector2 position_ = SpriteDefaults::kInitPos;
+
+		// スプライト個々の回転角
+		float rotation_ = SpriteDefaults::kInitRotation;
+
+		// スプライト個々のサイズ
+		Vector2 size_ = SpriteDefaults::kInitSize;
+
+		// テクスチャ番号
+		uint32_t textureIndex_ = 0;
+
+		// アンカーポイント
+		Vector2 anchorPoint_ = SpriteDefaults::kInitAnchor;
+
+		// 左右フリップ
+		bool isFlipX_ = SpriteDefaults::kInitFlipX;
+
+		// 上下フリップ
+		bool isFlipY_ = SpriteDefaults::kInitFlipY;
+
+		// テクスチャ左上座標
+		Vector2 textureLeftTop_ = SpriteDefaults::kInitTexLeftTop;
+
+		// テクスチャ切り出しサイズ
+		Vector2 textureSize_ = SpriteDefaults::kInitTexSize;
+
+		// テクスチャファイルパス
+		std::string filePath_;
+	};
 }
-
-/// <summary>
-/// スプライトクラス
-/// </summary>
-class Sprite
-{
-public:
-	/*------メンバ関数------*/
-
-	// 初期化
-	void Initialize(DirectXCommon* dxCommon, std::string textureFilePath);
-
-	// 更新
-	void Update();
-
-	// 描画
-	void Draw();
-
-	/*------ゲッター------*/
-
-	// スプライト個々の座標の取得
-	const Vector2& GetPosition() const { return position_; }
-
-	// スプライト個々の回転角の取得
-	float GetRotation() const { return rotation_; }
-
-	// スプライト個々の色の取得
-	const Vector4& GetColor() const { return materialData_->color; }
-
-	// スプライト個々のサイズの取得
-	const Vector2& GetSize() const { return size_; }
-
-	// アンカーポイントの取得
-	const Vector2& GetAnchorPoint() const { return anchorPoint_; }
-
-	// 左右フリップの取得
-	bool GetIsFlipX() const { return isFlipX_; }
-
-	// 上下フリップの取得
-	bool GetIsFlipY() const { return isFlipY_; }
-
-	// テクスチャ左上座標の取得
-	const Vector2& GetTextureLeftTop() const { return textureLeftTop_; }
-
-	// テクスチャ切り出しサイズの取得
-	const Vector2& GetTextureSize() const { return textureSize_; }
-
-	/*------セッター------*/
-
-	// スプライト個々の座標の設定
-	void SetPosition(const Vector2& position) { position_ = position; }
-
-	// スプライト個々の回転角の設定
-	void SetRotation(float rotation) { rotation_ = rotation; }
-
-	// スプライト個々の色の設定
-	void SetColor(const Vector4& color) { materialData_->color = color; }
-
-	// スプライト個々のサイズの設定
-	void SetSize(const Vector2& size) { size_ = size; }
-
-	// アンカーポイントの設定
-	void SetAnchorPoint(const Vector2& anchorPoint) { anchorPoint_ = anchorPoint; }
-
-	// 左右フリップの設定
-	void SetIsFlipX(bool isFlipX) { isFlipX_ = isFlipX; }
-
-	// 上下フリップの設定
-	void SetIsFlipY(bool isFlipY) { isFlipY_ = isFlipY; }
-
-	// テクスチャ左上座標の設定
-	void SetTextureLeftTop(const Vector2& textureLeftTop) { textureLeftTop_ = textureLeftTop; }
-
-	// テクスチャ切り出しサイズの設定
-	void SetTextureSize(const Vector2& textureSize) { textureSize_ = textureSize; }
-
-private:
-	/*------プライベートメンバ関数------*/
-
-	// BufferResourceの作成
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(const Microsoft::WRL::ComPtr<ID3D12Device>& device, size_t sizeInBytes);
-
-	// 頂点データの作成
-	void CreateVertexData();
-
-	// マテリアルデータの作成
-	void CreateMaterialData();
-
-	// WVPデータの作成
-	void CreateWVPData();
-
-	// テクスチャサイズをイメージに合わせる
-	void AdjustTextureSize();
-
-	/*------メンバ変数------*/
-
-	// スプライト共通部
-	SpriteCommon* spriteCommon_ = nullptr;
-
-	// バッファリソース
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
-
-	// バッファリソース内のデータを指すポインタ
-	VertexData* vertexData_ = nullptr;
-	uint32_t* indexData_ = nullptr;
-	TransformationMatrix* transformationMatrixData_ = nullptr;
-
-	// バッファビュー
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
-	D3D12_INDEX_BUFFER_VIEW indexBufferView_{};
-
-	// DirectX共通部
-	DirectXCommon* dxCommon_ = nullptr;
-
-	// マテリアルデータ
-	Material* materialData_ = nullptr;
-
-	// スプライト個々の座標
-	Vector2 position_ = SpriteDefaults::kInitPos;
-
-	// スプライト個々の回転角
-	float rotation_ = SpriteDefaults::kInitRotation;
-
-	// スプライト個々のサイズ
-	Vector2 size_ = SpriteDefaults::kInitSize;
-
-	// テクスチャ番号
-	uint32_t textureIndex_ = 0;
-
-	// アンカーポイント
-	Vector2 anchorPoint_ = SpriteDefaults::kInitAnchor;
-
-	// 左右フリップ
-	bool isFlipX_ = SpriteDefaults::kInitFlipX;
-
-	// 上下フリップ
-	bool isFlipY_ = SpriteDefaults::kInitFlipY;
-
-	// テクスチャ左上座標
-	Vector2 textureLeftTop_ = SpriteDefaults::kInitTexLeftTop;
-
-	// テクスチャ切り出しサイズ
-	Vector2 textureSize_ = SpriteDefaults::kInitTexSize;
-
-	// テクスチャファイルパス
-	std::string filePath_;
-};
-
-

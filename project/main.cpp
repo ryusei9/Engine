@@ -1,12 +1,11 @@
 #include "MyGame.h"
 #include "SRFramework.h"
+#include <memory>
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-	SRFramework* game = new MyGame();
+	std::unique_ptr<SRFramework> game = std::make_unique<MyGame>();
 
 	game->Run();
-
-	delete game;
 
 	return 0;
 }

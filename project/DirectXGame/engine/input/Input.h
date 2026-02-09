@@ -8,53 +8,55 @@
 /// <summary>
 /// 入力
 /// </summary>
-class Input {
-public:
-	// namespace省略
-	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
+namespace MyEngine {
+	class Input {
+	public:
+		// namespace省略
+		template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
 
-	// シングルトンインスタンスの取得
-	static Input* GetInstance() {
-		static Input instance;
-		return &instance;
-	}
+		// シングルトンインスタンスの取得
+		static Input* GetInstance() {
+			static Input instance;
+			return &instance;
+		}
 
-	// コンストラクタ・デストラクタ
-	Input() = default;
-	~Input() = default;
+		// コンストラクタ・デストラクタ
+		Input() = default;
+		~Input() = default;
 
-	Input(const Input&) = delete;
-	Input& operator=(const Input&) = delete;
+		Input(const Input&) = delete;
+		Input& operator=(const Input&) = delete;
 
 
-	/*-------メンバ関数------*/
-	// 初期化
-	void Initialize(WinApp* winApp);
-	// 更新
-	void Update();
+		/*-------メンバ関数------*/
+		// 初期化
+		void Initialize(WinApp* winApp);
+		// 更新
+		void Update();
 
-	/// <summary>
-	/// キーの押下をチェック
-	/// </summary>
-	/// 押されているか
-	bool PushKey(BYTE keyNumber);
+		/// <summary>
+		/// キーの押下をチェック
+		/// </summary>
+		/// 押されているか
+		bool PushKey(BYTE keyNumber);
 
-	/// <summary>
-	/// キーのトリガーをチェック
-	/// </summary>
-	bool TriggerKey(BYTE keyNumber);
+		/// <summary>
+		/// キーのトリガーをチェック
+		/// </summary>
+		bool TriggerKey(BYTE keyNumber);
 
-private:
-	// メンバ変数
-	// キーボードのデバイス
-	ComPtr<IDirectInputDevice8> keyboard_;
-	// 全キーの状態
-	BYTE key_[256] = {};
-	// 前回の全キーの状態
-	BYTE keyPre_[256] = {};
-	// DirectInputのインスタンス
-	ComPtr<IDirectInput8> directInput_ = nullptr;
+	private:
+		// メンバ変数
+		// キーボードのデバイス
+		ComPtr<IDirectInputDevice8> keyboard_;
+		// 全キーの状態
+		BYTE key_[256] = {};
+		// 前回の全キーの状態
+		BYTE keyPre_[256] = {};
+		// DirectInputのインスタンス
+		ComPtr<IDirectInput8> directInput_ = nullptr;
 
-	// WindowsAPI
-	WinApp* winApp_ = nullptr;
-};
+		// WindowsAPI
+		WinApp* winApp_ = nullptr;
+	};
+}

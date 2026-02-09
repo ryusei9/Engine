@@ -1,44 +1,46 @@
 #include "MyGame.h"
 
+namespace MyEngine {
 
-void MyGame::Initialize()
-{
-	// 基底クラスの初期化処理
-	SRFramework::Initialize();
-}
+	void MyGame::Initialize()
+	{
+		// 基底クラスの初期化処理
+		SRFramework::Initialize();
+	}
 
-void MyGame::Finelize()
-{
-	SRFramework::Finelize();
-}
+	void MyGame::Finelize()
+	{
+		SRFramework::Finelize();
+	}
 
-void MyGame::Update()
-{
-	SRFramework::Update();
-	// ImGuiの更新
-	imGuiManager_->Begin();
+	void MyGame::Update()
+	{
+		SRFramework::Update();
+		// ImGuiの更新
+		imGuiManager_->Begin();
 #ifdef _DEBUG
-	// ゲームプレイシーンの更新
-	sceneManager_->DrawImGui();
+		// ゲームプレイシーンの更新
+		sceneManager_->DrawImGui();
 
 #endif
-	imGuiManager_->End();
-	
-}
+		imGuiManager_->End();
 
-void MyGame::Draw()
-{
-	SRFramework::PrePostEffect();
+	}
 
-	sceneManager_->Draw();
+	void MyGame::Draw()
+	{
+		SRFramework::PrePostEffect();
 
-	ParticleManager::GetInstance()->Draw();
+		sceneManager_->Draw();
 
-	SRFramework::PreDraw();
+		ParticleManager::GetInstance()->Draw();
 
-	SRFramework::DrawPostEffect();
+		SRFramework::PreDraw();
 
-	imGuiManager_->Draw();
-	
-	SRFramework::PostDraw();
+		SRFramework::DrawPostEffect();
+
+		imGuiManager_->Draw();
+
+		SRFramework::PostDraw();
+	}
 }

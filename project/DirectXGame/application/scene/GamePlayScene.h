@@ -21,6 +21,7 @@
 #include <CameraManager.h>
 #include <GrayscalePostEffect.h>
 #include <PostEffectManager.h>
+#include <Camera.h>
 
 /// 調整用定数（マジックナンバー排除）
 namespace GamePlayDefaults {
@@ -252,7 +253,7 @@ private:
 	bool fadeStarted_ = false;
 
 	// カメラ
-	std::unique_ptr<Camera> camera_;
+	std::unique_ptr<MyEngine::Camera> camera_;
 
 	// ゲーム終了フラグ
 	bool isEnd_ = false;

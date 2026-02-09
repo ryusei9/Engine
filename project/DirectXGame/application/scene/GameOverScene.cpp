@@ -1,6 +1,8 @@
 #include "GameOverScene.h"
 #include <imgui.h>
 
+using namespace MyEngine;
+
 void GameOverScene::Initialize(DirectXCommon* /*directXCommon*/, WinApp* winApp)
 {
 	// インプット

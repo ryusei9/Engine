@@ -55,7 +55,7 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	particleManager_->GetInstance()->SetParticleType(ParticleType::Normal);
 	// テクスチャ"Voxel_Enemy_Body.dds"を使用
-	particleManager_->GetInstance()->CreateParticleGroup("Normal", "resources/Voxel_Enemy_Body.dds");
+	particleManager_->GetInstance()->CreateParticleGroup("Normal", "resources/header.dds");
 
 	// タイトルシーン用パーティクルエミッターの初期化
 	titleParticleEmitter_ = std::make_unique<ParticleEmitter>(particleManager_, "Normal");
@@ -169,7 +169,7 @@ void TitleScene::DrawImGui()
 	skydome_->DrawImGui();
 	fadeManager_->DrawImGui();
 	cameraManager_->DrawImGui();
-	cube_->DrawImGui();
+	//cube_->DrawImGui();
 	ImGui::End();
 #endif
 }

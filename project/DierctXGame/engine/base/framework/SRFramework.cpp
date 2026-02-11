@@ -41,7 +41,7 @@ void SRFramework::Initialize()
 	TextureManager::GetInstance()->LoadTexture("resources/fadeWhite.png");
 	TextureManager::GetInstance()->LoadTexture("resources/BackToTitle.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Black.png");
-	TextureManager::GetInstance()->LoadTexture("resources/Voxel_Enemy_Body.dds");
+	TextureManager::GetInstance()->LoadTexture("resources/header.dds");
 	
 	// スプライト共通部の初期化
 	

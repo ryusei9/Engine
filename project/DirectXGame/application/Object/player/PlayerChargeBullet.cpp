@@ -66,6 +66,13 @@ void PlayerChargeBullet::Draw()
 	PlayerBullet::Draw();
 }
 
+void PlayerChargeBullet::OnCollision(Collider* other)
+{
+	// チャージ弾は敵を貫通するため、何もしない
+	// 寿命で消えるのみ
+	(void)other; // 未使用パラメータ警告回避
+}
+
 void PlayerChargeBullet::SetChargeBulletParameters(const PlayerChargeBulletParameters& parameters)
 {
 	chargeBulletParameters_ = parameters;

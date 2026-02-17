@@ -41,6 +41,8 @@ public:
 	// 更新
 	void Update();
 
+	bool IsInView(const Vector3& worldPos) const;
+
 	// セッター
 	void SetRotate(const Vector3& rotate) { transform_.rotate = rotate; }
 	void SetTranslate(const Vector3& translate) { transform_.translate = translate; }

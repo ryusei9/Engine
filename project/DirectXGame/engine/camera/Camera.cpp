@@ -46,6 +46,24 @@ void Camera::Update()
 	UpdateViewProjectionMatrix();
 }
 
+bool Camera::IsInView(const Vector3& worldPos) const
+{
+	Matrix4x4 viewProj = GetViewProjectionMatrix();
+
+	Vector4 clip = Multiply::Multiply(viewProj, Vector4{ worldPos.x, worldPos.y, worldPos.z, 1.0f });
+	if (clip.w == 0.0f) return false;
+
+	Vector3 ndc = {
+		clip.x / clip.w,
+		clip.y / clip.w,
+		clip.z / clip.w
+	};
+
+	return (ndc.x >= -1.0f && ndc.x <= 1.0f &&
+		ndc.y >= -1.0f && ndc.y <= 1.0f &&
+		ndc.z >= 0.0f && ndc.z <= 1.0f);
+}
+
 // ===== ヘルパー関数 =====
 
 void Camera::UpdateWorldMatrix()

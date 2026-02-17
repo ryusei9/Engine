@@ -637,7 +637,7 @@ void GamePlayScene::CheckAllCollisions()
 	// チャージ弾
 	for (const auto& chargeBullet : *playerChargeBullets_) {
 		if (chargeBullet && chargeBullet->IsAlive()) {
-			collisionManager_->AddCollider(chargeBullet.get());
+			collisionManager_->AddCollider(chargeBullet.get());)
 		}
 	}
 
@@ -818,24 +818,7 @@ void GamePlayScene::UpdatePlayerFollowCamera()
 
 bool GamePlayScene::IsInCameraView(const Vector3& worldPos)
 {
-	Camera* cam = cameraManager_->GetMainCamera();
-	Matrix4x4 viewProj = cam->GetViewProjectionMatrix();
-
-	// ワールド → クリップ
-	Vector4 clip = Multiply::Multiply(viewProj, Vector4{ worldPos.x, worldPos.y, worldPos.z, 1.0f });
-	if (clip.w == 0.0f) return false;
-
-	// NDCへ変換
-	Vector3 ndc = {
-		clip.x / clip.w,
-		clip.y / clip.w,
-		clip.z / clip.w
-	};
-
-	// NDCが -1～1 の範囲なら画面内
-	return (ndc.x >= -1.0f && ndc.x <= 1.0f &&
-		ndc.y >= -1.0f && ndc.y <= 1.0f &&
-		ndc.z >= 0.0f && ndc.z <= 1.0f);
+	return cameraManager_->GetMainCamera()->IsInView(worldPos);
 }
 
 void GamePlayScene::UpdateGameClear()

@@ -281,7 +281,7 @@ void Enemy::PlayHitParticle()
 			enemyHitEmitter_->SetPosition(worldTransform_.GetTranslate());
 			enemyHitEmitter_->SetParticleRate(parameters_.hitParticleRate);
 			enemyHitEmitter_->SetParticleCount(parameters_.hitParticleCount);
-			enemyHitEmitter_->Update();
+			enemyHitEmitter_->Update();                                                                                                                                                            
 		}
 		hasPlayedHitParticle_ = true;
 	}

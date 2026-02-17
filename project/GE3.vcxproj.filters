@@ -492,6 +492,7 @@
     <ClInclude Include="tools\json.hpp">
       <Filter>External</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\engine\math\Length.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\enemyAttackParameters.json">

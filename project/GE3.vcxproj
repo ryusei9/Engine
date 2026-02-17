@@ -179,6 +179,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\Object\player\PlayerBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DirectXGame\engine\math\Length.h" />
     <ClInclude Include="DirectXGame\engine\util\CurveLibrary.h" />
     <ClInclude Include="DirectXGame\engine\manager\CurveMoveManager.h" />
     <ClInclude Include="DirectXGame\application\Object\enemy\Boss.h" />

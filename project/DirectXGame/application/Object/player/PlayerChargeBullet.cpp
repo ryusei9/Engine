@@ -1,90 +1,121 @@
 #include "PlayerChargeBullet.h"
-#include <CollisionTypeIdDef.h>
-#include "JsonLoader.h"
-
-// 静的メンバ変数の初期化
-uint32_t PlayerChargeBullet::sNextSerialNumber_ = PlayerChargeBulletDefaults::kSerialStart;
+#include "Enemy.h"
+#include "GamePlayScene.h"
+#include "ParticleManager.h"
+#include <algorithm>
+#include <cmath>
+#include <Normalize.h>
+#include <Length.h>
 
 PlayerChargeBullet::PlayerChargeBullet()
 {
-	// シリアルナンバーを設定
-	serialNumber_ = sNextSerialNumber_++;
 }
 
-void PlayerChargeBullet::Initialize(const Vector3& position)
+void PlayerChargeBullet::Initialize(
+    const Vector3& playerPosition,
+    const std::vector<Enemy*>& enemies,
+    GamePlayScene* scene)
 {
-	// デフォルトパラメータで初期化
-	Initialize(position, "");
+    playerPosition_ = playerPosition;
+    activeTime_ = 0.0f;
+    isDead_ = false;
+    targets_.clear();
+
+    CollectTargets(enemies, scene);
 }
 
-void PlayerChargeBullet::Initialize(const Vector3& position, const std::string& parameterFileName)
+void PlayerChargeBullet::CollectTargets(
+    const std::vector<Enemy*>& enemies,
+    GamePlayScene* scene)
 {
-	// パラメータファイルから読み込み（空文字列の場合はデフォルトパラメータを使用）
-	if (!parameterFileName.empty()) {
-		chargeBulletParameters_ = JsonLoader::LoadPlayerChargeBulletParameters(parameterFileName);
-	} else {
-		chargeBulletParameters_ = defaultChargeBulletParameters_;
-	}
+    for (Enemy* enemy : enemies)
+    {
+        if (!enemy) continue;
+        if (!enemy->IsAlive()) continue;
 
-	// パラメータを適用
-	damage_ = chargeBulletParameters_.damage;
+        if (scene->IsInCameraView(enemy->GetPosition()))
+        {
+            targets_.push_back(enemy);
+        }
+    }
 
-	// 基底クラスのパラメータを設定してから初期化
-	PlayerBullet::SetParameters(chargeBulletParameters_.baseBulletParams);
-	
-	// 基底の初期化（位置・Transformなど）
-	// 空文字列を渡すことで、既に設定されたパラメータを使用
-	PlayerBullet::Initialize(position, "");
-
-	// チャージ弾のコライダーID（基底クラスの初期化後に上書き）
-	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerChargeBullet));
-
-	// worldTransformのスケールを拡大（パラメータから倍率取得）
-	const Vector3 scaledTransform = worldTransform_.GetScale() * chargeBulletParameters_.scaleFactor;
-	worldTransform_.SetScale(scaledTransform);
-
-	// 見た目のスケールも拡大
-	if (objectBullet_) {
-		objectBullet_->SetScale(scaledTransform);
-	}
-
-	// 当たり判定の半径も拡大（パラメータから取得）
-	SetRadius(chargeBulletParameters_.radius);
-	radius_ = chargeBulletParameters_.radius;
+    if (targets_.size() > maxLockCount_)
+    {
+        targets_.resize(maxLockCount_);
+    }
 }
 
-void PlayerChargeBullet::Update()
+void PlayerChargeBullet::Update(float deltaTime)
 {
-	// 共通の更新（移動・寿命・描画更新）
-	PlayerBullet::Update();
-	// 必要ならチャージ弾専用の挙動をここに追加
+    if (isDead_) return;
+
+    activeTime_ += deltaTime;
+
+    if (activeTime_ >= maxActiveTime_)
+    {
+        isDead_ = true;
+        return;
+    }
+
+    // 生きている敵のみ残す
+    targets_.erase(
+        std::remove_if(
+            targets_.begin(),
+            targets_.end(),
+            [](Enemy* e) { return (!e || !e->IsAlive()); }),
+        targets_.end());
+
+    if (targets_.empty())
+    {
+        isDead_ = true;
+        return;
+    }
+
+    float damagePerTarget =
+        baseDamage_ / static_cast<float>(targets_.size());
+
+    for (Enemy* enemy : targets_)
+    {
+        ApplyDamage(enemy, damagePerTarget);
+        EmitLaserTo(enemy);
+    }
+}
+
+void PlayerChargeBullet::ApplyDamage(
+    Enemy* enemy,
+    float damage)
+{
+    if (!enemy) return;
+
+    // 継続ダメージ型
+    enemy->TakeDamage(damage * 0.016f);
+    // ↑ 60FPS前提で秒間換算
+}
+
+void PlayerChargeBullet::EmitLaserTo(Enemy* enemy)
+{
+    if (!enemy) return;
+
+    Vector3 start = playerPosition_;
+    Vector3 end = enemy->GetPosition();
+
+    Vector3 direction = end - start;
+    float length = Length::Length(direction);
+    direction = Normalize::Normalize(direction);
+
+    const int division = 8;
+    float step = length / static_cast<float>(division);
+
+    ParticleManager* pm = ParticleManager::GetInstance();
+
+    for (int i = 0; i < division; ++i)
+    {
+        Vector3 pos = start + direction * (step * i);
+        pm->Emit("Laser", pos, 1);
+    }
 }
 
 void PlayerChargeBullet::Draw()
 {
-	// チャージ弾専用の描画があれば追加
-	PlayerBullet::Draw();
-}
-
-void PlayerChargeBullet::SetChargeBulletParameters(const PlayerChargeBulletParameters& parameters)
-{
-	chargeBulletParameters_ = parameters;
-	damage_ = chargeBulletParameters_.damage;
-	SetRadius(chargeBulletParameters_.radius);
-	radius_ = chargeBulletParameters_.radius;
-	
-	// 基底クラスのパラメータも設定
-	PlayerBullet::SetParameters(chargeBulletParameters_.baseBulletParams);
-}
-
-void PlayerChargeBullet::SetDefaultChargeBulletParameters(const PlayerChargeBulletParameters& parameters)
-{
-	defaultChargeBulletParameters_ = parameters;
-	// 基底クラスのデフォルトパラメータも設定
-	PlayerBullet::SetDefaultParameters(parameters.baseBulletParams);
-}
-
-const PlayerChargeBulletParameters& PlayerChargeBullet::GetDefaultChargeBulletParameters()
-{
-	return defaultChargeBulletParameters_;
+    // 必要ならここに追加描画
 }

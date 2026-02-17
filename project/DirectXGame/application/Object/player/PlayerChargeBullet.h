@@ -1,92 +1,54 @@
 #pragma once
-#include "PlayerBullet.h"
-#include "Collider.h"
-#include <string>
+#include <vector>
 #include <cstdint>
+#include "Vector3.h"
 
-// 前方宣言
-struct Vector3;
+class Enemy;
+class GamePlayScene;
 
-/// <summary>
-/// チャージ弾の調整用定数（マジックナンバー排除）
-/// </summary>
-namespace PlayerChargeBulletDefaults {
-	inline constexpr float    kDamage        = 30.0f;
-	inline constexpr float    kRadius        = 0.5f;
-	inline constexpr float    kScaleFactor   = 10.0f;
-	inline constexpr uint32_t kSerialStart   = 1u;
-}
-
-/// <summary>
-/// プレイヤーチャージ弾のパラメータ構造体（JSONから読み込み）
-/// </summary>
-struct PlayerChargeBulletParameters {
-	// ダメージ数
-	float damage = PlayerChargeBulletDefaults::kDamage;
-	// 当たり半径
-	float radius = PlayerChargeBulletDefaults::kRadius;
-	// 見た目スケール倍率
-	float scaleFactor = PlayerChargeBulletDefaults::kScaleFactor;
-	// シリアルナンバー開始値
-	uint32_t serialStart = PlayerChargeBulletDefaults::kSerialStart;
-	
-	// 基底クラスのパラメータ（継承して上書き可能）
-	PlayerBulletParameters baseBulletParams;
-};
-
-/// <summary>
-/// プレイヤーのチャージ弾クラス
-/// </summary>
-class PlayerChargeBullet : public PlayerBullet {
+class PlayerChargeBullet
+{
 public:
-	// コンストラクタ
-	PlayerChargeBullet();
+    PlayerChargeBullet();
 
-	// 初期化
-	void Initialize(const Vector3& position) override;
+    // 初期化（発動時）
+    void Initialize(
+        const Vector3& playerPosition,
+        const std::vector<Enemy*>& enemies,
+        GamePlayScene* scene);
 
-	// パラメータファイルから初期化
-	void Initialize(const Vector3& position, const std::string& parameterFileName);
+    // 更新
+    void Update(float deltaTime);
 
-	// 更新
-	void Update() override;
+    // 描画（必要なら）
+    void Draw();
 
-	// 描画
-	void Draw() override;
-
-	// ダメージ数の取得
-	float GetDamage() const { return damage_; }
-
-	// シリアルナンバーの取得
-	uint32_t GetSerialNumber() const { return serialNumber_; }
-
-	// パラメータの取得
-	const PlayerChargeBulletParameters& GetChargeBulletParameters() const { return chargeBulletParameters_; }
-
-	// パラメータの設定
-	void SetChargeBulletParameters(const PlayerChargeBulletParameters& parameters);
-
-	// デフォルトパラメータを設定
-	static void SetDefaultChargeBulletParameters(const PlayerChargeBulletParameters& parameters);
-
-	// デフォルトパラメータを取得
-	static const PlayerChargeBulletParameters& GetDefaultChargeBulletParameters();
+    bool IsDead() const { return isDead_; }
 
 private:
-	/*------メンバ変数------*/
 
-	// チャージ弾専用パラメータ
-	PlayerChargeBulletParameters chargeBulletParameters_;
+    // ロック対象収集
+    void CollectTargets(
+        const std::vector<Enemy*>& enemies,
+        GamePlayScene* scene);
 
-	// ダメージ数
-	float damage_ = PlayerChargeBulletDefaults::kDamage;
+    // ダメージ処理
+    void ApplyDamage(Enemy* enemy, float damage);
 
-	// シリアルナンバー
-	uint32_t serialNumber_ = 0;
+    // レーザー演出
+    void EmitLaserTo(Enemy* enemy);
 
-	// 次のシリアルナンバー
-	static uint32_t sNextSerialNumber_;
+private:
 
-	// デフォルトパラメータ（静的メンバ）
-	static inline PlayerChargeBulletParameters defaultChargeBulletParameters_;
+    // ==== パラメータ ====
+    float baseDamage_ = 60.0f;
+    float maxActiveTime_ = 2.0f;
+    uint32_t maxLockCount_ = 5;
+
+    // ==== 状態 ====
+    Vector3 playerPosition_;
+    float activeTime_ = 0.0f;
+    bool isDead_ = false;
+
+    std::vector<Enemy*> targets_;
 };

@@ -27,6 +27,7 @@ namespace EnemyDefaults {
 	inline constexpr float kFallSpeed        = -0.02f; // 落下速度
 	inline constexpr float kRotationSpeed    = 0.01f;  // 回転速度
 	inline constexpr int32_t kInvalidColliderId = -1;
+	inline constexpr int32_t kDefaultHp = 1;
 }
 
 /// <summary>

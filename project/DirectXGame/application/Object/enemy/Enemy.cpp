@@ -96,6 +96,8 @@ void Enemy::Initialize(const std::string& parameterFileName)
 	attack_->SetPattern(1);
 
 	hasStartedCurveMove_ = false;
+
+	hp_ = EnemyDefaults::kDefaultHp;
 }
 
 void Enemy::Update()

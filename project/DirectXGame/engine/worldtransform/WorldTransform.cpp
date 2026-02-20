@@ -6,6 +6,7 @@
 #include <Inverse.h>
 #include <ResourceManager.h>
 namespace MyEngine {
+	using namespace Math;
 
 	void WorldTransform::Initialize()
 	{
@@ -34,13 +35,13 @@ namespace MyEngine {
 		// 親オブジェクトがあれば親のワールド行列を掛ける
 		if (parent_)
 		{
-			worldMatrix = Multiply::Multiply(worldMatrix, parent_->matWorld_);
+			worldMatrix = Multiply(worldMatrix, parent_->matWorld_);
 		}
 
 		if (camera_)
 		{
 			const Matrix4x4& viewProjectionMatrix = camera_->GetViewProjectionMatrix();
-			worldViewProjectionMatrix = Multiply::Multiply(worldMatrix, viewProjectionMatrix);
+			worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 		}
 		else
 		{
@@ -49,7 +50,7 @@ namespace MyEngine {
 
 		wvpData_->WVP = worldViewProjectionMatrix;
 		wvpData_->World = worldMatrix;
-		wvpData_->WorldInversedTranspose = Matrix4x4::Transpose(Inverse::Inverse(worldMatrix));
+		wvpData_->WorldInversedTranspose = Matrix4x4::Transpose(Inverse(worldMatrix));
 	}
 
 	void WorldTransform::SetPipeline()

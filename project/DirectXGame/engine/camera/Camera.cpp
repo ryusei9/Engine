@@ -18,6 +18,7 @@
 //   ・Update() は transform_ の値（translate/rotate/scale）を変更した後に呼び出すこと。
 //   ・行列の掛け合わせ順はレンダリング側のシェーダ期待順に合わせてある（view * projection）。
 //
+using namespace Math;
 namespace MyEngine {
 	using namespace CameraConstants;
 
@@ -32,9 +33,9 @@ namespace MyEngine {
 		, nearClip_(kDefaultNearClip)
 		, farClip_(kDefaultFarClip)
 		, worldMatrix_(MakeAffineMatrix::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate))
-		, viewMatrix_(Inverse::Inverse(worldMatrix_))
+		, viewMatrix_(Inverse(worldMatrix_))
 		, projectionMatrix_(MakePerspectiveFovMatrix(fovY_, aspectRatio_, nearClip_, farClip_))
-		, viewProjectionMatrix_(Multiply::Multiply(viewMatrix_, projectionMatrix_))
+		, viewProjectionMatrix_(Multiply(viewMatrix_, projectionMatrix_))
 	{
 	}
 
@@ -57,7 +58,7 @@ namespace MyEngine {
 	void Camera::UpdateViewMatrix()
 	{
 		// viewMatrix_ は worldMatrix_ の逆行列（カメラ座標系へ変換）
-		viewMatrix_ = Inverse::Inverse(worldMatrix_);
+		viewMatrix_ = Inverse(worldMatrix_);
 	}
 
 	void Camera::UpdateProjectionMatrix()
@@ -69,7 +70,7 @@ namespace MyEngine {
 	void Camera::UpdateViewProjectionMatrix()
 	{
 		// 最終的なワールド→クリップ空間変換を用意（描画時に直接使う）
-		viewProjectionMatrix_ = Multiply::Multiply(viewMatrix_, projectionMatrix_);
+		viewProjectionMatrix_ = Multiply(viewMatrix_, projectionMatrix_);
 	}
 
 	float Camera::CalculateAspectRatio()

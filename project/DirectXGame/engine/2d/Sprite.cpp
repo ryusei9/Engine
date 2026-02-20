@@ -7,6 +7,8 @@
 #include "MakeOrthographicMatrix.h"
 #include <cassert>
 #include <ResourceManager.h>
+
+using namespace Math;
 namespace MyEngine {
 
 	namespace {
@@ -126,7 +128,7 @@ namespace MyEngine {
 			SpriteDefaults::kOrthoNear,
 			SpriteDefaults::kOrthoFar);
 
-		transformationMatrixData_->wvp = Multiply::Multiply(worldMatrix, Multiply::Multiply(viewMatrix, projectionMatrix));
+		transformationMatrixData_->wvp = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 		transformationMatrixData_->world = worldMatrix;
 	}
 

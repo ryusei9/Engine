@@ -18,6 +18,7 @@
 namespace MyEngine {
 	using namespace Logger;
 	using namespace ParticleManagerConstants;
+	using namespace Math;
 
 	namespace {
 		// 加速度フィールドのデフォルト値
@@ -87,19 +88,19 @@ namespace MyEngine {
 			{ 1.0f, 1.0f, 1.0f },
 			camera_->GetRotate(),
 			camera_->GetTranslate());
-		Matrix4x4 viewMatrix = Inverse::Inverse(cameraMatrix);
+		Matrix4x4 viewMatrix = Inverse(cameraMatrix);
 		Matrix4x4 projectionMatrix = camera_->GetProjectionMatrix();
-		Matrix4x4 viewProjectionMatrix = Multiply::Multiply(viewMatrix, projectionMatrix);
+		Matrix4x4 viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 
 		// UV変換行列の計算
 		Matrix4x4 uvTransformMatrix = MakeScaleMatrix::MakeScaleMatrix(uvTransform_.scale);
-		uvTransformMatrix = Multiply::Multiply(uvTransformMatrix, MakeRotateZMatrix::MakeRotateZMatrix(uvTransform_.rotate.z));
-		uvTransformMatrix = Multiply::Multiply(uvTransformMatrix, MakeTranslateMatrix::MakeTranslateMatrix(uvTransform_.translate));
+		uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix::MakeRotateZMatrix(uvTransform_.rotate.z));
+		uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix::MakeTranslateMatrix(uvTransform_.translate));
 		materialData_->uvTransform = uvTransformMatrix;
 
 		// ビルボード行列の計算
 		Matrix4x4 backToFrontMatrix = MakeIdentity4x4::MakeIdentity4x4();
-		Matrix4x4 billboardMatrix = Multiply::Multiply(backToFrontMatrix, cameraMatrix);
+		Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, cameraMatrix);
 		billboardMatrix.m[kBillboardMatrixOffsetIndex][0] = kBillboardMatrixOffsetValue;
 		billboardMatrix.m[kBillboardMatrixOffsetIndex][1] = kBillboardMatrixOffsetValue;
 		billboardMatrix.m[kBillboardMatrixOffsetIndex][2] = kBillboardMatrixOffsetValue;
@@ -152,7 +153,7 @@ namespace MyEngine {
 		Matrix4x4 worldMatrix = CalculateWorldMatrix(particle, billboardMatrix);
 
 		// ワールド・ビュー・プロジェクション行列を計算
-		Matrix4x4 worldViewProjectionMatrix = Multiply::Multiply(worldMatrix, viewProjectionMatrix);
+		Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 
 		// インスタンシング用データを設定
 		group.instanceData[group.numParticles].WVP = worldViewProjectionMatrix;

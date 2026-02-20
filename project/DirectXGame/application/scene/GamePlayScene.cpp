@@ -12,6 +12,7 @@
 #undef max
 
 using MyEngine::Camera;
+using namespace Math;
 
 void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
@@ -647,7 +648,7 @@ void GamePlayScene::RestrictPlayerInsideCameraView() {
 
 	// ステップ1: ワールド座標 → クリップ座標
 	// ビュープロジェクション行列を使用して同次座標系に変換
-	Vector4 clipPos = Multiply::Multiply(viewProj, Vector4{ playerPos.x, playerPos.y, playerPos.z, 1.0f });
+	Vector4 clipPos = Multiply(viewProj, Vector4{ playerPos.x, playerPos.y, playerPos.z, 1.0f });
 
 	// ステップ2: クリップ座標 → NDC（正規化デバイス座標）
 	// w成分で除算することで、透視変換後の画面座標系に変換
@@ -666,8 +667,8 @@ void GamePlayScene::RestrictPlayerInsideCameraView() {
 	Vector4 newClipPos = { ndcPos.x * clipPos.w, ndcPos.y * clipPos.w, ndcPos.z * clipPos.w, clipPos.w };
 
 	// ワールド座標に戻す（逆行列で）
-	Matrix4x4 invViewProj = Inverse::Inverse(viewProj);
-	Vector4 newWorldPos = Multiply::Multiply(invViewProj, newClipPos);
+	Matrix4x4 invViewProj = Inverse(viewProj);
+	Vector4 newWorldPos = Multiply(invViewProj, newClipPos);
 
 	// プレイヤー位置を更新
 	Vector3 clampedWorldPos = {
@@ -715,7 +716,7 @@ bool GamePlayScene::IsInCameraView(const Vector3& worldPos)
 	Matrix4x4 viewProj = cam->GetViewProjectionMatrix();
 
 	// ワールド → クリップ
-	Vector4 clip = Multiply::Multiply(viewProj, Vector4{ worldPos.x, worldPos.y, worldPos.z, 1.0f });
+	Vector4 clip = Multiply(viewProj, Vector4{ worldPos.x, worldPos.y, worldPos.z, 1.0f });
 	if (clip.w == 0.0f) return false;
 
 	// NDCへ変換

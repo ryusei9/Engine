@@ -564,6 +564,7 @@ void GamePlayScene::UpdateStartCameraEasing()
 	};
 
 	cameraManager_->SetCameraPosition(pos);
+	//cameraManager_->SetCameraRotation(rot);
 
 	if (t >= 1.0f) {
 		isStartCameraEasing_ = false;
@@ -679,6 +680,7 @@ void GamePlayScene::RestrictPlayerInsideCameraView() {
 
 void GamePlayScene::UpdatePlayerFollowCamera()
 {
+	
 	Vector3 prevCamPos = cameraManager_->GetMainCamera()->GetTranslate();
 
 	if (!isStartCameraEasing_) {

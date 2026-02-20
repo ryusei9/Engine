@@ -68,8 +68,8 @@ namespace MyEngine {
 	void CameraManager::MoveTargetAndCamera(WorldTransform& target, const Vector3& delta)
 	{
 		// 目標とカメラを同時に移動
-		Vector3 currentTargetPos = target.GetTranslate();
-		target.SetTranslate(currentTargetPos + delta);
+		/*Vector3 currentTargetPos = target.GetTranslate();
+		target.SetTranslate(currentTargetPos + delta);*/
 
 		if (mainCamera_) {
 			Vector3 currentPos = mainCamera_->GetTranslate();

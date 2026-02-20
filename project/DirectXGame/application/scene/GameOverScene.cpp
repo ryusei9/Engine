@@ -1,6 +1,8 @@
 #include "GameOverScene.h"
 #include <imgui.h>
 
+using namespace MyEngine;
+
 void GameOverScene::Initialize(DirectXCommon* /*directXCommon*/, WinApp* winApp)
 {
 	// インプット
@@ -64,7 +66,7 @@ void GameOverScene::Update()
 	// フェードイン開始
 	if (returnToTitle_ && !fadeStarted_) {
 		fadeManager_->FadeInStart(GameOverDefaults::kFadeStep, [this]() {
-			SetSceneNo(TITLE);
+			RequestSceneChange(TITLE);
 		});
 		fadeStarted_ = true;
 	}

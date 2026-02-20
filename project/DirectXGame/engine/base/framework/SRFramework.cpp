@@ -2,213 +2,215 @@
 #include "TitleScene.h"
 #include <GetNowTimeInSeconds.h>
 
-void SRFramework::Initialize()
-{
-	// COMの初期化
-	CoInitializeEx(0, COINIT_MULTITHREADED);
+namespace MyEngine {
+	void SRFramework::Initialize()
+	{
+		// COMの初期化
+		CoInitializeEx(0, COINIT_MULTITHREADED);
 
 
 
-	// WindowsAPIの初期化
-	winApp_ = make_unique<WinApp>();
-	winApp_->Initialize();
+		// WindowsAPIの初期化
+		winApp_ = make_unique<WinApp>();
+		winApp_->Initialize();
 
 
 
-	// DirectXの初期化
-	DirectXCommon::GetInstance()->Initialize(winApp_.get());
+		// DirectXの初期化
+		DirectXCommon::GetInstance()->Initialize(winApp_.get());
 
 
-	// SRVマネージャの初期化
-	srvManager_ = make_unique<SrvManager>();
-	srvManager_->Initialize();
+		// SRVマネージャの初期化
+		srvManager_ = make_unique<SrvManager>();
+		srvManager_->Initialize();
 
-	// テクスチャマネージャの初期化
-	TextureManager::GetInstance()->Initialize(srvManager_.get());
+		// テクスチャマネージャの初期化
+		TextureManager::GetInstance()->Initialize(srvManager_.get());
 
-	// テクスチャを事前にロード
-	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
-	TextureManager::GetInstance()->LoadTexture("resources/monsterBall.png");
-	TextureManager::GetInstance()->LoadTexture("resources/mori.png");
-	TextureManager::GetInstance()->LoadTexture("resources/mori_Red.png");
-	TextureManager::GetInstance()->LoadTexture("resources/circle2.png");
-	TextureManager::GetInstance()->LoadTexture("resources/gradationLine.png");
-	TextureManager::GetInstance()->LoadTexture("resources/player.png");
-	TextureManager::GetInstance()->LoadTexture("resources/Boss.png");
-	TextureManager::GetInstance()->LoadTexture("resources/player_bullet.png");
-	TextureManager::GetInstance()->LoadTexture("resources/white.png");
-	TextureManager::GetInstance()->LoadTexture("resources/backGround.png");
-	TextureManager::GetInstance()->LoadTexture("resources/fadeWhite.png");
-	TextureManager::GetInstance()->LoadTexture("resources/BackToTitle.png");
-	TextureManager::GetInstance()->LoadTexture("resources/Black.png");
-	
-	// スプライト共通部の初期化
-	
-	SpriteCommon::GetInstance()->Initialize(srvManager_.get());
+		// テクスチャを事前にロード
+		TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
+		TextureManager::GetInstance()->LoadTexture("resources/monsterBall.png");
+		TextureManager::GetInstance()->LoadTexture("resources/mori.png");
+		TextureManager::GetInstance()->LoadTexture("resources/mori_Red.png");
+		TextureManager::GetInstance()->LoadTexture("resources/circle2.png");
+		TextureManager::GetInstance()->LoadTexture("resources/gradationLine.png");
+		TextureManager::GetInstance()->LoadTexture("resources/player.png");
+		TextureManager::GetInstance()->LoadTexture("resources/Boss.png");
+		TextureManager::GetInstance()->LoadTexture("resources/player_bullet.png");
+		TextureManager::GetInstance()->LoadTexture("resources/white.png");
+		TextureManager::GetInstance()->LoadTexture("resources/backGround.png");
+		TextureManager::GetInstance()->LoadTexture("resources/fadeWhite.png");
+		TextureManager::GetInstance()->LoadTexture("resources/BackToTitle.png");
+		TextureManager::GetInstance()->LoadTexture("resources/Black.png");
 
+		// スプライト共通部の初期化
 
-	// 3Dオブジェクト共通部の初期化
-	Object3dCommon::GetInstance()->Initialize(srvManager_.get());
+		SpriteCommon::GetInstance()->Initialize(srvManager_.get());
 
 
-	// 3Dモデルマネージャの初期化
-	ModelManager::GetInstance()->Initialize();
-
-	// .objファイルからモデルを読み込む
-	ModelManager::GetInstance()->LoadModel("plane.obj");
-	ModelManager::GetInstance()->LoadModel("axis.obj");
-	ModelManager::GetInstance()->LoadModel("BackToTitle.obj"); // ←追加
-	ModelManager::GetInstance()->LoadModel("testCube.obj");
-	ModelManager::GetInstance()->LoadModel("testGround.obj");
-	// 弾用モデルを事前にロード
-	ModelManager::GetInstance()->LoadModel("player_bullet.obj"); // ←追加
+		// 3Dオブジェクト共通部の初期化
+		Object3dCommon::GetInstance()->Initialize(srvManager_.get());
 
 
+		// 3Dモデルマネージャの初期化
+		ModelManager::GetInstance()->Initialize();
 
-	Input::GetInstance()->Initialize(winApp_.get());
+		// .objファイルからモデルを読み込む
+		ModelManager::GetInstance()->LoadModel("plane.obj");
+		ModelManager::GetInstance()->LoadModel("axis.obj");
+		ModelManager::GetInstance()->LoadModel("BackToTitle.obj"); // ←追加
+		ModelManager::GetInstance()->LoadModel("testCube.obj");
+		ModelManager::GetInstance()->LoadModel("testGround.obj");
+		// 弾用モデルを事前にロード
+		ModelManager::GetInstance()->LoadModel("player_bullet.obj"); // ←追加
 
-	camera_->SetRotate({ 0.1f, 0.0f, 0.0f });
-	camera_->SetTranslate({ 0.0f, 1.0f, -10.0f });
-	Object3dCommon::GetInstance()->SetDefaultCamera(camera_.get());
 
-	dxCommon_ = DirectXCommon::GetInstance();
 
-	dxCommon_->CreateDepthResource(camera_.get());
+		Input::GetInstance()->Initialize(winApp_.get());
 
-	dxCommon_->CreateMaskSRVDescriptorHeap();
+		camera_->SetRotate({ 0.1f, 0.0f, 0.0f });
+		camera_->SetTranslate({ 0.0f, 1.0f, -10.0f });
+		Object3dCommon::GetInstance()->SetDefaultCamera(camera_.get());
 
-	// 各種ポストエフェクトの初期化
-	noisePostEffect_ = std::make_unique<NoisePostEffect>();
-	noisePostEffect_->Initialize(dxCommon_);
+		dxCommon_ = DirectXCommon::GetInstance();
 
-	grayscalePostEffect_ = std::make_unique<GrayscalePostEffect>();
-	grayscalePostEffect_->Initialize(dxCommon_);
+		dxCommon_->CreateDepthResource(camera_.get());
 
-	// ポストエフェクトマネージャにポストエフェクトを追加
-	
-	PostEffectManager::GetInstance()->Initialize(dxCommon_);
-	PostEffectManager::GetInstance()->AddEffect(std::move(noisePostEffect_));
-	PostEffectManager::GetInstance()->AddEffect(std::move(grayscalePostEffect_));
+		dxCommon_->CreateMaskSRVDescriptorHeap();
 
-	PostEffectManager::GetInstance()->SetEffectEnabled(0, false);
-	PostEffectManager::GetInstance()->SetEffectEnabled(1, false);
+		// 各種ポストエフェクトの初期化
+		noisePostEffect_ = std::make_unique<NoisePostEffect>();
+		noisePostEffect_->Initialize(dxCommon_);
 
-	imGuiManager_->Initialize(winApp_.get());
+		grayscalePostEffect_ = std::make_unique<GrayscalePostEffect>();
+		grayscalePostEffect_->Initialize(dxCommon_);
 
-	/*------パーティクルマネージャの初期化------*/
-	ParticleManager::GetInstance()->Initialize(srvManager_.get(), camera_.get());
+		// ポストエフェクトマネージャにポストエフェクトを追加
 
-	// シーンマネージャの初期化
-	sceneManager_ = std::make_unique<SceneManager>();
-	sceneManager_->Initialize(winApp_.get());
+		PostEffectManager::GetInstance()->Initialize(dxCommon_);
+		PostEffectManager::GetInstance()->AddEffect(std::move(noisePostEffect_));
+		PostEffectManager::GetInstance()->AddEffect(std::move(grayscalePostEffect_));
 
-	/*------パーティクルマネージャの初期化------*/
-	ParticleManager::GetInstance()->Initialize(srvManager_.get(), camera_.get());
-}
+		PostEffectManager::GetInstance()->SetEffectEnabled(0, false);
+		PostEffectManager::GetInstance()->SetEffectEnabled(1, false);
 
-void SRFramework::Finelize()
-{
-	for (uint32_t i = 0; i < SrvManager::kMaxSRVCount_; i++) {
-		// 使われているSRVインデックスを解放
-		srvManager_->Free(i);
+		imGuiManager_->Initialize(winApp_.get());
+
+		/*------パーティクルマネージャの初期化------*/
+		ParticleManager::GetInstance()->Initialize(srvManager_.get(), camera_.get());
+
+		// シーンマネージャの初期化
+		sceneManager_ = std::make_unique<SceneManager>();
+		sceneManager_->Initialize(winApp_.get());
+
+		/*------パーティクルマネージャの初期化------*/
+		ParticleManager::GetInstance()->Initialize(srvManager_.get(), camera_.get());
 	}
-	
-	
-	// WindowsAPIの終了処理
-	winApp_->Finalize();
-	
 
-	CloseHandle(DirectXCommon::GetInstance()->GetFenceEvent());
-	
-
-	// テクスチャマネージャの終了
-	TextureManager::GetInstance()->Finalize();
-	// 3Dモデルマネージャの終了
-	ModelManager::GetInstance()->Finalize();
-
-	// パーティクルマネージャの終了
-	ParticleManager::GetInstance()->Finalize();
-	
-}
-
-void SRFramework::Update()
-{
-	MSG msg{};
-	// ウィンドウの×ボタンが押されるまでループ
-
-	// Windowsのメッセージ処理
-	if (winApp_->ProcessMessage()) {
-		// ゲームループを抜ける
-		endRequest_ = true;
-	}
-	// シーンマネージャの更新
-	sceneManager_->Update();
-	camera_->Update();
-
-	PostEffectManager::GetInstance()->SetTimeParams(GetNowTimeInSeconds());
-	// パーティクルマネージャの更新
-	ParticleManager::GetInstance()->Update();
-}
-
-void SRFramework::PreDraw()
-{
-	// --- ここでの深度バッファ状態 ---
-   // 前フレームのポストエフェクト後なので
-   // [D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE]（SRV用）になっている
-
-
-
-	// --- ここでの深度バッファ状態 ---
-	// [D3D12_RESOURCE_STATE_DEPTH_WRITE]（書き込み
-	// 描画前処理
-	DirectXCommon::GetInstance()->PreDraw();
-
-	srvManager_->PreDraw();
-	
-}
-
-void SRFramework::PostDraw()
-{
-	DirectXCommon::GetInstance()->PostDraw();
-}
-
-void SRFramework::PrePostEffect()
-{
-	// [D3D12_RESOURCE_STATE_DEPTH_WRITE]（書き込み
-	dxCommon_->PreRenderScene();
-	PostEffectManager::GetInstance()->PreRenderAll();
-}
-
-void SRFramework::DrawPostEffect()
-{
-	// 深度バッファを「SRV用」に遷移
-	dxCommon_->TransitionDepthBufferToSRV();
-
-	dxCommon_->TransitionRenderTextureToShaderResource();
-	dxCommon_->DrawRenderTexture();
-	dxCommon_->TransitionRenderTextureToRenderTarget();
-	PostEffectManager::GetInstance()->PreBarrierAll();
-	PostEffectManager::GetInstance()->DrawAll();
-	PostEffectManager::GetInstance()->PostBarrierAll();
-
-	// --- ここでの深度バッファ状態 ---
-    // [D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE]（SRV用）のまま
-}
-
-void SRFramework::Run()
-{
-	// ゲームの初期化
-	Initialize();
-	while (true) {
-		// メインループ
-		Update();
-		// ゲームループを抜ける
-		if (IsEndRequest()) {
-			break;
+	void SRFramework::Finelize()
+	{
+		for (uint32_t i = 0; i < SrvManager::kMaxSRVCount_; i++) {
+			// 使われているSRVインデックスを解放
+			srvManager_->Free(i);
 		}
-		// 描画
-		Draw();
+
+
+		// WindowsAPIの終了処理
+		winApp_->Finalize();
+
+
+		CloseHandle(DirectXCommon::GetInstance()->GetFenceEvent());
+
+
+		// テクスチャマネージャの終了
+		TextureManager::GetInstance()->Finalize();
+		// 3Dモデルマネージャの終了
+		ModelManager::GetInstance()->Finalize();
+
+		// パーティクルマネージャの終了
+		ParticleManager::GetInstance()->Finalize();
+
 	}
-	// ゲームの終了
-	Finelize();
+
+	void SRFramework::Update()
+	{
+		MSG msg{};
+		// ウィンドウの×ボタンが押されるまでループ
+
+		// Windowsのメッセージ処理
+		if (winApp_->ProcessMessage()) {
+			// ゲームループを抜ける
+			endRequest_ = true;
+		}
+		// シーンマネージャの更新
+		sceneManager_->Update();
+		camera_->Update();
+
+		PostEffectManager::GetInstance()->SetTimeParams(GetNowTimeInSeconds());
+		// パーティクルマネージャの更新
+		ParticleManager::GetInstance()->Update();
+	}
+
+	void SRFramework::PreDraw()
+	{
+		// --- ここでの深度バッファ状態 ---
+	   // 前フレームのポストエフェクト後なので
+	   // [D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE]（SRV用）になっている
+
+
+
+		// --- ここでの深度バッファ状態 ---
+		// [D3D12_RESOURCE_STATE_DEPTH_WRITE]（書き込み
+		// 描画前処理
+		DirectXCommon::GetInstance()->PreDraw();
+
+		srvManager_->PreDraw();
+
+	}
+
+	void SRFramework::PostDraw()
+	{
+		DirectXCommon::GetInstance()->PostDraw();
+	}
+
+	void SRFramework::PrePostEffect()
+	{
+		// [D3D12_RESOURCE_STATE_DEPTH_WRITE]（書き込み
+		dxCommon_->PreRenderScene();
+		PostEffectManager::GetInstance()->PreRenderAll();
+	}
+
+	void SRFramework::DrawPostEffect()
+	{
+		// 深度バッファを「SRV用」に遷移
+		dxCommon_->TransitionDepthBufferToSRV();
+
+		dxCommon_->TransitionRenderTextureToShaderResource();
+		dxCommon_->DrawRenderTexture();
+		dxCommon_->TransitionRenderTextureToRenderTarget();
+		PostEffectManager::GetInstance()->PreBarrierAll();
+		PostEffectManager::GetInstance()->DrawAll();
+		PostEffectManager::GetInstance()->PostBarrierAll();
+
+		// --- ここでの深度バッファ状態 ---
+		// [D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE]（SRV用）のまま
+	}
+
+	void SRFramework::Run()
+	{
+		// ゲームの初期化
+		Initialize();
+		while (true) {
+			// メインループ
+			Update();
+			// ゲームループを抜ける
+			if (IsEndRequest()) {
+				break;
+			}
+			// 描画
+			Draw();
+		}
+		// ゲームの終了
+		Finelize();
+	}
 }

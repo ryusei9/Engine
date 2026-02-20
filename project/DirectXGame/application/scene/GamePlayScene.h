@@ -21,6 +21,7 @@
 #include <CameraManager.h>
 #include <GrayscalePostEffect.h>
 #include <PostEffectManager.h>
+#include <Camera.h>
 
 /// 調整用定数（マジックナンバー排除）
 namespace GamePlayDefaults {
@@ -252,7 +253,7 @@ private:
 	bool fadeStarted_ = false;
 
 	// カメラ
-	std::unique_ptr<Camera> camera_;
+	std::unique_ptr<MyEngine::Camera> camera_;
 
 	// ゲーム終了フラグ
 	bool isEnd_ = false;
@@ -345,5 +346,39 @@ private:
 	// SPACEキーで決定
 	std::unique_ptr<Object3d> spaceGuide_ = nullptr;
 	WorldTransform spaceGuideTransform_;
+
+private:
+	// 初期化系
+	void InitializeSprite();
+	void InitializeAudio();
+	void InitializeFade();
+	void InitializePlayer();
+	void InitializeEnemyCurves();
+	void InitializeLevelData();
+	void InitializeSkybox();
+	void InitializeCollisionManager();
+	void InitializeCamera();
+	void InitializeUIObjects();
+	void InitializeGameTimers();
+	void InitializePostEffects();
+
+	// 更新系
+	void UpdateInput();
+	void UpdateFadeAndTransitions();
+	void UpdateGameObjects();
+	void UpdatePlayerBullets();
+	void UpdateEnemies();
+	void UpdateEnemyBehavior(Enemy* enemy);
+	void CleanupDestroyedObjects();
+	void UpdateCameraSystem();
+	void UpdateUIObjects();
+	void UpdateGuideTextPositions(const Vector3& camPos);
+	void UpdateCollisionSystem();
+
+	// 描画系
+	void DrawGameObjects();
+	void DrawUI();
+	void DrawSkybox();
+	void DrawFade();
 };
 

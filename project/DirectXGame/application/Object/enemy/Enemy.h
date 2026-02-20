@@ -169,7 +169,11 @@ public:
 	void SetControlEnabled(bool enabled) { controlEnabled_ = enabled; } 
 
 	// Z軸の座標を設定
-	void SetZ(float z) { worldTransform_.translate_.z = z; }
+	void SetZ(float z) {
+		WorldTransform& wt = GetWorldTransform();
+		Vector3 pos = wt.GetTranslate();
+		wt.SetTranslate(Vector3(pos.x, pos.y, z));
+	}
 
 	// パラメータの設定
 	void SetParameters(const EnemyParameters& parameters);
@@ -180,6 +184,8 @@ public:
 
 private:
 	/*------メンバ変数------*/
+
+	WorldTransform& worldTransform;
 
 	// 敵の調整パラメータ（JSONから読み込み）
 	EnemyParameters parameters_;
@@ -194,7 +200,7 @@ private:
 	uint32_t serialNumber_ = 0;
 
 	// 敵のカメラ
-	Camera* camera_ = nullptr;
+	MyEngine::Camera* camera_ = nullptr;
 
 	// 敵のリスポーンタイム
 	float respawnTime_ = EnemyDefaults::kRespawnTimeSec;

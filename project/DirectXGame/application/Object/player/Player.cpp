@@ -11,6 +11,7 @@
 #endif
 
 Player::Player()
+	: worldTransform_(BaseCharacter::GetWorldTransform())
 {
 	// シリアルナンバーを振る
 	serialNumber_ = sNextSerialNumber_;
@@ -49,9 +50,11 @@ void Player::Initialize(const std::string& parameterFileName)
 	// プレイヤーのカメラを取得
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
 
-	// 3Dオブジェクト
+	// 3Dオブジェクトの初期化
+	
 	object3d_ = std::make_unique<Object3d>();
 	object3d_->Initialize(parameters_.modelFileName);
+
 
 	SetRadius(parameters_.radius); // コライダーの半径を設定
 
@@ -113,8 +116,8 @@ void Player::Update()
 	// ワールド変換の更新
 	worldTransform_.Update();
 
-	// 3Dオブジェクトへ反映
-	object3d_->SetCamera(camera_);
+	// 3Dオブジェクトへ反映	
+	object3d_->SetCamera(GetCamera());
 	object3d_->SetTranslate(worldTransform_.GetTranslate());
 	object3d_->SetRotate(worldTransform_.GetRotate());
 	object3d_->SetScale(worldTransform_.GetScale());
@@ -124,7 +127,7 @@ void Player::Update()
 void Player::Draw()
 {
 	// 死亡していなければ描画
-	if (!isAlive_) {
+	if (!IsAlive()) {
 		return;
 	}
 	BaseCharacter::Draw();
@@ -138,19 +141,23 @@ void Player::Move()
 	// 速度をリセット
 	velocity_ = { 0.0f, 0.0f, 0.0f };
 
+	// 入力取得
+	Input* input = GetInput();
+
 	// 入力
-	if (input_->PushKey(DIK_W)) { 
-		velocity_.y += moveSpeed_; 
+	if (input->PushKey(DIK_W)) {
+		velocity_.y += moveSpeed_;
 	}
-	if (input_->PushKey(DIK_S)) { 
-		velocity_.y -= moveSpeed_; 
+	if (input->PushKey(DIK_S)) {
+		velocity_.y -= moveSpeed_;
 	}
-	if (input_->PushKey(DIK_A)) { 
-		velocity_.x -= moveSpeed_; 
+	if (input->PushKey(DIK_A)) {
+		velocity_.x -= moveSpeed_;
 	}
-	if (input_->PushKey(DIK_D)) { 
-		velocity_.x += moveSpeed_; 
+	if (input->PushKey(DIK_D)) {
+		velocity_.x += moveSpeed_;
 	}
+
 
 	// 速度を座標に反映
 	worldTransform_.SetTranslate(worldTransform_.GetTranslate() + velocity_);
@@ -158,8 +165,11 @@ void Player::Move()
 
 void Player::Attack()
 {
+	// 入力取得
+	Input* input = GetInput();
+
 	// チャージ
-	if (input_->PushKey(DIK_SPACE)) {
+	if (input->PushKey(DIK_SPACE)) {
 		if (!isCharging_) {
 			isCharging_ = true;
 			chargeTime_ = 0.0f;
@@ -193,10 +203,10 @@ void Player::Attack()
 
 void Player::OnCollision(Collider* other)
 {
-	if (isAlive_) {
+	if (IsAlive()) {
 		if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy) ||
 			other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyBullet)) {
-			isAlive_ = false;
+			SetIsAlive(false);
 			respawnTimer_ = parameters_.respawnWaitSec;
 			PlayDeathParticleOnce();
 		}
@@ -208,6 +218,7 @@ void Player::DrawImGui()
 #ifdef USE_IMGUI
 	object3d_->DrawImGui();
 	ImGui::Begin("Player Info");
+	ImGui::Text("Position: (%.2f, %.2f, %.2f)", worldTransform_.GetTranslate().x, worldTransform_.GetTranslate().y, worldTransform_.GetTranslate().z);
 	ImGui::Text("Charge Time: %.2f seconds", chargeTime_);
 	ImGui::Text("Is Charging: %s", isCharging_ ? "Yes" : "No");
 	ImGui::Text("Charge Ready: %s", chargeReady_ ? "Yes" : "No");

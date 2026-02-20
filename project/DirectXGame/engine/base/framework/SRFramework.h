@@ -55,69 +55,70 @@
 #pragma comment(lib,"dxcompiler.lib")
 using namespace std;
 
-/// <summary>
-/// ゲーム全体
-/// </summary>
-class SRFramework
-{
-public:
-	// デストラクタ
-	virtual ~SRFramework() = default;
+namespace MyEngine {
+	/// <summary>
+	/// ゲーム全体
+	/// </summary>
+	class SRFramework
+	{
+	public:
+		// デストラクタ
+		virtual ~SRFramework() = default;
 
-	// 初期化
-	virtual void Initialize();
+		// 初期化
+		virtual void Initialize();
 
-	// 終了
-	virtual void Finelize();
+		// 終了
+		virtual void Finelize();
 
-	// 毎フレーム更新
-	virtual void Update();
+		// 毎フレーム更新
+		virtual void Update();
 
-	// 描画
-	virtual void Draw() = 0;
+		// 描画
+		virtual void Draw() = 0;
 
-	// 描画前処理
-	virtual void PreDraw();
+		// 描画前処理
+		virtual void PreDraw();
 
-	// 描画後処理
-	virtual void PostDraw();
+		// 描画後処理
+		virtual void PostDraw();
 
-	// 終了リクエスト
-	virtual bool IsEndRequest() const { return endRequest_; }
+		// 終了リクエスト
+		virtual bool IsEndRequest() const { return endRequest_; }
 
-	// PreDrawを行う前の処理
-	void PrePostEffect();
+		// PreDrawを行う前の処理
+		void PrePostEffect();
 
-	// PostDrawを行う後の処理
-	void DrawPostEffect();
+		// PostDrawを行う後の処理
+		void DrawPostEffect();
 
-	// 実行
-	void Run();
+		// 実行
+		void Run();
 
-	/*------ゲッター------*/
+		/*------ゲッター------*/
 
-	// winappの取得
-	WinApp* GetWinApp() const { return winApp_.get(); }
+		// winappの取得
+		WinApp* GetWinApp() const { return winApp_.get(); }
 
-protected:
-	// メンバ変数
-	// ポインタ
-	std::unique_ptr<WinApp> winApp_ = nullptr;
+	protected:
+		// メンバ変数
+		// ポインタ
+		std::unique_ptr<WinApp> winApp_ = nullptr;
 
-	std::unique_ptr<SrvManager> srvManager_ = nullptr;
+		std::unique_ptr<SrvManager> srvManager_ = nullptr;
 
-	std::unique_ptr<Camera> camera_ = std::make_unique<Camera>();
+		std::unique_ptr<Camera> camera_ = std::make_unique<Camera>();
 
-	std::unique_ptr<ImGuiManager> imGuiManager_ = std::make_unique<ImGuiManager>();
+		std::unique_ptr<ImGuiManager> imGuiManager_ = std::make_unique<ImGuiManager>();
 
-	bool endRequest_ = false;
+		bool endRequest_ = false;
 
-	std::unique_ptr<SceneManager> sceneManager_ = nullptr;
+		std::unique_ptr<SceneManager> sceneManager_ = nullptr;
 
-	std::unique_ptr<NoisePostEffect> noisePostEffect_ = nullptr;
+		std::unique_ptr<NoisePostEffect> noisePostEffect_ = nullptr;
 
-	std::unique_ptr<GrayscalePostEffect> grayscalePostEffect_ = nullptr;
+		std::unique_ptr<GrayscalePostEffect> grayscalePostEffect_ = nullptr;
 
-	DirectXCommon* dxCommon_ = nullptr;
-};
-
+		DirectXCommon* dxCommon_ = nullptr;
+	};
+}

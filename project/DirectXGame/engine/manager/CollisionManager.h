@@ -3,6 +3,7 @@
 #include <memory>
 #include "Vector3.h"
 
+namespace MyEngine {
 class Collider; // 前方宣言
 
 // CollisionManager用の定数
@@ -14,57 +15,58 @@ namespace CollisionManagerConstants {
 	constexpr bool kUseSquaredDistance = true;
 }
 
-/// <summary>
-/// 当たり判定管理クラス
-/// </summary>
-class CollisionManager
-{
-public:
-	// 初期化
-	void Initialize();
 
-	// 更新
-	void Update();
+	/// <summary>
+	/// 当たり判定管理クラス
+	/// </summary>
+	class CollisionManager
+	{
+	public:
+		// 初期化
+		void Initialize();
 
-	// 描画
-	void Draw();
+		// 更新
+		void Update();
 
-	// リセット
-	void Reset();
+		// 描画
+		void Draw();
 
-	// 衝突判定を行う
-	void CheckCollision();
+		// リセット
+		void Reset();
 
-	// 衝突オブジェクトを追加
-	void AddCollider(Collider* collider);
+		// 衝突判定を行う
+		void CheckCollision();
 
-	// 衝突オブジェクトを削除
-	void RemoveCollider(Collider* collider);
+		// 衝突オブジェクトを追加
+		void AddCollider(Collider* collider);
 
-	// コライダー2つの衝突判定と応答処理
-	void CheckCollisionPair(Collider* colliderA, Collider* colliderB);
+		// 衝突オブジェクトを削除
+		void RemoveCollider(Collider* collider);
 
-	// 球体同士の衝突判定
-	bool CheckSphereCollision(Collider* colliderA, Collider* colliderB);
+		// コライダー2つの衝突判定と応答処理
+		void CheckCollisionPair(Collider* colliderA, Collider* colliderB);
 
-	// ゲッター
-	size_t GetColliderCount() const { return colliders_.size(); }
-	const std::list<Collider*>& GetColliders() const { return colliders_; }
+		// 球体同士の衝突判定
+		bool CheckSphereCollision(Collider* colliderA, Collider* colliderB);
 
-private:
-	// 衝突判定のフィルタリング
-	bool ShouldCheckCollision(uint32_t typeA, uint32_t typeB) const;
-	
-	// 球体同士の衝突判定（最適化版：二乗距離を使用）
-	bool CheckSphereCollisionOptimized(Collider* colliderA, Collider* colliderB) const;
-	
-	// 衝突応答の通知
-	void NotifyCollision(Collider* colliderA, Collider* colliderB);
-	
-	// 全ペアの衝突判定を実行
-	void CheckAllPairs();
+		// ゲッター
+		size_t GetColliderCount() const { return colliders_.size(); }
+		const std::list<Collider*>& GetColliders() const { return colliders_; }
 
-	// 衝突オブジェクトのリスト
-	std::list<Collider*> colliders_;
-};
+	private:
+		// 衝突判定のフィルタリング
+		bool ShouldCheckCollision(uint32_t typeA, uint32_t typeB) const;
 
+		// 球体同士の衝突判定（最適化版：二乗距離を使用）
+		bool CheckSphereCollisionOptimized(Collider* colliderA, Collider* colliderB) const;
+
+		// 衝突応答の通知
+		void NotifyCollision(Collider* colliderA, Collider* colliderB);
+
+		// 全ペアの衝突判定を実行
+		void CheckAllPairs();
+
+		// 衝突オブジェクトのリスト
+		std::list<Collider*> colliders_;
+	};
+}

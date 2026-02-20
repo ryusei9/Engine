@@ -93,7 +93,7 @@ private:
 	WorldTransform titleLogoTransform_;
 
 	// カメラ
-	std::unique_ptr<Camera> camera_ = std::make_unique<Camera>();
+	std::unique_ptr<MyEngine::Camera> camera_ = std::make_unique<MyEngine::Camera>();
 
 	// skydome
 	std::unique_ptr<Object3d> skydome_ = nullptr;

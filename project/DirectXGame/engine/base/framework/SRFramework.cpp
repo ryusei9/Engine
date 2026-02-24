@@ -42,6 +42,7 @@ namespace MyEngine {
 		TextureManager::GetInstance()->LoadTexture("resources/fadeWhite.png");
 		TextureManager::GetInstance()->LoadTexture("resources/BackToTitle.png");
 		TextureManager::GetInstance()->LoadTexture("resources/Black.png");
+		TextureManager::GetInstance()->LoadTexture("resources/Dock.png");
 
 		// スプライト共通部の初期化
 
@@ -61,6 +62,7 @@ namespace MyEngine {
 		ModelManager::GetInstance()->LoadModel("BackToTitle.obj"); // ←追加
 		ModelManager::GetInstance()->LoadModel("testCube.obj");
 		ModelManager::GetInstance()->LoadModel("testGround.obj");
+		ModelManager::GetInstance()->LoadModel("Dock.obj");
 		// 弾用モデルを事前にロード
 		ModelManager::GetInstance()->LoadModel("player_bullet.obj"); // ←追加
 

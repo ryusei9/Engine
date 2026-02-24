@@ -4,13 +4,11 @@
 #include "MakeRotateYMatrix.h"
 #include "MakeRotateZMatrix.h"
 
-using namespace Math;
-
-namespace MakeAffineMatrix {
+namespace Math {
     Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3 translate)
     {
 		Matrix4x4 resultAffineMatrix = {};
-		Matrix4x4 resultRotateXYZMatrix = Multiply(MakeRotateXMatrix::MakeRotateXMatrix(rotate.x), Multiply(MakeRotateYMatrix::MakeRotateYMatrix(rotate.y), MakeRotateZMatrix::MakeRotateZMatrix(rotate.z)));
+		Matrix4x4 resultRotateXYZMatrix = Multiply(MakeRotateXMatrix(rotate.x), Multiply(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
 		resultAffineMatrix.m[0][0] = scale.x * resultRotateXYZMatrix.m[0][0];
 		resultAffineMatrix.m[0][1] = scale.x * resultRotateXYZMatrix.m[0][1];
 		resultAffineMatrix.m[0][2] = scale.x * resultRotateXYZMatrix.m[0][2];

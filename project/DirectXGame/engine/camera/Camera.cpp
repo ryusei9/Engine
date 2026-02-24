@@ -32,7 +32,7 @@ namespace MyEngine {
 		, aspectRatio_(CalculateAspectRatio())
 		, nearClip_(kDefaultNearClip)
 		, farClip_(kDefaultFarClip)
-		, worldMatrix_(MakeAffineMatrix::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate))
+		, worldMatrix_(MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate))
 		, viewMatrix_(Inverse(worldMatrix_))
 		, projectionMatrix_(MakePerspectiveFovMatrix(fovY_, aspectRatio_, nearClip_, farClip_))
 		, viewProjectionMatrix_(Multiply(viewMatrix_, projectionMatrix_))
@@ -52,7 +52,7 @@ namespace MyEngine {
 	void Camera::UpdateWorldMatrix()
 	{
 		// worldMatrix_ を作成：スケール・回転・平行移動からワールド変換行列を合成する
-		worldMatrix_ = MakeAffineMatrix::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+		worldMatrix_ = MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
 	}
 
 	void Camera::UpdateViewMatrix()

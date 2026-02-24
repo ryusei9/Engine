@@ -110,7 +110,7 @@ namespace MyEngine {
 		materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 
 		materialData_->color = { kDefaultColorR, kDefaultColorG, kDefaultColorB, kDefaultColorA };
-		materialData_->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
+		materialData_->uvTransform = MakeIdentity4x4();
 	}
 
 	void Skybox::Update()

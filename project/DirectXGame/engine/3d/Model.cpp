@@ -167,7 +167,7 @@ namespace MyEngine {
 			kDefaultMaterialColorA
 		);
 		materialData_->enableLighting = kDefaultLightingEnabled;
-		materialData_->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
+		materialData_->uvTransform = MakeIdentity4x4();
 	}
 
 	// ===== ヘルパー関数 =====

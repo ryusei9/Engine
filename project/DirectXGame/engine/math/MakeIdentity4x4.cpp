@@ -1,6 +1,6 @@
 #include "MakeIdentity4x4.h"
 
-namespace MakeIdentity4x4 {
+namespace Math {
     Matrix4x4 MakeIdentity4x4()
     {
 		Matrix4x4 resultIdentity = {};

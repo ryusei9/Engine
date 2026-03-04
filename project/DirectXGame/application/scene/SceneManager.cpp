@@ -26,27 +26,35 @@ void SceneManager::Initialize(WinApp* winApp)
 
 void SceneManager::Update()
 {
-	prevSceneNo_ = currentSceneNo_;
-	currentSceneNo_ = nowScene_->GetSceneNo();
-
-	// 次のシーンがある場合
-	if (prevSceneNo_ != currentSceneNo_) {
-		//---------------------------------------
-		// 旧シーンの終了処理
-		if (nowScene_ != nullptr) {
+	// シーン遷移のチェック
+	if (nowScene_) {
+		// 次のシーンが要求されているかチェック
+		std::optional<int32_t> nextScene = nowScene_->GetNextScene();
+		
+		if (nextScene.has_value()) {
+			// シーン番号を更新
+			prevSceneNo_ = currentSceneNo_;
+			currentSceneNo_ = nextScene.value();
+			
+			//---------------------------------------
+			// 旧シーンの終了処理
 			nowScene_->Finalize();
+			
+			//---------------------------------------
+			// 新シーンの生成と初期化
+			if (currentSceneNo_ == GAMEPLAY) {
+				nowScene_ = std::make_unique<GamePlayScene>();
+			} else if (currentSceneNo_ == TITLE) {
+				nowScene_ = std::make_unique<TitleScene>();
+			} else if (currentSceneNo_ == GAMEOVER) {
+				nowScene_ = std::make_unique<GameOverScene>();
+			}
+			
+			// 新シーンの初期化
+			if (nowScene_) {
+				nowScene_->Initialize(directXCommon_, winApp_);
+			}
 		}
-		//---------------------------------------
-		// 新シーンの初期化
-		if (currentSceneNo_ == GAMEPLAY) {
-			nowScene_ = std::make_unique<GamePlayScene>();
-		} else if (currentSceneNo_ == TITLE) {
-			nowScene_ = std::make_unique<TitleScene>();
-		} else if (currentSceneNo_ == GAMEOVER) {
-			nowScene_ = std::make_unique<GameOverScene>();
-		}
-		// シーンの初期化
-		nowScene_->Initialize(directXCommon_, winApp_);
 	}
 
 	//========================================

@@ -54,6 +54,9 @@ public:
 	// 描画
 	void Draw() override;
 
+	// 衝突判定（敵を貫通する）
+	void OnCollision(Collider* other) override;
+
 	// ダメージ数の取得
 	float GetDamage() const { return damage_; }
 

@@ -84,11 +84,10 @@ void PlayerBullet::OnCollision(Collider* other)
 		return;
 	}
 
-	// 敵や敵弾に当たったら消える（必要に応じて条件拡張）
+	// 敵に当たったら消える
 	const uint32_t type = other->GetTypeID();
-	if (type == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy) ||
-		type == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyBullet)) {
-		isAlive_ = false;
+	if (type == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {	
+		isAlive_ = false;	
 		SetRadius(0.0f); // 直ちに当たり判定無効化
 	}
 }

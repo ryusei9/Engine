@@ -30,6 +30,9 @@ namespace TitleDefaults {
 	inline constexpr Vector3 kGuideRot{ -1.387f, 0.0f, 0.0f };
 	inline constexpr Vector3 kGuideScale{ 0.232f, 0.232f, 0.232f };
 
+	// ドック
+	inline constexpr Vector3 kDockPos{ 0.0f, -0.5f, -4.0f };
+
 	// フェード
 	inline constexpr float kFadeStep = 0.02f;
 
@@ -65,6 +68,23 @@ public:
 	void CameraMove();
 
 private:
+	// ステートマシン
+	enum class TitleStartState {
+		None,
+		Start,          // スペース押下
+		CameraMove,
+		FloatUp,
+		FlyAway,
+		FadeOut,
+		Finish
+	};
+
+	TitleStartState startState_ = TitleStartState::None;
+	float startTimer_ = 0.0f;
+	Vector3 startPlayerBasePos_;
+	Vector3 startCameraPos_;
+
+private:
 	// スプライトコモン
 	SpriteCommon* spriteCommon_ = nullptr;
 
@@ -81,7 +101,7 @@ private:
 	SoundData soundData1_;
 
 	// プレイヤー
-	std::unique_ptr<Player> player_ = nullptr;
+	std::unique_ptr<Object3d> player_ = nullptr;
 
 	// プレイヤーのワールド変換
 	WorldTransform playerTransform_;
@@ -93,7 +113,7 @@ private:
 	WorldTransform titleLogoTransform_;
 
 	// カメラ
-	std::unique_ptr<Camera> camera_ = std::make_unique<Camera>();
+	std::unique_ptr<MyEngine::Camera> camera_ = std::make_unique<MyEngine::Camera>();
 
 	// skydome
 	std::unique_ptr<Object3d> skydome_ = nullptr;
@@ -111,6 +131,17 @@ private:
 	Vector3 titleGuidePosition_ = TitleDefaults::kGuidePos;
 	Vector3 titleGuideRotate_   = TitleDefaults::kGuideRot;
 	Vector3 titleGuideScale_    = TitleDefaults::kGuideScale;
+
+	std::unique_ptr<Object3d> dock_ = nullptr;
+
+	// Dockのワールド変換
+	WorldTransform dockTransform_;
+
+	// カメラ移動
+	Vector3 startDockBasePos_;
+	Vector3 startPlayerTargetPos_;
+	Vector3 startDockTargetPos_;
+	float startRotY_ = 0.0f;
 
 	// カメラマネージャー
 	std::unique_ptr<CameraManager> cameraManager_ = nullptr;

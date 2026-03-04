@@ -6,55 +6,56 @@
 /// <summary>
 /// ポストエフェクトマネージャー
 /// </summary>
-class PostEffectManager
-{
-public:
-	// シングルトンインスタンス
-	static PostEffectManager* GetInstance() {
-		static PostEffectManager instance;
-		return &instance;
-	}
+namespace MyEngine {
+	class PostEffectManager
+	{
+	public:
+		// シングルトンインスタンス
+		static PostEffectManager* GetInstance() {
+			static PostEffectManager instance;
+			return &instance;
+		}
 
-	// コンストラクタ・デストラクタ
-	PostEffectManager() = default;
-	~PostEffectManager() = default;
-	PostEffectManager(const PostEffectManager&) = delete;
-	PostEffectManager& operator=(const PostEffectManager&) = delete;
-	
-	// 初期化
-	void Initialize(DirectXCommon* dxCommon);
+		// コンストラクタ・デストラクタ
+		PostEffectManager() = default;
+		~PostEffectManager() = default;
+		PostEffectManager(const PostEffectManager&) = delete;
+		PostEffectManager& operator=(const PostEffectManager&) = delete;
 
-	// ポストエフェクトを追加する
-	void AddEffect(std::unique_ptr<PostEffectBase> effect);
+		// 初期化
+		void Initialize(DirectXCommon* dxCommon);
 
-	// ポストエフェクトのインデックスを指定して有効・無効を設定する
-	void SetEffectEnabled(size_t index, bool enebled);
+		// ポストエフェクトを追加する
+		void AddEffect(std::unique_ptr<PostEffectBase> effect);
 
-	// 有効なエフェクトだけ順番にPreRender
-	void PreRenderAll();
+		// ポストエフェクトのインデックスを指定して有効・無効を設定する
+		void SetEffectEnabled(size_t index, bool enebled);
 
-	// 有効なエフェクトだけ順番にDraw
-	void DrawAll();
+		// 有効なエフェクトだけ順番にPreRender
+		void PreRenderAll();
 
-	// 有効なエフェクトだけ順番にPostRender
-	void PostRenderAll();
+		// 有効なエフェクトだけ順番にDraw
+		void DrawAll();
 
-	// 時間パラメータを設定
-	void SetTimeParams(float time);
+		// 有効なエフェクトだけ順番にPostRender
+		void PostRenderAll();
 
-	// 有効なエフェクトだけ順番にPreBarrier
-	void PreBarrierAll();
+		// 時間パラメータを設定
+		void SetTimeParams(float time);
 
-	// 有効なエフェクトだけ順番にPostBarrier
-	void PostBarrierAll();
+		// 有効なエフェクトだけ順番にPreBarrier
+		void PreBarrierAll();
 
-	// ImGui描画
-	void DrawImGui();
+		// 有効なエフェクトだけ順番にPostBarrier
+		void PostBarrierAll();
 
-private:
-	DirectXCommon* dxCommon_ = nullptr;
-	std::vector<std::unique_ptr<PostEffectBase>> effects_;
-	std::vector<bool> enabled_;
-	SrvManager* srvManager_ = nullptr;
-};
+		// ImGui描画
+		void DrawImGui();
 
+	private:
+		DirectXCommon* dxCommon_ = nullptr;
+		std::vector<std::unique_ptr<PostEffectBase>> effects_;
+		std::vector<bool> enabled_;
+		SrvManager* srvManager_ = nullptr;
+	};
+}

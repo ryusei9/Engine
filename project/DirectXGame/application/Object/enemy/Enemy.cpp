@@ -7,6 +7,8 @@
 #include <imgui.h>
 #include <CurveLibrary.h>
 
+using namespace MyEngine;
+
 namespace {
 	constexpr float kUpdateDeltaTime = 1.0f / 60.0f;
 	constexpr float kDeathDeltaTime = 1.0f / 120.0f;
@@ -14,6 +16,7 @@ namespace {
 }
 
 Enemy::Enemy()
+	: worldTransform(BaseCharacter::GetWorldTransform())
 {
 	// シリアルナンバーを振る
 	serialNumber_ = sNextSerialNumber_;
@@ -48,11 +51,11 @@ void Enemy::Initialize(const std::string& parameterFileName)
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kEnemy));
 
 	// 敵のワールド変換を初期化
-	worldTransform_.Initialize();
+	worldTransform.Initialize();
 	// 初期Transform（定数で意味付け）
-	worldTransform_.SetScale(Vector3{ 1.0f, 1.0f, 1.0f });
-	worldTransform_.SetRotate(Vector3{ 0.0f, 3.0f, 0.0f });
-	worldTransform_.SetTranslate(Vector3{ 10.0f, 0.0f, 0.0f });
+	worldTransform.SetScale(Vector3{ 1.0f, 1.0f, 1.0f });
+	worldTransform.SetRotate(Vector3{ 0.0f, 3.0f, 0.0f });
+	worldTransform.SetTranslate(Vector3{ 10.0f, 0.0f, 0.0f });
 
 	// 敵のカメラを取得
 	camera_ = Object3dCommon::GetInstance()->GetDefaultCamera();
@@ -96,6 +99,8 @@ void Enemy::Initialize(const std::string& parameterFileName)
 	attack_->SetPattern(1);
 
 	hasStartedCurveMove_ = false;
+
+	hp_ = EnemyDefaults::kDefaultHp;
 }
 
 void Enemy::Update()
@@ -138,13 +143,14 @@ void Enemy::Update()
 	}
 
 	// ワールド変換の更新
-	worldTransform_.Update();
+	
+	worldTransform.Update();
 
 	// 敵のワールド変換を更新
 	object3d_->SetCamera(camera_);
-	object3d_->SetScale(worldTransform_.GetScale());
-	object3d_->SetRotate(worldTransform_.GetRotate());
-	object3d_->SetTranslate(worldTransform_.GetTranslate());
+	object3d_->SetScale(worldTransform.GetScale());
+	object3d_->SetRotate(worldTransform.GetRotate());
+	object3d_->SetTranslate(worldTransform.GetTranslate());
 	object3d_->Update();
 
 	// 死亡演出
@@ -152,16 +158,16 @@ void Enemy::Update()
 		deathTimer_ -= kDeathDeltaTime;
 
 		// 回転
-		Vector3 r = worldTransform_.GetRotate();
+		Vector3 r = worldTransform.GetRotate();
 		r.x += kRotationSpeedHalf;
 		r.y -= parameters_.rotationSpeed;
 		r.z -= parameters_.rotationSpeed;
-		worldTransform_.SetRotate(r);
+		worldTransform.SetRotate(r);
 
 		// 落下（-Y方向）
-		Vector3 t = worldTransform_.GetTranslate();
+		Vector3 t = worldTransform.GetTranslate();
 		t.y += parameters_.fallSpeed;
-		worldTransform_.SetTranslate(t);
+		worldTransform.SetTranslate(t);
 
 		// 煙の向き・速度
 		Vector3 leftDir = { 0.0f, parameters_.smokeUpwardForce, 0.0f };
@@ -169,7 +175,7 @@ void Enemy::Update()
 		Vector3 particleVelocity = leftDir * power;
 
 		// パーティクル更新
-		smokeEmitter_->SetPosition(worldTransform_.GetTranslate());
+		smokeEmitter_->SetPosition(worldTransform.GetTranslate());
 		smokeEmitter_->SetVelocity(particleVelocity);
 		smokeEmitter_->Update();
 
@@ -218,9 +224,9 @@ void Enemy::DrawImGui()
 	// ImGuiで敵の情報を表示
 	ImGui::Text("Enemy Serial Number: %u", serialNumber_);
 	ImGui::Text("HP: %d", hp_);
-	const Vector3& pos = worldTransform_.GetTranslate();
+	const Vector3& pos = GetWorldTransform().GetTranslate();
 	ImGui::Text("Position: (%.2f, %.2f, %.2f)", pos.x, pos.y, pos.z);
-	ImGui::Text("Alive: %s", isAlive_ ? "Yes" : "No");
+	ImGui::Text("Alive: %s", IsAlive() ? "Yes" : "No");
 	ImGui::Text("Respawn Time: %.2f seconds", respawnTime_);
 	// 攻撃パターンの選択
 	attack_->DrawImGui();
@@ -265,7 +271,7 @@ void Enemy::PlayDeathParticleOnce()
 	// 敵死亡時に一度だけパーティクルを出す
 	if (!hasPlayedDeathParticle_) {
 		if (enemyDeathEmitter_) {
-			enemyDeathEmitter_->SetPosition(worldTransform_.GetTranslate());
+			enemyDeathEmitter_->SetPosition(GetWorldTransform().GetTranslate());
 			enemyDeathEmitter_->SetParticleRate(parameters_.deathParticleRate);
 			enemyDeathEmitter_->SetParticleCount(parameters_.deathParticleCount);
 			enemyDeathEmitter_->Update();
@@ -278,7 +284,7 @@ void Enemy::PlayHitParticle()
 {
 	if (!hasPlayedHitParticle_) {
 		if (enemyHitEmitter_) {
-			enemyHitEmitter_->SetPosition(worldTransform_.GetTranslate());
+			enemyHitEmitter_->SetPosition(GetWorldTransform().GetTranslate());
 			enemyHitEmitter_->SetParticleRate(parameters_.hitParticleRate);
 			enemyHitEmitter_->SetParticleCount(parameters_.hitParticleCount);
 			enemyHitEmitter_->Update();
@@ -327,7 +333,8 @@ void Enemy::UpdateCurveMove()
 
 void Enemy::UpdateFollowZ()
 {
-	Vector3 pos = worldTransform_.GetTranslate();
+	WorldTransform& worldTransform = GetWorldTransform();
+	Vector3 pos = worldTransform.GetTranslate();
 
 	float targetZ = player_->GetPosition().z;
 	float currentZ = pos.z;
@@ -352,7 +359,7 @@ void Enemy::EnterDyingState()
 Vector3 Enemy::GetCenterPosition() const
 {
 	const Vector3 offset = { 0.0f, 0.0f, 0.0f };
-	return worldTransform_.GetTranslate() + offset;
+	return GetWorldTransform().GetTranslate() + offset;
 }
 
 void Enemy::SetParameters(const EnemyParameters& parameters)

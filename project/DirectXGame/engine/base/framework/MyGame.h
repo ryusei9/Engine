@@ -7,25 +7,26 @@
 /// <summary>
 /// ゲーム全体
 /// </summary>
-class MyGame : public SRFramework
-{
-public:
-	// 初期化
-	void Initialize() override;
+namespace MyEngine {
+	class MyGame : public SRFramework
+	{
+	public:
+		// 初期化
+		void Initialize() override;
 
-	// 終了
-	void Finelize() override;
+		// 終了
+		void Finelize() override;
 
-	// 毎フレーム更新
-	void Update() override;
+		// 毎フレーム更新
+		void Update() override;
 
-	// 描画
-	void Draw() override;
+		// 描画
+		void Draw() override;
 
-private:
-	// ゲームプレイシーン
-	GamePlayScene* scene_;
-	// タイトルシーン
-	TitleScene* titleScene_;
-};
-
+	private:
+		// ゲームプレイシーン
+		GamePlayScene* scene_;
+		// タイトルシーン
+		TitleScene* titleScene_;
+	};
+}

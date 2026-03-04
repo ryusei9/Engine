@@ -1,10 +1,12 @@
 #include "MakeRotateXYZMatrix.h"
 
-Matrix4x4 MakeRotateXYZMatrix::MakeRotateXYZMatrix(Vector3 rotate)
-{
-	Matrix4x4 rotateMatrix;
-	return rotateMatrix = MakeRotateXMatrix::MakeRotateXMatrix(rotate.x) *
-		MakeRotateYMatrix::MakeRotateYMatrix(rotate.y) *
-		MakeRotateZMatrix::MakeRotateZMatrix(rotate.z);
+namespace Math {
+	Matrix4x4 MakeRotateXYZMatrix(Vector3 rotate)
+	{
+		Matrix4x4 rotateMatrix;
+		return rotateMatrix = MakeRotateXMatrix(rotate.x) *
+			MakeRotateYMatrix(rotate.y) *
+			MakeRotateZMatrix(rotate.z);
 
+	}
 }

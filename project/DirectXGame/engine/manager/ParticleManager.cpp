@@ -84,7 +84,7 @@ namespace MyEngine {
 	void ParticleManager::Update()
 	{
 		// ビュー行列とプロジェクション行列をカメラから取得
-		Matrix4x4 cameraMatrix = MakeAffineMatrix::MakeAffineMatrix(
+		Matrix4x4 cameraMatrix = MakeAffineMatrix(
 			{ 1.0f, 1.0f, 1.0f },
 			camera_->GetRotate(),
 			camera_->GetTranslate());
@@ -94,12 +94,12 @@ namespace MyEngine {
 
 		// UV変換行列の計算
 		Matrix4x4 uvTransformMatrix = MakeScaleMatrix::MakeScaleMatrix(uvTransform_.scale);
-		uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix::MakeRotateZMatrix(uvTransform_.rotate.z));
+		uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransform_.rotate.z));
 		uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix::MakeTranslateMatrix(uvTransform_.translate));
 		materialData_->uvTransform = uvTransformMatrix;
 
 		// ビルボード行列の計算
-		Matrix4x4 backToFrontMatrix = MakeIdentity4x4::MakeIdentity4x4();
+		Matrix4x4 backToFrontMatrix = MakeIdentity4x4();
 		Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, cameraMatrix);
 		billboardMatrix.m[kBillboardMatrixOffsetIndex][0] = kBillboardMatrixOffsetValue;
 		billboardMatrix.m[kBillboardMatrixOffsetIndex][1] = kBillboardMatrixOffsetValue;
@@ -196,7 +196,7 @@ namespace MyEngine {
 		}
 		else
 		{
-			Matrix4x4 rotateMatrix = MakeRotateXYZMatrix::MakeRotateXYZMatrix(particle.transform.rotate);
+			Matrix4x4 rotateMatrix = MakeRotateXYZMatrix(particle.transform.rotate);
 			return scaleMatrix * rotateMatrix * translateMatrix;
 		}
 	}
@@ -289,8 +289,8 @@ namespace MyEngine {
 		// 初期化
 		for (uint32_t i = 0; i < kMaxInstanceCount; ++i)
 		{
-			group.instanceData[i].WVP = MakeIdentity4x4::MakeIdentity4x4();
-			group.instanceData[i].World = MakeIdentity4x4::MakeIdentity4x4();
+			group.instanceData[i].WVP = MakeIdentity4x4();
+			group.instanceData[i].World = MakeIdentity4x4();
 		}
 
 		// インスタンシング用SRVの生成
@@ -724,7 +724,7 @@ namespace MyEngine {
 
 		materialData_->color = kColorWhite;
 		materialData_->enableLighting = false;
-		materialData_->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
+		materialData_->uvTransform = MakeIdentity4x4();
 	}
 
 	void ParticleManager::DrawImGui()

@@ -6,7 +6,8 @@
 #include "Vector3.h"
 
 // XYZ回転行列の作成
-namespace MakeRotateXYZMatrix
+
+namespace Math
 {
 	Matrix4x4 MakeRotateXYZMatrix(Vector3 rotate);
 };

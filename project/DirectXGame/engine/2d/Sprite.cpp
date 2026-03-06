@@ -121,7 +121,7 @@ namespace MyEngine {
 		// ワールド・ビュー・プロジェクション行列の計算
 		Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 		Matrix4x4 viewMatrix = MakeIdentity4x4();
-		Matrix4x4 projectionMatrix = MakeOrthographicMatrix::MakeOrthographicMatrix(
+		Matrix4x4 projectionMatrix = MakeOrthographicMatrix(
 			0.0f, 0.0f,
 			static_cast<float>(WinApp::kClientWidth),
 			static_cast<float>(WinApp::kClientHeight),

@@ -93,9 +93,9 @@ namespace MyEngine {
 		Matrix4x4 viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 
 		// UV変換行列の計算
-		Matrix4x4 uvTransformMatrix = MakeScaleMatrix::MakeScaleMatrix(uvTransform_.scale);
+		Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransform_.scale);
 		uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransform_.rotate.z));
-		uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix::MakeTranslateMatrix(uvTransform_.translate));
+		uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransform_.translate));
 		materialData_->uvTransform = uvTransformMatrix;
 
 		// ビルボード行列の計算
@@ -187,8 +187,8 @@ namespace MyEngine {
 		const Particle& particle,
 		const Matrix4x4& billboardMatrix) const
 	{
-		Matrix4x4 scaleMatrix = MakeScaleMatrix::MakeScaleMatrix(particle.transform.scale);
-		Matrix4x4 translateMatrix = MakeTranslateMatrix::MakeTranslateMatrix(particle.transform.translate);
+		Matrix4x4 scaleMatrix = MakeScaleMatrix(particle.transform.scale);
+		Matrix4x4 translateMatrix = MakeTranslateMatrix(particle.transform.translate);
 
 		if (useBillboard_)
 		{

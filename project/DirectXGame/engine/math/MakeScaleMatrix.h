@@ -3,7 +3,7 @@
 #include <Vector3.h>
 
 // スケール行列の作成
-namespace MakeScaleMatrix {
+namespace Math {
 	Matrix4x4 MakeScaleMatrix(const Vector3& scale)
 	{
 		Matrix4x4 result{};

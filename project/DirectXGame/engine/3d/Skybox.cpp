@@ -21,6 +21,7 @@
 //
 namespace MyEngine {
 	using namespace SkyboxConstants;
+	using namespace Math;
 
 	void Skybox::Initialize(const std::string& texturePath)
 	{

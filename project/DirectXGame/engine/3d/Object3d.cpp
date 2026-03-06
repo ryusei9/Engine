@@ -311,7 +311,7 @@ namespace MyEngine {
 		directionalLightData_->direction = { 0.0f, Object3dConstants::kDefaultDirectionalLightDirectionY, 0.0f };
 		directionalLightData_->intensity = Object3dConstants::kDefaultLightIntensity;
 
-		Normalize::Normalize(directionalLightData_->direction);
+		Normalize(directionalLightData_->direction);
 	}
 
 	// ===== OBJパース用ヘルパー関数 =====

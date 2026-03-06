@@ -17,6 +17,7 @@
 
 using namespace Microsoft::WRL;
 using namespace DirectXCommonConstants;
+using namespace Math;
 
 namespace MyEngine {
 
@@ -745,7 +746,7 @@ namespace MyEngine {
 		depthResource_->Map(0, nullptr, reinterpret_cast<void**>(&depthData_));
 
 		Matrix4x4 proj = camera->GetProjectionMatrix();
-		Matrix4x4 projInv = Inverse::Inverse(proj);
+		Matrix4x4 projInv = Inverse(proj);
 		depthData_->projectionInverse = projInv;
 	}
 

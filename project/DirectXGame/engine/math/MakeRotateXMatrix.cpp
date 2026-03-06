@@ -1,6 +1,7 @@
 #include "MakeRotateXMatrix.h"
 #include "cmath"
-namespace MakeRotateXMatrix {
+
+namespace Math {
 	Matrix4x4 MakeRotateXMatrix(float radian)
 	{
 		Matrix4x4 resultRotateXMatrix = {};

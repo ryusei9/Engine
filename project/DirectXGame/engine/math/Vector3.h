@@ -4,6 +4,7 @@
 #include <Matrix4x4.h>
 #include <Multiply.h>
 
+using namespace Math;
 // 3次元ベクトル構造体
 struct Vector3 {
 	float x;
@@ -92,7 +93,7 @@ struct Vector3 {
 
 	static Vector3 TransformCoord(const Vector3& v, const Matrix4x4& m) {
 		Vector4 tmp = { v.x, v.y, v.z, 1.0f };
-		Vector4 result = Multiply::Multiply(m, tmp);
+		Vector4 result = Multiply(m, tmp);
 		if (result.w != 0.0f) {
 			result.x /= result.w;
 			result.y /= result.w;

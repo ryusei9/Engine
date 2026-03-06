@@ -4,7 +4,7 @@
 
 
 // 平行移動行列の作成
-namespace MakeTranslateMatrix {
+namespace Math {
 	Matrix4x4 MakeTranslateMatrix(const Vector3& translate)
 	{
 		Matrix4x4 result{};

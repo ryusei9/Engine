@@ -33,12 +33,13 @@ namespace Math {
         float t2 = t * t;
         float t3 = t2 * t;
 
-    return (p1 * 2.0f +
-        (p2 - p0) * t +
-        (p0 * 2.0f - p1 * 5.0f + p2 * 4.0f - p3) * t2 +
-        (-p0 + p1 * 3.0f - p2 * 3.0f + p3) * t3) * 0.5f;
-}
+        return (p1 * 2.0f +
+            (p2 - p0) * t +
+            (p0 * 2.0f - p1 * 5.0f + p2 * 4.0f - p3) * t2 +
+            (-p0 + p1 * 3.0f - p2 * 3.0f + p3) * t3) * 0.5f;
+    }
 
-inline float EaseOut(float t) {
-    return 1.0f - static_cast<float>(std::pow(1.0f - t, 3));
+    inline float EaseOut(float t) {
+        return 1.0f - static_cast<float>(std::pow(1.0f - t, 3));
+    }
 }

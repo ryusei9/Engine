@@ -148,5 +148,8 @@ private:
 
 	// ゲームスタートフラグ
 	bool isGameStart_ = false;
+
+	// スプライト
+	std::unique_ptr<Sprite> sprite_ = nullptr;
 };
 

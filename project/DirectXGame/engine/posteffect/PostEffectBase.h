@@ -13,7 +13,7 @@ namespace MyEngine
         virtual ~PostEffectBase() = default;
 
         // 初期化（リソース生成など）
-        virtual void Initialize(DirectXCommon* dxCommon);
+        virtual void Initialize(DirectXCommon* dxCommon, SrvManager* srvManager);
 
         // ルートシグネイチャの作成
         virtual void CreateRootSignature() = 0;
@@ -79,5 +79,7 @@ namespace MyEngine
         D3D12_RECT scissorRect_{};
 
         D3D12_GPU_DESCRIPTOR_HANDLE inputSRV_ = {};
+
+		SrvManager* srvManager_ = nullptr; // SRV管理クラスへのポインタ
     };
 }

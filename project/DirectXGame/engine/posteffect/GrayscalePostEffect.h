@@ -9,7 +9,7 @@ namespace MyEngine
     class GrayscalePostEffect : public PostEffectBase {
     public:
         // 初期化
-        void Initialize(DirectXCommon* dxCommon) override;
+        void Initialize(DirectXCommon* dxCommon,SrvManager* srvManager) override;
 
         // 描画前準備
         void PreRender() override;

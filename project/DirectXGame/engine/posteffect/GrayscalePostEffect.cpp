@@ -19,7 +19,7 @@
 //   * RenderTexture のフォーマットは sRGB を用いている（出力の色空間を合わせること）。
 //
 namespace MyEngine {
-    void GrayscalePostEffect::Initialize(DirectXCommon* dxCommon) {
+    void GrayscalePostEffect::Initialize(DirectXCommon* dxCommon,SrvManager* srvManager) {
         // 初期化:
         // - DirectXCommon の参照を保持
         // - ベースクラスで共通初期化を実行
@@ -32,7 +32,8 @@ namespace MyEngine {
         // 副作用:
         // - GPU リソース（RenderTarget / SRV / RTV / DSV 等）を確保する
         dxCommon_ = dxCommon;
-        PostEffectBase::Initialize(dxCommon);
+		srvManager_ = srvManager;
+        PostEffectBase::Initialize(dxCommon, srvManager);
         CreateRootSignature();
         CreatePipelineStateObject();
         CreateRenderTexture(WinApp::kClientWidth, WinApp::kClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, kRenderTargetClearValue_);
@@ -141,7 +142,10 @@ namespace MyEngine {
         // 注意:
         // - ここでは入力 SRV を固定インデックス 1 のハンドルから取得している（dxCommon_->GetSRVGPUDescriptorHandle(1)）。
         //   実行環境によっては入力ソースの SRV 管理を呼び出し元で適切に行う必要がある。
-        ID3D12DescriptorHeap* heaps[] = { dxCommon_->GetSRVDescriptorHeap().Get() };
+        ID3D12DescriptorHeap* heaps[] =
+        {
+            srvManager_->GetDescriptorHeap()
+        };
         commandList_->SetDescriptorHeaps(_countof(heaps), heaps);
         commandList_->SetPipelineState(pipelineState_.Get());
         commandList_->SetGraphicsRootSignature(rootSignature_.Get());

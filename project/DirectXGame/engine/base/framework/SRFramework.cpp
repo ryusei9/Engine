@@ -24,9 +24,16 @@ namespace MyEngine {
 		srvManager_ = make_unique<SrvManager>();
 		srvManager_->Initialize();
 
+		DirectXCommon::GetInstance()->SetSrvmanager(srvManager_.get());
+		DirectXCommon::GetInstance()->CreateRenderTexture();
+
 		// テクスチャマネージャの初期化
 		TextureManager::GetInstance()->Initialize(srvManager_.get());
 
+		uint32_t depthIndex =
+			srvManager_->CreateDepthSRV(DirectXCommon::GetInstance()->GetDepthResource());
+
+		
 		// テクスチャを事前にロード
 		TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
 		TextureManager::GetInstance()->LoadTexture("resources/monsterBall.png");
@@ -82,10 +89,10 @@ namespace MyEngine {
 
 		// 各種ポストエフェクトの初期化
 		noisePostEffect_ = std::make_unique<NoisePostEffect>();
-		noisePostEffect_->Initialize(dxCommon_);
+		noisePostEffect_->Initialize(dxCommon_, srvManager_.get());
 
 		grayscalePostEffect_ = std::make_unique<GrayscalePostEffect>();
-		grayscalePostEffect_->Initialize(dxCommon_);
+		grayscalePostEffect_->Initialize(dxCommon_, srvManager_.get());
 
 		// ポストエフェクトマネージャにポストエフェクトを追加
 

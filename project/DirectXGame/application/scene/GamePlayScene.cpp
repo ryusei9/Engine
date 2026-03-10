@@ -58,6 +58,8 @@ void GamePlayScene::InitializePlayer()
 	player_ = std::make_unique<Player>();
 	player_->Initialize();
 
+	player_->SetPosition(Vector3(-10.0f, 0.0f, 0.0f));
+
 	// プレイヤーの弾のリストを取得
 	playerBullets_ = &player_->GetBullets();
 	playerChargeBullets_ = &player_->GetChargeBullets();
@@ -541,39 +543,52 @@ void GamePlayScene::LoadLevel(const LevelData* levelData)
 
 void GamePlayScene::UpdateStartCameraEasing()
 {
-	startCameraTimer_ += GamePlayDefaults::kDeltaTime60Hz; // フレームレート固定なら
+	startCameraTimer_ += GamePlayDefaults::kDeltaTime60Hz;
 	float t = std::clamp(startCameraTimer_ / kStartCameraDuration_, 0.0f, 1.0f);
 
-	// イージング（easeInOutCubic）
+	// プレイヤー開始位置保存
+	if (!playerStartPosInitialized_) {
+		startPlayerPos_ = player_->GetPosition() + Vector3(-70.0f,0.0f,0.0f);
+		playerStartPosInitialized_ = true;
+	}
+
+	// イージング
 	float easeT;
 	if (t < 0.5f) {
 		easeT = 4.0f * t * t * t;
-	} else {
+	}
+	else {
 		float p = (t - 1.0f);
 		easeT = 1.0f + 4.0f * p * p * p;
 	}
 
+	// --- カメラ移動 ---
 	Vector3 pos = {
 		std::lerp(startCameraPos_.x, endCameraPos_.x, easeT),
 		std::lerp(startCameraPos_.y, endCameraPos_.y, easeT),
 		std::lerp(startCameraPos_.z, endCameraPos_.z, easeT)
 	};
-	Vector3 rot = {
-		std::lerp(startCameraRot_.x, endCameraRot_.x, easeT),
-		std::lerp(startCameraRot_.y, endCameraRot_.y, easeT),
-		std::lerp(startCameraRot_.z, endCameraRot_.z, easeT)
-	};
 
 	cameraManager_->SetCameraPosition(pos);
-	//cameraManager_->SetCameraRotation(rot);
+
+	// --- プレイヤー移動（等速） ---
+	Vector3 playerPos = {
+		std::lerp(startPlayerPos_.x, 0.0f, easeT),
+		std::lerp(startPlayerPos_.y, 0.0f, easeT),
+		std::lerp(startPlayerPos_.z, startPlayerPos_.z, easeT) // Z固定
+	};
+
+	player_->SetPosition(playerPos);
 
 	if (t >= 1.0f) {
 		isStartCameraEasing_ = false;
-		player_->SetPlayerControlEnabled(true); // プレイヤー操作有効化
+
+		player_->SetPlayerControlEnabled(true);
+
 		for (auto& enemy : enemies_) {
 			enemy->SetControlEnabled(true);
 		}
-		// 必要ならここでカメラモードを切り替え
+
 		cameraMode_ = CameraMode::Free;
 	}
 }
@@ -1242,9 +1257,11 @@ void GamePlayScene::DrawGameObjects()
 		player_->Draw();
 	}
 
-	// 敵の描画
-	for (auto& enemy : enemies_) {
-		enemy->Draw();
+	if (!isStartCameraEasing_) {
+		// 敵の描画
+		for (auto& enemy : enemies_) {
+			enemy->Draw();
+		}
 	}
 }
 
@@ -1257,11 +1274,13 @@ void GamePlayScene::DrawUI()
 		pressSpaceKeyText_->Draw();
 	}
 	else {
-		// インゲーム中のガイド表示
-		if (gameSceneState_ == GameSceneState::InGame) {
-			wasdGuide_->Draw();
-			spaceKeyGuide_->Draw();
-			escGuide_->Draw();
+		if (!isStartCameraEasing_) {
+			// インゲーム中のガイド表示
+			if (gameSceneState_ == GameSceneState::InGame) {
+				wasdGuide_->Draw();
+				spaceKeyGuide_->Draw();
+				escGuide_->Draw();
+			}
 		}
 	}
 

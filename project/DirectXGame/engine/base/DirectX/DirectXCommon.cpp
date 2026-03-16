@@ -201,6 +201,7 @@ namespace MyEngine {
 
 	void DirectXCommon::DepthStencilViewInitialize()
 	{
+		assert(srvManager_ != nullptr);
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
 		dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;

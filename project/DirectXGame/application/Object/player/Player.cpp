@@ -205,7 +205,8 @@ void Player::OnCollision(Collider* other)
 {
 	if (IsAlive()) {
 		if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy) ||
-			other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyBullet)) {
+			other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyBullet) ||
+			other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyMissile)) {
 			SetIsAlive(false);
 			respawnTimer_ = parameters_.respawnWaitSec;
 			PlayDeathParticleOnce();

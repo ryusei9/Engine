@@ -10,4 +10,6 @@ enum class CollisionTypeIdDef : uint32_t
 	kPlayerChargeBullet, // プレイヤーのチャージ弾ID
 	kEnemy,			 // エネミーID
 	kEnemyBullet,	 // エネミー弾ID
+	kMiniBoss,			 // ボスID
+	kEnemyMissile,	 // ホーミングミサイルID
 };

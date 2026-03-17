@@ -90,6 +90,10 @@ void PlayerBullet::OnCollision(Collider* other)
 		isAlive_ = false;	
 		SetRadius(0.0f); // 直ちに当たり判定無効化
 	}
+	if (type == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyMissile)) {
+		isAlive_ = false; // ミサイルに当たったら消える
+		SetRadius(0.0f); // 直ちに当たり判定無効化
+	}
 }
 
 Vector3 PlayerBullet::GetCenterPosition() const

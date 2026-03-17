@@ -74,6 +74,54 @@ void SceneManager::Draw()
 
 void SceneManager::DrawImGui()
 {
+#ifdef USE_IMGUI
+	ImGui::Begin("SceneManager");
+
+	std::optional<int32_t> debugNextScene = std::nullopt;
+
+	// 各シーンへの遷移ボタン
+	if (ImGui::Button("TITLE")) {
+		debugNextScene = TITLE;
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("GAMEPLAY")) {
+		debugNextScene = GAMEPLAY;
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("GAMEOVER")) {
+		debugNextScene = GAMEOVER;
+	}
+
+	ImGui::End();
+
+	// デバッグ用のシーン強制切り替え処理
+	auto& nextScene = debugNextScene;
+	if (nextScene.has_value() && currentSceneNo_ != nextScene.value()) {
+		// 旧シーンの終了処理
+		if (nowScene_) {
+			nowScene_->Finalize();
+		}
+
+		prevSceneNo_ = currentSceneNo_;
+		currentSceneNo_ = nextScene.value();
+
+		// 新シーンの生成
+		if (currentSceneNo_ == GAMEPLAY) {
+			nowScene_ = std::make_unique<GamePlayScene>();
+		}
+		else if (currentSceneNo_ == TITLE) {
+			nowScene_ = std::make_unique<TitleScene>();
+		}
+		else if (currentSceneNo_ == GAMEOVER) {
+			nowScene_ = std::make_unique<GameOverScene>();
+		}
+
+		// 新シーンの初期化
+		if (nowScene_) {
+			nowScene_->Initialize(directXCommon_, winApp_);
+		}
+	}
+#endif
 	if (nowScene_) {
 		nowScene_->DrawImGui();
 	}

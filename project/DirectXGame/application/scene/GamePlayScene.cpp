@@ -405,6 +405,9 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		
 		newEnemy->SetPosition(enemyData.translation);
 		newEnemy->SetMoveType(enemyData.move);
+		if (enemyData.move == EnemyMove::WavePlusY) {
+			newEnemy->SetAttackPattern(4);
+		}
 		newEnemy->SetPlayer(player_.get());
 
 		if (enemyData.move != EnemyMove::None) {

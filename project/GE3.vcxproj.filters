@@ -247,6 +247,9 @@
     <ClCompile Include="DirectXGame\engine\worldtransform\WorldTransform.cpp">
       <Filter>DirectXGame\Engine\WorldTransform</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\application\Object\enemy\MiniBoss.cpp" />
+    <ClCompile Include="DirectXGame\application\scene\DebugScene.cpp" />
+    <ClCompile Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\Object\enemy\Enemy.h">
@@ -492,6 +495,9 @@
     <ClInclude Include="tools\json.hpp">
       <Filter>External</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\application\Object\enemy\MiniBoss.h" />
+    <ClInclude Include="DirectXGame\application\scene\DebugScene.h" />
+    <ClInclude Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\enemyAttackParameters.json">

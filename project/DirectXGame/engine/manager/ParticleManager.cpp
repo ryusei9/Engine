@@ -222,9 +222,7 @@ namespace MyEngine {
 		// ルートシグネチャを設定
 		commandList->SetGraphicsRootSignature(rootSignature_.Get());
 
-		// パイプラインステートオブジェクト (PSO) を設定
-		commandList->SetPipelineState(graphicsPipelineState_.Get());
-
+		
 		// プリミティブトポロジを設定
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -236,6 +234,15 @@ namespace MyEngine {
 		{
 			if (group.second.numParticles == 0) {
 				continue;
+			}
+			// 👇 PSO切り替え
+			if (group.second.isAdditive)
+			{
+				commandList->SetPipelineState(graphicsPipelineStateAdditive_.Get());
+			}
+			else
+			{
+				commandList->SetPipelineState(graphicsPipelineStateAlpha_.Get());
 			}
 
 			// マテリアルCBVを設定
@@ -266,7 +273,7 @@ namespace MyEngine {
 		particleGroups_.clear();
 	}
 
-	void ParticleManager::CreateParticleGroup(const std::string& name, const std::string textureFilePath)
+	void ParticleManager::CreateParticleGroup(const std::string& name, const std::string textureFilePath, bool isAdditive)
 	{
 		// パーティクルグループが既に存在するか確認
 		if (particleGroups_.find(name) != particleGroups_.end())
@@ -280,6 +287,7 @@ namespace MyEngine {
 		ParticleGroup group{};
 		group.materialData.textureFilePath = textureFilePath;
 		group.textureSrvIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
+		group.isAdditive = isAdditive;
 
 		// インスタンスバッファ作成
 		group.instanceBuffer = ResourceManager::CreateBufferResource(
@@ -840,7 +848,7 @@ namespace MyEngine {
 		assert(SUCCEEDED(hr));
 	}
 
-	void ParticleManager::CreatePSO()
+	void ParticleManager::CreatePSOInternal(D3D12_BLEND_DESC blendDesc, Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso)
 	{
 		CreateRootSignature();
 
@@ -865,16 +873,16 @@ namespace MyEngine {
 		inputLayoutDesc.pInputElementDescs = inputElementDescs;
 		inputLayoutDesc.NumElements = kInputElementCount;
 
-		// ブレンドステートの設定（加算合成）
-		D3D12_BLEND_DESC blendDesc{};
-		blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-		blendDesc.RenderTarget[0].BlendEnable = TRUE;
-		blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-		blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-		blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE; // 加算合成
-		blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-		blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-		blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+		//// ブレンドステートの設定（加算合成）
+		//D3D12_BLEND_DESC blendDesc{};
+		//blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+		//blendDesc.RenderTarget[0].BlendEnable = TRUE;
+		//blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		//blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+		//blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE; // 加算合成
+		//blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+		//blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+		//blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
 
 		// ラスタライザステート
 		D3D12_RASTERIZER_DESC rasterizerDesc{};
@@ -923,8 +931,37 @@ namespace MyEngine {
 		// パイプラインステートの生成
 		HRESULT hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(
 			&graphicsPipelineStateDesc,
-			IID_PPV_ARGS(&graphicsPipelineState_));
+			IID_PPV_ARGS(pso.GetAddressOf()));
 		assert(SUCCEEDED(hr));
+	}
+
+	void ParticleManager::CreatePSO()
+	{
+		// 加算用
+		D3D12_BLEND_DESC additive{};
+		additive.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+		additive.RenderTarget[0].BlendEnable = TRUE;
+		additive.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		additive.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
+		additive.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+		additive.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+		additive.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+		additive.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+
+		CreatePSOInternal(additive, graphicsPipelineStateAdditive_);
+
+		// 通常アルファ用（煙）
+		D3D12_BLEND_DESC alpha{};
+		alpha.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+		alpha.RenderTarget[0].BlendEnable = TRUE;
+		alpha.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		alpha.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+		alpha.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+		alpha.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+		alpha.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+		alpha.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+
+		CreatePSOInternal(alpha, graphicsPipelineStateAlpha_);
 	}
 
 	bool ParticleManager::IsCollision(const AABB& aabb, const Vector3& point)

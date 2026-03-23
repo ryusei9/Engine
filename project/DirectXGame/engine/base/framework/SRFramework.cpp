@@ -102,7 +102,7 @@ namespace MyEngine {
 		/*------パーティクルマネージャの初期化------*/
 		ParticleManager::GetInstance()->Initialize(srvManager_.get(), camera_.get());
 
-		ParticleManager::GetInstance()->CreateParticleGroup("thruster", "resources/circle2.png");
+		ParticleManager::GetInstance()->CreateParticleGroup("thruster", "resources/circle2.png",true);
 		ParticleManager::GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
 		ParticleManager::GetInstance()->CreateParticleGroup("smoke", "resources/fog.png");
 		// シーンマネージャの初期化

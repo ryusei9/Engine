@@ -180,6 +180,7 @@ namespace MyEngine {
 			ParticleForGPU* instanceData;
 			uint32_t numParticles = 0;
 			Microsoft::WRL::ComPtr<ID3D12Resource> instanceBuffer;
+			bool isAdditive = true;
 		};
 
 		/*------メンバ関数------*/
@@ -210,7 +211,7 @@ namespace MyEngine {
 		void Finalize();
 
 		// パーティクルグループの追加
-		void CreateParticleGroup(const std::string& name, const std::string textureFilePath);
+		void CreateParticleGroup(const std::string& name, const std::string textureFilePath, bool isAdditive = false);
 
 
 		// パーティクルの発生
@@ -257,6 +258,8 @@ namespace MyEngine {
 
 		// ルートシグネチャの作成
 		void CreateRootSignature();
+
+		void CreatePSOInternal(D3D12_BLEND_DESC blendDesc,Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso);
 
 		// パイプラインステートオブジェクトの作成
 		void CreatePSO();
@@ -307,6 +310,9 @@ namespace MyEngine {
 
 		// グラフィックスパイプライン
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState_;
+
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineStateAdditive_;
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineStateAlpha_;
 
 		// リソース
 		Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;

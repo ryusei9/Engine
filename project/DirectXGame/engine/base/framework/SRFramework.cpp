@@ -43,6 +43,7 @@ namespace MyEngine {
 		TextureManager::GetInstance()->LoadTexture("resources/BackToTitle.png");
 		TextureManager::GetInstance()->LoadTexture("resources/Black.png");
 		TextureManager::GetInstance()->LoadTexture("resources/Dock.png");
+		TextureManager::GetInstance()->LoadTexture("resources/fog.png");
 
 		// スプライト共通部の初期化
 
@@ -101,12 +102,14 @@ namespace MyEngine {
 		/*------パーティクルマネージャの初期化------*/
 		ParticleManager::GetInstance()->Initialize(srvManager_.get(), camera_.get());
 
+		ParticleManager::GetInstance()->CreateParticleGroup("thruster", "resources/circle2.png");
+		ParticleManager::GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
+		ParticleManager::GetInstance()->CreateParticleGroup("smoke", "resources/fog.png");
 		// シーンマネージャの初期化
 		sceneManager_ = std::make_unique<SceneManager>();
 		sceneManager_->Initialize(winApp_.get());
 
-		/*------パーティクルマネージャの初期化------*/
-		ParticleManager::GetInstance()->Initialize(srvManager_.get(), camera_.get());
+		
 	}
 
 	void SRFramework::Finelize()

@@ -241,11 +241,11 @@ namespace MyEngine {
 			// マテリアルCBVを設定
 			commandList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
 
-			// テクスチャのSRVのデスクリプタテーブルを設定
+			// インスタンシングデータのSRVのデスクリプタテーブルを設定
 			commandList->SetGraphicsRootDescriptorTable(1, srvManager_->GetGPUDescriptorHandle(group.second.srvIndex));
 
-			// インスタンシングデータのSRVのデスクリプタテーブルを設定
-			commandList->SetGraphicsRootDescriptorTable(2, group.second.materialData.gpuHandle);
+			// テクスチャのSRVのデスクリプタテーブルを設定
+			commandList->SetGraphicsRootDescriptorTable(2, srvManager_->GetGPUDescriptorHandle(group.second.textureSrvIndex));
 
 			// インスタンシング描画
 			commandList->DrawInstanced(UINT(modelData_.vertices.size()), group.second.numParticles, 0, 0);
@@ -271,6 +271,7 @@ namespace MyEngine {
 		// パーティクルグループが既に存在するか確認
 		if (particleGroups_.find(name) != particleGroups_.end())
 		{
+			std::cout << "ParticleGroups size: " << particleGroups_.size() << std::endl;
 			std::cerr << "Error: Particle group '" << name << "' already exists!" << std::endl;
 			return;
 		}
@@ -278,7 +279,7 @@ namespace MyEngine {
 		// 新たな空のパーティクルグループを作成
 		ParticleGroup group{};
 		group.materialData.textureFilePath = textureFilePath;
-		group.materialData.gpuHandle = TextureManager::GetInstance()->GetSrvHandleGPU(textureFilePath);
+		group.textureSrvIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
 
 		// インスタンスバッファ作成
 		group.instanceBuffer = ResourceManager::CreateBufferResource(
@@ -784,14 +785,14 @@ namespace MyEngine {
 		rootParameters[0].DescriptorTable.NumDescriptorRanges = 0;
 		rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-		// ルートパラメータ1: テクスチャSRV（VertexShader用）
+		// ルートパラメータ1: インスタンシングデータSRV（VertexShader用）
 		rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 		rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 		rootParameters[1].Descriptor.ShaderRegister = 0;
 		rootParameters[1].DescriptorTable.pDescriptorRanges = rangeTexture;
 		rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
 
-		// ルートパラメータ2: インスタンシングデータSRV（PixelShader用）
+		// ルートパラメータ2: テクスチャSRV（PixelShader用）
 		rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 		rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 		rootParameters[2].DescriptorTable.pDescriptorRanges = rangeTexture;

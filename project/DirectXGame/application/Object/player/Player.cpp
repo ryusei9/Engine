@@ -58,10 +58,7 @@ void Player::Initialize(const std::string& parameterFileName)
 
 	SetRadius(parameters_.radius); // コライダーの半径を設定
 
-	// パーティクルグループの作成
-	particleManager_ = ParticleManager::GetInstance();
-	particleManager_->CreateParticleGroup("thruster", parameters_.thrusterTexture);
-	particleManager_->CreateParticleGroup("explosion", parameters_.explosionTexture);
+	
 
 	// エミッター初期化
 	thrusterEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "thruster");

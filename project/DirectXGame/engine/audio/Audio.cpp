@@ -7,8 +7,8 @@
 // - シングルトンで管理され、アプリケーション全体で一意の XAudio2 インスタンスを保持する。
 // - WAV ファイル（RIFF/WAVE）を読み込んでメモリに展開し、XAudio2 の SourceVoice で再生する。
 // - 注意:
-//   - SoundLoadWave は読み込んだ PCM データ用にヒープ上でバッファを確保する（new[]）。呼び出し側は
-//     SoundUnload を呼んでメモリを解放する必要がある。
+//   - SoundLoadWave は読み込んだ PCM データを std::vector に格納する。
+//     呼び出し側は使い終わったら SoundUnload を呼んでメモリを解放することができる。
 //   - 実装は簡易的な WAV パーサであり、すべての WAV 形式を扱えるわけではない（基本的な PCM のみ想定）。
 //   - スレッドセーフではない（呼び出しはメインスレッド前提）。
 //
@@ -38,13 +38,13 @@ namespace MyEngine {
 	{
 		// WAV ファイルを読み込み、SoundData を返す
 		// - filename: 読み込む WAV ファイルのパス（C 文字列）
-		// - 戻り値: 読み込まれた PCM データとフォーマットを含む SoundData（pBuffer は new[] により確保）
+		// - 戻り値: 読み込まれた PCM データとフォーマットを含む SoundData
 		// - エラー処理: ファイル形式が不正なら assert で停止する（デバッグビルド向け）
 		//
 		// 実装メモ:
 		// - RIFF / WAVE / fmt / data チャンクのみを順次処理する
 		// - "JUNK" チャンクを見つけた場合はスキップする実装を含む
-		// - 読み込んだバッファは呼び出し元で SoundUnload() を呼び解放すること
+		// - 読み込んだバッファは呼び出し元で不要になったら SoundUnload() を呼び解放できる
 
 		// ファイルオープン
 		std::ifstream file;
@@ -72,7 +72,7 @@ namespace MyEngine {
 		// SoundData を構築して返す
 		SoundData soundData = {};
 		soundData.wfex = format.fmt;
-		soundData.pBuffer = reinterpret_cast<BYTE*>(pBuffer.release());
+		soundData.pBuffer = std::move(pBuffer);
 		soundData.bufferSize = data.size;
 
 		return soundData;
@@ -81,9 +81,8 @@ namespace MyEngine {
 	void Audio::SoundUnload(SoundData* soundData)
 	{
 		// SoundData が保持するバッファを解放し、構造体を初期化する
-		// - 呼び出し側が SoundLoadWave で確保したメモリを確実に解放すること
-		delete[] soundData->pBuffer;
-		soundData->pBuffer = nullptr;
+		soundData->pBuffer.clear();
+		soundData->pBuffer.shrink_to_fit();
 		soundData->bufferSize = 0;
 		soundData->wfex = {};
 	}
@@ -157,10 +156,10 @@ namespace MyEngine {
 		assert(ValidateChunkId(data.id, kDataChunkId));
 	}
 
-	std::unique_ptr<char[]> Audio::ReadWaveData(std::ifstream& file, uint32_t size)
+	std::vector<BYTE> Audio::ReadWaveData(std::ifstream& file, uint32_t size)
 	{
-		auto pBuffer = std::make_unique<char[]>(size);
-		file.read(pBuffer.get(), size);
+		std::vector<BYTE> pBuffer(size);
+		file.read(reinterpret_cast<char*>(pBuffer.data()), size);
 		return pBuffer;
 	}
 
@@ -189,7 +188,7 @@ namespace MyEngine {
 	{
 		// XAUDIO2_BUFFER に再生データを詰める
 		XAUDIO2_BUFFER buf{};
-		buf.pAudioData = soundData.pBuffer;
+		buf.pAudioData = soundData.pBuffer.data();
 		buf.AudioBytes = soundData.bufferSize;
 		buf.Flags = XAUDIO2_END_OF_STREAM;
 

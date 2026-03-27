@@ -18,6 +18,7 @@
 // - OBJ ファイルの読み込み・頂点/マテリアルバッファ作成、描画、GUI 操作を含む。
 // - カメラ／ライト用の定数バッファも保持し、必要時に GPU に渡す。
 // 
+using namespace Math;
 namespace MyEngine {
 	void Object3d::Initialize(const std::string& fileName)
 	{
@@ -289,7 +290,7 @@ namespace MyEngine {
 			Object3dConstants::kDefaultMaterialColorA);
 		materialData_->enableLighting = Object3dConstants::kDefaultLightingEnabled;
 		materialData_->shininess = Object3dConstants::kDefaultShininess;
-		materialData_->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
+		materialData_->uvTransform = MakeIdentity4x4();
 		materialData_->environmentCoefficient = Object3dConstants::kDefaultEnvironmentCoefficient;
 	}
 
@@ -310,7 +311,7 @@ namespace MyEngine {
 		directionalLightData_->direction = { 0.0f, Object3dConstants::kDefaultDirectionalLightDirectionY, 0.0f };
 		directionalLightData_->intensity = Object3dConstants::kDefaultLightIntensity;
 
-		Normalize::Normalize(directionalLightData_->direction);
+		Normalize(directionalLightData_->direction);
 	}
 
 	// ===== OBJパース用ヘルパー関数 =====

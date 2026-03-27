@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <EnemyBullet.h>
 #include <Player.h>
+#include <EnemyHomingMissile.h>
 
 // 前方宣言
 class Enemy;
@@ -180,6 +181,28 @@ public:
 
 	// パターン名取得
 	const char* GetName() const override { return "Pattern4:Wait"; }
+};
+
+/// <summary>
+/// パターン5: ミサイル
+/// </summary>
+
+class EnemyAttackPatternMissile : public EnemyAttackPattern {
+public:
+
+	void Update(
+		Enemy* enemy,
+		Player* player,
+		std::list<std::unique_ptr<EnemyBullet>>& bullets,
+		float deltaTime) override;
+
+	void DrawImGui(int32_t idx, bool selected) override;
+
+	const char* GetName() const override { return "Pattern5:Missile"; }
+
+private:
+
+	float shotTimer_ = 0.0f;
 };
 
 /// <summary>

@@ -114,6 +114,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DirectXGame\application\scene\DebugScene.cpp" />
     <ClCompile Include="DirectXGame\engine\util\CurveLibrary.cpp" />
     <ClCompile Include="DirectXGame\engine\manager\CurveMoveManager.cpp" />
     <ClCompile Include="DirectXGame\application\Object\enemy\Boss.cpp" />
@@ -143,6 +144,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\scene\GamePlayScene.cpp" />
     <ClCompile Include="DirectXGame\engine\base\framework\SRFramework.cpp" />
     <ClCompile Include="DirectXGame\engine\manager\ImGuiManager.cpp" />
+    <ClCompile Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="DirectXGame\engine\math\MakeAffineMatrix.cpp" />
     <ClCompile Include="DirectXGame\engine\math\MakeIdentity4x4.cpp" />
@@ -169,6 +171,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\posteffect\NoisePostEffect.cpp" />
     <ClCompile Include="DirectXGame\engine\posteffect\PostEffectManager.cpp" />
     <ClCompile Include="DirectXGame\engine\manager\ResourceManager.cpp" />
+    <ClCompile Include="DirectXGame\application\Object\enemy\MiniBoss.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DirectXGame\engine\math\MakeRotateXYZMatrix.cpp" />
@@ -179,6 +182,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\Object\player\PlayerBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DirectXGame\application\scene\DebugScene.h" />
     <ClInclude Include="DirectXGame\engine\util\CurveLibrary.h" />
     <ClInclude Include="DirectXGame\engine\manager\CurveMoveManager.h" />
     <ClInclude Include="DirectXGame\application\Object\enemy\Boss.h" />
@@ -256,6 +260,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\worldtransform\WorldTransform.h" />
     <ClInclude Include="DirectXGame\application\Object\player\Player.h" />
     <ClInclude Include="DirectXGame\application\Object\player\PlayerBullet.h" />
+    <ClInclude Include="DirectXGame\application\Object\enemy\MiniBoss.h" />
+    <ClInclude Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.h" />
     <ClInclude Include="tools\json.hpp" />
     <ClInclude Include="DirectXGame\engine\math\DepthMaterial.h" />
     <ClInclude Include="DirectXGame\engine\posteffect\GrayscalePostEffect.h" />

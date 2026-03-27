@@ -12,6 +12,7 @@
 #undef max
 
 using MyEngine::Camera;
+using namespace Math;
 
 void GamePlayScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
@@ -56,6 +57,8 @@ void GamePlayScene::InitializePlayer()
 {
 	player_ = std::make_unique<Player>();
 	player_->Initialize();
+
+	player_->SetPosition(Vector3(-10.0f, 0.0f, 0.0f));
 
 	// プレイヤーの弾のリストを取得
 	playerBullets_ = &player_->GetBullets();
@@ -404,6 +407,9 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		
 		newEnemy->SetPosition(enemyData.translation);
 		newEnemy->SetMoveType(enemyData.move);
+		if (enemyData.move == EnemyMove::WavePlusY) {
+			newEnemy->SetAttackPattern(4);
+		}
 		newEnemy->SetPlayer(player_.get());
 
 		if (enemyData.move != EnemyMove::None) {
@@ -540,39 +546,52 @@ void GamePlayScene::LoadLevel(const LevelData* levelData)
 
 void GamePlayScene::UpdateStartCameraEasing()
 {
-	startCameraTimer_ += GamePlayDefaults::kDeltaTime60Hz; // フレームレート固定なら
+	startCameraTimer_ += GamePlayDefaults::kDeltaTime60Hz;
 	float t = std::clamp(startCameraTimer_ / kStartCameraDuration_, 0.0f, 1.0f);
 
-	// イージング（easeInOutCubic）
+	// プレイヤー開始位置保存
+	if (!playerStartPosInitialized_) {
+		startPlayerPos_ = player_->GetPosition() + Vector3(-70.0f,0.0f,0.0f);
+		playerStartPosInitialized_ = true;
+	}
+
+	// イージング
 	float easeT;
 	if (t < 0.5f) {
 		easeT = 4.0f * t * t * t;
-	} else {
+	}
+	else {
 		float p = (t - 1.0f);
 		easeT = 1.0f + 4.0f * p * p * p;
 	}
 
+	// --- カメラ移動 ---
 	Vector3 pos = {
 		std::lerp(startCameraPos_.x, endCameraPos_.x, easeT),
 		std::lerp(startCameraPos_.y, endCameraPos_.y, easeT),
 		std::lerp(startCameraPos_.z, endCameraPos_.z, easeT)
 	};
-	Vector3 rot = {
-		std::lerp(startCameraRot_.x, endCameraRot_.x, easeT),
-		std::lerp(startCameraRot_.y, endCameraRot_.y, easeT),
-		std::lerp(startCameraRot_.z, endCameraRot_.z, easeT)
-	};
 
 	cameraManager_->SetCameraPosition(pos);
-	//cameraManager_->SetCameraRotation(rot);
+
+	// --- プレイヤー移動（等速） ---
+	Vector3 playerPos = {
+		std::lerp(startPlayerPos_.x, 0.0f, easeT),
+		std::lerp(startPlayerPos_.y, 0.0f, easeT),
+		std::lerp(startPlayerPos_.z, startPlayerPos_.z, easeT) // Z固定
+	};
+
+	player_->SetPosition(playerPos);
 
 	if (t >= 1.0f) {
 		isStartCameraEasing_ = false;
-		player_->SetPlayerControlEnabled(true); // プレイヤー操作有効化
+
+		player_->SetPlayerControlEnabled(true);
+
 		for (auto& enemy : enemies_) {
 			enemy->SetControlEnabled(true);
 		}
-		// 必要ならここでカメラモードを切り替え
+
 		cameraMode_ = CameraMode::Free;
 	}
 }
@@ -647,7 +666,7 @@ void GamePlayScene::RestrictPlayerInsideCameraView() {
 
 	// ステップ1: ワールド座標 → クリップ座標
 	// ビュープロジェクション行列を使用して同次座標系に変換
-	Vector4 clipPos = Multiply::Multiply(viewProj, Vector4{ playerPos.x, playerPos.y, playerPos.z, 1.0f });
+	Vector4 clipPos = Multiply(viewProj, Vector4{ playerPos.x, playerPos.y, playerPos.z, 1.0f });
 
 	// ステップ2: クリップ座標 → NDC（正規化デバイス座標）
 	// w成分で除算することで、透視変換後の画面座標系に変換
@@ -666,8 +685,8 @@ void GamePlayScene::RestrictPlayerInsideCameraView() {
 	Vector4 newClipPos = { ndcPos.x * clipPos.w, ndcPos.y * clipPos.w, ndcPos.z * clipPos.w, clipPos.w };
 
 	// ワールド座標に戻す（逆行列で）
-	Matrix4x4 invViewProj = Inverse::Inverse(viewProj);
-	Vector4 newWorldPos = Multiply::Multiply(invViewProj, newClipPos);
+	Matrix4x4 invViewProj = Inverse(viewProj);
+	Vector4 newWorldPos = Multiply(invViewProj, newClipPos);
 
 	// プレイヤー位置を更新
 	Vector3 clampedWorldPos = {
@@ -715,7 +734,7 @@ bool GamePlayScene::IsInCameraView(const Vector3& worldPos)
 	Matrix4x4 viewProj = cam->GetViewProjectionMatrix();
 
 	// ワールド → クリップ
-	Vector4 clip = Multiply::Multiply(viewProj, Vector4{ worldPos.x, worldPos.y, worldPos.z, 1.0f });
+	Vector4 clip = Multiply(viewProj, Vector4{ worldPos.x, worldPos.y, worldPos.z, 1.0f });
 	if (clip.w == 0.0f) return false;
 
 	// NDCへ変換
@@ -1241,9 +1260,11 @@ void GamePlayScene::DrawGameObjects()
 		player_->Draw();
 	}
 
-	// 敵の描画
-	for (auto& enemy : enemies_) {
-		enemy->Draw();
+	if (!isStartCameraEasing_) {
+		// 敵の描画
+		for (auto& enemy : enemies_) {
+			enemy->Draw();
+		}
 	}
 }
 
@@ -1256,11 +1277,13 @@ void GamePlayScene::DrawUI()
 		pressSpaceKeyText_->Draw();
 	}
 	else {
-		// インゲーム中のガイド表示
-		if (gameSceneState_ == GameSceneState::InGame) {
-			wasdGuide_->Draw();
-			spaceKeyGuide_->Draw();
-			escGuide_->Draw();
+		if (!isStartCameraEasing_) {
+			// インゲーム中のガイド表示
+			if (gameSceneState_ == GameSceneState::InGame) {
+				wasdGuide_->Draw();
+				spaceKeyGuide_->Draw();
+				escGuide_->Draw();
+			}
 		}
 	}
 

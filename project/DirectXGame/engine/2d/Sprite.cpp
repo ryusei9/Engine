@@ -7,6 +7,8 @@
 #include "MakeOrthographicMatrix.h"
 #include <cassert>
 #include <ResourceManager.h>
+
+using namespace Math;
 namespace MyEngine {
 
 	namespace {
@@ -117,16 +119,16 @@ namespace MyEngine {
 		};
 
 		// ワールド・ビュー・プロジェクション行列の計算
-		Matrix4x4 worldMatrix = MakeAffineMatrix::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-		Matrix4x4 viewMatrix = MakeIdentity4x4::MakeIdentity4x4();
-		Matrix4x4 projectionMatrix = MakeOrthographicMatrix::MakeOrthographicMatrix(
+		Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+		Matrix4x4 viewMatrix = MakeIdentity4x4();
+		Matrix4x4 projectionMatrix = MakeOrthographicMatrix(
 			0.0f, 0.0f,
 			static_cast<float>(WinApp::kClientWidth),
 			static_cast<float>(WinApp::kClientHeight),
 			SpriteDefaults::kOrthoNear,
 			SpriteDefaults::kOrthoFar);
 
-		transformationMatrixData_->wvp = Multiply::Multiply(worldMatrix, Multiply::Multiply(viewMatrix, projectionMatrix));
+		transformationMatrixData_->wvp = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 		transformationMatrixData_->world = worldMatrix;
 	}
 
@@ -191,7 +193,7 @@ namespace MyEngine {
 		materialData_->enableLighting = false;
 
 		// UV変換行列を単位行列で初期化
-		materialData_->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
+		materialData_->uvTransform = MakeIdentity4x4();
 	}
 
 	void Sprite::CreateWVPData()
@@ -203,8 +205,8 @@ namespace MyEngine {
 		wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData_));
 
 		// 単位行列で初期化
-		transformationMatrixData_->wvp = MakeIdentity4x4::MakeIdentity4x4();
-		transformationMatrixData_->world = MakeIdentity4x4::MakeIdentity4x4();
+		transformationMatrixData_->wvp = MakeIdentity4x4();
+		transformationMatrixData_->world = MakeIdentity4x4();
 	}
 
 	void Sprite::AdjustTextureSize()

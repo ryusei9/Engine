@@ -67,7 +67,7 @@ namespace MyEngine {
 		// 色定義
 		constexpr Vector4 kColorWhite = { 1.0f, 1.0f, 1.0f, 1.0f };
 		constexpr Vector4 kColorCyan = { 0.0f, 1.0f, 1.0f, 1.0f };
-		constexpr Vector4 kColorGray = { 0.3f, 0.3f, 0.3f, 0.3f };
+		constexpr Vector4 kColorGray = { 0.3f, 0.3f, 0.3f, 1.0f };
 		constexpr Vector4 kColorBlue = { 0.0f, 0.0f, 1.0f, 1.0f };
 		constexpr Vector4 kExplosionColorCenter = { 1.0f, 1.0f, 1.0f, 1.0f };
 		constexpr Vector4 kExplosionColorSub = { 1.0f, 0.8f, 0.2f, 1.0f };
@@ -176,9 +176,11 @@ namespace MyEngine {
 			MaterialData materialData;
 			std::list<Particle> particles;
 			uint32_t srvIndex;
+			uint32_t textureSrvIndex;
 			ParticleForGPU* instanceData;
 			uint32_t numParticles = 0;
 			Microsoft::WRL::ComPtr<ID3D12Resource> instanceBuffer;
+			bool isAdditive = true;
 		};
 
 		/*------メンバ関数------*/
@@ -209,7 +211,7 @@ namespace MyEngine {
 		void Finalize();
 
 		// パーティクルグループの追加
-		void CreateParticleGroup(const std::string& name, const std::string textureFilePath);
+		void CreateParticleGroup(const std::string& name, const std::string textureFilePath, bool isAdditive = false);
 
 
 		// パーティクルの発生
@@ -256,6 +258,8 @@ namespace MyEngine {
 
 		// ルートシグネチャの作成
 		void CreateRootSignature();
+
+		void CreatePSOInternal(D3D12_BLEND_DESC blendDesc,Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso);
 
 		// パイプラインステートオブジェクトの作成
 		void CreatePSO();
@@ -306,6 +310,9 @@ namespace MyEngine {
 
 		// グラフィックスパイプライン
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState_;
+
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineStateAdditive_;
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineStateAlpha_;
 
 		// リソース
 		Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;

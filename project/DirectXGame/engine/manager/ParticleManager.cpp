@@ -18,6 +18,7 @@
 namespace MyEngine {
 	using namespace Logger;
 	using namespace ParticleManagerConstants;
+	using namespace Math;
 
 	namespace {
 		// 加速度フィールドのデフォルト値
@@ -83,23 +84,23 @@ namespace MyEngine {
 	void ParticleManager::Update()
 	{
 		// ビュー行列とプロジェクション行列をカメラから取得
-		Matrix4x4 cameraMatrix = MakeAffineMatrix::MakeAffineMatrix(
+		Matrix4x4 cameraMatrix = MakeAffineMatrix(
 			{ 1.0f, 1.0f, 1.0f },
 			camera_->GetRotate(),
 			camera_->GetTranslate());
-		Matrix4x4 viewMatrix = Inverse::Inverse(cameraMatrix);
+		Matrix4x4 viewMatrix = Inverse(cameraMatrix);
 		Matrix4x4 projectionMatrix = camera_->GetProjectionMatrix();
-		Matrix4x4 viewProjectionMatrix = Multiply::Multiply(viewMatrix, projectionMatrix);
+		Matrix4x4 viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 
 		// UV変換行列の計算
-		Matrix4x4 uvTransformMatrix = MakeScaleMatrix::MakeScaleMatrix(uvTransform_.scale);
-		uvTransformMatrix = Multiply::Multiply(uvTransformMatrix, MakeRotateZMatrix::MakeRotateZMatrix(uvTransform_.rotate.z));
-		uvTransformMatrix = Multiply::Multiply(uvTransformMatrix, MakeTranslateMatrix::MakeTranslateMatrix(uvTransform_.translate));
+		Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransform_.scale);
+		uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransform_.rotate.z));
+		uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransform_.translate));
 		materialData_->uvTransform = uvTransformMatrix;
 
 		// ビルボード行列の計算
-		Matrix4x4 backToFrontMatrix = MakeIdentity4x4::MakeIdentity4x4();
-		Matrix4x4 billboardMatrix = Multiply::Multiply(backToFrontMatrix, cameraMatrix);
+		Matrix4x4 backToFrontMatrix = MakeIdentity4x4();
+		Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, cameraMatrix);
 		billboardMatrix.m[kBillboardMatrixOffsetIndex][0] = kBillboardMatrixOffsetValue;
 		billboardMatrix.m[kBillboardMatrixOffsetIndex][1] = kBillboardMatrixOffsetValue;
 		billboardMatrix.m[kBillboardMatrixOffsetIndex][2] = kBillboardMatrixOffsetValue;
@@ -152,7 +153,7 @@ namespace MyEngine {
 		Matrix4x4 worldMatrix = CalculateWorldMatrix(particle, billboardMatrix);
 
 		// ワールド・ビュー・プロジェクション行列を計算
-		Matrix4x4 worldViewProjectionMatrix = Multiply::Multiply(worldMatrix, viewProjectionMatrix);
+		Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 
 		// インスタンシング用データを設定
 		group.instanceData[group.numParticles].WVP = worldViewProjectionMatrix;
@@ -186,8 +187,8 @@ namespace MyEngine {
 		const Particle& particle,
 		const Matrix4x4& billboardMatrix) const
 	{
-		Matrix4x4 scaleMatrix = MakeScaleMatrix::MakeScaleMatrix(particle.transform.scale);
-		Matrix4x4 translateMatrix = MakeTranslateMatrix::MakeTranslateMatrix(particle.transform.translate);
+		Matrix4x4 scaleMatrix = MakeScaleMatrix(particle.transform.scale);
+		Matrix4x4 translateMatrix = MakeTranslateMatrix(particle.transform.translate);
 
 		if (useBillboard_)
 		{
@@ -195,7 +196,7 @@ namespace MyEngine {
 		}
 		else
 		{
-			Matrix4x4 rotateMatrix = MakeRotateXYZMatrix::MakeRotateXYZMatrix(particle.transform.rotate);
+			Matrix4x4 rotateMatrix = MakeRotateXYZMatrix(particle.transform.rotate);
 			return scaleMatrix * rotateMatrix * translateMatrix;
 		}
 	}
@@ -221,9 +222,7 @@ namespace MyEngine {
 		// ルートシグネチャを設定
 		commandList->SetGraphicsRootSignature(rootSignature_.Get());
 
-		// パイプラインステートオブジェクト (PSO) を設定
-		commandList->SetPipelineState(graphicsPipelineState_.Get());
-
+		
 		// プリミティブトポロジを設定
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -236,15 +235,24 @@ namespace MyEngine {
 			if (group.second.numParticles == 0) {
 				continue;
 			}
+			// 👇 PSO切り替え
+			if (group.second.isAdditive)
+			{
+				commandList->SetPipelineState(graphicsPipelineStateAdditive_.Get());
+			}
+			else
+			{
+				commandList->SetPipelineState(graphicsPipelineStateAlpha_.Get());
+			}
 
 			// マテリアルCBVを設定
 			commandList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
 
-			// テクスチャのSRVのデスクリプタテーブルを設定
+			// インスタンシングデータのSRVのデスクリプタテーブルを設定
 			commandList->SetGraphicsRootDescriptorTable(1, srvManager_->GetGPUDescriptorHandle(group.second.srvIndex));
 
-			// インスタンシングデータのSRVのデスクリプタテーブルを設定
-			commandList->SetGraphicsRootDescriptorTable(2, group.second.materialData.gpuHandle);
+			// テクスチャのSRVのデスクリプタテーブルを設定
+			commandList->SetGraphicsRootDescriptorTable(2, srvManager_->GetGPUDescriptorHandle(group.second.textureSrvIndex));
 
 			// インスタンシング描画
 			commandList->DrawInstanced(UINT(modelData_.vertices.size()), group.second.numParticles, 0, 0);
@@ -265,11 +273,12 @@ namespace MyEngine {
 		particleGroups_.clear();
 	}
 
-	void ParticleManager::CreateParticleGroup(const std::string& name, const std::string textureFilePath)
+	void ParticleManager::CreateParticleGroup(const std::string& name, const std::string textureFilePath, bool isAdditive)
 	{
 		// パーティクルグループが既に存在するか確認
 		if (particleGroups_.find(name) != particleGroups_.end())
 		{
+			std::cout << "ParticleGroups size: " << particleGroups_.size() << std::endl;
 			std::cerr << "Error: Particle group '" << name << "' already exists!" << std::endl;
 			return;
 		}
@@ -277,7 +286,8 @@ namespace MyEngine {
 		// 新たな空のパーティクルグループを作成
 		ParticleGroup group{};
 		group.materialData.textureFilePath = textureFilePath;
-		group.materialData.gpuHandle = TextureManager::GetInstance()->GetSrvHandleGPU(textureFilePath);
+		group.textureSrvIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
+		group.isAdditive = isAdditive;
 
 		// インスタンスバッファ作成
 		group.instanceBuffer = ResourceManager::CreateBufferResource(
@@ -288,8 +298,8 @@ namespace MyEngine {
 		// 初期化
 		for (uint32_t i = 0; i < kMaxInstanceCount; ++i)
 		{
-			group.instanceData[i].WVP = MakeIdentity4x4::MakeIdentity4x4();
-			group.instanceData[i].World = MakeIdentity4x4::MakeIdentity4x4();
+			group.instanceData[i].WVP = MakeIdentity4x4();
+			group.instanceData[i].World = MakeIdentity4x4();
 		}
 
 		// インスタンシング用SRVの生成
@@ -723,7 +733,7 @@ namespace MyEngine {
 
 		materialData_->color = kColorWhite;
 		materialData_->enableLighting = false;
-		materialData_->uvTransform = MakeIdentity4x4::MakeIdentity4x4();
+		materialData_->uvTransform = MakeIdentity4x4();
 	}
 
 	void ParticleManager::DrawImGui()
@@ -783,14 +793,14 @@ namespace MyEngine {
 		rootParameters[0].DescriptorTable.NumDescriptorRanges = 0;
 		rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-		// ルートパラメータ1: テクスチャSRV（VertexShader用）
+		// ルートパラメータ1: インスタンシングデータSRV（VertexShader用）
 		rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 		rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 		rootParameters[1].Descriptor.ShaderRegister = 0;
 		rootParameters[1].DescriptorTable.pDescriptorRanges = rangeTexture;
 		rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
 
-		// ルートパラメータ2: インスタンシングデータSRV（PixelShader用）
+		// ルートパラメータ2: テクスチャSRV（PixelShader用）
 		rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 		rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 		rootParameters[2].DescriptorTable.pDescriptorRanges = rangeTexture;
@@ -838,7 +848,7 @@ namespace MyEngine {
 		assert(SUCCEEDED(hr));
 	}
 
-	void ParticleManager::CreatePSO()
+	void ParticleManager::CreatePSOInternal(D3D12_BLEND_DESC blendDesc, Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso)
 	{
 		CreateRootSignature();
 
@@ -863,16 +873,16 @@ namespace MyEngine {
 		inputLayoutDesc.pInputElementDescs = inputElementDescs;
 		inputLayoutDesc.NumElements = kInputElementCount;
 
-		// ブレンドステートの設定（加算合成）
-		D3D12_BLEND_DESC blendDesc{};
-		blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-		blendDesc.RenderTarget[0].BlendEnable = TRUE;
-		blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-		blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-		blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE; // 加算合成
-		blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-		blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-		blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+		//// ブレンドステートの設定（加算合成）
+		//D3D12_BLEND_DESC blendDesc{};
+		//blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+		//blendDesc.RenderTarget[0].BlendEnable = TRUE;
+		//blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		//blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+		//blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE; // 加算合成
+		//blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+		//blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+		//blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
 
 		// ラスタライザステート
 		D3D12_RASTERIZER_DESC rasterizerDesc{};
@@ -921,8 +931,37 @@ namespace MyEngine {
 		// パイプラインステートの生成
 		HRESULT hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(
 			&graphicsPipelineStateDesc,
-			IID_PPV_ARGS(&graphicsPipelineState_));
+			IID_PPV_ARGS(pso.GetAddressOf()));
 		assert(SUCCEEDED(hr));
+	}
+
+	void ParticleManager::CreatePSO()
+	{
+		// 加算用
+		D3D12_BLEND_DESC additive{};
+		additive.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+		additive.RenderTarget[0].BlendEnable = TRUE;
+		additive.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		additive.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
+		additive.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+		additive.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+		additive.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+		additive.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+
+		CreatePSOInternal(additive, graphicsPipelineStateAdditive_);
+
+		// 通常アルファ用（煙）
+		D3D12_BLEND_DESC alpha{};
+		alpha.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+		alpha.RenderTarget[0].BlendEnable = TRUE;
+		alpha.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		alpha.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+		alpha.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+		alpha.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+		alpha.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+		alpha.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+
+		CreatePSOInternal(alpha, graphicsPipelineStateAlpha_);
 	}
 
 	bool ParticleManager::IsCollision(const AABB& aabb, const Vector3& point)

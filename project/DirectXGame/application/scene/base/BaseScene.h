@@ -6,7 +6,7 @@
 #include <optional>
 using namespace MyEngine;
 // シーンの種類（意味付けのためenumを明示）
-enum SCENE { TITLE, GAMEPLAY, GAMEOVER };
+enum SCENE { TITLE, GAMEPLAY, GAMEOVER,DEBUG };
 
 /// <summary>
 /// シーン基底クラス

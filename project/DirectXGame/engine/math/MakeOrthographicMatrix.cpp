@@ -1,6 +1,6 @@
 #include "MakeOrthographicMatrix.h"
 
-namespace MakeOrthographicMatrix {
+namespace Math {
 	Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip) {
 		Matrix4x4 resultOrthographicMatrix = {};
 		resultOrthographicMatrix.m[0][0] = 2 / (right - left);

@@ -3,6 +3,7 @@
 #include <xaudio2.h>
 #pragma comment(lib,"xaudio2.lib")
 #include <fstream>
+#include <vector>
 #include <memory>
 #include <cstdint>
 
@@ -45,7 +46,7 @@ namespace MyEngine {
 	// サウンドデータ
 	struct SoundData {
 		WAVEFORMATEX wfex; // 波形フォーマット
-		BYTE* pBuffer; // バッファの先頭アドレス
+		std::vector<BYTE> pBuffer; // バッファの先頭アドレス
 		uint32_t bufferSize; // バッファのサイズ
 	};
 
@@ -86,7 +87,7 @@ namespace MyEngine {
 		void ReadRiffHeader(std::ifstream& file, RiffHeader& riff);
 		void ReadFormatChunk(std::ifstream& file, FormatChunk& format);
 		void ReadDataChunk(std::ifstream& file, ChunkHeader& data);
-		std::unique_ptr<char[]> ReadWaveData(std::ifstream& file, uint32_t size);
+		std::vector<BYTE> ReadWaveData(std::ifstream& file, uint32_t size);
 
 		// チャンク検証
 		bool ValidateChunkId(const char* chunkId, const char* expectedId) const;

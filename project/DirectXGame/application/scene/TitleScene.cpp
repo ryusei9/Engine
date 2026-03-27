@@ -59,9 +59,6 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	dockTransform_.Initialize();
 	dockTransform_.SetTranslate(TitleDefaults::kDockPos);
-
-	sprite_ = std::make_unique<Sprite>();
-	sprite_->Initialize(directXCommon, "resources/uvChecker.png");
 	
 
 	PostEffectManager::GetInstance()->SetEffectEnabled(1, false);
@@ -97,8 +94,7 @@ void TitleScene::Update()
 		rot.y = 4.7f;
 
 		startRotY_ = rot.y;
-		/*player_->SetRotate(rot);
-		dockTransform_.SetRotate(rot);*/
+		
 	}
 
 	if (startState_ != TitleStartState::None)
@@ -200,7 +196,6 @@ void TitleScene::Update()
 	skydome_->Update();
 	dock_->SetWorldTransform(dockTransform_);
 	dock_->Update();
-	sprite_->Update();
 
 	fadeManager_->Update();
 	cameraManager_->Update();
@@ -232,8 +227,6 @@ void TitleScene::Draw()
 
 	/*------スプライトの更新------*/
 	SpriteCommon::GetInstance()->DrawSettings();
-
-	sprite_->Draw();
 	
 	// フェードマネージャの描画
 	fadeManager_->Draw();

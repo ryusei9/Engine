@@ -35,7 +35,7 @@ namespace MyEngine {
 		std::string sceneName = deserialized["name"].get<std::string>();
 		assert(sceneName == "scene");
 
-		LevelData* levelData = new LevelData();
+		std::unique_ptr<LevelData> levelData = std::make_unique<LevelData>();
 
 		if (deserialized.contains("objects") && deserialized["objects"].is_array()) {
 			for (const auto& objectJson : deserialized["objects"]) {
@@ -134,9 +134,9 @@ namespace MyEngine {
 			}
 		}
 
-		return levelData;
+		return levelData.release();
 	}
-	
+
 
 	StageData JsonLoader::GetStageData(const std::vector<StageData>& stageDataTable, int stageIndex)
 	{

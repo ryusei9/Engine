@@ -80,6 +80,7 @@ private:
 	};
 
 	TitleStartState startState_ = TitleStartState::None;
+
 	float startTimer_ = 0.0f;
 	Vector3 startPlayerBasePos_;
 	Vector3 startCameraPos_;

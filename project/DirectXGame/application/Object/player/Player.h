@@ -69,7 +69,7 @@ struct PlayerParameters {
 	std::string modelFileName = "player.obj";
 
 	// パーティクルテクスチャファイル名
-	std::string thrusterTexture = "resources/circle2.png";
+	std::string thrusterTexture = "resources/mori.png";
 	std::string explosionTexture = "resources/circle2.png";
 };
 

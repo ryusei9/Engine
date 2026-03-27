@@ -127,12 +127,60 @@ void EnemyAttackPatternWait::DrawImGui(int32_t idx, bool selected) {
 #endif
 }
 
+void EnemyAttackPatternMissile::Update(
+	Enemy* enemy,
+	Player* player,
+	std::list<std::unique_ptr<EnemyBullet>>& bullets,
+	float deltaTime)
+{
+	shotTimer_ += deltaTime;
+
+	if (shotTimer_ < 3.0f) return;
+
+	const int missileCount = 3;
+	const float spread = EnemyAttackDefaults::kPi / 6.0f;
+	const float baseAngle = EnemyAttackDefaults::kPi;
+
+	for (int i = 0; i < missileCount; ++i) {
+
+		float angle =
+			baseAngle - spread / 2.0f +
+			spread * (float(i) / float(missileCount - 1));
+
+		Vector3 vel{
+			std::cos(angle) * 0.12f,
+			std::sin(angle) * 0.12f,
+			0.0f
+		};
+
+		auto missile = std::make_unique<EnemyHomingMissile>();
+
+		missile->Initialize(
+			enemy->GetWorldTransform().GetTranslate(),
+			vel,
+			player,
+			"enemyBulletParameters");
+
+		bullets.push_back(std::move(missile));
+	}
+
+	shotTimer_ = 0.0f;
+}
+
+void EnemyAttackPatternMissile::DrawImGui(int32_t idx, bool selected)
+{
+#ifdef USE_IMGUI
+	if (ImGui::Selectable(GetName(), selected)) {}
+#endif
+}
+
 // EnemyAttack本体
 EnemyAttack::EnemyAttack() {
 	patterns_.push_back(std::make_unique<EnemyAttackPatternFan>());   // 0
 	patterns_.push_back(std::make_unique<EnemyAttackPatternAimed>()); // 1
 	patterns_.push_back(std::make_unique<EnemyAttackPatternRush>());  // 2
 	patterns_.push_back(std::make_unique<EnemyAttackPatternWait>());  // 3
+	patterns_.push_back(std::make_unique<EnemyAttackPatternMissile>()); // 4
 }
 
 void EnemyAttack::Initialize(const std::string& parameterFileName) {

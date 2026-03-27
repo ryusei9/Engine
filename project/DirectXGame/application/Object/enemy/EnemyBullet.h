@@ -48,16 +48,16 @@ public:
 	void Initialize(const Vector3& position, const Vector3& velocity, const std::string& parameterFileName);
 
 	// 更新
-	void Update();
+	virtual void Update();
     
 	// 描画
 	void Draw();
 
 	// 移動
-	void Move();
+	virtual void Move();
 
 	// 衝突判定
-	void OnCollision(Collider* other) override;
+	virtual void OnCollision(Collider* other) override;
 
 	// 中心座標を取得
 	Vector3 GetCenterPosition() const override;
@@ -65,8 +65,16 @@ public:
 	// 生存状態を取得
 	bool IsAlive() const { return isAlive_; }
 
+	void SetAlive(bool alive) { isAlive_ = alive; }
+
+	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
+
 	// 位置を取得（コピー回避）
 	const Vector3& GetPosition() const { return worldTransform_.GetTranslate(); }
+
+	const Vector3& GetVelocity() const { return velocity_; }
+
+	void SetVelocity(const Vector3& velocity) { velocity_ = velocity; }
 
 	// 位置を設定
 	void SetPosition(const Vector3& position) { worldTransform_.SetTranslate(position); }
@@ -93,9 +101,6 @@ private:
 	// 弾のオブジェクト
 	std::unique_ptr<Object3d> objectBullet_;
 
-	// 弾の速度
-	Vector3 velocity_ = {};
-
 	// 生存状態
 	bool isAlive_ = true;
 
@@ -107,5 +112,8 @@ private:
 
 	// デフォルトパラメータ（静的メンバ）
 	static inline EnemyBulletParameters defaultParameters_;
+protected:
+	// 弾の速度
+	Vector3 velocity_ = {};
 };
 

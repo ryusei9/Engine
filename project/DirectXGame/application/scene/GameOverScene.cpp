@@ -33,9 +33,17 @@ void GameOverScene::Initialize(DirectXCommon* /*directXCommon*/, WinApp* winApp)
 	gameOverGuideTransform_.SetTranslate(GameOverDefaults::kGuideTranslate);
 	gameOverGuideTransform_.SetRotate(GameOverDefaults::kGuideRotate);
 
+	retryTextTransform_.Initialize();
+	retryTextTransform_.SetTranslate(GameOverDefaults::kRetryTextTranslate);
+	retryTextTransform_.SetRotate(GameOverDefaults::kRetryTextRotate);
+
 	// ガイド
 	gameOverGuide_ = std::make_unique<Object3d>();
 	gameOverGuide_->Initialize("GameOverGuide.obj");
+
+	// リトライテキスト
+	retryText_ = std::make_unique<Object3d>();
+	retryText_->Initialize("retry.obj");
 	
 	// skydome
 	skydome_ = std::make_unique<Object3d>();
@@ -51,18 +59,23 @@ void GameOverScene::Initialize(DirectXCommon* /*directXCommon*/, WinApp* winApp)
 	playerTransform_.SetTranslate(GameOverDefaults::kPlayerInitTranslate);
 	playerTransform_.SetRotate(GameOverDefaults::kPlayerInitRotate);
 
+	// パーティクルの初期化
+	smokeEffect_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "smoke");
+	smokeEffect_->SetParticleRate(parameters_.rate);
+	smokeEffect_->SetParticleCount(parameters_.count);
+	smokeEffect_->SetSmoke(true);
+
 	PostEffectManager::GetInstance()->SetEffectEnabled(1, false);
 }
 
 void GameOverScene::Update()
 {
-	// 入力
-	input_->Update();
+	UpdateInput();
 
-	// スペースでタイトルへ
-	if (input_->TriggerKey(DIK_SPACE)) {
-		returnToTitle_ = true;
-	}
+	//// スペースでタイトルへ
+	//if (input_->TriggerKey(DIK_SPACE)) {
+	//	returnToTitle_ = true;
+	//}
 	// フェードイン開始
 	if (returnToTitle_ && !fadeStarted_) {
 		fadeManager_->FadeInStart(GameOverDefaults::kFadeStep, [this]() {
@@ -70,6 +83,9 @@ void GameOverScene::Update()
 		});
 		fadeStarted_ = true;
 	}
+	smokeEffect_->SetPosition(playerTransform_.GetTranslate());
+	smokeEffect_->SetVelocity(smokeVelocity_);
+	smokeEffect_->Update();
 	
 	// フェード
 	fadeManager_->Update();
@@ -83,6 +99,9 @@ void GameOverScene::Update()
 
 	gameOverGuide_->SetWorldTransform(gameOverGuideTransform_);
 	gameOverGuide_->Update();
+
+	retryText_->SetWorldTransform(retryTextTransform_);
+	retryText_->Update();
 
 	// プレイヤー落下＆回転
 	Vector3 t = playerTransform_.GetTranslate();
@@ -107,6 +126,7 @@ void GameOverScene::Draw()
 	Object3dCommon::GetInstance()->DrawSettings();
 	gameOverText_->Draw();
 	gameOverGuide_->Draw();
+	retryText_->Draw();
 	player_->Draw();
 	skydome_->Draw();
 
@@ -129,9 +149,62 @@ void GameOverScene::DrawImGui()
 	ImGui::DragFloat3("guide_translate_", const_cast<float*>(&gameOverGuideTransform_.GetTranslate().x));
 	ImGui::DragFloat3("guide_rotate_",    const_cast<float*>(&gameOverGuideTransform_.GetRotate().x));
 	ImGui::DragFloat3("guide_scale_",     const_cast<float*>(&gameOverGuideTransform_.GetScale().x));
+	ImGui::DragFloat3("retry_translate_", const_cast<float*>(&retryTextTransform_.GetTranslate().x));
+	ImGui::DragFloat3("retry_rotate_", const_cast<float*>(&retryTextTransform_.GetRotate().x));
 	ImGui::DragFloat3("player_translate_", const_cast<float*>(&playerTransform_.GetTranslate().x));
 	ImGui::DragFloat3("player_rotate_",    const_cast<float*>(&playerTransform_.GetRotate().x));
 	ImGui::End();
+	ImGui::Begin("MenuState");
+	ImGui::Text("W/S : Move Menu");
+	ImGui::Text("SPACE : Select");
+	ImGui::Text("Current Menu: %s", menuSelect_ == MenuSelect::Restart ? "Restart" : "Return To Title");
+	ImGui::End();
+	ImGui::Begin("Particle Parameters");
+	ImGui::SliderInt("Rate", reinterpret_cast<int*>(&parameters_.rate), 1, 120);
+	ImGui::SliderInt("Count", reinterpret_cast<int*>(&parameters_.count), 1, 100);
+	ImGui::SliderFloat3("Smoke Velocity", &smokeVelocity_.x, -5.0f, 5.0f);
+	ImGui::End();
+
 	cameraManager_->DrawImGui();
 #endif
 }
+
+void GameOverScene::UpdateInput()
+{
+	// 入力
+	input_->Update();
+
+	if (menuSelect_ == MenuSelect::Restart) {
+		retryText_->SetMaterialColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+		gameOverGuide_->SetMaterialColor(Vector4(0.3f, 0.3f, 0.3f, 1.0f));
+		gameOverGuide_->SetPointLight(0.0f);
+		gameOverGuide_->SetDirectionalLight(1.0f);
+		if (input_->TriggerKey(DIK_SPACE)) {
+			fadeManager_->FadeInStart(GameOverDefaults::kDeltaTime60Hz * 1.2f, [this]() {
+				RequestSceneChange(GAMEPLAY);
+				});
+			fadeStarted_ = true;
+		}
+
+		if (input_->TriggerKey(DIK_S)) {
+			menuSelect_ = MenuSelect::ReturnToTitle;
+		}
+	}
+	else if (menuSelect_ == MenuSelect::ReturnToTitle) {
+		retryText_->SetMaterialColor(Vector4(0.3f, 0.3f, 0.3f, 1.0f));
+		retryText_->SetPointLight(0.0f);
+		retryText_->SetDirectionalLight(1.0f);
+		gameOverGuide_->SetMaterialColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+		if (input_->TriggerKey(DIK_SPACE)) {
+			fadeManager_->FadeInStart(GameOverDefaults::kDeltaTime60Hz * 1.2f, [this]() {
+				RequestSceneChange(TITLE);
+				});
+			fadeStarted_ = true;
+		}
+
+		if (input_->TriggerKey(DIK_W)) {
+			menuSelect_ = MenuSelect::Restart;
+		}
+	}
+}
+

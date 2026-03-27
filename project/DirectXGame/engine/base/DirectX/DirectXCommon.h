@@ -136,6 +136,8 @@ namespace MyEngine {
 
 		void CreateRenderTexture();
 
+		void DepthStencilViewInitialize();
+
 		// ディスクリプタヒープ作成（外部から呼ばれる）
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(
 			D3D12_DESCRIPTOR_HEAP_TYPE heapType,
@@ -191,7 +193,7 @@ namespace MyEngine {
 		void CreateBuffer(int32_t width, int32_t height);
 		void DescriptorHeap();
 		void RenderTargetView();
-		void DepthStencilViewInitialize();
+	
 		void FenceInitialize();
 		void ViewPortInitialize();
 		void ScissorRectInitialize();

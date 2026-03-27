@@ -41,7 +41,7 @@ namespace MyEngine {
 		DescriptorHeap();
 		RenderTargetView();
 		//CreateRenderTexture();
-		DepthStencilViewInitialize();
+		//DepthStencilViewInitialize();
 		FenceInitialize();
 		ViewPortInitialize();
 		ScissorRectInitialize();

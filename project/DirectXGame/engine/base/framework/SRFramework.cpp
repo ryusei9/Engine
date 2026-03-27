@@ -26,6 +26,7 @@ namespace MyEngine {
 
 		DirectXCommon::GetInstance()->SetSrvmanager(srvManager_.get());
 		DirectXCommon::GetInstance()->CreateRenderTexture();
+		DirectXCommon::GetInstance()->DepthStencilViewInitialize();
 
 		// テクスチャマネージャの初期化
 		TextureManager::GetInstance()->Initialize(srvManager_.get());

@@ -19,7 +19,7 @@ namespace MyEngine {
 		constexpr D3D12_FILL_MODE kFillModeSolid = D3D12_FILL_MODE_SOLID;
 
 		// デプス設定
-		constexpr BOOL kDepthEnable = TRUE;
+		constexpr BOOL kDepthEnable = FALSE;
 		constexpr D3D12_DEPTH_WRITE_MASK kDepthWriteMaskAll = D3D12_DEPTH_WRITE_MASK_ALL;
 		constexpr D3D12_COMPARISON_FUNC kDepthFuncLessEqual = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
@@ -109,12 +109,12 @@ namespace MyEngine {
 		// ルートパラメータ0: CBV（マテリアル）
 		rootParameters[SpriteCommonDefaults::kRootParamIndexMaterial].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 		rootParameters[SpriteCommonDefaults::kRootParamIndexMaterial].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-		rootParameters[SpriteCommonDefaults::kRootParamIndexMaterial].Descriptor.ShaderRegister = SpriteCommonDefaults::kCbvRegister;
+		rootParameters[SpriteCommonDefaults::kRootParamIndexMaterial].Descriptor.ShaderRegister = SpriteCommonDefaults::kCbvMaterialRegister;
 
 		// ルートパラメータ1: CBV（WVP）
 		rootParameters[SpriteCommonDefaults::kRootParamIndexWVP].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 		rootParameters[SpriteCommonDefaults::kRootParamIndexWVP].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-		rootParameters[SpriteCommonDefaults::kRootParamIndexWVP].Descriptor.ShaderRegister = SpriteCommonDefaults::kCbvRegister;
+		rootParameters[SpriteCommonDefaults::kRootParamIndexWVP].Descriptor.ShaderRegister = SpriteCommonDefaults::kCbvWVPRegister;
 
 		// ルートパラメータ2: DescriptorTable（テクスチャ）
 		rootParameters[SpriteCommonDefaults::kRootParamIndexTexture].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
@@ -173,6 +173,9 @@ namespace MyEngine {
 		inputElementDescs_[1].SemanticIndex = kSemanticIndex;
 		inputElementDescs_[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 		inputElementDescs_[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
+		inputElementDescs_[2].SemanticName = "NORMAL";
+		inputElementDescs_[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 
 		inputLayoutDesc_.pInputElementDescs = inputElementDescs_;
 		inputLayoutDesc_.NumElements = SpriteCommonDefaults::kInputElementCount;

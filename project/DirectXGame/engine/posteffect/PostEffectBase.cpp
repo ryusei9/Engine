@@ -21,7 +21,7 @@
 //
 namespace MyEngine {
 
-    void PostEffectBase::Initialize(DirectXCommon* dxCommon) {
+    void PostEffectBase::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager) {
         // 初期化:
         // - DirectXCommon の参照を保持してコマンドリストを取得する。
         // - ビューポートとシザー矩形を画面サイズに合わせて初期化する。
@@ -29,6 +29,7 @@ namespace MyEngine {
         // 前提:
         // - dxCommon は既に初期化済みであること（デバイスやスワップチェインが生成済み）。
         dxCommon_ = dxCommon;
+		srvManager_ = srvManager;
         commandList_ = dxCommon_->GetCommandList();
         ViewPortInitialize();
         ScissorRectInitialize();

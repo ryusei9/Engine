@@ -40,6 +40,9 @@ namespace MyEngine {
 		// SRV生成(Structured Buffer用)
 		void CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structuredByteStride);
 
+		// DepthSRV生成
+		uint32_t CreateDepthSRV(ID3D12Resource* depthResource);
+
 		// 描画前処理
 		void PreDraw();
 

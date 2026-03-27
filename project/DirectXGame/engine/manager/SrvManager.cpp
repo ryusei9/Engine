@@ -101,11 +101,34 @@ namespace MyEngine {
 		CreateSRVInternal(srvIndex, pResource, srvDesc);
 	}
 
+	uint32_t SrvManager::CreateDepthSRV(ID3D12Resource* depthResource)
+	{
+		D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
+		desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+		desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		desc.Texture2D.MipLevels = 1;
+
+		uint32_t index = Allocate();
+
+		directXCommon_->GetDevice()->CreateShaderResourceView(
+			depthResource,
+			&desc,
+			GetCPUDescriptorHandle(index));
+
+		return index;
+	}
+
 	void SrvManager::PreDraw()
 	{
-		// 描画前に DescriptorHeap をコマンドリストに設定
-		ID3D12DescriptorHeap* descriptorHeaps[] = { descriptorHeap_.Get() };
-		directXCommon_->GetCommandList()->SetDescriptorHeaps(1, descriptorHeaps);
+		ID3D12GraphicsCommandList* cmd = directXCommon_->GetCommandList();
+
+		ID3D12DescriptorHeap* heaps[] =
+		{
+			descriptorHeap_.Get()
+		};
+
+		cmd->SetDescriptorHeaps(_countof(heaps), heaps);
 	}
 
 	void SrvManager::SetGraphicsRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex)
@@ -166,7 +189,7 @@ namespace MyEngine {
 	void SrvManager::InitializeFreeIndices()
 	{
 		// 空きインデックスキューを初期化（0..kMaxSRVCount-1 を push）
-		for (uint32_t i = 0; i < kMaxSRVCount; ++i) {
+		for (uint32_t i = 1; i < kMaxSRVCount; ++i) {
 			freeIndices_.push(i);
 		}
 	}

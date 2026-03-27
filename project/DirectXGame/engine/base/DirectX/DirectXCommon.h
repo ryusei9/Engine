@@ -11,6 +11,7 @@
 #include <Vector4.h>
 #include <DepthMaterial.h>
 #include <ResourceManager.h>
+#include <SrvManager.h>
 
 // DirectXCommon用の定数
 namespace DirectXCommonConstants {
@@ -133,6 +134,10 @@ namespace MyEngine {
 		// マスクSRVディスクリプタヒープ作成（外部から呼ばれる）
 		void CreateMaskSRVDescriptorHeap();
 
+		void CreateRenderTexture();
+
+		void DepthStencilViewInitialize();
+
 		// ディスクリプタヒープ作成（外部から呼ばれる）
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(
 			D3D12_DESCRIPTOR_HEAP_TYPE heapType,
@@ -144,10 +149,8 @@ namespace MyEngine {
 		IDxcUtils* GetDxcUtils() const { return dxcUtils_; }
 		IDxcCompiler3* GetDxcCompiler() const { return dxcCompiler_; }
 		IDxcIncludeHandler* GetIncludeHandler() const { return includeHandler_; }
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetSRVDescriptorHeap() const { return srvDescriptorHeap_; }
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetDSVDescriptorHeap() const { return dsvDescriptorHeap_; }
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetCBVSRVUAVDescriptorHeap() const { return cbvSrvUavDescriptorHeap_; }
-		uint32_t GetDescriptorSizeSRV() const { return descriptorSizeSRV_; }
 		uint32_t GetDescriptorSizeDSV() const { return descriptorSizeDSV_; }
 		Microsoft::WRL::ComPtr<IDXGISwapChain4> GetSwapChain() const { return swapChain_; }
 		HANDLE GetFenceEvent() const { return fenceEvent_; }
@@ -156,9 +159,12 @@ namespace MyEngine {
 		uint32_t GetBackBufferIndex() const { return backBufferIndex_; }
 		uint32_t GetBackBufferCount() const { return DirectXCommonConstants::kBackBufferCount; }
 		DissolveParams* GetDissolveParam() const { return dissolveParams_; }
+		ID3D12Resource* GetDepthResource(){return depthStencilResource_.Get();}
 
 		// セッター
 		void SetTimeParams(float time) { timeParams_->time = time; }
+
+		void SetSrvmanager(SrvManager* srvManager) { srvManager_ = srvManager; }
 
 		// 静的ヘルパー関数
 		static D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(
@@ -187,13 +193,12 @@ namespace MyEngine {
 		void CreateBuffer(int32_t width, int32_t height);
 		void DescriptorHeap();
 		void RenderTargetView();
-		void DepthStencilViewInitialize();
+	
 		void FenceInitialize();
 		void ViewPortInitialize();
 		void ScissorRectInitialize();
 		void CreateDXCCompiler();
-		void CreateRenderTexture();
-		void CreateDepthSRVDescriptorHeap();
+		
 		void CreateDissolveParamBuffer();
 		void CreateCBVSRVUAVDescriptorHeap(ID3D12Device* device);
 
@@ -246,17 +251,17 @@ namespace MyEngine {
 		Microsoft::WRL::ComPtr<IDXGIAdapter4> selectedAdapter_;
 		Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain_;
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc_{};
+		SrvManager* srvManager_ = nullptr;
+		uint32_t depthSrvIndex_ = 0;
 
 		// デスクリプタヒープ
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap_;
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap_;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> cbvSrvUavDescriptorHeap_;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> renderTextureRtvHeap_;
 
 		// デスクリプタサイズ
 		uint32_t descriptorSizeRTV_;
-		uint32_t descriptorSizeSRV_;
 		uint32_t descriptorSizeDSV_;
 
 		// コマンド関連

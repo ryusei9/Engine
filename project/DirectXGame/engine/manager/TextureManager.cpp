@@ -90,8 +90,8 @@ namespace MyEngine {
 		assert(IsTextureExists(filePath) && "Texture not found!");
 
 		auto it = textureDatas_.find(filePath);
-		uint32_t textureIndex = static_cast<uint32_t>(std::distance(textureDatas_.begin(), it));
-		return textureIndex;
+		
+		return textureDatas_[filePath].srvIndex;
 	}
 
 	D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(const std::string& filePath)

@@ -21,7 +21,7 @@
 //   * 深度テストは無効化されており、フルスクリーン描画専用の設定になっている。
 //
 namespace MyEngine {
-    void NoisePostEffect::Initialize(DirectXCommon* dxCommon)
+    void NoisePostEffect::Initialize(DirectXCommon* dxCommon,SrvManager* srvManager)
     {
         // 引数を保存し、ベースクラス初期化を行ったうえで本パス固有のリソースを構築する。
         // - timeParamBuffer_ : 時間等のパラメータを格納する CBV（CPU マップ可能）
@@ -29,7 +29,8 @@ namespace MyEngine {
         // - ルートシグネチャ / PSO を生成
         // - 出力用のレンダーターゲクスチャを作成（幅/高は画面サイズ）
         dxCommon_ = dxCommon;
-        PostEffectBase::Initialize(dxCommon);
+		srvManager_ = srvManager;
+        PostEffectBase::Initialize(dxCommon, srvManager);
         timeParamBuffer_ = ResourceManager::CreateBufferResource(dxCommon_->GetDevice().Get(), sizeof(TimeParams));
         timeParamBuffer_->Map(0, nullptr, reinterpret_cast<void**>(&timeParams_));
         timeParams_->time = 0.0f;
@@ -174,9 +175,12 @@ namespace MyEngine {
         // - SRV ヒープをセットし、PSO/RootSignature をバインド
         // - ルートに入力 SRV (t0) と時間パラメータ CBV (b0) を配置
         // - フルスクリーン三角形を DrawInstanced(3,1,0,0) で描画
-        ID3D12DescriptorHeap* heaps[] = { dxCommon_->GetSRVDescriptorHeap().Get() };
-        commandList_->SetDescriptorHeaps(_countof(heaps), heaps);
+        ID3D12DescriptorHeap* heaps[] =
+        {
+            srvManager_->GetDescriptorHeap()
+        };
 
+        commandList_->SetDescriptorHeaps(_countof(heaps), heaps);
         commandList_->SetPipelineState(pipelineState_.Get());
         commandList_->SetGraphicsRootSignature(rootSignature_.Get());
         commandList_->SetGraphicsRootDescriptorTable(0, dxCommon_->GetSRVGPUDescriptorHandle(1));

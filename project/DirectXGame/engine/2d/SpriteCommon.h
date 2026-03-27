@@ -28,11 +28,13 @@ namespace MyEngine {
 		// SRV ベースシェーダレジスタ
 		inline constexpr uint32_t kSrvBaseRegister = 0;
 
-		// CBV シェーダレジスタ（マテリアル・WVP共に b0）
-		inline constexpr uint32_t kCbvRegister = 0;
+		// CBV シェーダレジスタ（マテリアル b0）
+		inline constexpr uint32_t kCbvMaterialRegister = 0;
+
+		inline constexpr uint32_t kCbvWVPRegister = 1;
 
 		// 入力要素数（POSITION, TEXCOORD, NORMAL）
-		inline constexpr uint32_t kInputElementCount = 2;
+		inline constexpr uint32_t kInputElementCount = 3;
 
 		// レンダーターゲット数
 		inline constexpr uint32_t kRenderTargetCount = 1;

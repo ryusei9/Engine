@@ -9,7 +9,7 @@ namespace MyEngine {
     {
     public:
         // 初期化
-        void Initialize(DirectXCommon* dxCommon) override;
+        void Initialize(DirectXCommon* dxCommon, SrvManager* srvManager) override;
 
         // ルートシグネチャの作成
         void CreateRootSignature() override;

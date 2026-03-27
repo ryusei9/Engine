@@ -32,7 +32,7 @@ namespace MyEngine {
 	{
 		assert(winApp);
 		winApp_ = winApp;
-
+		
 		initializeFixFPS();
 		DeviceInitialize();
 		CommandInitialize();
@@ -40,13 +40,13 @@ namespace MyEngine {
 		CreateBuffer(WinApp::kClientWidth, WinApp::kClientHeight);
 		DescriptorHeap();
 		RenderTargetView();
-		CreateRenderTexture();
-		DepthStencilViewInitialize();
+		//CreateRenderTexture();
+		//DepthStencilViewInitialize();
 		FenceInitialize();
 		ViewPortInitialize();
 		ScissorRectInitialize();
 		CreateDXCCompiler();
-		CreateDepthSRVDescriptorHeap();
+		///CreateDepthSRVDescriptorHeap();
 		CreateDissolveParamBuffer();
 
 		timeParamBuffer_ = ResourceManager::CreateBufferResource(device_.Get(), sizeof(TimeParams));
@@ -145,11 +145,9 @@ namespace MyEngine {
 	void DirectXCommon::DescriptorHeap()
 	{
 		descriptorSizeRTV_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-		descriptorSizeSRV_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		descriptorSizeDSV_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
 		rtvDescriptorHeap_ = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, kRTVDescriptorCount, false);
-		srvDescriptorHeap_ = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
 		dsvDescriptorHeap_ = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, kDSVDescriptorCount, false);
 
 		CreateCBVSRVUAVDescriptorHeap(device_.Get());
@@ -193,20 +191,22 @@ namespace MyEngine {
 
 	D3D12_CPU_DESCRIPTOR_HANDLE DirectXCommon::GetSRVCPUDescriptorHandle(uint32_t index)
 	{
-		return GetCPUDescriptorHandle(srvDescriptorHeap_, descriptorSizeSRV_, index);
+		return srvManager_->GetCPUDescriptorHandle(index);
 	}
 
 	D3D12_GPU_DESCRIPTOR_HANDLE DirectXCommon::GetSRVGPUDescriptorHandle(uint32_t index)
 	{
-		return GetGPUDescriptorHandle(srvDescriptorHeap_, descriptorSizeSRV_, index);
+		return srvManager_->GetGPUDescriptorHandle(index);
 	}
 
 	void DirectXCommon::DepthStencilViewInitialize()
 	{
+		assert(srvManager_ != nullptr);
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
 		dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 		device_->CreateDepthStencilView(depthStencilResource_.Get(), &dsvDesc, dsvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart());
+		depthSrvIndex_ = srvManager_->CreateDepthSRV(depthStencilResource_.Get());
 	}
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateDepthStencilTextureResource(
@@ -721,7 +721,11 @@ namespace MyEngine {
 
 	void DirectXCommon::DrawRenderTexture()
 	{
-		ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap_.Get() };
+		ID3D12DescriptorHeap* descriptorHeaps[] =
+		{
+			srvManager_->GetDescriptorHeap()
+		};
+
 		commandList_->SetDescriptorHeaps(1, descriptorHeaps);
 		commandList_->SetGraphicsRootSignature(rootSignature_.Get());
 		commandList_->SetPipelineState(graphicsPipelineState_.Get());
@@ -730,15 +734,7 @@ namespace MyEngine {
 		commandList_->DrawInstanced(3, 1, 0, 0);
 	}
 
-	void DirectXCommon::CreateDepthSRVDescriptorHeap()
-	{
-		D3D12_SHADER_RESOURCE_VIEW_DESC depthTextureSrvDesc = {};
-		depthTextureSrvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-		depthTextureSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		depthTextureSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		depthTextureSrvDesc.Texture2D.MipLevels = 1;
-		device_->CreateShaderResourceView(depthStencilResource_.Get(), &depthTextureSrvDesc, GetSRVCPUDescriptorHandle(1));
-	}
+	
 
 	void DirectXCommon::CreateDepthResource(Camera* camera)
 	{

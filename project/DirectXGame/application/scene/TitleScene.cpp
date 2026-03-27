@@ -94,8 +94,7 @@ void TitleScene::Update()
 		rot.y = 4.7f;
 
 		startRotY_ = rot.y;
-		/*player_->SetRotate(rot);
-		dockTransform_.SetRotate(rot);*/
+		
 	}
 
 	if (startState_ != TitleStartState::None)

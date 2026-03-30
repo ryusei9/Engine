@@ -6,6 +6,7 @@
 #include <list>
 #include <string>
 #include <cstdint>
+#include <PlayerLaser.h>
 
 // 前方宣言
 class PlayerBullet;
@@ -69,7 +70,7 @@ struct PlayerParameters {
 	std::string modelFileName = "player.obj";
 
 	// パーティクルテクスチャファイル名
-	std::string thrusterTexture = "resources/mori.png";
+	std::string thrusterTexture = "resources/circle2.png";
 	std::string explosionTexture = "resources/circle2.png";
 };
 
@@ -196,5 +197,7 @@ private:
 
 	// 演出用プレイヤーが動かないフラグ
 	bool controlEnabled_ = true;
+
+	std::list<std::unique_ptr<PlayerLaser>> lasers_;
 };
 

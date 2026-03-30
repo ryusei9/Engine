@@ -172,6 +172,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\posteffect\PostEffectManager.cpp" />
     <ClCompile Include="DirectXGame\engine\manager\ResourceManager.cpp" />
     <ClCompile Include="DirectXGame\application\Object\enemy\MiniBoss.cpp" />
+    <ClCompile Include="PlayerLaser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DirectXGame\engine\math\MakeRotateXYZMatrix.cpp" />
@@ -262,6 +263,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\Object\player\PlayerBullet.h" />
     <ClInclude Include="DirectXGame\application\Object\enemy\MiniBoss.h" />
     <ClInclude Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.h" />
+    <ClInclude Include="PlayerLaser.h" />
     <ClInclude Include="tools\json.hpp" />
     <ClInclude Include="DirectXGame\engine\math\DepthMaterial.h" />
     <ClInclude Include="DirectXGame\engine\posteffect\GrayscalePostEffect.h" />

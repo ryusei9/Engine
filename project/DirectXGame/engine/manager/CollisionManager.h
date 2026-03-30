@@ -49,6 +49,8 @@ namespace CollisionManagerConstants {
 		// 球体同士の衝突判定
 		bool CheckSphereCollision(Collider* colliderA, Collider* colliderB);
 
+		bool CheckLineSphere(const Vector3& start, const Vector3& end, const Vector3& center, float radius);
+
 		// ゲッター
 		size_t GetColliderCount() const { return colliders_.size(); }
 		const std::list<Collider*>& GetColliders() const { return colliders_; }

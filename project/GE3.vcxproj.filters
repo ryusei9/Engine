@@ -250,6 +250,7 @@
     <ClCompile Include="DirectXGame\application\Object\enemy\MiniBoss.cpp" />
     <ClCompile Include="DirectXGame\application\scene\DebugScene.cpp" />
     <ClCompile Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.cpp" />
+    <ClCompile Include="PlayerLaser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\Object\enemy\Enemy.h">
@@ -498,6 +499,7 @@
     <ClInclude Include="DirectXGame\application\Object\enemy\MiniBoss.h" />
     <ClInclude Include="DirectXGame\application\scene\DebugScene.h" />
     <ClInclude Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.h" />
+    <ClInclude Include="PlayerLaser.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\enemyAttackParameters.json">

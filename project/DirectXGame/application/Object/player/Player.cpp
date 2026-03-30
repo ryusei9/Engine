@@ -84,10 +84,20 @@ void Player::Update()
 		}
 		return false;
 	});
+	lasers_.remove_if([](std::unique_ptr<PlayerLaser>& laser) {
+		if (!laser->IsActive()) {
+			laser.reset();
+			return true;
+		}
+		return false;
+		});
 
 	// 弾の更新
 	for (auto& bullet : bullets_) {
 		bullet->Update();
+	}
+	for (auto& laser : lasers_) {
+		laser->Update();
 	}
 
 	// プレイヤーの移動・攻撃
@@ -130,6 +140,9 @@ void Player::Draw()
 	BaseCharacter::Draw();
 	for (auto& bullet : bullets_) {
 		bullet->Draw();
+	}
+	for (auto& laser : lasers_) {
+		laser->Draw();
 	}
 }
 
@@ -190,6 +203,11 @@ void Player::Attack()
 			bullet->Initialize(worldTransform_.GetTranslate(), "playerBulletParameters");
 			bullet->Update();
 			bullets_.push_back(std::move(bullet));
+
+			auto laser = std::make_unique<PlayerLaser>();
+			laser->Initialize(worldTransform_.GetTranslate(), Vector3(1,0,0));
+			laser->Update();
+			lasers_.push_back(std::move(laser));
 		}
 		// リセット
 		isCharging_ = false;

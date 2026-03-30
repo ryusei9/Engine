@@ -127,6 +127,21 @@ namespace MyEngine {
 		return distance <= radiusSum;
 	}
 
+	bool CollisionManager::CheckLineSphere(const Vector3& start, const Vector3& end, const Vector3& center, float radius)
+	{
+		Vector3 line = end - start;
+		Vector3 toCenter = center - start;
+
+		float t = Dot(toCenter, line) / Dot(line, line);
+		t = std::clamp(t, 0.0f, 1.0f);
+
+		Vector3 closest = start + line * t;
+
+		Vector3 diff = center - closest;
+
+		return Dot(diff, diff) <= radius * radius;
+	}
+
 	// ===== ヘルパー関数 =====
 
 	bool CollisionManager::ShouldCheckCollision(uint32_t typeA, uint32_t typeB) const

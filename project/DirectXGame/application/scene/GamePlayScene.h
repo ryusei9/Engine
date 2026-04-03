@@ -350,6 +350,12 @@ private:
 	Vector3 startPlayerPos_;
 	bool playerStartPosInitialized_ = false;
 
+	// skydome
+	std::unique_ptr<Object3d> skydome_ = nullptr;
+
+	// skydomeワールド変換
+	WorldTransform skydomeTransform_;
+
 private:
 	// 初期化系
 	void InitializeSprite();

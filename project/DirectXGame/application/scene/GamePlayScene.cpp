@@ -104,6 +104,12 @@ void GamePlayScene::InitializeSkybox()
 {
 	skybox_ = std::make_unique<Skybox>();
 	skybox_->Initialize("resources/rostock_laage_airport_4k.dds");
+
+	// skydomeの初期化
+	skydome_ = std::make_unique<Object3d>();
+	skydome_->Initialize("skydome.obj");
+	skydome_->SetPointLight(0.0f);
+	skydomeTransform_.Initialize();
 }
 
 void GamePlayScene::InitializeCollisionManager()
@@ -262,7 +268,7 @@ void GamePlayScene::Draw()
 	DrawUI();
 
 	// スカイボックスの描画
-	DrawSkybox();
+	//DrawSkybox();
 
 	// フェードの描画
 	DrawFade();
@@ -756,6 +762,9 @@ void GamePlayScene::UpdateGameClear()
 	if (isGameClear_) {
 		// プレイヤー操作を無効化
 		player_->SetPlayerControlEnabled(false);
+		for (auto& enemy : enemies_) {
+			enemy->SetControlEnabled(false);
+		}
 		// 初回に待機を開始
 		if (!gameClearCameraWaiting_ && !gameClearCameraMoving_ && !gameClearPlayerLaunched_ && !gameClearFadeStarted_) {
 			gameClearCameraWaiting_ = true;
@@ -1157,6 +1166,8 @@ void GamePlayScene::UpdateUIObjects()
 	// スカイボックスの更新
 	skybox_->Update();
 
+	skydome_->Update();
+
 	// スプライトの更新
 	sprite_->SetPosition(spritePosition_);
 	sprite_->Update();
@@ -1266,6 +1277,8 @@ void GamePlayScene::DrawGameObjects()
 			enemy->Draw();
 		}
 	}
+
+	skydome_->Draw();
 }
 
 // UIの描画
@@ -1302,6 +1315,7 @@ void GamePlayScene::DrawSkybox()
 {
 	skybox_->DrawSettings();
 	skybox_->Draw();
+
 }
 
 // フェードの描画

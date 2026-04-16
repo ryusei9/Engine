@@ -52,6 +52,8 @@ namespace MyEngine {
 		TextureManager::GetInstance()->LoadTexture("resources/Black.png");
 		TextureManager::GetInstance()->LoadTexture("resources/Dock.png");
 		TextureManager::GetInstance()->LoadTexture("resources/fog.png");
+		TextureManager::GetInstance()->LoadTexture("resources/StageClear.png");
+		TextureManager::GetInstance()->LoadTexture("resources/PressSpaceKey.png");
 
 		// スプライト共通部の初期化
 

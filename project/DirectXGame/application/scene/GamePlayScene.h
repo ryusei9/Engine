@@ -28,6 +28,15 @@ namespace GamePlayDefaults {
 	// スプライト座標
 	inline constexpr Vector2 kSpritePos{ 100.0f, 100.0f };
 
+	inline constexpr Vector2 kStageClearSpritePos{ 255.0f, 115.0f };
+	inline constexpr Vector2 kStageClearSpriteSize{ 800.0f, 128.0f };
+	inline constexpr float kStageClearSpriteRotation = 0.0f;
+
+	inline constexpr Vector2 kPressSpaceKeySpritePos{ 93.0f, 480.0f };
+	inline constexpr Vector2 kPressSpaceKeySpriteScale{ 1080.0f, 128.0f };
+	inline constexpr float kPressSpaceKeySpriteRotation = 0.0f;
+
+
 	// スタート演出
 	inline constexpr bool  kStartCameraEasing = true;
 	inline constexpr float kStartCameraDurationSec = 5.0f;
@@ -292,15 +301,26 @@ private:
 
 	// ゲームクリア演出用テキスト
 	std::unique_ptr<Object3d> gameClearText_;
+	std::unique_ptr<Sprite> stageClearSprite_;
 
 	// スペースキーを押してねテキスト
 	std::unique_ptr<Object3d> pressSpaceKeyText_;
+	std::unique_ptr<Sprite> pressSpaceKeySprite_;
 
 	// ゲームクリア演出用テキストの表示フラグ
 	bool gameClearTextVisible_ = false;
 
 	// ゲームクリア演出用テキストのワールド変換
 	WorldTransform gameClearTextTransform_;
+	Vector2 stageClearSpritePos_;
+	Vector2 stageClearSpriteScale_;
+	float stageClearSpriteRotation_;
+
+	Vector2 pressSpaceKeySpritePos_;
+	Vector2 pressSpaceKeySpriteScale_;
+	float pressSpaceKeySpriteRotation_;
+
+	float pressSpaceKeyAlpha_ = 1.0f;
 
 	// スペースキーを押してねテキストのワールド変換
 	WorldTransform pressSpaceKeyTransform_;
@@ -389,5 +409,6 @@ private:
 	void DrawUI();
 	void DrawSkybox();
 	void DrawFade();
+	void DrawSprite();
 };
 

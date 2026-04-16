@@ -157,22 +157,6 @@ void GamePlayScene::InitializeUIObjects()
 	backToTitle_->Initialize("BackToTitle.obj");
 	backToTitle_->SetWorldTransform(textTitle_);
 
-	// ゲームクリアテキスト
-	gameClearText_ = std::make_unique<Object3d>();
-	gameClearText_->Initialize("StageClear.obj");
-
-	gameClearTextTransform_.Initialize();
-	gameClearTextTransform_.SetScale(Vector3(0.528f, 0.528f, 0.528f));
-	gameClearTextTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
-
-	// スペースキーを押してくださいテキスト
-	pressSpaceKeyText_ = std::make_unique<Object3d>();
-	pressSpaceKeyText_->Initialize("PressSpaceKey.obj");
-
-	pressSpaceKeyTransform_.Initialize();
-	pressSpaceKeyTransform_.SetScale(Vector3(0.4f, 0.4f, 0.4f));
-	pressSpaceKeyTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
-
 	// WASDガイド
 	wasdGuide_ = make_unique<Object3d>();
 	wasdGuide_->Initialize("WASD.obj");
@@ -845,16 +829,6 @@ void GamePlayScene::UpdateGameClear()
 				// イージング終了直後にテキストを表示する
 				// カメラ位置から Y +1.2 の位置に表示
 				gameClearTextVisible_ = true;
-
-				// 即時に位置を設定しておく（Draw 側でも毎フレーム更新します）
-				if (gameClearText_) {
-					Camera* cam = cameraManager_->GetMainCamera();
-					if (cam) {
-						Vector3 camPos = cam->GetTranslate();
-						gameClearText_->SetTranslate(camPos + Vector3{ 0.0f, 1.2f, 0.0f });
-						gameClearText_->Update();
-					}
-				}
 			}
 		}
 	}
@@ -1172,20 +1146,6 @@ void GamePlayScene::UpdateUIObjects()
 
 	Vector3 camPos = cam->GetTranslate();
 
-	// ゲームクリアテキストの更新
-	if (gameClearTextVisible_ && gameClearText_) {
-		gameClearTextTransform_.SetTranslate(Vector3(camPos.x, camPos.y + 0.6f, camPos.z + 5.0f));
-
-		pressSpaceKeyTransform_.SetTranslate(camPos + Vector3(0.0f, -0.6f, 5.0f));
-
-		gameClearText_->SetWorldTransform(gameClearTextTransform_);
-		
-		pressSpaceKeyText_->SetWorldTransform(pressSpaceKeyTransform_);
-
-		gameClearText_->Update();
-		
-		pressSpaceKeyText_->Update();
-	}
 	stageClearSprite_->SetPosition(stageClearSpritePos_);
 	stageClearSprite_->SetSize(stageClearSpriteScale_);
 	stageClearSprite_->SetRotation(stageClearSpriteRotation_);
@@ -1324,10 +1284,7 @@ void GamePlayScene::DrawGameObjects()
 void GamePlayScene::DrawUI()
 {
 	// クリアテキストの描画
-	if (gameClearTextVisible_ && gameClearText_) {
-		
-	}
-	else {
+	if (!gameClearTextVisible_ && !gameClearText_) {
 		if (!isStartCameraEasing_) {
 			// インゲーム中のガイド表示
 			if (gameSceneState_ == GameSceneState::InGame) {

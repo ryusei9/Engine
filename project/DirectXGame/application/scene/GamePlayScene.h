@@ -300,30 +300,25 @@ private:
 	const float kGameClearPlayerLaunchSpeed_ = GamePlayDefaults::kGameClearPlayerLaunchSpeed;
 
 	// ゲームクリア演出用テキスト
-	std::unique_ptr<Object3d> gameClearText_;
 	std::unique_ptr<Sprite> stageClearSprite_;
 
 	// スペースキーを押してねテキスト
-	std::unique_ptr<Object3d> pressSpaceKeyText_;
 	std::unique_ptr<Sprite> pressSpaceKeySprite_;
 
 	// ゲームクリア演出用テキストの表示フラグ
 	bool gameClearTextVisible_ = false;
 
-	// ゲームクリア演出用テキストのワールド変換
-	WorldTransform gameClearTextTransform_;
+	// ゲームクリア演出用テキスト用の座標、スケール、回転
 	Vector2 stageClearSpritePos_;
 	Vector2 stageClearSpriteScale_;
 	float stageClearSpriteRotation_;
 
+	// スペースキーを押してねテキスト用の座標、スケール、回転
 	Vector2 pressSpaceKeySpritePos_;
 	Vector2 pressSpaceKeySpriteScale_;
 	float pressSpaceKeySpriteRotation_;
-
+	// スペースキーを押してねテキストの透明度
 	float pressSpaceKeyAlpha_ = 1.0f;
-
-	// スペースキーを押してねテキストのワールド変換
-	WorldTransform pressSpaceKeyTransform_;
 
 	// カーブセグメントタイマー
 	float segmentTimer_ = 0.0f;

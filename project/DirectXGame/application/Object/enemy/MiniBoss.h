@@ -38,11 +38,15 @@ public:
     // 中心座標
     Vector3 GetCenterPosition() const override;
 
-    // HP取得
+    // Getter
     int GetHp() const { return hp_; }
+    float GetRadius() const { return radius_; }
+    State GetState() const { return state_; }
 
-    // HP設定
+    // Setter
     void SetHp(int hp) { hp_ = hp; }
+    void SetRadius(float radius) { radius_ = radius; }
+    void SetState(State state) { state_ = state; }
 
 private:
 

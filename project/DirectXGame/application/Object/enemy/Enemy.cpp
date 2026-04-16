@@ -70,7 +70,7 @@ void Enemy::Initialize(const std::string& parameterFileName)
 	// 敵死亡時のパーティクル設定
 	particleManager_->GetInstance()->SetParticleType(ParticleType::Explosion);
 	// テクスチャ"circle2"を使用
-	particleManager_->GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
+	particleManager_->GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png",false);
 	particleManager_->GetInstance()->CreateParticleGroup("smoke", "resources/circle2.png");
 
 	// 敵死亡時のパーティクルエミッターを初期化

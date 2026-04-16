@@ -38,6 +38,22 @@ void GamePlayScene::InitializeSprite()
 {
 	sprite_ = std::make_unique<Sprite>();
 	sprite_->Initialize(directXCommon_, "resources/BackToTitle.png");
+
+	stageClearSprite_ = std::make_unique<Sprite>();
+	stageClearSprite_->Initialize(directXCommon_, "resources/StageClear.png");
+
+	stageClearSpritePos_ = GamePlayDefaults::kStageClearSpritePos;
+	stageClearSpriteScale_ = GamePlayDefaults::kStageClearSpriteSize;
+	stageClearSpriteRotation_ = GamePlayDefaults::kStageClearSpriteRotation;
+
+	pressSpaceKeySprite_ = std::make_unique<Sprite>();
+	pressSpaceKeySprite_->Initialize(directXCommon_, "resources/PressSpaceKey.png");
+	pressSpaceKeySpritePos_ = GamePlayDefaults::kPressSpaceKeySpritePos;
+	pressSpaceKeySpriteScale_ = GamePlayDefaults::kPressSpaceKeySpriteScale;
+	pressSpaceKeySpriteRotation_ = GamePlayDefaults::kPressSpaceKeySpriteRotation;
+	pressSpaceKeyAlpha_ = 0.0f;
+
+
 }
 
 void GamePlayScene::InitializeAudio()
@@ -258,14 +274,15 @@ void GamePlayScene::Update()
 
 void GamePlayScene::Draw()
 {
-	// スプライトの描画準備
-	SpriteCommon::GetInstance()->DrawSettings();
+	
 
 	// ゲームオブジェクトの描画
 	DrawGameObjects();
 
 	// UIの描画
 	DrawUI();
+
+	DrawSprite();
 
 	// スカイボックスの描画
 	//DrawSkybox();
@@ -319,6 +336,9 @@ void GamePlayScene::DrawImGui()
 	if (ImGui::SliderFloat3("clear Text Scale", &clearScale.x, 0.1f, 10.0f)) {
 		gameClearTextTransform_.SetScale(clearScale);
 	}
+	ImGui::SliderFloat2("clear Sprite Position", &stageClearSpritePos_.x, 0.0f, 800.0f);
+	
+	ImGui::SliderFloat2("Press Space Key Sprite Position", &pressSpaceKeySpritePos_.x, 0.0f, 800.0f);
 
 	// wasdGuideTransform_ の編集
 	Vector3 wasdPos = wasdGuideTransform_.GetTranslate();
@@ -838,6 +858,15 @@ void GamePlayScene::UpdateGameClear()
 			}
 		}
 	}
+	// press space keyテキストのアルファ値を変更して点滅させる
+	if (gameClearTextVisible_) {
+		static float alphaTimer = 0.0f;
+		alphaTimer += GamePlayDefaults::kDeltaTime60Hz * 5.0f; // 点滅の速度調整	
+		float alpha = (std::sin(alphaTimer) + 1.0f) * 0.5f; // 0.0 ～ 1.0 の範囲で変動させる
+		if (pressSpaceKeyText_) {
+			pressSpaceKeyAlpha_ = alpha;
+		}
+	}
 
 	// プレイヤー発射（ゲームクリア中にSPACEで発射した場合の挙動）
 	if (gameClearPlayerLaunched_) {
@@ -1150,12 +1179,22 @@ void GamePlayScene::UpdateUIObjects()
 		pressSpaceKeyTransform_.SetTranslate(camPos + Vector3(0.0f, -0.6f, 5.0f));
 
 		gameClearText_->SetWorldTransform(gameClearTextTransform_);
+		
 		pressSpaceKeyText_->SetWorldTransform(pressSpaceKeyTransform_);
 
 		gameClearText_->Update();
+		
 		pressSpaceKeyText_->Update();
 	}
-
+	stageClearSprite_->SetPosition(stageClearSpritePos_);
+	stageClearSprite_->SetSize(stageClearSpriteScale_);
+	stageClearSprite_->SetRotation(stageClearSpriteRotation_);
+	stageClearSprite_->Update();
+	pressSpaceKeySprite_->SetPosition(pressSpaceKeySpritePos_);
+	pressSpaceKeySprite_->SetSize(pressSpaceKeySpriteScale_);
+	pressSpaceKeySprite_->SetRotation(pressSpaceKeySpriteRotation_);
+	pressSpaceKeySprite_->SetColor(Vector4(1.0f, 1.0f, 1.0f, pressSpaceKeyAlpha_));
+	pressSpaceKeySprite_->Update();
 	// 各種ガイドテキストの位置更新
 	UpdateGuideTextPositions(camPos);
 
@@ -1286,8 +1325,7 @@ void GamePlayScene::DrawUI()
 {
 	// クリアテキストの描画
 	if (gameClearTextVisible_ && gameClearText_) {
-		gameClearText_->Draw();
-		pressSpaceKeyText_->Draw();
+		
 	}
 	else {
 		if (!isStartCameraEasing_) {
@@ -1323,4 +1361,14 @@ void GamePlayScene::DrawFade()
 {
 	SpriteCommon::GetInstance()->DrawSettings();
 	fadeManager_->Draw();
+}
+
+void GamePlayScene::DrawSprite()
+{
+	SpriteCommon::GetInstance()->DrawSettings();
+	if (gameClearTextVisible_ && !gameClearPlayerLaunched_) {
+		stageClearSprite_->Draw();
+		pressSpaceKeySprite_->Draw();
+	}
+	
 }

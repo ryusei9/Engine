@@ -16,6 +16,20 @@ public:
 
     void OnCollision(Collider* other) override;
 
+    // Getter
+    Player* GetPlayer() const { return player_; }
+    float GetHomingTime() const { return homingTime_; }
+    float GetTimer() const { return timer_; }
+    float GetRotateSpeed() const { return rotateSpeed_; }
+    float GetSpeed() const { return speed_; }
+
+    // Setter
+    void SetPlayer(Player* player) { player_ = player; }
+    void SetHomingTime(float homingTime) { homingTime_ = homingTime; }
+    void SetTimer(float timer) { timer_ = timer; }
+    void SetRotateSpeed(float rotateSpeed) { rotateSpeed_ = rotateSpeed; }
+    void SetSpeed(float speed) { speed_ = speed; }
+
 private:
 
     Player* player_ = nullptr;

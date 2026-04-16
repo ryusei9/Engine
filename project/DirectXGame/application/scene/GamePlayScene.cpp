@@ -38,6 +38,22 @@ void GamePlayScene::InitializeSprite()
 {
 	sprite_ = std::make_unique<Sprite>();
 	sprite_->Initialize(directXCommon_, "resources/BackToTitle.png");
+
+	stageClearSprite_ = std::make_unique<Sprite>();
+	stageClearSprite_->Initialize(directXCommon_, "resources/StageClear.png");
+
+	stageClearSpritePos_ = GamePlayDefaults::kStageClearSpritePos;
+	stageClearSpriteScale_ = GamePlayDefaults::kStageClearSpriteSize;
+	stageClearSpriteRotation_ = GamePlayDefaults::kStageClearSpriteRotation;
+
+	pressSpaceKeySprite_ = std::make_unique<Sprite>();
+	pressSpaceKeySprite_->Initialize(directXCommon_, "resources/PressSpaceKey.png");
+	pressSpaceKeySpritePos_ = GamePlayDefaults::kPressSpaceKeySpritePos;
+	pressSpaceKeySpriteScale_ = GamePlayDefaults::kPressSpaceKeySpriteScale;
+	pressSpaceKeySpriteRotation_ = GamePlayDefaults::kPressSpaceKeySpriteRotation;
+	pressSpaceKeyAlpha_ = 0.0f;
+
+
 }
 
 void GamePlayScene::InitializeAudio()
@@ -104,6 +120,12 @@ void GamePlayScene::InitializeSkybox()
 {
 	skybox_ = std::make_unique<Skybox>();
 	skybox_->Initialize("resources/rostock_laage_airport_4k.dds");
+
+	// skydomeの初期化
+	skydome_ = std::make_unique<Object3d>();
+	skydome_->Initialize("skydome.obj");
+	skydome_->SetPointLight(0.0f);
+	skydomeTransform_.Initialize();
 }
 
 void GamePlayScene::InitializeCollisionManager()
@@ -134,22 +156,6 @@ void GamePlayScene::InitializeUIObjects()
 	backToTitle_ = std::make_unique<Object3d>();
 	backToTitle_->Initialize("BackToTitle.obj");
 	backToTitle_->SetWorldTransform(textTitle_);
-
-	// ゲームクリアテキスト
-	gameClearText_ = std::make_unique<Object3d>();
-	gameClearText_->Initialize("StageClear.obj");
-
-	gameClearTextTransform_.Initialize();
-	gameClearTextTransform_.SetScale(Vector3(0.528f, 0.528f, 0.528f));
-	gameClearTextTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
-
-	// スペースキーを押してくださいテキスト
-	pressSpaceKeyText_ = std::make_unique<Object3d>();
-	pressSpaceKeyText_->Initialize("PressSpaceKey.obj");
-
-	pressSpaceKeyTransform_.Initialize();
-	pressSpaceKeyTransform_.SetScale(Vector3(0.4f, 0.4f, 0.4f));
-	pressSpaceKeyTransform_.SetRotate(Vector3{ -1.694f, 0.0f, 0.0f });
 
 	// WASDガイド
 	wasdGuide_ = make_unique<Object3d>();
@@ -252,8 +258,7 @@ void GamePlayScene::Update()
 
 void GamePlayScene::Draw()
 {
-	// スプライトの描画準備
-	SpriteCommon::GetInstance()->DrawSettings();
+	
 
 	// ゲームオブジェクトの描画
 	DrawGameObjects();
@@ -261,8 +266,10 @@ void GamePlayScene::Draw()
 	// UIの描画
 	DrawUI();
 
+	DrawSprite();
+
 	// スカイボックスの描画
-	DrawSkybox();
+	//DrawSkybox();
 
 	// フェードの描画
 	DrawFade();
@@ -313,6 +320,9 @@ void GamePlayScene::DrawImGui()
 	if (ImGui::SliderFloat3("clear Text Scale", &clearScale.x, 0.1f, 10.0f)) {
 		gameClearTextTransform_.SetScale(clearScale);
 	}
+	ImGui::SliderFloat2("clear Sprite Position", &stageClearSpritePos_.x, 0.0f, 800.0f);
+	
+	ImGui::SliderFloat2("Press Space Key Sprite Position", &pressSpaceKeySpritePos_.x, 0.0f, 800.0f);
 
 	// wasdGuideTransform_ の編集
 	Vector3 wasdPos = wasdGuideTransform_.GetTranslate();
@@ -756,6 +766,9 @@ void GamePlayScene::UpdateGameClear()
 	if (isGameClear_) {
 		// プレイヤー操作を無効化
 		player_->SetPlayerControlEnabled(false);
+		for (auto& enemy : enemies_) {
+			enemy->SetControlEnabled(false);
+		}
 		// 初回に待機を開始
 		if (!gameClearCameraWaiting_ && !gameClearCameraMoving_ && !gameClearPlayerLaunched_ && !gameClearFadeStarted_) {
 			gameClearCameraWaiting_ = true;
@@ -816,17 +829,16 @@ void GamePlayScene::UpdateGameClear()
 				// イージング終了直後にテキストを表示する
 				// カメラ位置から Y +1.2 の位置に表示
 				gameClearTextVisible_ = true;
-
-				// 即時に位置を設定しておく（Draw 側でも毎フレーム更新します）
-				if (gameClearText_) {
-					Camera* cam = cameraManager_->GetMainCamera();
-					if (cam) {
-						Vector3 camPos = cam->GetTranslate();
-						gameClearText_->SetTranslate(camPos + Vector3{ 0.0f, 1.2f, 0.0f });
-						gameClearText_->Update();
-					}
-				}
 			}
+		}
+	}
+	// press space keyテキストのアルファ値を変更して点滅させる
+	if (gameClearTextVisible_) {
+		static float alphaTimer = 0.0f;
+		alphaTimer += GamePlayDefaults::kDeltaTime60Hz * 5.0f; // 点滅の速度調整	
+		float alpha = (std::sin(alphaTimer) + 1.0f) * 0.5f; // 0.0 ～ 1.0 の範囲で変動させる
+		if (pressSpaceKeyText_) {
+			pressSpaceKeyAlpha_ = alpha;
 		}
 	}
 
@@ -1134,19 +1146,15 @@ void GamePlayScene::UpdateUIObjects()
 
 	Vector3 camPos = cam->GetTranslate();
 
-	// ゲームクリアテキストの更新
-	if (gameClearTextVisible_ && gameClearText_) {
-		gameClearTextTransform_.SetTranslate(Vector3(camPos.x, camPos.y + 0.6f, camPos.z + 5.0f));
-
-		pressSpaceKeyTransform_.SetTranslate(camPos + Vector3(0.0f, -0.6f, 5.0f));
-
-		gameClearText_->SetWorldTransform(gameClearTextTransform_);
-		pressSpaceKeyText_->SetWorldTransform(pressSpaceKeyTransform_);
-
-		gameClearText_->Update();
-		pressSpaceKeyText_->Update();
-	}
-
+	stageClearSprite_->SetPosition(stageClearSpritePos_);
+	stageClearSprite_->SetSize(stageClearSpriteScale_);
+	stageClearSprite_->SetRotation(stageClearSpriteRotation_);
+	stageClearSprite_->Update();
+	pressSpaceKeySprite_->SetPosition(pressSpaceKeySpritePos_);
+	pressSpaceKeySprite_->SetSize(pressSpaceKeySpriteScale_);
+	pressSpaceKeySprite_->SetRotation(pressSpaceKeySpriteRotation_);
+	pressSpaceKeySprite_->SetColor(Vector4(1.0f, 1.0f, 1.0f, pressSpaceKeyAlpha_));
+	pressSpaceKeySprite_->Update();
 	// 各種ガイドテキストの位置更新
 	UpdateGuideTextPositions(camPos);
 
@@ -1156,6 +1164,8 @@ void GamePlayScene::UpdateUIObjects()
 
 	// スカイボックスの更新
 	skybox_->Update();
+
+	skydome_->Update();
 
 	// スプライトの更新
 	sprite_->SetPosition(spritePosition_);
@@ -1266,17 +1276,15 @@ void GamePlayScene::DrawGameObjects()
 			enemy->Draw();
 		}
 	}
+
+	skydome_->Draw();
 }
 
 // UIの描画
 void GamePlayScene::DrawUI()
 {
 	// クリアテキストの描画
-	if (gameClearTextVisible_ && gameClearText_) {
-		gameClearText_->Draw();
-		pressSpaceKeyText_->Draw();
-	}
-	else {
+	if (!gameClearTextVisible_ && !gameClearText_) {
 		if (!isStartCameraEasing_) {
 			// インゲーム中のガイド表示
 			if (gameSceneState_ == GameSceneState::InGame) {
@@ -1302,6 +1310,7 @@ void GamePlayScene::DrawSkybox()
 {
 	skybox_->DrawSettings();
 	skybox_->Draw();
+
 }
 
 // フェードの描画
@@ -1309,4 +1318,14 @@ void GamePlayScene::DrawFade()
 {
 	SpriteCommon::GetInstance()->DrawSettings();
 	fadeManager_->Draw();
+}
+
+void GamePlayScene::DrawSprite()
+{
+	SpriteCommon::GetInstance()->DrawSettings();
+	if (gameClearTextVisible_ && !gameClearPlayerLaunched_) {
+		stageClearSprite_->Draw();
+		pressSpaceKeySprite_->Draw();
+	}
+	
 }

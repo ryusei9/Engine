@@ -30,6 +30,9 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	titleLogo_ = std::make_unique<Object3d>();
 	titleLogo_->Initialize("title.obj");
 
+	sprite_ = std::make_unique<Sprite>();
+	sprite_->Initialize(directXCommon, "resources/StageClear.png");
+
 	// ワールド変換の初期化
 	titleLogoTransform_.Initialize();
 	titleLogoTransform_.SetRotate(TitleDefaults::kTitleLogoRot);
@@ -196,6 +199,8 @@ void TitleScene::Update()
 	skydome_->Update();
 	dock_->SetWorldTransform(dockTransform_);
 	dock_->Update();
+	sprite_->SetPosition(spritePosition_);
+	sprite_->Update();
 
 	fadeManager_->Update();
 	cameraManager_->Update();
@@ -227,6 +232,7 @@ void TitleScene::Draw()
 
 	/*------スプライトの更新------*/
 	SpriteCommon::GetInstance()->DrawSettings();
+	//sprite_->Draw();
 	
 	// フェードマネージャの描画
 	fadeManager_->Draw();

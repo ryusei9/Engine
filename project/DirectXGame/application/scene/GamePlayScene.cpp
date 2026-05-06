@@ -1223,7 +1223,7 @@ void GamePlayScene::UpdateGuideTextPositions(const Vector3& camPos)
 
 	// ESCガイド
 	Vector3 escPos = escGuideTransform_.GetTranslate();
-	escPos.x = camPos.x - 1.3f;
+	escPos.x = camPos.x - 1.5f;
 	escPos.y = camPos.y - 1.5f;
 	escPos.z = camPos.z + 5.0f;
 	escGuideTransform_.SetTranslate(escPos);
@@ -1312,7 +1312,7 @@ void GamePlayScene::DrawGameObjects()
 void GamePlayScene::DrawUI()
 {
 	// クリアテキストの描画
-	if (!gameClearTextVisible_ && !stageClearSprite_) {
+	if (!gameClearTextVisible_) {
 		if (!isStartCameraEasing_) {
 			// インゲーム中のガイド表示
 			if (gameSceneState_ == GameSceneState::InGame) {

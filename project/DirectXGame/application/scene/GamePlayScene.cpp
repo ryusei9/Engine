@@ -53,7 +53,14 @@ void GamePlayScene::InitializeSprite()
 	pressSpaceKeySpriteRotation_ = GamePlayDefaults::kPressSpaceKeySpriteRotation;
 	pressSpaceKeyAlpha_ = 0.0f;
 
+	chargeUISprite_ = std::make_unique<Sprite>();
+	chargeUISprite_->Initialize(directXCommon_, "resources/ChargeRod.png");
+	chargeUISpritePos_ = GamePlayDefaults::kChargeUISpritePos;
 
+	chargeGaugeSprite_ = std::make_unique<Sprite>();
+	chargeGaugeSprite_->Initialize(directXCommon_, "resources/ChargeGauge.png");
+	chargeGaugeSpritePos_ = GamePlayDefaults::kChargeGaugeSpritePos;
+	chargeGaugeSpriteScale_ = GamePlayDefaults::kChargeGaugeSpriteSize;
 }
 
 void GamePlayScene::InitializeAudio()
@@ -311,6 +318,11 @@ void GamePlayScene::DrawImGui()
 	ImGui::SliderFloat2("clear Sprite Position", &stageClearSpritePos_.x, 0.0f, 800.0f);
 	
 	ImGui::SliderFloat2("Press Space Key Sprite Position", &pressSpaceKeySpritePos_.x, 0.0f, 800.0f);
+
+	ImGui::SliderFloat2("Charge UI Sprite Position", &chargeUISpritePos_.x, 0.0f, 800.0f);
+
+	ImGui::SliderFloat2("Charge Gauge Sprite Position", &chargeGaugeSpritePos_.x, 0.0f, 800.0f);
+	ImGui::SliderFloat("Charge Gauge Sprite Scale", &chargeGaugeSpriteScale_.x, 0.0f, 594.0f);
 
 	// wasdGuideTransform_ の編集
 	Vector3 wasdPos = wasdGuideTransform_.GetTranslate();
@@ -1143,6 +1155,34 @@ void GamePlayScene::UpdateUIObjects()
 	pressSpaceKeySprite_->SetRotation(pressSpaceKeySpriteRotation_);
 	pressSpaceKeySprite_->SetColor(Vector4(1.0f, 1.0f, 1.0f, pressSpaceKeyAlpha_));
 	pressSpaceKeySprite_->Update();
+
+	chargeUISprite_->SetPosition(chargeUISpritePos_);
+	chargeUISprite_->Update();
+
+	chargeGaugeSprite_->SetPosition(chargeGaugeSpritePos_);
+	float chargeRate = player_->GetChargeRate();
+	if (chargeRate >= 1.0f) {
+		chargeBlinkTimer_ += GamePlayDefaults::kDeltaTime60Hz * 8.0f; // 点滅速度
+		float t = (std::sin(chargeBlinkTimer_) + 1.0f) * 0.5f; // 0～1
+
+		// 白く点滅（RGBを上げる）
+		Vector4 color = {
+			1.0f,
+			1.0f,
+			1.0f,
+			0.5f + t * 0.5f // 半透明〜完全表示
+		};
+
+		chargeGaugeSprite_->SetColor(color);
+	}
+	else {
+		// 通常状態に戻す
+		chargeGaugeSprite_->SetColor(Vector4(1, 1, 1, 1));
+		chargeBlinkTimer_ = 0.0f;
+	}
+	chargeGaugeSprite_->SetVisibleRate(chargeRate);
+	chargeGaugeSprite_->Update();
+
 	// 各種ガイドテキストの位置更新
 	UpdateGuideTextPositions(camPos);
 
@@ -1311,6 +1351,8 @@ void GamePlayScene::DrawFade()
 void GamePlayScene::DrawSprite()
 {
 	SpriteCommon::GetInstance()->DrawSettings();
+	chargeUISprite_->Draw();
+	chargeGaugeSprite_->Draw();
 	if (gameClearTextVisible_ && !gameClearPlayerLaunched_) {
 		stageClearSprite_->Draw();
 		pressSpaceKeySprite_->Draw();

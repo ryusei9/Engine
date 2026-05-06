@@ -65,6 +65,8 @@ namespace MyEngine {
 		float top = kAnchorTop - anchorPoint_.y;
 		float bottom = kAnchorBottom - anchorPoint_.y;
 
+		float visibleRight = left + (right - left) * visibleRate_;
+
 		// テクスチャメタデータの取得
 		const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(filePath_);
 
@@ -73,6 +75,8 @@ namespace MyEngine {
 		float tex_right = (textureLeftTop_.x + textureSize_.x) / static_cast<float>(metadata.width);
 		float tex_top = textureLeftTop_.y / static_cast<float>(metadata.height);
 		float tex_bottom = (textureLeftTop_.y + textureSize_.y) / static_cast<float>(metadata.height);
+
+		float tex_visible_right = tex_left + (tex_right - tex_left) * visibleRate_;
 
 		// 左右反転
 		if (isFlipX_) {
@@ -95,12 +99,12 @@ namespace MyEngine {
 		vertexData_[1].texcoord = { tex_left, tex_top };
 		vertexData_[1].normal = kSpriteNormal;
 
-		vertexData_[2].position = { right, bottom, kSpriteDepth, kHomogeneousW };
-		vertexData_[2].texcoord = { tex_right, tex_bottom };
+		vertexData_[2].position = { visibleRight, bottom, kSpriteDepth, kHomogeneousW };
+		vertexData_[2].texcoord = { tex_visible_right, tex_bottom };
 		vertexData_[2].normal = kSpriteNormal;
 
-		vertexData_[3].position = { right, top, kSpriteDepth, kHomogeneousW };
-		vertexData_[3].texcoord = { tex_right, tex_top };
+		vertexData_[3].position = { visibleRight, top, kSpriteDepth, kHomogeneousW };
+		vertexData_[3].texcoord = { tex_visible_right, tex_top };
 		vertexData_[3].normal = kSpriteNormal;
 
 		// インデックスデータの更新（三角形1、三角形2）

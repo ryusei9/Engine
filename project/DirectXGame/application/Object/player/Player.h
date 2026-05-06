@@ -22,7 +22,7 @@ namespace PlayerDefaults {
 	inline constexpr float kDelta60Hz         = 1.0f / 60.0f;
 
 	// チャージ関連
-	inline constexpr float kChargeReadySec    = 3.0f;
+	inline constexpr float kChargeReadySec    = 1.0f;
 
 	// パーティクル
 	inline constexpr uint32_t kThrusterRate   = 150;
@@ -134,6 +134,10 @@ public:
 	// パラメータを取得
 	const PlayerParameters& GetParameters() const { return parameters_; }
 
+	float GetChargeRate() const {
+		return std::clamp(chargeTime_ / parameters_.chargeReadySec, 0.0f, 1.0f);
+	}
+
 	/*------セッター------*/
 
 	// プレイヤーのコントロール有効フラグを設定
@@ -196,5 +200,8 @@ private:
 
 	// 演出用プレイヤーが動かないフラグ
 	bool controlEnabled_ = true;
+
+	// デバッグ用無敵フラグ
+	bool debugInvincible_ = false;
 };
 

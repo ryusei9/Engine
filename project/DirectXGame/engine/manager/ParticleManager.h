@@ -21,7 +21,7 @@ namespace MyEngine {
 	/// </summary>
 	namespace ParticleManagerConstants {
 		// インスタンシング
-		constexpr uint32_t kMaxInstanceCount = 100;
+		constexpr uint32_t kMaxInstanceCount = 2000;
 
 		// デルタタイム
 		constexpr float kDeltaTime = 1.0f / 60.0f;
@@ -45,7 +45,7 @@ namespace MyEngine {
 		constexpr float kParticleLifeTimeMin = 1.0f;
 		constexpr float kParticleLifeTimeMax = 3.0f;
 		constexpr float kThrusterLifeTime = 0.1f;
-		constexpr float kSmokeLifeTime = 0.1f;
+		constexpr float kSmokeLifeTime = 0.2f;
 
 		// パーティクルサイズ
 		constexpr float kDefaultParticleScale = 1.0f;
@@ -252,6 +252,7 @@ namespace MyEngine {
 		void SetParticleType(ParticleType type);
 		void SetParticleScale(const Vector3& scale) { uvTransform_.scale = scale; }
 		void SetIsSmoke(bool isSmoke) { isSmoke_ = isSmoke; }
+
 
 	private:
 		/*------プライベートメンバ関数------*/

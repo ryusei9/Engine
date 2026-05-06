@@ -153,5 +153,7 @@ private:
 	std::unique_ptr<Sprite> sprite_;
 
 	Vector2 spritePosition_ = { 0.0f, 0.0f };
+
+	std::unique_ptr<ParticleEmitter> thrusterEmitter_;
 };
 

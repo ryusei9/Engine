@@ -113,7 +113,7 @@ namespace MyEngine {
 		ParticleManager::GetInstance()->Initialize(srvManager_.get(), camera_.get());
 
 		ParticleManager::GetInstance()->CreateParticleGroup("thruster", "resources/circle2.png",true);
-		ParticleManager::GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
+		ParticleManager::GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png",true);
 		ParticleManager::GetInstance()->CreateParticleGroup("smoke", "resources/fog.png");
 		// シーンマネージャの初期化
 		sceneManager_ = std::make_unique<SceneManager>();

@@ -25,8 +25,8 @@ namespace PlayerDefaults {
 	inline constexpr float kChargeReadySec    = 3.0f;
 
 	// パーティクル
-	inline constexpr uint32_t kThrusterRate   = 60;
-	inline constexpr uint32_t kThrusterCount  = 3;
+	inline constexpr uint32_t kThrusterRate   = 150;
+	inline constexpr uint32_t kThrusterCount  = 60;
 	inline constexpr float    kThrusterOffsetX = 0.2f;
 	inline constexpr float    kExplosionRate  = 1.0f;
 	inline constexpr uint32_t kExplosionCount = 0;

@@ -307,19 +307,7 @@ void GamePlayScene::DrawImGui()
 		textTitle_.SetRotate(textRot);
 	}
 
-	// gameClearTextTransform_ の編集
-	Vector3 clearPos = gameClearTextTransform_.GetTranslate();
-	Vector3 clearRot = gameClearTextTransform_.GetRotate();
-	Vector3 clearScale = gameClearTextTransform_.GetScale();
-	if (ImGui::SliderFloat3("clear Text Position", &clearPos.x, -10.0f, 10.0f)) {
-		gameClearTextTransform_.SetTranslate(clearPos);
-	}
-	if (ImGui::SliderFloat3("clear Text rotation", &clearRot.x, -3.14f, 3.14f)) {
-		gameClearTextTransform_.SetRotate(clearRot);
-	}
-	if (ImGui::SliderFloat3("clear Text Scale", &clearScale.x, 0.1f, 10.0f)) {
-		gameClearTextTransform_.SetScale(clearScale);
-	}
+	
 	ImGui::SliderFloat2("clear Sprite Position", &stageClearSpritePos_.x, 0.0f, 800.0f);
 	
 	ImGui::SliderFloat2("Press Space Key Sprite Position", &pressSpaceKeySpritePos_.x, 0.0f, 800.0f);
@@ -837,7 +825,7 @@ void GamePlayScene::UpdateGameClear()
 		static float alphaTimer = 0.0f;
 		alphaTimer += GamePlayDefaults::kDeltaTime60Hz * 5.0f; // 点滅の速度調整	
 		float alpha = (std::sin(alphaTimer) + 1.0f) * 0.5f; // 0.0 ～ 1.0 の範囲で変動させる
-		if (pressSpaceKeyText_) {
+		if (pressSpaceKeySprite_) {
 			pressSpaceKeyAlpha_ = alpha;
 		}
 	}
@@ -1284,7 +1272,7 @@ void GamePlayScene::DrawGameObjects()
 void GamePlayScene::DrawUI()
 {
 	// クリアテキストの描画
-	if (!gameClearTextVisible_ && !gameClearText_) {
+	if (!gameClearTextVisible_ && !stageClearSprite_) {
 		if (!isStartCameraEasing_) {
 			// インゲーム中のガイド表示
 			if (gameSceneState_ == GameSceneState::InGame) {

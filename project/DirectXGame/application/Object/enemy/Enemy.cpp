@@ -176,7 +176,7 @@ void Enemy::Update()
 
 		// パーティクル更新
 		smokeEmitter_->SetPosition(worldTransform.GetTranslate());
-		smokeEmitter_->SetVelocity(particleVelocity);
+		smokeEmitter_->SetVelocity(particleVelocity * 0.2f);
 		smokeEmitter_->Update();
 
 		if (deathTimer_ <= 0.0f) {

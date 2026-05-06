@@ -204,7 +204,9 @@ void Player::OnCollision(Collider* other)
 		if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy) ||
 			other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyBullet) ||
 			other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyMissile)) {
-			SetIsAlive(false);
+			if (!debugInvincible_) {
+				SetIsAlive(false);
+			}
 			respawnTimer_ = parameters_.respawnWaitSec;
 			PlayDeathParticleOnce();
 		}
@@ -216,6 +218,8 @@ void Player::DrawImGui()
 #ifdef USE_IMGUI
 	object3d_->DrawImGui();
 	ImGui::Begin("Player Info");
+	// デバッグ用プレイヤー無敵フラグ
+	ImGui::Checkbox("Debug Invincible", &debugInvincible_);
 	ImGui::Text("Position: (%.2f, %.2f, %.2f)", worldTransform_.GetTranslate().x, worldTransform_.GetTranslate().y, worldTransform_.GetTranslate().z);
 	ImGui::Text("Charge Time: %.2f seconds", chargeTime_);
 	ImGui::Text("Is Charging: %s", isCharging_ ? "Yes" : "No");

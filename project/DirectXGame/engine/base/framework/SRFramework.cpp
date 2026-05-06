@@ -54,6 +54,8 @@ namespace MyEngine {
 		TextureManager::GetInstance()->LoadTexture("resources/fog.png");
 		TextureManager::GetInstance()->LoadTexture("resources/StageClear.png");
 		TextureManager::GetInstance()->LoadTexture("resources/PressSpaceKey.png");
+		TextureManager::GetInstance()->LoadTexture("resources/ChargeRod.png");
+		TextureManager::GetInstance()->LoadTexture("resources/ChargeGauge.png");
 
 		// スプライト共通部の初期化
 
@@ -113,7 +115,7 @@ namespace MyEngine {
 		ParticleManager::GetInstance()->Initialize(srvManager_.get(), camera_.get());
 
 		ParticleManager::GetInstance()->CreateParticleGroup("thruster", "resources/circle2.png",true);
-		ParticleManager::GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png");
+		ParticleManager::GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png",true);
 		ParticleManager::GetInstance()->CreateParticleGroup("smoke", "resources/fog.png");
 		// シーンマネージャの初期化
 		sceneManager_ = std::make_unique<SceneManager>();

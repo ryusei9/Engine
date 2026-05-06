@@ -164,6 +164,19 @@ namespace MyEngine {
 		group.instanceData[group.numParticles].color = particle.color;
 		group.instanceData[group.numParticles].color.w = alpha;
 
+		float t = particle.currentTime / particle.lifeTime;
+
+		// 指数フェード（炎・スラスター向き）
+		float fade = exp(-3.0f * t);
+
+		// 色の明るさそのものを落とす
+		particle.color.x *= fade;
+		particle.color.y *= fade;
+		particle.color.z *= fade;
+
+		// αは補助程度
+		particle.color.w = fade;
+
 		// 風の適用
 		if (isWind_)
 		{
@@ -409,9 +422,10 @@ namespace MyEngine {
 
 		ParticleGroup& particleGroup = particleGroups_[name];
 
-		if (particleGroup.particles.size() >= count) {
+		/*if (particleGroup.particles.size() >= count) {
 			return;
-		}
+		}*/
+		std::uniform_real_distribution<float> spread(-2.0f, 2.0f);
 
 		for (uint32_t index = 0; index < count; ++index)
 		{
@@ -419,7 +433,19 @@ namespace MyEngine {
 				? MakeNewSmokeParticle(randomEngine_, position)
 				: MakeNewThrusterParticle(randomEngine_, position);
 
-			particle.velocity = velocity;
+
+			Vector3 randomOffset = {
+					   spread(randomEngine_),
+					   spread(randomEngine_) * 0.3f,
+					   spread(randomEngine_)
+			};
+
+			if (isSmoke_) {
+				particle.velocity = velocity + randomOffset * 0.5f;
+			}
+			else {
+				particle.velocity = velocity + randomOffset * 1.5f;
+			}
 			particleGroup.particles.push_back(particle);
 		}
 	}
@@ -510,7 +536,10 @@ namespace MyEngine {
 		std::uniform_real_distribution<float> distribution(kParticleSpawnRangeMin, kParticleSpawnRangeMax);
 
 		Particle particle;
-		particle.transform.scale = { kThrusterParticleScale, kThrusterParticleScale, kThrusterParticleScale };
+		std::uniform_real_distribution<float> scaleDist(0.05f, 0.15f);
+		float s = scaleDist(randomEngine);
+
+		particle.transform.scale = { s, s, s };
 		particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
 		particle.transform.translate = translate;
 		particle.color = kColorCyan;
@@ -528,6 +557,7 @@ namespace MyEngine {
 		std::uniform_real_distribution<float> distribution(kParticleSpawnRangeMin, kParticleSpawnRangeMax);
 
 		Particle particle;
+		
 		particle.transform.scale = { kSmokeParticleScale, kSmokeParticleScale, kSmokeParticleScale };
 		particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
 		particle.transform.translate = translate;

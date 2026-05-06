@@ -2,6 +2,7 @@
 #include <imgui.h>
 #include <Object3dCommon.h>
 #include <Lerp.h>
+#include <ParticleManager.h>
 
 void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 {
@@ -62,6 +63,14 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 
 	dockTransform_.Initialize();
 	dockTransform_.SetTranslate(TitleDefaults::kDockPos);
+
+	ParticleManager::GetInstance()->SetParticleType(ParticleType::Normal);
+
+	thrusterEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "thruster");
+
+	thrusterEmitter_->SetParticleRate(150);   // 好きに調整
+	thrusterEmitter_->SetParticleCount(60);
+	thrusterEmitter_->SetThruster(true);
 	
 
 	PostEffectManager::GetInstance()->SetEffectEnabled(1, false);
@@ -70,7 +79,7 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 void TitleScene::Update()
 {
 	input_->Update();
-
+	
 	if (input_->TriggerKey(DIK_SPACE) && startState_ == TitleStartState::None)
 	{
 		startState_ = TitleStartState::CameraMove;
@@ -99,11 +108,28 @@ void TitleScene::Update()
 		startRotY_ = rot.y;
 		
 	}
+	
 
 	if (startState_ != TitleStartState::None)
 	{
 		startTimer_ += 1.0f / 60.0f;
+		Vector3 pos = player_->GetTranslate();
 
+		// プレイヤーの向きからスラスター方向計算
+		float yRad = player_->GetRotate().y;
+
+		Vector3 leftDir = {
+			-std::cos(yRad),
+			0.0f,
+			std::sin(yRad)
+		};
+
+		float power = 2.0f; // タイトル用なので弱めでもOK
+		Vector3 velocity = leftDir * power * 1.5f;
+
+		thrusterEmitter_->SetPosition(pos);
+		thrusterEmitter_->SetVelocity(velocity);
+		thrusterEmitter_->Update();
 		switch (startState_)
 		{
 		case TitleStartState::CameraMove:
@@ -291,6 +317,11 @@ void TitleScene::DrawImGui()
 	if (ImGui::SliderFloat3("dockScale", &dockScale.x, 0.0f, 10.0f)) {
 		dockTransform_.SetScale(dockScale);
 	}
+	Vector3 thrusterPos = thrusterEmitter_->GetPosition();
+	if (ImGui::DragFloat3("thrusterPosition", &thrusterPos.x)) {
+		thrusterEmitter_->SetPosition(thrusterPos);
+	}
+
 
 	// その他のImGui描画
 	skydome_->DrawImGui();

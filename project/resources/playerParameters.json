@@ -2,7 +2,7 @@
   "moveSpeed": 0.1,
   "radius": 0.1,
   "respawnWaitSec": 2.0,
-  "chargeReadySec": 3.0,
+  "chargeReadySec": 2.0,
   "thrusterRate": 60,
   "thrusterCount": 3,
   "thrusterOffsetX": 0.2,

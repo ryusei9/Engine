@@ -36,6 +36,10 @@ namespace GamePlayDefaults {
 	inline constexpr Vector2 kPressSpaceKeySpriteScale{ 1080.0f, 128.0f };
 	inline constexpr float kPressSpaceKeySpriteRotation = 0.0f;
 
+	inline constexpr Vector2 kChargeUISpritePos{ 340.0f, 626.0f };
+
+	inline constexpr Vector2 kChargeGaugeSpritePos{ 343.0f, 629.0f };
+	inline constexpr Vector2 kChargeGaugeSpriteSize{ 594.0f, 58.0f };
 
 	// スタート演出
 	inline constexpr bool  kStartCameraEasing = true;
@@ -370,6 +374,16 @@ private:
 
 	// skydomeワールド変換
 	WorldTransform skydomeTransform_;
+	
+	// チャージUI
+	std::unique_ptr<Sprite> chargeUISprite_ = nullptr;
+	Vector2 chargeUISpritePos_;
+
+	std::unique_ptr<Sprite> chargeGaugeSprite_ = nullptr;
+	Vector2 chargeGaugeSpritePos_;
+	Vector2 chargeGaugeSpriteScale_;
+
+	float chargeBlinkTimer_ = 0.0f;
 
 private:
 	// 初期化系

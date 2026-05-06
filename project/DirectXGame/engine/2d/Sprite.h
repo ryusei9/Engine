@@ -11,6 +11,8 @@
 #include <string>
 #include <cstdint>
 #include <wrl/client.h>
+#include <memory>
+#include <algorithm>
 
 namespace MyEngine{
 
@@ -140,6 +142,8 @@ namespace MyEngine{
 		// テクスチャ切り出しサイズの設定
 		void SetTextureSize(const Vector2& textureSize) { textureSize_ = textureSize; }
 
+		void SetVisibleRate(float rate) { visibleRate_ = std::clamp(rate, 0.0f, 1.0f); }
+
 	private:
 		/*------プライベートメンバ関数------*/
 
@@ -210,5 +214,8 @@ namespace MyEngine{
 
 		// テクスチャファイルパス
 		std::string filePath_;
+
+		// 表示割合（0.0f～1.0f）
+		float visibleRate_ = 1.0f;
 	};
 }

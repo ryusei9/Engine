@@ -129,7 +129,9 @@ namespace MyEngine {
 		struct Particle {
 			Transform transform;
 			Vector3 velocity;
-			Vector4 color;
+			Vector4 startColor;
+			Vector4 endColor;
+			Vector4 currentColor;
 			float lifeTime;
 			float currentTime;
 			bool isExplosion = false;

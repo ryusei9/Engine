@@ -161,33 +161,38 @@ namespace MyEngine {
 		group.instanceData[group.numParticles].WVP = worldViewProjectionMatrix;
 		group.instanceData[group.numParticles].World = worldMatrix;
 
-		// 色とアルファ値を設定
-		float alpha = 1.0f - (particle.currentTime / particle.lifeTime);
-		group.instanceData[group.numParticles].color = particle.color;
-		group.instanceData[group.numParticles].color.w = alpha;
-		if (particleType_ == ParticleType::Charge)
+
+		// 爆発パーティクルの更新
+		if (particle.isExplosion)
 		{
-			float t = particle.currentTime / particle.lifeTime;
+			UpdateExplosionParticle(particle);
+		}
+		// 色とアルファ値を設定
+		float t =
+			particle.currentTime /
+			particle.lifeTime;
 
-			// 徐々に濃く
-			particle.color.w = (std::min)(t * 2.0f, 1.0f);
+		t = std::clamp(t, 0.0f, 1.0f);
 
-			// 中心近くでさらに強く
-			particle.color.w *= 1.5f;
+		Vector4 currentColor{};
+
+		if (particle.isExplosion)
+		{
+			currentColor = particle.currentColor;
+		}
+		else
+		{
+			currentColor = Lerp(
+				particle.startColor,
+				particle.endColor,
+				t
+			);
 		}
 
-		float t = particle.currentTime / particle.lifeTime;
 
-		// 指数フェード（炎・スラスター向き）
-		float fade = exp(-3.0f * t);
 
-		// 色の明るさそのものを落とす
-		particle.color.x *= fade;
-		particle.color.y *= fade;
-		particle.color.z *= fade;
-
-		// αは補助程度
-		particle.color.w = fade;
+		group.instanceData[group.numParticles].color = currentColor;
+		   
 
 		// 風の適用
 		if (isWind_)
@@ -195,11 +200,7 @@ namespace MyEngine {
 			ApplyWind(particle);
 		}
 
-		// 爆発パーティクルの更新
-		if (particle.isExplosion)
-		{
-			UpdateExplosionParticle(particle);
-		}
+		
 
 		// パーティクルタイプ別の処理
 		if (particleType_ == ParticleType::Cylinder)
@@ -218,11 +219,26 @@ namespace MyEngine {
 			{
 				Vector3 dir = Normalize(toTarget);
 
-				// 中心へ吸引
-				particle.velocity += dir * 0.08f;
+				Vector3 tangent = {
+					-dir.z,
+					0.0f,
+					dir.x
+				};
 
-				// 減衰
-				particle.velocity *= 0.92f;
+				float force = 0.02f + (1.0f / length) * 0.1f;
+
+				particle.velocity += dir * force;
+				particle.velocity += tangent * 0.03f;
+
+				float scale = length * 0.05f;
+
+				scale = std::clamp(scale, 0.02f, 0.15f);
+
+				particle.transform.scale = { scale, scale, scale };
+			}
+			if (length < 0.2f)
+			{
+				particle.currentTime = particle.lifeTime;
 			}
 		}
 	}
@@ -266,7 +282,7 @@ namespace MyEngine {
 		// ルートシグネチャを設定
 		commandList->SetGraphicsRootSignature(rootSignature_.Get());
 
-		
+
 		// プリミティブトポロジを設定
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -387,6 +403,8 @@ namespace MyEngine {
 			return MakeNewRingParticle(randomEngine_, position);
 		case ParticleType::Cylinder:
 			return MakeNewCylinderParticle(randomEngine_, position);
+		case ParticleType::Charge:
+			return MakeNewChargeParticle(randomEngine_, position);
 		default:
 			return MakeNewParticle(randomEngine_, position);
 		}
@@ -404,7 +422,20 @@ namespace MyEngine {
 			particle.transform.scale = kExplosionCenterScale;
 			particle.transform.rotate = kExplosionCenterRotation;
 			particle.transform.translate = position;
-			particle.color = kExplosionColorCenter;
+			particle.startColor = {
+				1.0f,
+				1.0f,
+				0.8f,
+				1.0f
+			};
+
+			particle.endColor = {
+				0.8f,
+				0.2f,
+				0.0f,
+				0.0f
+			};
+			particle.currentColor = particle.startColor;
 			particle.lifeTime = kExplosionCenterLifeTime;
 			particle.currentTime = 0.0f;
 			particle.velocity = kExplosionCenterVelocity;
@@ -433,7 +464,20 @@ namespace MyEngine {
 			particle.transform.scale = { 0.0f, 0.0f, 0.0f };
 			particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
 			particle.transform.translate = position + Vector3{ x, y, z };
-			particle.color = kExplosionColorSub;
+			particle.startColor = {
+				1.0f,
+				1.0f,
+				0.8f,
+				1.0f
+			};
+
+			particle.endColor = {
+				0.8f,
+				0.2f,
+				0.0f,
+				0.0f
+			};
+			particle.currentColor = particle.startColor;
 			particle.lifeTime = distLife(randomEngine_);
 			particle.currentTime = distStartTime(randomEngine_);
 			particle.velocity = { 0.0f, 0.0f, 0.0f };
@@ -493,7 +537,8 @@ namespace MyEngine {
 		particle.transform.scale = { kDefaultParticleScale, kDefaultParticleScale, kDefaultParticleScale };
 		particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
 		particle.transform.translate = translate;
-		particle.color = { distColor(randomEngine), distColor(randomEngine), distColor(randomEngine), 1.0f };
+		particle.startColor = { distColor(randomEngine), distColor(randomEngine), distColor(randomEngine), 1.0f };
+		particle.endColor = { distColor(randomEngine), distColor(randomEngine), distColor(randomEngine), 1.0f };
 		particle.lifeTime = distTime(randomEngine);
 		particle.currentTime = 0.0f;
 		particle.velocity = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
@@ -514,7 +559,8 @@ namespace MyEngine {
 		particle.transform.scale = { kPlaneScaleX, distScale(randomEngine), kPlaneScaleZ };
 		particle.transform.rotate = { 0.0f, 0.0f, distRotate(randomEngine) };
 		particle.transform.translate = translate;
-		particle.color = kColorWhite;
+		particle.startColor = kColorWhite;
+		particle.endColor = kColorWhite;
 		particle.lifeTime = kPlaneLifeTime;
 		particle.currentTime = 0.0f;
 		particle.velocity = { 0.0f, 0.0f, 0.0f };
@@ -534,7 +580,8 @@ namespace MyEngine {
 		particle.transform.scale = { kDefaultParticleScale, kDefaultParticleScale, kDefaultParticleScale };
 		particle.transform.rotate = { kRingRotationX, kRingRotationY, distRotate(randomEngine) };
 		particle.transform.translate = translate;
-		particle.color = kColorWhite;
+		particle.startColor = kColorWhite;
+		particle.endColor = kColorWhite;
 		particle.lifeTime = kRingLifeTime;
 		particle.currentTime = 0.0f;
 		particle.velocity = { 0.0f, 0.0f, 0.0f };
@@ -552,7 +599,8 @@ namespace MyEngine {
 		particle.transform.scale = { kDefaultParticleScale, kDefaultParticleScale, kDefaultParticleScale };
 		particle.transform.rotate = kCylinderRotation;
 		particle.transform.translate = translate;
-		particle.color = kColorBlue;
+		particle.startColor = kColorBlue;
+		particle.endColor = kColorBlue;
 		particle.lifeTime = kCylinderLifeTime;
 		particle.currentTime = 0.0f;
 		particle.velocity = { 0.0f, 0.0f, 0.0f };
@@ -573,7 +621,14 @@ namespace MyEngine {
 		particle.transform.scale = { s, s, s };
 		particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
 		particle.transform.translate = translate;
-		particle.color = kColorCyan;
+		particle.startColor = kColorCyan;
+
+		particle.endColor = {
+			0.1f,
+			0.1f,
+			0.1f,
+			0.0f
+		};
 		particle.lifeTime = kThrusterLifeTime;
 		particle.currentTime = 0.0f;
 		particle.velocity = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
@@ -588,11 +643,12 @@ namespace MyEngine {
 		std::uniform_real_distribution<float> distribution(kParticleSpawnRangeMin, kParticleSpawnRangeMax);
 
 		Particle particle;
-		
+
 		particle.transform.scale = { kSmokeParticleScale, kSmokeParticleScale, kSmokeParticleScale };
 		particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
 		particle.transform.translate = translate;
-		particle.color = kColorGray;
+		particle.startColor = kColorGray;
+		particle.endColor = kColorGray;
 		particle.lifeTime = kSmokeLifeTime;
 		particle.currentTime = 0.0f;
 		particle.velocity = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
@@ -621,11 +677,18 @@ namespace MyEngine {
 
 		particle.transform.scale = { 0.15f, 0.15f, 0.15f };
 
-		particle.color = {
+		particle.startColor = {
 			0.2f,
 			1.0f,
 			1.0f,
-			0.0f // 最初透明
+			0.0f
+		};
+
+		particle.endColor = {
+			0.2f,
+			1.0f,
+			1.0f,
+			1.0f
 		};
 
 		particle.lifeTime = 0.5f;
@@ -644,28 +707,29 @@ namespace MyEngine {
 		if (t < kExplosionColorPhase1)
 		{
 			float f = t / kExplosionColorPhase1;
-			particle.color = Lerp(kExplosionColor1, kExplosionColor2, f);
+			particle.currentColor = Lerp(kExplosionColor1, kExplosionColor2, f);
 		}
 		else if (t < kExplosionColorPhase2)
 		{
 			float f = (t - kExplosionColorPhase1) / (kExplosionColorPhase2 - kExplosionColorPhase1);
-			particle.color = Lerp(kExplosionColor2, kExplosionColor3, f);
+			particle.currentColor = Lerp(kExplosionColor2, kExplosionColor3, f);
 		}
 		else if (t < kExplosionColorPhase3)
 		{
 			float f = (t - kExplosionColorPhase2) / (kExplosionColorPhase3 - kExplosionColorPhase2);
-			particle.color = Lerp(kExplosionColor3, kExplosionColor4, f);
+			particle.currentColor = Lerp(kExplosionColor3, kExplosionColor4, f);
 		}
 		else
 		{
 			float f = (t - kExplosionColorPhase3) / (1.0f - kExplosionColorPhase3);
-			particle.color = Lerp(kExplosionColor4, kExplosionColor5, f);
+			particle.currentColor = Lerp(kExplosionColor4, kExplosionColor5, f);
 		}
 
 		// スケール補間
 		float maxScale = particle.isSubExplosion ? particle.maxScale : kExplosionCenterMaxScale;
 		float scale = Lerp(particle.transform.scale.x, maxScale, t);
 		particle.transform.scale = { scale, scale, scale };
+		particle.currentColor.w = 1.0f - t;
 	}
 
 	void ParticleManager::CreateRingVertexData()
@@ -861,6 +925,7 @@ namespace MyEngine {
 		case ParticleType::Normal:
 		case ParticleType::Plane:
 		case ParticleType::Explosion:
+		case ParticleType::Charge:
 			CreateVertexData();
 			break;
 		case ParticleType::Ring:

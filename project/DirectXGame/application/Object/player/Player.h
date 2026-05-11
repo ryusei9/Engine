@@ -190,6 +190,9 @@ private:
 	// 爆発パーティクルエミッター
 	std::unique_ptr<ParticleEmitter> explosionEmitter_;
 
+	// チャージパーティクルエミッター
+	std::unique_ptr<ParticleEmitter> chargeEmitter_;
+
 	// プレイヤー死亡時にパーティクルを一度だけ再生するためのフラグ
 	bool hasPlayedDeathParticle_ = false;
 

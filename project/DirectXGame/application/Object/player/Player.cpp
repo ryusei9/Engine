@@ -59,6 +59,7 @@ void Player::Initialize(const std::string& parameterFileName)
 	SetRadius(parameters_.radius); // コライダーの半径を設定
 
 	
+	ParticleManager::GetInstance()->SetParticleType(ParticleType::Normal);
 
 	// エミッター初期化
 	thrusterEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "thruster");
@@ -66,9 +67,18 @@ void Player::Initialize(const std::string& parameterFileName)
 	thrusterEmitter_->SetParticleCount(parameters_.thrusterCount);
 	thrusterEmitter_->SetThruster(true); // スラスターエミッターを有効化
 
+	ParticleManager::GetInstance()->SetParticleType(ParticleType::Explosion);
 	explosionEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "explosion");
 	explosionEmitter_->SetUseRingParticle(true);
 	explosionEmitter_->SetExplosion(true);
+
+	ParticleManager::GetInstance()->SetParticleType(ParticleType::Charge);
+
+	// チャージパーティクルエミッター
+	chargeEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(),"charge");
+
+	chargeEmitter_->SetParticleRate(1);
+	chargeEmitter_->SetParticleCount(4);
 }
 
 void Player::Update()
@@ -109,6 +119,13 @@ void Player::Update()
 	thrusterEmitter_->SetPosition(pos - Vector3(parameters_.thrusterOffsetX, 0.0f, 0.0f));
 	thrusterEmitter_->SetVelocity(particleVelocity);
 	thrusterEmitter_->Update();
+
+	// チャージパーティクル
+	if (isCharging_)
+	{
+		chargeEmitter_->SetPosition(worldTransform_.GetTranslate());
+		chargeEmitter_->Update();
+	}
 
 	// ワールド変換の更新
 	worldTransform_.Update();

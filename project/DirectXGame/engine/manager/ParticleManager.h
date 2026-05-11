@@ -135,6 +135,7 @@ namespace MyEngine {
 			bool isExplosion = false;
 			bool isSubExplosion = false;
 			float maxScale = ParticleManagerConstants::kDefaultParticleScale;
+			Vector3 targetPosition;
 		};
 
 		// GPU用パーティクル構造体
@@ -226,6 +227,7 @@ namespace MyEngine {
 		Particle MakeNewCylinderParticle(std::mt19937& randomEngine, const Vector3& translate);
 		Particle MakeNewThrusterParticle(std::mt19937& randomEngine, const Vector3& translate);
 		Particle MakeNewSmokeParticle(std::mt19937& randomEngine, const Vector3& translate);
+		Particle MakeNewChargeParticle(std::mt19937& randomEngine, const Vector3& center);
 
 		// パーティクルの更新
 		void UpdateExplosionParticle(Particle& particle);

@@ -11,9 +11,11 @@
 #include <MakeRotateXYZMatrix.h>
 #include <iostream>
 #include <numbers>
+#include <algorithm>
 #include <Lerp.h>
 #include "DirectXCommon.h"
 #include <ResourceManager.h>
+#include <Normalize.h>
 
 namespace MyEngine {
 	using namespace Logger;
@@ -163,6 +165,16 @@ namespace MyEngine {
 		float alpha = 1.0f - (particle.currentTime / particle.lifeTime);
 		group.instanceData[group.numParticles].color = particle.color;
 		group.instanceData[group.numParticles].color.w = alpha;
+		if (particleType_ == ParticleType::Charge)
+		{
+			float t = particle.currentTime / particle.lifeTime;
+
+			// 徐々に濃く
+			particle.color.w = (std::min)(t * 2.0f, 1.0f);
+
+			// 中心近くでさらに強く
+			particle.color.w *= 1.5f;
+		}
 
 		float t = particle.currentTime / particle.lifeTime;
 
@@ -193,6 +205,25 @@ namespace MyEngine {
 		if (particleType_ == ParticleType::Cylinder)
 		{
 			uvTransform_.translate.x += kCylinderUVStep;
+		}
+		if (particleType_ == ParticleType::Charge)
+		{
+			Vector3 toTarget =
+				particle.targetPosition -
+				particle.transform.translate;
+
+			float length = Vector3::Length(toTarget);
+
+			if (length > 0.01f)
+			{
+				Vector3 dir = Normalize(toTarget);
+
+				// 中心へ吸引
+				particle.velocity += dir * 0.08f;
+
+				// 減衰
+				particle.velocity *= 0.92f;
+			}
 		}
 	}
 
@@ -565,6 +596,42 @@ namespace MyEngine {
 		particle.lifeTime = kSmokeLifeTime;
 		particle.currentTime = 0.0f;
 		particle.velocity = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
+
+		return particle;
+	}
+
+	ParticleManager::Particle ParticleManager::MakeNewChargeParticle(std::mt19937& randomEngine, const Vector3& center)
+	{
+		std::uniform_real_distribution<float> distAngle(-0.8f, 0.8f);
+		std::uniform_real_distribution<float> distRadius(2.0f, 6.0f);
+
+		float angle = distAngle(randomEngine);
+		float radius = distRadius(randomEngine);
+
+		Vector3 offset = {
+			std::sin(angle) * radius,
+			0.0f,
+			std::cos(angle) * radius
+		};
+
+		Particle particle;
+
+		particle.transform.translate = center + offset;
+		particle.targetPosition = center;
+
+		particle.transform.scale = { 0.15f, 0.15f, 0.15f };
+
+		particle.color = {
+			0.2f,
+			1.0f,
+			1.0f,
+			0.0f // 最初透明
+		};
+
+		particle.lifeTime = 0.5f;
+		particle.currentTime = 0.0f;
+
+		particle.velocity = { 0,0,0 };
 
 		return particle;
 	}

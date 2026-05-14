@@ -63,7 +63,7 @@ void GameOverScene::Initialize(DirectXCommon* /*directXCommon*/, WinApp* winApp)
 	smokeEffect_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "smoke");
 	smokeEffect_->SetParticleRate(parameters_.rate);
 	smokeEffect_->SetParticleCount(parameters_.count);
-	smokeEffect_->SetSmoke(true);
+	smokeEffect_->SetParticleType(ParticleType::Smoke);
 
 	PostEffectManager::GetInstance()->SetEffectEnabled(1, false);
 }

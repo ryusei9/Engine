@@ -34,18 +34,51 @@ namespace MyEngine {
 
 	void ParticleEmitter::EmitParticles()
 	{
-		if (isExplosion_) {
-			EmitExplosionParticles();
+
+		assert(manager_ != nullptr);
+
+		switch (particleType_)
+		{
+		case ParticleType::Explosion:
+			manager_->EmitExplosion(
+				groupName_,
+				position_,
+				particleCount_
+			);
+			break;
+
+		case ParticleType::Thruster:
+			manager_->EmitWithVelocity(
+				groupName_,
+				position_,
+				particleCount_,
+				velocity_,
+				ParticleType::Thruster
+			);
+			break;
+		case ParticleType::Smoke:
+			manager_->SetIsSmoke(true);
+			manager_->EmitWithVelocity(
+				groupName_,
+				position_,
+				particleCount_,
+				velocity_,
+				ParticleType::Smoke
+			);
+			break;
+
+		case ParticleType::Charge:
+		case ParticleType::Normal:
+		case ParticleType::Ring:
+		case ParticleType::Cylinder:
+			manager_->Emit(
+				groupName_,
+				position_,
+				particleCount_
+			);
+			break;
 		}
-		else if (isThruster_) {
-			EmitThrusterParticles();
-		}
-		else if (isSmoke_) {
-			EmitSmokeParticles();
-		}
-		else {
-			EmitNormalParticles();
-		}
+
 
 		// 発生間隔をリセット
 		interval_ -= static_cast<float>(particleRate_) / particleRate_;
@@ -55,26 +88,6 @@ namespace MyEngine {
 	{
 		assert(manager_ != nullptr && "ParticleManager is null!");
 		manager_->EmitExplosion(groupName_, position_, particleCount_);
-	}
-
-	void ParticleEmitter::EmitThrusterParticles()
-	{
-		assert(manager_ != nullptr && "ParticleManager is null!");
-		manager_->SetIsSmoke(false);
-		manager_->EmitWithVelocity(groupName_, position_, particleCount_, velocity_);
-	}
-
-	void ParticleEmitter::EmitSmokeParticles()
-	{
-		assert(manager_ != nullptr && "ParticleManager is null!");
-		manager_->SetIsSmoke(true);
-		manager_->EmitWithVelocity(groupName_, position_, particleCount_, velocity_);
-	}
-
-	void ParticleEmitter::EmitNormalParticles()
-	{
-		assert(manager_ != nullptr && "ParticleManager is null!");
-		manager_->Emit(groupName_, position_, particleCount_);
 	}
 
 	void ParticleEmitter::UpdateInterval()

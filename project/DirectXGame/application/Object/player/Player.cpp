@@ -59,26 +59,22 @@ void Player::Initialize(const std::string& parameterFileName)
 	SetRadius(parameters_.radius); // コライダーの半径を設定
 
 	
-	ParticleManager::GetInstance()->SetParticleType(ParticleType::Normal);
-
 	// エミッター初期化
 	thrusterEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "thruster");
 	thrusterEmitter_->SetParticleRate(parameters_.thrusterRate);
 	thrusterEmitter_->SetParticleCount(parameters_.thrusterCount);
-	thrusterEmitter_->SetThruster(true); // スラスターエミッターを有効化
+	thrusterEmitter_->SetParticleType(ParticleType::Thruster); // スラスターエミッターを有効化
 
-	ParticleManager::GetInstance()->SetParticleType(ParticleType::Explosion);
+	
 	explosionEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "explosion");
-	explosionEmitter_->SetUseRingParticle(true);
-	explosionEmitter_->SetExplosion(true);
-
-	ParticleManager::GetInstance()->SetParticleType(ParticleType::Charge);
+	explosionEmitter_->SetParticleType(ParticleType::Explosion);
 
 	// チャージパーティクルエミッター
 	chargeEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(),"charge");
 
 	chargeEmitter_->SetParticleRate(1);
 	chargeEmitter_->SetParticleCount(4);
+	chargeEmitter_->SetParticleType(ParticleType::Charge);
 }
 
 void Player::Update()

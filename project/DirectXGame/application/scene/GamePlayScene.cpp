@@ -1438,13 +1438,16 @@ void GamePlayScene::DrawFade()
 void GamePlayScene::DrawSprite()
 {
 	SpriteCommon::GetInstance()->DrawSettings();
-	chargeUISprite_->Draw();
-	chargeGaugeSprite_->Draw();
+	
 	if (gameSceneState_ == GameSceneState::InGame) {
-		if (!isStartCameraEasing_) {
-			wasdGuideSprite_->Draw();
-			spaceKeyGuideSprite_->Draw();
-			escGuideSprite_->Draw();
+		if (!gameClearTextVisible_) {
+			if (!isStartCameraEasing_) {
+				wasdGuideSprite_->Draw();
+				spaceKeyGuideSprite_->Draw();
+				escGuideSprite_->Draw();
+				chargeUISprite_->Draw();
+				chargeGaugeSprite_->Draw();
+			}
 		}
 	}
 	

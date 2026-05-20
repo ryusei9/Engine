@@ -55,12 +55,24 @@ void GamePlayScene::InitializeSprite()
 
 	chargeUISprite_ = std::make_unique<Sprite>();
 	chargeUISprite_->Initialize(directXCommon_, "resources/ChargeRod.png");
-	chargeUISpritePos_ = GamePlayDefaults::kChargeUISpritePos;
+	chargeUISpritePos_ = chargeUIStartPos_;
 
 	chargeGaugeSprite_ = std::make_unique<Sprite>();
 	chargeGaugeSprite_->Initialize(directXCommon_, "resources/ChargeGauge.png");
-	chargeGaugeSpritePos_ = GamePlayDefaults::kChargeGaugeSpritePos;
+	chargeGaugeSpritePos_ = chargeGaugeStartPos_;
 	chargeGaugeSpriteScale_ = GamePlayDefaults::kChargeGaugeSpriteSize;
+
+	wasdGuideSprite_ = std::make_unique<Sprite>();
+	wasdGuideSprite_->Initialize(directXCommon_, "resources/WASD.png");
+	wasdGuideSpritePos_ = wasdGuideStartPos_;
+
+	spaceKeyGuideSprite_ = std::make_unique<Sprite>();
+	spaceKeyGuideSprite_->Initialize(directXCommon_, "resources/SpaceShot.png");
+	spaceKeyGuideSpritePos_ = spaceKeyGuideStartPos_;
+
+	escGuideSprite_ = std::make_unique<Sprite>();
+	escGuideSprite_->Initialize(directXCommon_, "resources/pause.png");
+	escGuideSpritePos_ = escGuideStartPos_;
 }
 
 void GamePlayScene::InitializeAudio()
@@ -313,7 +325,11 @@ void GamePlayScene::DrawImGui()
 	if (ImGui::SliderFloat3("text rotation", &textRot.x, -3.14f, 3.14f)) {
 		textTitle_.SetRotate(textRot);
 	}
+	ImGui::SliderFloat2("space Shot Sprite Position", &spaceKeyGuideSpritePos_.x, 0.0f, 800.0f);
 
+	ImGui::SliderFloat2("WASD Sprite Position", &wasdGuideSpritePos_.x, 0.0f, 800.0f);
+
+	ImGui::SliderFloat2("ESC Sprite Position", &escGuideSpritePos_.x, 0.0f, 1200.0f);
 	
 	ImGui::SliderFloat2("clear Sprite Position", &stageClearSpritePos_.x, 0.0f, 800.0f);
 	
@@ -603,6 +619,10 @@ void GamePlayScene::UpdateStartCameraEasing()
 		}
 
 		cameraMode_ = CameraMode::Free;
+
+		// UI演出開始
+		isChargeUIAnimating_ = true;
+		chargeUIAnimTimer_ = 0.0f;
 	}
 }
 
@@ -889,6 +909,10 @@ void GamePlayScene::UpdateGame()
 		Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
 		//return; // 他の更新をスキップ
 	}
+	else {
+		// UIのイージング
+
+	}
 
 	// ゲームオブジェクトの更新
 	UpdateGameObjects();
@@ -1156,8 +1180,70 @@ void GamePlayScene::UpdateUIObjects()
 	pressSpaceKeySprite_->SetColor(Vector4(1.0f, 1.0f, 1.0f, pressSpaceKeyAlpha_));
 	pressSpaceKeySprite_->Update();
 
+	
+	// -------------------------
+	// チャージUI登場演出
+	// -------------------------
+	if (isChargeUIAnimating_) {
+
+		chargeUIAnimTimer_ += GamePlayDefaults::kDeltaTime60Hz;
+
+		float t = std::clamp(chargeUIAnimTimer_ / GamePlayDefaults::kChargeUIAnimDuration_,0.0f,1.0f);
+
+		// EaseOutBack
+		float c1 = 1.70158f;
+		float c3 = c1 + 1.0f;
+
+		float easeT =
+			1.0f + c3 * (float)std::pow(t - 1.0f, 3) +
+			c1 * (float)std::pow(t - 1.0f, 2);
+
+		chargeGaugeSpritePos_.y =
+			std::lerp(
+				chargeGaugeStartPos_.y,
+				chargeGaugeTargetPos_.y,
+				easeT
+			);
+
+		chargeUISpritePos_.y =
+			std::lerp(
+				chargeUIStartPos_.y,
+				chargeUITargetPos_.y,
+				easeT
+			);
+		wasdGuideSpritePos_.x =
+			std::lerp(
+				wasdGuideStartPos_.x,
+				wasdGuideTargetPos_.x,
+				easeT
+			);
+		spaceKeyGuideSpritePos_.x =
+			std::lerp(
+				spaceKeyGuideStartPos_.x,
+				spaceKeyGuideTargetPos_.x,
+				easeT
+			);
+		escGuideSpritePos_.x =
+			std::lerp(
+				escGuideStartPos_.x,
+				escGuideTargetPos_.x,
+				easeT
+			);
+
+		if (t >= 1.0f) {
+			isChargeUIAnimating_ = false;
+		}
+	}
 	chargeUISprite_->SetPosition(chargeUISpritePos_);
 	chargeUISprite_->Update();
+
+	wasdGuideSprite_->SetPosition(wasdGuideSpritePos_);
+	wasdGuideSprite_->Update();
+	spaceKeyGuideSprite_->SetPosition(spaceKeyGuideSpritePos_);
+	spaceKeyGuideSprite_->Update();
+
+	escGuideSprite_->SetPosition(escGuideSpritePos_);
+	escGuideSprite_->Update();
 
 	chargeGaugeSprite_->SetPosition(chargeGaugeSpritePos_);
 	float chargeRate = player_->GetChargeRate();
@@ -1181,6 +1267,7 @@ void GamePlayScene::UpdateUIObjects()
 		chargeBlinkTimer_ = 0.0f;
 	}
 	chargeGaugeSprite_->SetVisibleRate(chargeRate);
+	
 	chargeGaugeSprite_->Update();
 
 	// 各種ガイドテキストの位置更新
@@ -1316,9 +1403,9 @@ void GamePlayScene::DrawUI()
 		if (!isStartCameraEasing_) {
 			// インゲーム中のガイド表示
 			if (gameSceneState_ == GameSceneState::InGame) {
-				wasdGuide_->Draw();
+				/*wasdGuide_->Draw();
 				spaceKeyGuide_->Draw();
-				escGuide_->Draw();
+				escGuide_->Draw();*/
 			}
 		}
 	}
@@ -1353,6 +1440,14 @@ void GamePlayScene::DrawSprite()
 	SpriteCommon::GetInstance()->DrawSettings();
 	chargeUISprite_->Draw();
 	chargeGaugeSprite_->Draw();
+	if (gameSceneState_ == GameSceneState::InGame) {
+		if (!isStartCameraEasing_) {
+			wasdGuideSprite_->Draw();
+			spaceKeyGuideSprite_->Draw();
+			escGuideSprite_->Draw();
+		}
+	}
+	
 	if (gameClearTextVisible_ && !gameClearPlayerLaunched_) {
 		stageClearSprite_->Draw();
 		pressSpaceKeySprite_->Draw();

@@ -120,6 +120,7 @@ void Player::Update()
 	if (isCharging_)
 	{
 		chargeEmitter_->SetPosition(worldTransform_.GetTranslate());
+		chargeEmitter_->SetTarget(&GetPosition());
 		chargeEmitter_->Update();
 	}
 

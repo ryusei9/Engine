@@ -139,6 +139,7 @@ namespace MyEngine {
 			float maxScale = ParticleManagerConstants::kDefaultParticleScale;
 			Vector3 targetPosition;
 			ParticleType type = ParticleType::Normal;
+			const Vector3* followTarget = nullptr;
 		};
 
 		// GPU用パーティクル構造体
@@ -227,7 +228,7 @@ namespace MyEngine {
 		void Emit(const std::string name, const Vector3& position, uint32_t count);
 		void EmitExplosion(const std::string& name, const Vector3& position, uint32_t count);
 		void EmitWithVelocity(const std::string& name, const Vector3& position, uint32_t count, const Vector3& velocity,ParticleType type);
-
+		void EmitCharge(const std::string& name,const Vector3& position,const Vector3* target,uint32_t count);
 		// パーティクルの生成
 		Particle MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate);
 		Particle MakeNewPlaneParticle(std::mt19937& randomEngine, const Vector3& translate);

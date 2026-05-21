@@ -209,6 +209,12 @@ namespace MyEngine {
 		}
 		if (particle.type == ParticleType::Charge)
 		{
+			// 毎フレーム追従対象を更新
+			if (particle.followTarget)
+			{
+				particle.targetPosition = *particle.followTarget;
+			}
+
 			Vector3 toTarget =
 				particle.targetPosition -
 				particle.transform.translate;
@@ -228,14 +234,27 @@ namespace MyEngine {
 				float force = 0.02f + (1.0f / length) * 0.1f;
 
 				particle.velocity += dir * force;
+
+				// 渦っぽさ
 				particle.velocity += tangent * 0.03f;
 
-				float scale = length * 0.05f;
+				particle.velocity *= 0.95f;
 
+				// 速度制限
+				float speed = Vector3::Length(particle.velocity);
+
+				if (speed > 0.3f)
+				{
+					particle.velocity =
+						Normalize(particle.velocity) * 0.3f;
+				}
+
+				float scale = length * 0.05f;
 				scale = std::clamp(scale, 0.02f, 0.15f);
 
 				particle.transform.scale = { scale, scale, scale };
 			}
+
 			if (length < 0.2f)
 			{
 				particle.currentTime = particle.lifeTime;
@@ -551,6 +570,26 @@ namespace MyEngine {
 		}
 	}
 
+	void ParticleManager::EmitCharge(const std::string& name, const Vector3& position, const Vector3* target, uint32_t count)
+	{
+		assert(particleGroups_.find(name) != particleGroups_.end());
+
+		ParticleGroup& group = particleGroups_[name];
+
+		for (uint32_t i = 0; i < count; ++i)
+		{
+			Particle particle =
+				MakeNewChargeParticle(randomEngine_, position);
+
+			particle.type = ParticleType::Charge;
+
+			// 追従対象を保存
+			particle.followTarget = target;
+
+			group.particles.push_back(particle);
+		}
+	}
+
 	ParticleManager::Particle ParticleManager::MakeNewParticle(
 		std::mt19937& randomEngine,
 		const Vector3& translate)
@@ -692,9 +731,9 @@ namespace MyEngine {
 
 		// +X方向基準
 		Vector3 offset = {
-			std::cos(angle) * radius,
-			0.0f,
-			std::sin(angle) * radius
+			std::cos(angle)* radius,
+			std::sin(angle)* radius,
+			0.0f
 		};
 
 

@@ -68,6 +68,13 @@ namespace MyEngine {
 			break;
 
 		case ParticleType::Charge:
+			manager_->EmitCharge(
+				groupName_,
+				position_,
+				target_,
+				particleCount_
+			);
+			break;
 		case ParticleType::Normal:
 		case ParticleType::Ring:
 		case ParticleType::Cylinder:

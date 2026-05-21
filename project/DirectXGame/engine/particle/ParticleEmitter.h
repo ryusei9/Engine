@@ -52,6 +52,7 @@ namespace MyEngine {
 		void SetParticleRate(uint32_t rate) { particleRate_ = rate; }
 		void SetParticleCount(uint32_t count) { particleCount_ = count; }
 		void SetParticleType(ParticleType type) { particleType_ = type; }
+		void SetTarget(const Vector3* target) { target_ = target; }
 		
 
 		// ゲッター
@@ -106,5 +107,7 @@ namespace MyEngine {
 		float interval_ = ParticleEmitterConstants::kDefaultInterval;
 
 		ParticleType particleType_ = ParticleType::Normal;
+
+		const Vector3* target_ = nullptr;
 	};
 }

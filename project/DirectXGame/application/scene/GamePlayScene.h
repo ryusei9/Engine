@@ -41,6 +41,14 @@ namespace GamePlayDefaults {
 	inline constexpr Vector2 kChargeGaugeSpritePos{ 343.0f, 629.0f };
 	inline constexpr Vector2 kChargeGaugeSpriteSize{ 594.0f, 58.0f };
 
+	constexpr static float kChargeUIAnimDuration_ = 0.6f;
+
+	inline constexpr Vector2 kWASDSpritePos{ 46.0f, 10.0f };
+
+	inline constexpr Vector2 kSpaceShotSpritePos{ 46.0f, 72.0f };
+
+	inline constexpr Vector2 kEscGuideSpritePos{ 900.0f, 134.0f };
+
 	// スタート演出
 	inline constexpr bool  kStartCameraEasing = true;
 	inline constexpr float kStartCameraDurationSec = 5.0f;
@@ -338,9 +346,16 @@ private:
 
 	WorldTransform wasdGuideTransform_;
 
+	std::unique_ptr<Sprite> wasdGuideSprite_ = nullptr;
+
+	Vector2 wasdGuideSpritePos_;
+
 	// スペースキーで弾を撃つ
 	std::unique_ptr<Object3d> spaceKeyGuide_ = nullptr;
 	WorldTransform spaceKeyGuideTransform_;
+
+	std::unique_ptr<Sprite> spaceKeyGuideSprite_ = nullptr;
+	Vector2 spaceKeyGuideSpritePos_;
 
 	// escでポーズ
 	std::unique_ptr<Object3d> escGuide_ = nullptr;
@@ -384,6 +399,29 @@ private:
 	Vector2 chargeGaugeSpriteScale_;
 
 	float chargeBlinkTimer_ = 0.0f;
+
+	// チャージゲージUI演出
+	bool isChargeUIAnimating_ = false;
+	float chargeUIAnimTimer_ = 0.0f;
+
+	Vector2 chargeUIStartPos_ = { 340.0f, 800.0f };
+	Vector2 chargeUITargetPos_ = GamePlayDefaults::kChargeUISpritePos;
+
+	Vector2 chargeGaugeStartPos_ = { 343.0f, 800.0f }; // 画面下
+	Vector2 chargeGaugeTargetPos_ = GamePlayDefaults::kChargeGaugeSpritePos;
+
+	Vector2 wasdGuideStartPos_ = { -300.0f, 10.0f };
+	Vector2 wasdGuideTargetPos_ = GamePlayDefaults::kWASDSpritePos;
+
+	Vector2 spaceKeyGuideStartPos_ = { -300.0f, 72.0f };
+	Vector2 spaceKeyGuideTargetPos_ = GamePlayDefaults::kSpaceShotSpritePos;
+
+
+	std::unique_ptr<Sprite> escGuideSprite_ = nullptr;
+	Vector2 escGuideSpritePos_;
+	Vector2 escGuideSpriteScale_;
+	Vector2 escGuideStartPos_ = { 1200.0f, 10.0f };
+	Vector2 escGuideTargetPos_ = GamePlayDefaults::kEscGuideSpritePos;
 
 private:
 	// 初期化系

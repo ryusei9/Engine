@@ -152,10 +152,10 @@ namespace MyEngine {
 		void SetTranslate(const Vector3& translate) { worldTransform.SetTranslate(translate); }
 		void SetWorldTransform(const WorldTransform& worldTransform) { this->worldTransform = worldTransform; }
 		void SetCamera(Camera* camera) { camera_ = camera; }
-		void SetSkyboxFilePath(std::string filePath);
-		void SetPointLight(float intensity) { pointLightData_->intensity = intensity; }
-		void SetSpotLight(float intensity) { spotLightData_->intensity = intensity; }
-		void SetDirectionalLight(float intensity) { directionalLightData_->intensity = intensity; }
+		void SetSkyboxFilePath(const std::string& filePath);
+		void SetPointLight(const float& intensity) { pointLightData_->intensity = intensity; }
+		void SetSpotLight(const float& intensity) { spotLightData_->intensity = intensity; }
+		void SetDirectionalLight(const float& intensity) { directionalLightData_->intensity = intensity; }
 		void SetMaterialColor(const Vector4& color) { materialData_->color = color; }
 
 	private:
@@ -181,7 +181,7 @@ namespace MyEngine {
 
 		// 球体頂点生成
 		void GenerateSphereVertices();
-		VertexData CalculateSphereVertex(float lat, float lon, float u, float v) const;
+		VertexData CalculateSphereVertex(const float& lat, const float& lon, const float& u, const float& v) const;
 
 		// 描画ヘルパー
 		void BindVertexBuffer();

@@ -600,7 +600,7 @@ namespace MyEngine {
 		}
 
 		// 基底クラス（PlayerBullet）のパラメータ
-		if (deserialized.contains("baseBullet")) {
+		/*if (deserialized.contains("baseBullet")) {
 			const auto& baseBullet = deserialized["baseBullet"];
 
 			if (baseBullet.contains("lifeFrames")) {
@@ -630,7 +630,7 @@ namespace MyEngine {
 			if (baseBullet.contains("modelFileName")) {
 				params.baseBulletParams.modelFileName = baseBullet["modelFileName"].get<std::string>();
 			}
-		}
+		}*/
 
 		return params;
 	}

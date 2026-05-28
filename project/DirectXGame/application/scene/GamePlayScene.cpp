@@ -1440,7 +1440,7 @@ void GamePlayScene::DrawSprite()
 	SpriteCommon::GetInstance()->DrawSettings();
 	
 	if (gameSceneState_ == GameSceneState::InGame) {
-		if (!gameClearTextVisible_) {
+		if (!gameClearTextVisible_ && !gameClearPlayerLaunched_) {
 			if (!isStartCameraEasing_) {
 				wasdGuideSprite_->Draw();
 				spaceKeyGuideSprite_->Draw();

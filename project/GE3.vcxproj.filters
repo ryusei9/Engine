@@ -250,6 +250,8 @@
     <ClCompile Include="DirectXGame\application\Object\enemy\MiniBoss.cpp" />
     <ClCompile Include="DirectXGame\application\scene\DebugScene.cpp" />
     <ClCompile Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\collider\LineCollider.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\collider\SphereCollider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\Object\enemy\Enemy.h">
@@ -498,6 +500,8 @@
     <ClInclude Include="DirectXGame\application\Object\enemy\MiniBoss.h" />
     <ClInclude Include="DirectXGame\application\scene\DebugScene.h" />
     <ClInclude Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.h" />
+    <ClInclude Include="DirectXGame\engine\3d\collider\LineCollider.h" />
+    <ClInclude Include="DirectXGame\engine\3d\collider\SphereCollider.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\enemyAttackParameters.json">

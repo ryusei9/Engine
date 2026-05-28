@@ -22,6 +22,10 @@ namespace MyEngine {
 	class Collider
 	{
 	public:
+		enum class ColliderShape {
+			Sphere,
+			Line
+		};
 		/*------メンバ関数------*/
 
 		// デストラクタ
@@ -43,6 +47,9 @@ namespace MyEngine {
 		// 中心座標の取得（純粋仮想関数）
 		virtual Vector3 GetCenterPosition() const = 0;
 
+		// コライダーの形状を取得（純粋仮想関数）
+		virtual ColliderShape GetShape() const = 0;
+
 		/*------ゲッター------*/
 
 		// 識別IDを取得
@@ -50,7 +57,6 @@ namespace MyEngine {
 
 		// 半径を取得
 		float GetRadius() const { return radius_; }
-
 		/*------セッター------*/
 
 		// 識別IDを設定

@@ -211,11 +211,11 @@ namespace MyEngine {
 		void Finalize();
 
 		// パーティクルグループの追加
-		void CreateParticleGroup(const std::string& name, const std::string textureFilePath, bool isAdditive = false);
+		void CreateParticleGroup(const std::string& name, const std::string& textureFilePath, bool isAdditive = false);
 
 
 		// パーティクルの発生
-		void Emit(const std::string name, const Vector3& position, uint32_t count);
+		void Emit(const std::string& name, const Vector3& position, uint32_t count);
 		void EmitExplosion(const std::string& name, const Vector3& position, uint32_t count);
 		void EmitWithVelocity(const std::string& name, const Vector3& position, uint32_t count, const Vector3& velocity);
 

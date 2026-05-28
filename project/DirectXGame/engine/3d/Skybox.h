@@ -86,7 +86,7 @@ namespace MyEngine {
 
 		// ゲッター
 		WorldTransform& GetWorldTransform() { return worldTransform_; }
-		std::string GetFilePath() const { return filePath_; }
+		const std::string& GetFilePath() const { return filePath_; }
 
 		// セッター
 		void SetCamera(Camera* camera);

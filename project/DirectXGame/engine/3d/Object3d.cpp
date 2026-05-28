@@ -247,7 +247,7 @@ namespace MyEngine {
 		model_ = ModelManager::GetInstance()->FindModel(filePath);
 	}
 
-	void Object3d::SetSkyboxFilePath(std::string filePath)
+	void Object3d::SetSkyboxFilePath(const std::string& filePath)
 	{
 		// スカイボックス用テクスチャを設定し、SRV ハンドルを更新する
 		filePath_ = filePath;
@@ -409,7 +409,7 @@ namespace MyEngine {
 		}
 	}
 
-	VertexData Object3d::CalculateSphereVertex(float lat, float lon, float u, float v) const
+	VertexData Object3d::CalculateSphereVertex(const float& lat, const float& lon, const float& u, const float& v) const
 	{
 		VertexData vertex;
 		vertex.position = {

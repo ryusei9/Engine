@@ -286,7 +286,7 @@ namespace MyEngine {
 		particleGroups_.clear();
 	}
 
-	void ParticleManager::CreateParticleGroup(const std::string& name, const std::string textureFilePath, bool isAdditive)
+	void ParticleManager::CreateParticleGroup(const std::string& name, const std::string& textureFilePath, bool isAdditive)
 	{
 		// パーティクルグループが既に存在するか確認
 		if (particleGroups_.find(name) != particleGroups_.end())
@@ -326,7 +326,7 @@ namespace MyEngine {
 		particleGroups_.emplace(name, group);
 	}
 
-	void ParticleManager::Emit(const std::string name, const Vector3& position, uint32_t count)
+	void ParticleManager::Emit(const std::string& name, const Vector3& position, uint32_t count)
 	{
 		assert(particleGroups_.find(name) != particleGroups_.end() && "Particle Group is not found");
 

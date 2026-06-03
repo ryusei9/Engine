@@ -75,6 +75,14 @@ namespace MyEngine {
 				particleCount_
 			);
 			break;
+		case ParticleType::Laser:
+			manager_->EmitLaser(
+				groupName_,
+				position_,
+				velocity_,
+				radius_
+			);
+			break;
 		case ParticleType::Normal:
 		case ParticleType::Ring:
 		case ParticleType::Cylinder:

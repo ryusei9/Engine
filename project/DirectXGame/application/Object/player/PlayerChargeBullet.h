@@ -2,7 +2,8 @@
 #include <string>
 #include <cstdint>
 #include "LineCollider.h"
-
+#include "ParticleEmitter.h"
+#include <memory>
 // 前方宣言
 struct Vector3;
 class Player;
@@ -57,6 +58,10 @@ public:
 	// 衝突判定（敵を貫通する）
 	void OnCollision(Collider* other) override;
 
+	void DebugLaserParticle(const Vector3& start, const Vector3& end);
+
+	void DrawImGui();
+
 	// ダメージ数の取得
 	float GetDamage() const { return damage_; }
 
@@ -82,7 +87,9 @@ private:
 
 	Player* player_ = nullptr;
 
-	float length_ = 30.0f;
+	Vector3 offset_ = { 0.0f, 0.0f, 0.0f };
+
+	float length_ = 10.0f;
 
 	float duration_ = 2.0f;
 
@@ -103,6 +110,8 @@ private:
 
 	// デフォルトパラメータ（静的メンバ）
 	static inline PlayerChargeBulletParameters defaultChargeBulletParameters_;
+
+	std::unique_ptr<ParticleEmitter> debugParticleEmitter_;
 
 	/*Vector3 start_;
 	Vector3 end_;

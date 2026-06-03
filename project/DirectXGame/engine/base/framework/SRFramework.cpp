@@ -121,6 +121,7 @@ namespace MyEngine {
 		ParticleManager::GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png",ParticleType::Explosion,true);
 		ParticleManager::GetInstance()->CreateParticleGroup("smoke", "resources/fog.png",ParticleType::Smoke);
 		ParticleManager::GetInstance()->CreateParticleGroup("charge", "resources/circle2.png",ParticleType::Charge,true);
+		ParticleManager::GetInstance()->CreateParticleGroup("laser", "resources/circle2.png", ParticleType::Laser, true);
 		// シーンマネージャの初期化
 		sceneManager_ = std::make_unique<SceneManager>();
 		sceneManager_->Initialize(winApp_.get());

@@ -3,7 +3,10 @@
 #include "JsonLoader.h"
 #include <Player.h>
 #include <WorldTransform.h>
-
+#include <algorithm>
+#ifdef USE_IMGUI
+#include <imgui.h>
+#endif
 // 静的メンバ変数の初期化
 uint32_t PlayerChargeBullet::sNextSerialNumber_ = PlayerChargeBulletDefaults::kSerialStart;
 
@@ -55,9 +58,15 @@ void PlayerChargeBullet::Initialize(Player* player, const std::string& parameter
 	/*if (objectBullet_) {
 		objectBullet_->SetScale(scaledTransform);
 	}*/
+	debugParticleEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "laser");
+	debugParticleEmitter_->SetParticleCount(1);
+	debugParticleEmitter_->SetParticleType(ParticleType::Laser);
+
+	offset_ = {1.0f, 0.0f, 0.0f };
 
 	// 当たり判定の半径も拡大（パラメータから取得）
 	SetRadius(chargeBulletParameters_.radius);
+	debugParticleEmitter_->SetRadius(chargeBulletParameters_.radius);
 	//chargeBulletParameters_.radius = chargeBulletParameters_.radius;
 }
 
@@ -74,7 +83,7 @@ void PlayerChargeBullet::Update()
 
 	Vector3 end = playerPos + dir * length_;
 
-	SetStart(playerPos);
+	SetStart(playerPos + offset_);
 	SetEnd(end);
 
 	//SetRadius(1.0f);
@@ -84,7 +93,8 @@ void PlayerChargeBullet::Update()
 	if (timer_ >= duration_) {
 		isAlive_ = false;
 	}
-	
+	// デバッグ表示用パーティクル
+	DebugLaserParticle(playerPos + offset_, end);
 }
 
 void PlayerChargeBullet::Draw()
@@ -98,6 +108,44 @@ void PlayerChargeBullet::OnCollision(Collider* other)
 	// チャージ弾は敵を貫通するため、何もしない
 	// 寿命で消えるのみ
 	(void)other; // 未使用パラメータ警告回避
+}
+
+void PlayerChargeBullet::DebugLaserParticle(const Vector3& start, const Vector3& end)
+{
+	Vector3 dir = end - start;
+
+	float length = Vector3::Length(dir);
+
+	// 長さに応じて分割数を決定
+	int segment =
+		static_cast<int>(length * 20.0f);
+
+	// 最低保証
+	segment = std::max<int>(segment, 10);
+
+	for (int i = 0; i <= segment; ++i)
+	{
+		float t =
+			static_cast<float>(i) /
+			static_cast<float>(segment);
+
+		Vector3 pos = start + dir * t;
+
+		debugParticleEmitter_->SetPosition(pos);
+
+		debugParticleEmitter_->Update();
+	}
+}
+
+void PlayerChargeBullet::DrawImGui()
+{
+#ifdef USE_IMGUI
+	ImGui::Text("PlayerChargeBullet Parameters:");
+	ImGui::SliderFloat("Damage", &chargeBulletParameters_.damage, 0.0f, 100.0f);
+	ImGui::SliderFloat("Radius", &chargeBulletParameters_.radius, 0.1f, 5.0f);
+	ImGui::SliderFloat("Scale Factor", &chargeBulletParameters_.scaleFactor, 0.1f, 5.0f);
+	ImGui::DragFloat3("Offset", &offset_.x, 0.1f);
+#endif
 }
 
 void PlayerChargeBullet::SetChargeBulletParameters(const PlayerChargeBulletParameters& parameters)

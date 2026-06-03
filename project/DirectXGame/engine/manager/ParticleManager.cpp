@@ -269,7 +269,7 @@ namespace MyEngine {
 		Matrix4x4 scaleMatrix = MakeScaleMatrix(particle.transform.scale);
 		Matrix4x4 translateMatrix = MakeTranslateMatrix(particle.transform.translate);
 
-		if (useBillboard_)
+		if (useBillboard_ && particle.type != ParticleType::Laser)
 		{
 			return scaleMatrix * billboardMatrix * translateMatrix;
 		}
@@ -449,11 +449,41 @@ namespace MyEngine {
 
 		case ParticleType::Charge:
 			return MakeNewChargeParticle(randomEngine_, position);
-
+		//case ParticleType::Laser:
+			//return MakeNewLaserParticle(randomEngine_, position);
 		default:
 			return MakeNewParticle(randomEngine_, position);
 		}
 	}
+
+	//Matrix4x4 ParticleManager::MakeDirectionMatrix(const Vector3& dir)
+	//{
+	//	/*Vector3 forward = Normalize(dir);
+
+	//	Vector3 up = { 0,1,0 };
+
+	//	Vector3 right = Normalize(Cross(up, forward));
+
+	//	up = Cross(forward, right);
+
+	//	Matrix4x4 mat{};
+
+	//	mat.m[0][0] = right.x;
+	//	mat.m[0][1] = right.y;
+	//	mat.m[0][2] = right.z;
+
+	//	mat.m[1][0] = up.x;
+	//	mat.m[1][1] = up.y;
+	//	mat.m[1][2] = up.z;
+
+	//	mat.m[2][0] = forward.x;
+	//	mat.m[2][1] = forward.y;
+	//	mat.m[2][2] = forward.z;
+
+	//	mat.m[3][3] = 1.0f;
+
+	//	return mat;*/
+	//}
 
 	void ParticleManager::EmitExplosion(const std::string& name, const Vector3& position, uint32_t count)
 	{
@@ -588,6 +618,18 @@ namespace MyEngine {
 
 			group.particles.push_back(particle);
 		}
+	}
+
+	void ParticleManager::EmitLaser(const std::string& name, const Vector3& position, const Vector3& direction,const float& radius)
+	{
+		ParticleGroup& group = particleGroups_[name];
+
+		Particle particle =
+			MakeNewLaserParticle(randomEngine_, position,radius);
+
+		particle.direction = direction;
+
+		group.particles.push_back(particle);
 	}
 
 	ParticleManager::Particle ParticleManager::MakeNewParticle(
@@ -759,6 +801,48 @@ namespace MyEngine {
 		};
 
 		particle.lifeTime = 0.5f;
+		particle.currentTime = 0.0f;
+
+		particle.velocity = { 0,0,0 };
+
+		return particle;
+	}
+
+	ParticleManager::Particle ParticleManager::MakeNewLaserParticle(std::mt19937& randomEngine, const Vector3& translate,const float& radius)
+	{
+		Particle particle;
+
+		// 細長い
+		particle.transform.scale = {
+			radius, // 横幅
+			radius, // 高さ
+			3.0f   // 長さ
+		};
+
+		particle.transform.rotate = {
+			0.0f,
+			0.0f,
+			0.0f
+		};
+
+		particle.transform.translate = translate;
+
+		// 青白レーザー
+		particle.startColor = {
+			0.2f,
+			0.8f,
+			1.0f,
+			1.0f
+		};
+
+		particle.endColor = {
+			0.2f,
+			0.8f,
+			1.0f,
+			0.0f
+		};
+
+		particle.lifeTime = 0.15f;
 		particle.currentTime = 0.0f;
 
 		particle.velocity = { 0,0,0 };

@@ -140,6 +140,7 @@ namespace MyEngine {
 			Vector3 targetPosition;
 			ParticleType type = ParticleType::Normal;
 			const Vector3* followTarget = nullptr;
+			Vector3 direction = { 0,0,1 };
 		};
 
 		// GPU用パーティクル構造体
@@ -229,6 +230,7 @@ namespace MyEngine {
 		void EmitExplosion(const std::string& name, const Vector3& position, uint32_t count);
 		void EmitWithVelocity(const std::string& name, const Vector3& position, uint32_t count, const Vector3& velocity,ParticleType type);
 		void EmitCharge(const std::string& name,const Vector3& position,const Vector3* target,uint32_t count);
+		void EmitLaser(const std::string& name, const Vector3& position, const Vector3& direction,const float& radius);
 		// パーティクルの生成
 		Particle MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate);
 		Particle MakeNewPlaneParticle(std::mt19937& randomEngine, const Vector3& translate);
@@ -237,6 +239,7 @@ namespace MyEngine {
 		Particle MakeNewThrusterParticle(std::mt19937& randomEngine, const Vector3& translate);
 		Particle MakeNewSmokeParticle(std::mt19937& randomEngine, const Vector3& translate);
 		Particle MakeNewChargeParticle(std::mt19937& randomEngine, const Vector3& center);
+		Particle MakeNewLaserParticle(std::mt19937& randomEngine, const Vector3& translate,const float& radius);
 
 		// パーティクルの更新
 		void UpdateExplosionParticle(Particle& particle);
@@ -304,6 +307,8 @@ namespace MyEngine {
 
 		// パーティクルタイプ別の生成
 		Particle CreateParticleByType(ParticleType type, const Vector3& position);
+
+		//Matrix4x4 MakeDirectionMatrix(const Vector3& dir);
 
 		/*------メンバ変数------*/
 

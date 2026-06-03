@@ -49,6 +49,7 @@ namespace MyEngine {
 		// セッター
 		void SetPosition(const Vector3& position) { position_ = position; }
 		void SetVelocity(const Vector3& velocity) { velocity_ = velocity; }
+		void SetRadius(float radius) { radius_ = radius; }
 		void SetParticleRate(uint32_t rate) { particleRate_ = rate; }
 		void SetParticleCount(uint32_t count) { particleCount_ = count; }
 		void SetParticleType(ParticleType type) { particleType_ = type; }
@@ -58,6 +59,7 @@ namespace MyEngine {
 		// ゲッター
 		const Vector3& GetPosition() const { return position_; }
 		const Vector3& GetVelocity() const { return velocity_; }
+		float GetRadius() const { return radius_; }
 		uint32_t GetParticleRate() const { return particleRate_; }
 		uint32_t GetParticleCount() const { return particleCount_; }
 		float GetInterval() const { return interval_; }
@@ -96,6 +98,8 @@ namespace MyEngine {
 			ParticleEmitterConstants::kDefaultVelocityY,
 			ParticleEmitterConstants::kDefaultVelocityZ
 		};
+
+		float radius_ = 1.0f;
 
 		// パーティクルの一秒あたりの最大発生数
 		uint32_t particleRate_ = ParticleEmitterConstants::kDefaultParticleRate;

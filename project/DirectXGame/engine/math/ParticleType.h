@@ -9,5 +9,6 @@ enum class ParticleType {
 	Thruster,
 	Smoke,
 	Explosion,
-	Charge
+	Charge,
+	Laser,
 };

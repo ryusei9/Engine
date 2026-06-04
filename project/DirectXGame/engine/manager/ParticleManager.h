@@ -222,7 +222,7 @@ namespace MyEngine {
 		void Finalize();
 
 		// パーティクルグループの追加
-		void CreateParticleGroup(const std::string& name, const std::string& textureFilePath, bool isAdditive = false);
+		void CreateParticleGroup(const std::string& name, const std::string& textureFilePath, ParticleType type, bool isAdditive = false);
 
 
 		// パーティクルの発生

@@ -353,7 +353,7 @@ namespace MyEngine {
 		particleGroups_.clear();
 	}
 
-	void ParticleManager::CreateParticleGroup(const std::string& name, const std::string& textureFilePath, bool isAdditive)
+	void ParticleManager::CreateParticleGroup(const std::string& name, const std::string& textureFilePath, ParticleType type, bool isAdditive)
 	{
 
 		ParticleGroup group{};

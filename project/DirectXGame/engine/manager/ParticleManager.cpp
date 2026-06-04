@@ -11,9 +11,11 @@
 #include <MakeRotateXYZMatrix.h>
 #include <iostream>
 #include <numbers>
+#include <algorithm>
 #include <Lerp.h>
 #include "DirectXCommon.h"
 #include <ResourceManager.h>
+#include <Normalize.h>
 
 namespace MyEngine {
 	using namespace Logger;
@@ -159,23 +161,38 @@ namespace MyEngine {
 		group.instanceData[group.numParticles].WVP = worldViewProjectionMatrix;
 		group.instanceData[group.numParticles].World = worldMatrix;
 
+
+		// 爆発パーティクルの更新
+		if (particle.isExplosion)
+		{
+			UpdateExplosionParticle(particle);
+		}
 		// 色とアルファ値を設定
-		float alpha = 1.0f - (particle.currentTime / particle.lifeTime);
-		group.instanceData[group.numParticles].color = particle.color;
-		group.instanceData[group.numParticles].color.w = alpha;
+		float t =
+			particle.currentTime /
+			particle.lifeTime;
 
-		float t = particle.currentTime / particle.lifeTime;
+		t = std::clamp(t, 0.0f, 1.0f);
 
-		// 指数フェード（炎・スラスター向き）
-		float fade = exp(-3.0f * t);
+		Vector4 currentColor{};
 
-		// 色の明るさそのものを落とす
-		particle.color.x *= fade;
-		particle.color.y *= fade;
-		particle.color.z *= fade;
+		if (particle.isExplosion)
+		{
+			currentColor = particle.currentColor;
+		}
+		else
+		{
+			currentColor = Lerp(
+				particle.startColor,
+				particle.endColor,
+				t
+			);
+		}
 
-		// αは補助程度
-		particle.color.w = fade;
+
+
+		group.instanceData[group.numParticles].color = currentColor;
+
 
 		// 風の適用
 		if (isWind_)
@@ -183,16 +200,65 @@ namespace MyEngine {
 			ApplyWind(particle);
 		}
 
-		// 爆発パーティクルの更新
-		if (particle.isExplosion)
-		{
-			UpdateExplosionParticle(particle);
-		}
+
 
 		// パーティクルタイプ別の処理
-		if (particleType_ == ParticleType::Cylinder)
+		if (particle.type == ParticleType::Cylinder)
 		{
 			uvTransform_.translate.x += kCylinderUVStep;
+		}
+		if (particle.type == ParticleType::Charge)
+		{
+			// 毎フレーム追従対象を更新
+			if (particle.followTarget)
+			{
+				particle.targetPosition = *particle.followTarget;
+			}
+
+			Vector3 toTarget =
+				particle.targetPosition -
+				particle.transform.translate;
+
+			float length = Vector3::Length(toTarget);
+
+			if (length > 0.01f)
+			{
+				Vector3 dir = Normalize(toTarget);
+
+				Vector3 tangent = {
+					-dir.z,
+					0.0f,
+					dir.x
+				};
+
+				float force = 0.02f + (1.0f / length) * 0.1f;
+
+				particle.velocity += dir * force;
+
+				// 渦っぽさ
+				particle.velocity += tangent * 0.03f;
+
+				particle.velocity *= 0.95f;
+
+				// 速度制限
+				float speed = Vector3::Length(particle.velocity);
+
+				if (speed > 0.3f)
+				{
+					particle.velocity =
+						Normalize(particle.velocity) * 0.3f;
+				}
+
+				float scale = length * 0.05f;
+				scale = std::clamp(scale, 0.02f, 0.15f);
+
+				particle.transform.scale = { scale, scale, scale };
+			}
+
+			if (length < 0.2f)
+			{
+				particle.currentTime = particle.lifeTime;
+			}
 		}
 	}
 
@@ -203,7 +269,7 @@ namespace MyEngine {
 		Matrix4x4 scaleMatrix = MakeScaleMatrix(particle.transform.scale);
 		Matrix4x4 translateMatrix = MakeTranslateMatrix(particle.transform.translate);
 
-		if (useBillboard_)
+		if (useBillboard_ && particle.type != ParticleType::Laser)
 		{
 			return scaleMatrix * billboardMatrix * translateMatrix;
 		}
@@ -235,12 +301,10 @@ namespace MyEngine {
 		// ルートシグネチャを設定
 		commandList->SetGraphicsRootSignature(rootSignature_.Get());
 
-		
+
 		// プリミティブトポロジを設定
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		// VBVを設定
-		commandList->IASetVertexBuffers(0, 1, &vertexBufferView_);
 
 		// すべてのパーティクルグループについて処理する
 		for (auto& group : particleGroups_)
@@ -248,6 +312,9 @@ namespace MyEngine {
 			if (group.second.numParticles == 0) {
 				continue;
 			}
+			// VBVを設定
+			commandList->IASetVertexBuffers(0, 1, &group.second.vertexBufferView);
+
 			// 👇 PSO切り替え
 			if (group.second.isAdditive)
 			{
@@ -268,7 +335,7 @@ namespace MyEngine {
 			commandList->SetGraphicsRootDescriptorTable(2, srvManager_->GetGPUDescriptorHandle(group.second.textureSrvIndex));
 
 			// インスタンシング描画
-			commandList->DrawInstanced(UINT(modelData_.vertices.size()), group.second.numParticles, 0, 0);
+			commandList->DrawInstanced(UINT(group.second.modelData.vertices.size()), group.second.numParticles, 0, 0);
 
 			// インスタンス数をリセット
 			group.second.numParticles = 0;
@@ -286,80 +353,137 @@ namespace MyEngine {
 		particleGroups_.clear();
 	}
 
-	void ParticleManager::CreateParticleGroup(const std::string& name, const std::string& textureFilePath, bool isAdditive)
+	void ParticleManager::CreateParticleGroup(const std::string& name, const std::string& textureFilePath, ParticleType type, bool isAdditive)
 	{
-		// パーティクルグループが既に存在するか確認
-		if (particleGroups_.find(name) != particleGroups_.end())
+
+		ParticleGroup group{};
+
+		group.materialData.textureFilePath = textureFilePath;
+
+		group.textureSrvIndex =
+			TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
+
+		group.isAdditive = isAdditive;
+		group.type = type;
+
+		// 頂点をクリア
+		group.modelData.vertices.clear();
+
+		// タイプ別生成
+		switch (type)
 		{
-			std::cout << "ParticleGroups size: " << particleGroups_.size() << std::endl;
-			std::cerr << "Error: Particle group '" << name << "' already exists!" << std::endl;
-			return;
+		case ParticleType::Ring:
+			CreateRingVertexData(group);
+			break;
+
+		case ParticleType::Cylinder:
+			CreateCylinderVertexData(group);
+			break;
+
+		default:
+			CreateVertexData(group);
+			break;
 		}
 
-		// 新たな空のパーティクルグループを作成
-		ParticleGroup group{};
-		group.materialData.textureFilePath = textureFilePath;
-		group.textureSrvIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
-		group.isAdditive = isAdditive;
-
-		// インスタンスバッファ作成
 		group.instanceBuffer = ResourceManager::CreateBufferResource(
 			dxCommon_->GetDevice().Get(),
 			sizeof(ParticleForGPU) * kMaxInstanceCount);
-		group.instanceBuffer->Map(0, nullptr, reinterpret_cast<void**>(&group.instanceData));
 
-		// 初期化
+		group.instanceBuffer->Map(
+			0,
+			nullptr,
+			reinterpret_cast<void**>(&group.instanceData));
+
 		for (uint32_t i = 0; i < kMaxInstanceCount; ++i)
 		{
 			group.instanceData[i].WVP = MakeIdentity4x4();
 			group.instanceData[i].World = MakeIdentity4x4();
 		}
 
-		// インスタンシング用SRVの生成
 		group.srvIndex = srvManager_->Allocate();
+
 		srvManager_->CreateSRVforStructuredBuffer(
 			group.srvIndex,
 			group.instanceBuffer.Get(),
 			kMaxInstanceCount,
 			sizeof(ParticleForGPU));
 
-		particleGroups_.emplace(name, group);
+		particleGroups_.emplace(name, std::move(group));
 	}
 
 	void ParticleManager::Emit(const std::string& name, const Vector3& position, uint32_t count)
 	{
-		assert(particleGroups_.find(name) != particleGroups_.end() && "Particle Group is not found");
+		assert(particleGroups_.find(name) != particleGroups_.end());
 
 		ParticleGroup& particleGroup = particleGroups_[name];
 
-		if (particleGroup.particles.size() >= count) {
-			return;
-		}
-
 		for (uint32_t index = 0; index < count; ++index)
 		{
-			Particle particle = CreateParticleByType(position);
+			Particle particle =
+				CreateParticleByType(
+					particleGroup.type,
+					position);
+
+			particle.type = particleGroup.type;
+
 			particleGroup.particles.push_back(particle);
 		}
 	}
 
-	ParticleManager::Particle ParticleManager::CreateParticleByType(const Vector3& position)
+	ParticleManager::Particle ParticleManager::CreateParticleByType(ParticleType type, const Vector3& position)
 	{
-		switch (particleType_)
+		switch (type)
 		{
 		case ParticleType::Normal:
 		case ParticleType::Explosion:
 			return MakeNewParticle(randomEngine_, position);
+
 		case ParticleType::Plane:
 			return MakeNewPlaneParticle(randomEngine_, position);
+
 		case ParticleType::Ring:
 			return MakeNewRingParticle(randomEngine_, position);
+
 		case ParticleType::Cylinder:
 			return MakeNewCylinderParticle(randomEngine_, position);
+
+		case ParticleType::Charge:
+			return MakeNewChargeParticle(randomEngine_, position);
+		//case ParticleType::Laser:
+			//return MakeNewLaserParticle(randomEngine_, position);
 		default:
 			return MakeNewParticle(randomEngine_, position);
 		}
 	}
+
+	//Matrix4x4 ParticleManager::MakeDirectionMatrix(const Vector3& dir)
+	//{
+	//	/*Vector3 forward = Normalize(dir);
+
+	//	Vector3 up = { 0,1,0 };
+
+	//	Vector3 right = Normalize(Cross(up, forward));
+
+	//	up = Cross(forward, right);
+
+	//	Matrix4x4 mat{};
+
+	//	mat.m[0][0] = right.x;
+	//	mat.m[0][1] = right.y;
+	//	mat.m[0][2] = right.z;
+
+	//	mat.m[1][0] = up.x;
+	//	mat.m[1][1] = up.y;
+	//	mat.m[1][2] = up.z;
+
+	//	mat.m[2][0] = forward.x;
+	//	mat.m[2][1] = forward.y;
+	//	mat.m[2][2] = forward.z;
+
+	//	mat.m[3][3] = 1.0f;
+
+	//	return mat;*/
+	//}
 
 	void ParticleManager::EmitExplosion(const std::string& name, const Vector3& position, uint32_t count)
 	{
@@ -373,7 +497,20 @@ namespace MyEngine {
 			particle.transform.scale = kExplosionCenterScale;
 			particle.transform.rotate = kExplosionCenterRotation;
 			particle.transform.translate = position;
-			particle.color = kExplosionColorCenter;
+			particle.startColor = {
+				1.0f,
+				1.0f,
+				0.8f,
+				1.0f
+			};
+
+			particle.endColor = {
+				0.8f,
+				0.2f,
+				0.0f,
+				0.0f
+			};
+			particle.currentColor = particle.startColor;
 			particle.lifeTime = kExplosionCenterLifeTime;
 			particle.currentTime = 0.0f;
 			particle.velocity = kExplosionCenterVelocity;
@@ -402,7 +539,20 @@ namespace MyEngine {
 			particle.transform.scale = { 0.0f, 0.0f, 0.0f };
 			particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
 			particle.transform.translate = position + Vector3{ x, y, z };
-			particle.color = kExplosionColorSub;
+			particle.startColor = {
+				1.0f,
+				1.0f,
+				0.8f,
+				1.0f
+			};
+
+			particle.endColor = {
+				0.8f,
+				0.2f,
+				0.0f,
+				0.0f
+			};
+			particle.currentColor = particle.startColor;
 			particle.lifeTime = distLife(randomEngine_);
 			particle.currentTime = distStartTime(randomEngine_);
 			particle.velocity = { 0.0f, 0.0f, 0.0f };
@@ -416,20 +566,20 @@ namespace MyEngine {
 		const std::string& name,
 		const Vector3& position,
 		uint32_t count,
-		const Vector3& velocity)
+		const Vector3& velocity,
+		ParticleType type)
 	{
 		assert(particleGroups_.find(name) != particleGroups_.end() && "Particle Group is not found");
 
 		ParticleGroup& particleGroup = particleGroups_[name];
 
-		/*if (particleGroup.particles.size() >= count) {
-			return;
-		}*/
+		
 		std::uniform_real_distribution<float> spread(-2.0f, 2.0f);
 
 		for (uint32_t index = 0; index < count; ++index)
 		{
-			Particle particle = isSmoke_
+			Particle particle =
+				(type == ParticleType::Smoke)
 				? MakeNewSmokeParticle(randomEngine_, position)
 				: MakeNewThrusterParticle(randomEngine_, position);
 
@@ -440,7 +590,7 @@ namespace MyEngine {
 					   spread(randomEngine_)
 			};
 
-			if (isSmoke_) {
+			if (type == ParticleType::Smoke) {
 				particle.velocity = velocity + randomOffset * 0.5f;
 			}
 			else {
@@ -448,6 +598,38 @@ namespace MyEngine {
 			}
 			particleGroup.particles.push_back(particle);
 		}
+	}
+
+	void ParticleManager::EmitCharge(const std::string& name, const Vector3& position, const Vector3* target, uint32_t count)
+	{
+		assert(particleGroups_.find(name) != particleGroups_.end());
+
+		ParticleGroup& group = particleGroups_[name];
+
+		for (uint32_t i = 0; i < count; ++i)
+		{
+			Particle particle =
+				MakeNewChargeParticle(randomEngine_, position);
+
+			particle.type = ParticleType::Charge;
+
+			// 追従対象を保存
+			particle.followTarget = target;
+
+			group.particles.push_back(particle);
+		}
+	}
+
+	void ParticleManager::EmitLaser(const std::string& name, const Vector3& position, const Vector3& direction,const float& radius)
+	{
+		ParticleGroup& group = particleGroups_[name];
+
+		Particle particle =
+			MakeNewLaserParticle(randomEngine_, position,radius);
+
+		particle.direction = direction;
+
+		group.particles.push_back(particle);
 	}
 
 	ParticleManager::Particle ParticleManager::MakeNewParticle(
@@ -462,7 +644,8 @@ namespace MyEngine {
 		particle.transform.scale = { kDefaultParticleScale, kDefaultParticleScale, kDefaultParticleScale };
 		particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
 		particle.transform.translate = translate;
-		particle.color = { distColor(randomEngine), distColor(randomEngine), distColor(randomEngine), 1.0f };
+		particle.startColor = { distColor(randomEngine), distColor(randomEngine), distColor(randomEngine), 1.0f };
+		particle.endColor = { distColor(randomEngine), distColor(randomEngine), distColor(randomEngine), 1.0f };
 		particle.lifeTime = distTime(randomEngine);
 		particle.currentTime = 0.0f;
 		particle.velocity = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
@@ -483,7 +666,8 @@ namespace MyEngine {
 		particle.transform.scale = { kPlaneScaleX, distScale(randomEngine), kPlaneScaleZ };
 		particle.transform.rotate = { 0.0f, 0.0f, distRotate(randomEngine) };
 		particle.transform.translate = translate;
-		particle.color = kColorWhite;
+		particle.startColor = kColorWhite;
+		particle.endColor = kColorWhite;
 		particle.lifeTime = kPlaneLifeTime;
 		particle.currentTime = 0.0f;
 		particle.velocity = { 0.0f, 0.0f, 0.0f };
@@ -503,7 +687,8 @@ namespace MyEngine {
 		particle.transform.scale = { kDefaultParticleScale, kDefaultParticleScale, kDefaultParticleScale };
 		particle.transform.rotate = { kRingRotationX, kRingRotationY, distRotate(randomEngine) };
 		particle.transform.translate = translate;
-		particle.color = kColorWhite;
+		particle.startColor = kColorWhite;
+		particle.endColor = kColorWhite;
 		particle.lifeTime = kRingLifeTime;
 		particle.currentTime = 0.0f;
 		particle.velocity = { 0.0f, 0.0f, 0.0f };
@@ -521,7 +706,8 @@ namespace MyEngine {
 		particle.transform.scale = { kDefaultParticleScale, kDefaultParticleScale, kDefaultParticleScale };
 		particle.transform.rotate = kCylinderRotation;
 		particle.transform.translate = translate;
-		particle.color = kColorBlue;
+		particle.startColor = kColorBlue;
+		particle.endColor = kColorBlue;
 		particle.lifeTime = kCylinderLifeTime;
 		particle.currentTime = 0.0f;
 		particle.velocity = { 0.0f, 0.0f, 0.0f };
@@ -542,7 +728,14 @@ namespace MyEngine {
 		particle.transform.scale = { s, s, s };
 		particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
 		particle.transform.translate = translate;
-		particle.color = kColorCyan;
+		particle.startColor = kColorCyan;
+
+		particle.endColor = {
+			0.1f,
+			0.1f,
+			0.1f,
+			0.0f
+		};
 		particle.lifeTime = kThrusterLifeTime;
 		particle.currentTime = 0.0f;
 		particle.velocity = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
@@ -557,14 +750,102 @@ namespace MyEngine {
 		std::uniform_real_distribution<float> distribution(kParticleSpawnRangeMin, kParticleSpawnRangeMax);
 
 		Particle particle;
-		
+
 		particle.transform.scale = { kSmokeParticleScale, kSmokeParticleScale, kSmokeParticleScale };
 		particle.transform.rotate = { 0.0f, 0.0f, 0.0f };
 		particle.transform.translate = translate;
-		particle.color = kColorGray;
+		particle.startColor = kColorGray;
+		particle.endColor = kColorGray;
 		particle.lifeTime = kSmokeLifeTime;
 		particle.currentTime = 0.0f;
 		particle.velocity = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
+
+		return particle;
+	}
+
+	ParticleManager::Particle ParticleManager::MakeNewChargeParticle(std::mt19937& randomEngine, const Vector3& center)
+	{
+		std::uniform_real_distribution<float> distAngle(-0.4f, 0.4f);
+		std::uniform_real_distribution<float> distRadius(1.0f, 2.0f);
+
+		float angle = distAngle(randomEngine);
+		float radius = distRadius(randomEngine);
+
+		// +X方向基準
+		Vector3 offset = {
+			std::cos(angle)* radius,
+			std::sin(angle)* radius,
+			0.0f
+		};
+
+
+		Particle particle;
+
+		particle.transform.translate = center + offset;
+		particle.targetPosition = center;
+
+		particle.transform.scale = { 0.15f, 0.15f, 0.15f };
+
+		particle.startColor = {
+			0.2f,
+			1.0f,
+			1.0f,
+			0.0f
+		};
+
+		particle.endColor = {
+			0.2f,
+			1.0f,
+			1.0f,
+			1.0f
+		};
+
+		particle.lifeTime = 0.5f;
+		particle.currentTime = 0.0f;
+
+		particle.velocity = { 0,0,0 };
+
+		return particle;
+	}
+
+	ParticleManager::Particle ParticleManager::MakeNewLaserParticle(std::mt19937& randomEngine, const Vector3& translate,const float& radius)
+	{
+		Particle particle;
+
+		// 細長い
+		particle.transform.scale = {
+			radius, // 横幅
+			radius, // 高さ
+			3.0f   // 長さ
+		};
+
+		particle.transform.rotate = {
+			0.0f,
+			0.0f,
+			0.0f
+		};
+
+		particle.transform.translate = translate;
+
+		// 青白レーザー
+		particle.startColor = {
+			0.2f,
+			0.8f,
+			1.0f,
+			1.0f
+		};
+
+		particle.endColor = {
+			0.2f,
+			0.8f,
+			1.0f,
+			0.0f
+		};
+
+		particle.lifeTime = 0.15f;
+		particle.currentTime = 0.0f;
+
+		particle.velocity = { 0,0,0 };
 
 		return particle;
 	}
@@ -577,31 +858,32 @@ namespace MyEngine {
 		if (t < kExplosionColorPhase1)
 		{
 			float f = t / kExplosionColorPhase1;
-			particle.color = Lerp(kExplosionColor1, kExplosionColor2, f);
+			particle.currentColor = Lerp(kExplosionColor1, kExplosionColor2, f);
 		}
 		else if (t < kExplosionColorPhase2)
 		{
 			float f = (t - kExplosionColorPhase1) / (kExplosionColorPhase2 - kExplosionColorPhase1);
-			particle.color = Lerp(kExplosionColor2, kExplosionColor3, f);
+			particle.currentColor = Lerp(kExplosionColor2, kExplosionColor3, f);
 		}
 		else if (t < kExplosionColorPhase3)
 		{
 			float f = (t - kExplosionColorPhase2) / (kExplosionColorPhase3 - kExplosionColorPhase2);
-			particle.color = Lerp(kExplosionColor3, kExplosionColor4, f);
+			particle.currentColor = Lerp(kExplosionColor3, kExplosionColor4, f);
 		}
 		else
 		{
 			float f = (t - kExplosionColorPhase3) / (1.0f - kExplosionColorPhase3);
-			particle.color = Lerp(kExplosionColor4, kExplosionColor5, f);
+			particle.currentColor = Lerp(kExplosionColor4, kExplosionColor5, f);
 		}
 
 		// スケール補間
 		float maxScale = particle.isSubExplosion ? particle.maxScale : kExplosionCenterMaxScale;
 		float scale = Lerp(particle.transform.scale.x, maxScale, t);
 		particle.transform.scale = { scale, scale, scale };
+		particle.currentColor.w = 1.0f - t;
 	}
 
-	void ParticleManager::CreateRingVertexData()
+	void ParticleManager::CreateRingVertexData(ParticleGroup& group)
 	{
 		const float radianPerDivide = 2.0f * std::numbers::pi_v<float> / float(kRingDivision);
 
@@ -615,42 +897,42 @@ namespace MyEngine {
 			float uNext = float(index + 1) / float(kRingDivision);
 
 			// 頂点データを作成（6頂点で四角形2つ＝リングの一部）
-			modelData_.vertices.push_back({
+			group.modelData.vertices.push_back({
 				.position = {-sin * kRingInnerRadius, cos * kRingInnerRadius, kVertexDepth, kVertexW},
 				.texcoord = {u, 1.0f},
 				.normal = kVertexNormal
 				});
-			modelData_.vertices.push_back({
+			group.modelData.vertices.push_back({
 				.position = {-sinNext * kRingInnerRadius, cosNext * kRingInnerRadius, kVertexDepth, kVertexW},
 				.texcoord = {uNext, 1.0f},
 				.normal = kVertexNormal
 				});
-			modelData_.vertices.push_back({
+			group.modelData.vertices.push_back({
 				.position = {-sinNext * kRingOuterRadius, cosNext * kRingOuterRadius, kVertexDepth, kVertexW},
 				.texcoord = {uNext, 0.0f},
 				.normal = kVertexNormal
 				});
-			modelData_.vertices.push_back({
+			group.modelData.vertices.push_back({
 				.position = {-sin * kRingOuterRadius, cos * kRingOuterRadius, kVertexDepth, kVertexW},
 				.texcoord = {u, 0.0f},
 				.normal = kVertexNormal
 				});
-			modelData_.vertices.push_back({
+			group.modelData.vertices.push_back({
 				.position = {-sin * kRingInnerRadius, cos * kRingInnerRadius, kVertexDepth, kVertexW},
 				.texcoord = {u, 1.0f},
 				.normal = kVertexNormal
 				});
-			modelData_.vertices.push_back({
+			group.modelData.vertices.push_back({
 				.position = {-sinNext * kRingOuterRadius, cosNext * kRingOuterRadius, kVertexDepth, kVertexW},
 				.texcoord = {uNext, 0.0f},
 				.normal = kVertexNormal
 				});
 		}
 
-		CreateVertexBuffer();
+		CreateVertexBuffer(group);
 	}
 
-	void ParticleManager::CreateCylinderVertexData()
+	void ParticleManager::CreateCylinderVertexData(ParticleGroup& group)
 	{
 		const float radianPerDivide = 2.0f * std::numbers::pi_v<float> / float(kCylinderDivision);
 
@@ -664,93 +946,93 @@ namespace MyEngine {
 			float uNext = float(index + 1) / float(kCylinderDivision);
 
 			// 円柱の側面頂点データ（6頂点で四角形2つ）
-			modelData_.vertices.push_back({
+			group.modelData.vertices.push_back({
 				.position = {-sin * kCylinderTopRadius, kCylinderHeight, cos * kCylinderBottomRadius, kVertexW},
 				.texcoord = {u, 1.0f},
 				.normal = {-sin, 0.0f, cos}
 				});
-			modelData_.vertices.push_back({
+			group.modelData.vertices.push_back({
 				.position = {-sinNext * kCylinderTopRadius, kCylinderHeight, cosNext * kCylinderBottomRadius, kVertexW},
 				.texcoord = {uNext, 1.0f},
 				.normal = {-sinNext, 0.0f, cosNext}
 				});
-			modelData_.vertices.push_back({
+			group.modelData.vertices.push_back({
 				.position = {-sin * kCylinderBottomRadius, 0.0f, cos * kCylinderBottomRadius, kVertexW},
 				.texcoord = {u, 0.0f},
 				.normal = {-sin, 0.0f, cos}
 				});
-			modelData_.vertices.push_back({
+			group.modelData.vertices.push_back({
 				.position = {-sin * kCylinderBottomRadius, 0.0f, cos * kCylinderBottomRadius, kVertexW},
 				.texcoord = {u, 0.0f},
 				.normal = {-sin, 0.0f, cos}
 				});
-			modelData_.vertices.push_back({
+			group.modelData.vertices.push_back({
 				.position = {-sinNext * kCylinderTopRadius, kCylinderHeight, cosNext * kCylinderTopRadius, kVertexW},
 				.texcoord = {uNext, 1.0f},
 				.normal = {-sinNext, 0.0f, cosNext}
 				});
-			modelData_.vertices.push_back({
+			group.modelData.vertices.push_back({
 				.position = {-sinNext * kCylinderBottomRadius, 0.0f, cosNext * kCylinderBottomRadius, kVertexW},
 				.texcoord = {uNext, 0.0f},
 				.normal = {-sinNext, 0.0f, cosNext}
 				});
 		}
 
-		CreateVertexBuffer();
+		CreateVertexBuffer(group);
 	}
 
-	void ParticleManager::CreateVertexData()
+	void ParticleManager::CreateVertexData(ParticleGroup& group)
 	{
 		// 四角形の頂点データ（6頂点で三角形2つ）
-		modelData_.vertices.push_back({
+		group.modelData.vertices.push_back({
 			.position = {-kQuadVertexSize, kQuadVertexSize, kVertexDepth, kVertexW},
 			.texcoord = {0.0f, 0.0f},
 			.normal = kVertexNormal
 			});
-		modelData_.vertices.push_back({
+		group.modelData.vertices.push_back({
 			.position = {kQuadVertexSize, kQuadVertexSize, kVertexDepth, kVertexW},
 			.texcoord = {1.0f, 0.0f},
 			.normal = kVertexNormal
 			});
-		modelData_.vertices.push_back({
+		group.modelData.vertices.push_back({
 			.position = {-kQuadVertexSize, -kQuadVertexSize, kVertexDepth, kVertexW},
 			.texcoord = {0.0f, 1.0f},
 			.normal = kVertexNormal
 			});
-		modelData_.vertices.push_back({
+		group.modelData.vertices.push_back({
 			.position = {-kQuadVertexSize, -kQuadVertexSize, kVertexDepth, kVertexW},
 			.texcoord = {0.0f, 1.0f},
 			.normal = kVertexNormal
 			});
-		modelData_.vertices.push_back({
+		group.modelData.vertices.push_back({
 			.position = {kQuadVertexSize, kQuadVertexSize, kVertexDepth, kVertexW},
 			.texcoord = {1.0f, 0.0f},
 			.normal = kVertexNormal
 			});
-		modelData_.vertices.push_back({
+		group.modelData.vertices.push_back({
 			.position = {kQuadVertexSize, -kQuadVertexSize, kVertexDepth, kVertexW},
 			.texcoord = {1.0f, 1.0f},
 			.normal = kVertexNormal
 			});
 
-		CreateVertexBuffer();
+		CreateVertexBuffer(group);
 	}
 
-	void ParticleManager::CreateVertexBuffer()
+	void ParticleManager::CreateVertexBuffer(ParticleGroup& group)
 	{
 		// リソースの作成
-		vertexResource_ = ResourceManager::CreateBufferResource(
+		group.vertexResource = ResourceManager::CreateBufferResource(
 			dxCommon_->GetDevice().Get(),
-			sizeof(VertexData) * modelData_.vertices.size());
+			sizeof(VertexData) * group.modelData.vertices.size());
 
 		// 頂点バッファビューの設定
-		vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
-		vertexBufferView_.SizeInBytes = UINT(sizeof(VertexData) * modelData_.vertices.size());
-		vertexBufferView_.StrideInBytes = sizeof(VertexData);
+		group.vertexBufferView.BufferLocation = group.vertexResource->GetGPUVirtualAddress();
+		group.vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * group.modelData.vertices.size());
+		group.vertexBufferView.StrideInBytes = sizeof(VertexData);
 
 		// 頂点データをマップしてコピー
-		vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
-		std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
+		group.vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&group.vertexData));
+		std::memcpy(group.vertexData, group.modelData.vertices.data(), sizeof(VertexData) * group.modelData.vertices.size());
 	}
 
 	void ParticleManager::CreateMaterialData()
@@ -784,26 +1066,27 @@ namespace MyEngine {
 #endif
 	}
 
-	void ParticleManager::SetParticleType(ParticleType type)
-	{
-		particleType_ = type;
+	//void ParticleManager::SetParticleType(ParticleType type)
+	//{
+	//	particleType_ = type;
 
-		// 頂点データを切り替え
-		switch (particleType_)
-		{
-		case ParticleType::Normal:
-		case ParticleType::Plane:
-		case ParticleType::Explosion:
-			CreateVertexData();
-			break;
-		case ParticleType::Ring:
-			CreateRingVertexData();
-			break;
-		case ParticleType::Cylinder:
-			CreateCylinderVertexData();
-			break;
-		}
-	}
+	//	// 頂点データを切り替え
+	//	switch (particleType_)
+	//	{
+	//	case ParticleType::Normal:
+	//	case ParticleType::Plane:
+	//	case ParticleType::Explosion:
+	//	case ParticleType::Charge:
+	//		CreateVertexData();
+	//		break;
+	//	case ParticleType::Ring:
+	//		CreateRingVertexData();
+	//		break;
+	//	case ParticleType::Cylinder:
+	//		CreateCylinderVertexData();
+	//		break;
+	//	}
+	//}
 
 	void ParticleManager::CreateRootSignature()
 	{

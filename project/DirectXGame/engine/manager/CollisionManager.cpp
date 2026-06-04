@@ -2,6 +2,8 @@
 #include "Collider.h"
 #include "CollisionTypeIdDef.h"
 #include <cmath>
+#include <LineCollider.h>
+#include <SphereCollider.h>
 
 //
 // CollisionManager
@@ -92,12 +94,38 @@ namespace MyEngine {
 			return;
 		}
 
-		// 実際の衝突判定
-		bool isColliding = kUseSquaredDistance
-			? CheckSphereCollisionOptimized(colliderA, colliderB)
-			: CheckSphereCollision(colliderA, colliderB);
+		Collider::ColliderShape shapeA = colliderA->GetShape();
+		Collider::ColliderShape shapeB = colliderB->GetShape();
 
-		// 衝突検出時に通知
+		bool isColliding = false;
+
+		// Sphere vs Sphere
+		if (shapeA == Collider::ColliderShape::Sphere &&
+			shapeB == Collider::ColliderShape::Sphere)
+		{
+			isColliding = CheckSphereCollisionOptimized(
+				colliderA,
+				colliderB);
+		}
+
+		// Line vs Sphere
+		else if (shapeA == Collider::ColliderShape::Line &&
+			shapeB == Collider::ColliderShape::Sphere)
+		{
+			isColliding = CheckLineSphereCollision(
+				static_cast<LineCollider*>(colliderA),
+				static_cast<SphereCollider*>(colliderB));
+		}
+
+		// Sphere vs Line
+		else if (shapeA == Collider::ColliderShape::Sphere &&
+			shapeB == Collider::ColliderShape::Line)
+		{
+			isColliding = CheckLineSphereCollision(
+				static_cast<LineCollider*>(colliderB),
+				static_cast<SphereCollider*>(colliderA));
+		}
+
 		if (isColliding) {
 			NotifyCollision(colliderA, colliderB);
 		}
@@ -125,6 +153,51 @@ namespace MyEngine {
 
 		// 衝突判定
 		return distance <= radiusSum;
+	}
+
+	bool CollisionManager::CheckLineSphereCollision(LineCollider* line, SphereCollider* sphere)
+	{
+		if (!line) {
+			return false;
+		}
+
+		Vector3 start = line->GetStart();
+		Vector3 end = line->GetEnd();
+
+		Vector3 center = sphere->GetCenterPosition();
+
+		float laserRadius = line->GetRadius();
+		float sphereRadius = sphere->GetRadius();
+
+		// 判定
+		Vector3 lineDir = end - start;
+		Vector3 toSphere = center - start;
+
+		float lineLength = Vector3::Length(lineDir);
+
+		if (lineLength == 0.0f) {
+			return false; // 線分の長さがゼロの場合は衝突なしとする
+		}
+
+		Vector3 lineDirNormalized = lineDir / lineLength;
+
+		float projectionLength = toSphere.x * lineDirNormalized.x + toSphere.y * lineDirNormalized.y + toSphere.z * lineDirNormalized.z;
+
+		// 線分上の最近点を計算
+		float clampedProjection = std::max(0.0f, std::min(projectionLength, lineLength));
+
+		Vector3 closestPoint = start + lineDirNormalized * clampedProjection;
+
+		// 最近点と球の中心の距離を計算
+		Vector3 diff = closestPoint - center;
+		float distanceSq =
+			diff.x * diff.x +
+			diff.y * diff.y +
+			diff.z * diff.z;
+
+		float radiusSum = laserRadius + sphereRadius;
+
+		return distanceSq <= radiusSum * radiusSum;
 	}
 
 	// ===== ヘルパー関数 =====

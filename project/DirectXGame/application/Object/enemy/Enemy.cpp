@@ -67,28 +67,23 @@ void Enemy::Initialize(const std::string& parameterFileName)
 	// パーティクルマネージャの初期化
 	particleManager_ = ParticleManager::GetInstance();
 
-	// 敵死亡時のパーティクル設定
-	particleManager_->GetInstance()->SetParticleType(ParticleType::Explosion);
 	// テクスチャ"circle2"を使用
-	particleManager_->GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png",false);
-	particleManager_->GetInstance()->CreateParticleGroup("smoke", "resources/circle2.png");
+	particleManager_->GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png", ParticleType::Explosion, false);
+	particleManager_->GetInstance()->CreateParticleGroup("smoke", "resources/circle2.png", ParticleType::Smoke);
 
 	// 敵死亡時のパーティクルエミッターを初期化
 	enemyDeathEmitter_ = std::make_unique<ParticleEmitter>(particleManager_, "explosion");
-	enemyDeathEmitter_->SetUseRingParticle(true);
-	enemyDeathEmitter_->SetExplosion(true);
+	enemyDeathEmitter_->SetParticleType(ParticleType::Explosion);
 
 	// 敵ヒット時のパーティクル設定
 	enemyHitEmitter_ = std::make_unique<ParticleEmitter>(particleManager_, "explosion");
-	enemyHitEmitter_->SetUseRingParticle(true);
-	enemyHitEmitter_->SetExplosion(true);
+	enemyHitEmitter_->SetParticleType(ParticleType::Explosion);
 
 	// 煙用のパーティクルエミッターを初期化
-	particleManager_->GetInstance()->SetParticleType(ParticleType::Normal);
 	smokeEmitter_ = std::make_unique<ParticleEmitter>(particleManager_, "smoke");
 	smokeEmitter_->SetParticleRate(parameters_.smokeParticleRate);
 	smokeEmitter_->SetParticleCount(parameters_.smokeParticleCount);
-	smokeEmitter_->SetSmoke(true);
+	smokeEmitter_->SetParticleType(ParticleType::Smoke);
 
 	SetRadius(parameters_.colliderRadius);
 

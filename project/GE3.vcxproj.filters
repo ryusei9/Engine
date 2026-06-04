@@ -254,7 +254,7 @@
     <ClCompile Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\collider\LineCollider.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\collider\SphereCollider.cpp" />
-    <ClCompile Include="LineManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\manager\LineManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\Object\enemy\Enemy.h">
@@ -505,7 +505,7 @@
     <ClInclude Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.h" />
     <ClInclude Include="DirectXGame\engine\3d\collider\LineCollider.h" />
     <ClInclude Include="DirectXGame\engine\3d\collider\SphereCollider.h" />
-    <ClInclude Include="LineManager.h" />
+    <ClInclude Include="DirectXGame\engine\manager\LineManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\enemyAttackParameters.json">

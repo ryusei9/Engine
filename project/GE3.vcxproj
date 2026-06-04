@@ -146,7 +146,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\manager\ImGuiManager.cpp" />
     <ClCompile Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\collider\LineCollider.cpp" />
-    <ClCompile Include="LineManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\manager\LineManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="DirectXGame\engine\math\MakeAffineMatrix.cpp" />
     <ClCompile Include="DirectXGame\engine\math\MakeIdentity4x4.cpp" />
@@ -267,7 +267,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.h" />
     <ClInclude Include="DirectXGame\engine\3d\collider\LineCollider.h" />
     <ClInclude Include="DirectXGame\engine\3d\collider\SphereCollider.h" />
-    <ClInclude Include="LineManager.h" />
+    <ClInclude Include="DirectXGame\engine\manager\LineManager.h" />
     <ClInclude Include="tools\json.hpp" />
     <ClInclude Include="DirectXGame\engine\math\DepthMaterial.h" />
     <ClInclude Include="DirectXGame\engine\posteffect\GrayscalePostEffect.h" />

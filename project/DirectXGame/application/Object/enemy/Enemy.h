@@ -180,7 +180,7 @@ public:
 
 	void SetMoveType(EnemyMove type) { moveType_ = type; }
 
-	void SetMoveCurve(std::shared_ptr<CurveData> curve) {moveCurve_ = curve;}
+	void SetMoveCurve(const std::shared_ptr<CurveData>& curve) {moveCurve_ = curve;}
 
 	void SetAttackPattern(int32_t num) { attack_->SetPattern(num); }
 

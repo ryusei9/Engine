@@ -256,6 +256,7 @@ void TitleScene::Draw()
 
 	/*------スプライトの更新------*/
 	SpriteCommon::GetInstance()->DrawSettings();
+
 	//sprite_->Draw();
 	
 	// フェードマネージャの描画

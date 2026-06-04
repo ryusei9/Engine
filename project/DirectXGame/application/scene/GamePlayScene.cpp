@@ -435,6 +435,7 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		newEnemy->SetMoveType(enemyData.move);
 		if (enemyData.move == EnemyMove::WavePlusY) {
 			newEnemy->SetAttackPattern(4);
+			newEnemy->SetColor(Vector4(0.0f, 1.0f, 0.0f, 1.0f)); // 緑
 		}
 		newEnemy->SetPlayer(player_.get());
 

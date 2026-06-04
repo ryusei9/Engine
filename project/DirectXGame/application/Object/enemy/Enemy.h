@@ -184,6 +184,8 @@ public:
 
 	void SetAttackPattern(int32_t num) { attack_->SetPattern(num); }
 
+	void SetColor(const Vector4& color) {object3d_->SetMaterialColor(color);}
+
 private:
 	/*------メンバ変数------*/
 

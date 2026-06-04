@@ -117,9 +117,11 @@ namespace MyEngine {
 		/*------パーティクルマネージャの初期化------*/
 		ParticleManager::GetInstance()->Initialize(srvManager_.get(), camera_.get());
 
-		ParticleManager::GetInstance()->CreateParticleGroup("thruster", "resources/circle2.png",true);
-		ParticleManager::GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png",true);
-		ParticleManager::GetInstance()->CreateParticleGroup("smoke", "resources/fog.png");
+		ParticleManager::GetInstance()->CreateParticleGroup("thruster", "resources/circle2.png",ParticleType::Thruster,true);
+		ParticleManager::GetInstance()->CreateParticleGroup("explosion", "resources/circle2.png",ParticleType::Explosion,true);
+		ParticleManager::GetInstance()->CreateParticleGroup("smoke", "resources/fog.png",ParticleType::Smoke);
+		ParticleManager::GetInstance()->CreateParticleGroup("charge", "resources/circle2.png",ParticleType::Charge,true);
+		ParticleManager::GetInstance()->CreateParticleGroup("laser", "resources/circle2.png", ParticleType::Laser, true);
 		// シーンマネージャの初期化
 		sceneManager_ = std::make_unique<SceneManager>();
 		sceneManager_->Initialize(winApp_.get());

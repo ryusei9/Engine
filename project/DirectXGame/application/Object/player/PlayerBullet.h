@@ -5,6 +5,7 @@
 #include <Object3d.h>
 #include <string>
 #include <cstdint>
+#include <SphereCollider.h>
 
 // 前方宣言
 class Player;
@@ -44,7 +45,7 @@ struct PlayerBulletParameters {
 /// <summary>
 /// プレイヤーの弾
 /// </summary>
-class PlayerBullet : public Collider
+class PlayerBullet : public SphereCollider
 {
 public:
 	/*------メンバ関数------*/

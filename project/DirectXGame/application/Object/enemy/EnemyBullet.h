@@ -5,6 +5,7 @@
 #include <Object3d.h>
 #include <string>
 #include <cstdint>
+#include <SphereCollider.h>
 
 // 前方宣言
 struct Vector3;
@@ -38,7 +39,7 @@ struct EnemyBulletParameters {
 /// <summary>
 /// 敵の弾クラス
 /// </summary>
-class EnemyBullet : public Collider
+class EnemyBullet : public SphereCollider
 {
 public:
 	// 初期化

@@ -6,6 +6,7 @@
 #include <WorldTransform.h>
 #include <memory>
 #include <cstdint>
+#include <SphereCollider.h>
 
 using namespace MyEngine;
 // 前方宣言
@@ -18,7 +19,7 @@ struct Vector3;
 /// - Input, Camera, WorldTransformに依存し、3D空間での振る舞いを実現
 /// - 派生クラスでMove()とAttack()の実装が必須
 /// </summary>
-class BaseCharacter : public Collider
+class BaseCharacter : public SphereCollider
 {
 public:
 	/// <summary>

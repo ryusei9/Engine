@@ -64,13 +64,11 @@ void TitleScene::Initialize(DirectXCommon* directXCommon, WinApp* winApp)
 	dockTransform_.Initialize();
 	dockTransform_.SetTranslate(TitleDefaults::kDockPos);
 
-	ParticleManager::GetInstance()->SetParticleType(ParticleType::Normal);
-
 	thrusterEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "thruster");
 
 	thrusterEmitter_->SetParticleRate(150);   // 好きに調整
 	thrusterEmitter_->SetParticleCount(60);
-	thrusterEmitter_->SetThruster(true);
+	thrusterEmitter_->SetParticleType(ParticleType::Thruster);
 	
 
 	PostEffectManager::GetInstance()->SetEffectEnabled(1, false);

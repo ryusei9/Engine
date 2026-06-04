@@ -23,6 +23,8 @@ namespace PlayerDefaults {
 
 	// チャージ関連
 	inline constexpr float kChargeReadySec    = 1.0f;
+	// チャージ演出開始までの時間
+	inline constexpr float kChargeEffectStartSec = 0.15f;
 
 	// パーティクル
 	inline constexpr uint32_t kThrusterRate   = 150;
@@ -48,6 +50,7 @@ struct PlayerParameters {
 
 	// チャージ関連
 	float chargeReadySec = PlayerDefaults::kChargeReadySec;
+	float chargeEffectStartSec = PlayerDefaults::kChargeEffectStartSec;
 
 	// パーティクルパラメータ
 	uint32_t thrusterRate = PlayerDefaults::kThrusterRate;
@@ -189,6 +192,9 @@ private:
 
 	// 爆発パーティクルエミッター
 	std::unique_ptr<ParticleEmitter> explosionEmitter_;
+
+	// チャージパーティクルエミッター
+	std::unique_ptr<ParticleEmitter> chargeEmitter_;
 
 	// プレイヤー死亡時にパーティクルを一度だけ再生するためのフラグ
 	bool hasPlayedDeathParticle_ = false;

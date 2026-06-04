@@ -2,6 +2,8 @@
 #include <list>
 #include <memory>
 #include "Vector3.h"
+#include <SphereCollider.h>
+#include <LineCollider.h>
 
 namespace MyEngine {
 class Collider; // 前方宣言
@@ -48,6 +50,9 @@ namespace CollisionManagerConstants {
 
 		// 球体同士の衝突判定
 		bool CheckSphereCollision(Collider* colliderA, Collider* colliderB);
+
+		// 線分と球体の衝突判定
+		bool CheckLineSphereCollision(LineCollider* line, SphereCollider* sphere);
 
 		// ゲッター
 		size_t GetColliderCount() const { return colliders_.size(); }

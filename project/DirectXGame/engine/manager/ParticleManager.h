@@ -129,12 +129,18 @@ namespace MyEngine {
 		struct Particle {
 			Transform transform;
 			Vector3 velocity;
-			Vector4 color;
+			Vector4 startColor;
+			Vector4 endColor;
+			Vector4 currentColor;
 			float lifeTime;
 			float currentTime;
 			bool isExplosion = false;
 			bool isSubExplosion = false;
 			float maxScale = ParticleManagerConstants::kDefaultParticleScale;
+			Vector3 targetPosition;
+			ParticleType type = ParticleType::Normal;
+			const Vector3* followTarget = nullptr;
+			Vector3 direction = { 0,0,1 };
 		};
 
 		// GPU用パーティクル構造体
@@ -180,7 +186,12 @@ namespace MyEngine {
 			ParticleForGPU* instanceData;
 			uint32_t numParticles = 0;
 			Microsoft::WRL::ComPtr<ID3D12Resource> instanceBuffer;
+			ModelData modelData;
+			Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
+			D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+			VertexData* vertexData = nullptr;
 			bool isAdditive = true;
+			ParticleType type = ParticleType::Normal;
 		};
 
 		/*------メンバ関数------*/
@@ -217,8 +228,9 @@ namespace MyEngine {
 		// パーティクルの発生
 		void Emit(const std::string& name, const Vector3& position, uint32_t count);
 		void EmitExplosion(const std::string& name, const Vector3& position, uint32_t count);
-		void EmitWithVelocity(const std::string& name, const Vector3& position, uint32_t count, const Vector3& velocity);
-
+		void EmitWithVelocity(const std::string& name, const Vector3& position, uint32_t count, const Vector3& velocity,ParticleType type);
+		void EmitCharge(const std::string& name,const Vector3& position,const Vector3* target,uint32_t count);
+		void EmitLaser(const std::string& name, const Vector3& position, const Vector3& direction,const float& radius);
 		// パーティクルの生成
 		Particle MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate);
 		Particle MakeNewPlaneParticle(std::mt19937& randomEngine, const Vector3& translate);
@@ -226,14 +238,18 @@ namespace MyEngine {
 		Particle MakeNewCylinderParticle(std::mt19937& randomEngine, const Vector3& translate);
 		Particle MakeNewThrusterParticle(std::mt19937& randomEngine, const Vector3& translate);
 		Particle MakeNewSmokeParticle(std::mt19937& randomEngine, const Vector3& translate);
+		Particle MakeNewChargeParticle(std::mt19937& randomEngine, const Vector3& center);
+		Particle MakeNewLaserParticle(std::mt19937& randomEngine, const Vector3& translate,const float& radius);
 
 		// パーティクルの更新
 		void UpdateExplosionParticle(Particle& particle);
 
 		// 頂点データの作成
-		void CreateVertexData();
-		void CreateRingVertexData();
-		void CreateCylinderVertexData();
+		void CreateVertexData(ParticleGroup& group);
+		void CreateRingVertexData(ParticleGroup& group);
+		void CreateCylinderVertexData(ParticleGroup& group);
+
+		void CreateVertexBuffer(ParticleGroup& group);
 
 		// マテリアルデータの作成
 		void CreateMaterialData();
@@ -244,12 +260,12 @@ namespace MyEngine {
 		/*------ゲッター------*/
 		bool GetUseBillboard() const { return useBillboard_; }
 		bool GetUseRingVertex() const { return useRingVertex_; }
-		ParticleType GetParticleType() const { return particleType_; }
+		//ParticleType GetParticleType() const { return particleType_; }
 
 		/*------セッター------*/
 		void SetUseBillboard(bool useBillboard) { useBillboard_ = useBillboard; }
 		void SetUseRingVertex(bool useRingVertex) { useRingVertex_ = useRingVertex; }
-		void SetParticleType(ParticleType type);
+		//void SetParticleType(ParticleType type);
 		void SetParticleScale(const Vector3& scale) { uvTransform_.scale = scale; }
 		void SetIsSmoke(bool isSmoke) { isSmoke_ = isSmoke; }
 
@@ -290,10 +306,9 @@ namespace MyEngine {
 		void ApplyWind(Particle& particle);
 
 		// パーティクルタイプ別の生成
-		Particle CreateParticleByType(const Vector3& position);
+		Particle CreateParticleByType(ParticleType type, const Vector3& position);
 
-		// 頂点バッファの作成
-		void CreateVertexBuffer();
+		//Matrix4x4 MakeDirectionMatrix(const Vector3& dir);
 
 		/*------メンバ変数------*/
 
@@ -317,22 +332,19 @@ namespace MyEngine {
 
 		// リソース
 		Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
-		Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
+		//Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
 
 		// 頂点バッファビュー
-		D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
+		//D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
 
 		// モデルデータ
-		ModelData modelData_;
+		//ModelData modelData_;
 
 		// 頂点データ
-		VertexData* vertexData_ = nullptr;
+		//VertexData* vertexData_ = nullptr;
 
 		// マテリアルデータ
 		Material* materialData_ = nullptr;
-
-		// パーティクルタイプ
-		ParticleType particleType_ = ParticleType::Normal;
 
 		// ビルボードフラグ
 		bool useBillboard_ = false;

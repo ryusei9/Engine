@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <Vector3.h>
+#include <ParticleType.h>
 
 namespace MyEngine {
 	class ParticleManager;
@@ -48,31 +49,26 @@ namespace MyEngine {
 		// セッター
 		void SetPosition(const Vector3& position) { position_ = position; }
 		void SetVelocity(const Vector3& velocity) { velocity_ = velocity; }
+		void SetRadius(float radius) { radius_ = radius; }
 		void SetParticleRate(uint32_t rate) { particleRate_ = rate; }
 		void SetParticleCount(uint32_t count) { particleCount_ = count; }
-		void SetUseRingParticle(bool use) { useRingParticle_ = use; }
-		void SetExplosion(bool isExplosion) { isExplosion_ = isExplosion; }
-		void SetThruster(bool isThruster) { isThruster_ = isThruster; }
-		void SetSmoke(bool isSmoke) { isSmoke_ = isSmoke; }
+		void SetParticleType(ParticleType type) { particleType_ = type; }
+		void SetTarget(const Vector3* target) { target_ = target; }
+		
 
 		// ゲッター
 		const Vector3& GetPosition() const { return position_; }
 		const Vector3& GetVelocity() const { return velocity_; }
+		float GetRadius() const { return radius_; }
 		uint32_t GetParticleRate() const { return particleRate_; }
 		uint32_t GetParticleCount() const { return particleCount_; }
-		bool IsUseRingParticle() const { return useRingParticle_; }
-		bool IsExplosion() const { return isExplosion_; }
-		bool IsThruster() const { return isThruster_; }
-		bool IsSmoke() const { return isSmoke_; }
 		float GetInterval() const { return interval_; }
+		ParticleType GetParticleType() const { return particleType_; }
 
 	private:
 		// パーティクル発生処理
 		void EmitParticles();
 		void EmitExplosionParticles();
-		void EmitThrusterParticles();
-		void EmitSmokeParticles();
-		void EmitNormalParticles();
 
 		// 発生間隔の更新
 		void UpdateInterval();
@@ -103,6 +99,8 @@ namespace MyEngine {
 			ParticleEmitterConstants::kDefaultVelocityZ
 		};
 
+		float radius_ = 1.0f;
+
 		// パーティクルの一秒あたりの最大発生数
 		uint32_t particleRate_ = ParticleEmitterConstants::kDefaultParticleRate;
 
@@ -112,10 +110,8 @@ namespace MyEngine {
 		// パーティクルの発生間隔
 		float interval_ = ParticleEmitterConstants::kDefaultInterval;
 
-		// フラグ
-		bool useRingParticle_ = false;
-		bool isExplosion_ = false;
-		bool isThruster_ = false;
-		bool isSmoke_ = false;
+		ParticleType particleType_ = ParticleType::Normal;
+
+		const Vector3* target_ = nullptr;
 	};
 }

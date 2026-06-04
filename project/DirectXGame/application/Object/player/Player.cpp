@@ -59,16 +59,22 @@ void Player::Initialize(const std::string& parameterFileName)
 	SetRadius(parameters_.radius); // コライダーの半径を設定
 
 	
-
 	// エミッター初期化
 	thrusterEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "thruster");
 	thrusterEmitter_->SetParticleRate(parameters_.thrusterRate);
 	thrusterEmitter_->SetParticleCount(parameters_.thrusterCount);
-	thrusterEmitter_->SetThruster(true); // スラスターエミッターを有効化
+	thrusterEmitter_->SetParticleType(ParticleType::Thruster); // スラスターエミッターを有効化
 
+	
 	explosionEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "explosion");
-	explosionEmitter_->SetUseRingParticle(true);
-	explosionEmitter_->SetExplosion(true);
+	explosionEmitter_->SetParticleType(ParticleType::Explosion);
+
+	// チャージパーティクルエミッター
+	chargeEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(),"charge");
+
+	chargeEmitter_->SetParticleRate(1);
+	chargeEmitter_->SetParticleCount(2);
+	chargeEmitter_->SetParticleType(ParticleType::Charge);
 }
 
 void Player::Update()
@@ -87,6 +93,20 @@ void Player::Update()
 
 	// 弾の更新
 	for (auto& bullet : bullets_) {
+		bullet->Update();
+	}
+
+	// チャージ弾の削除
+	chargeBullets_.remove_if([](std::unique_ptr<PlayerChargeBullet>& bullet) {
+		if (!bullet->IsAlive()) {
+			bullet.reset();
+			return true;
+		}
+		return false;
+		});
+
+	// チャージ弾の更新
+	for (auto& bullet : chargeBullets_) {
 		bullet->Update();
 	}
 
@@ -110,6 +130,20 @@ void Player::Update()
 	thrusterEmitter_->SetVelocity(particleVelocity);
 	thrusterEmitter_->Update();
 
+	// チャージパーティクル
+	if (isCharging_ && chargeTime_ >= parameters_.chargeEffectStartSec)
+	{
+		chargeEmitter_->SetPosition(worldTransform_.GetTranslate());
+		chargeEmitter_->SetTarget(&GetPosition());
+		chargeEmitter_->Update();
+	}
+	if (chargeReady_) {
+		chargeEmitter_->SetParticleCount(4);
+	}
+	else {
+		chargeEmitter_->SetParticleCount(2);
+	}
+
 	// ワールド変換の更新
 	worldTransform_.Update();
 
@@ -129,6 +163,9 @@ void Player::Draw()
 	}
 	BaseCharacter::Draw();
 	for (auto& bullet : bullets_) {
+		bullet->Draw();
+	}
+	for (auto& bullet : chargeBullets_) {
 		bullet->Draw();
 	}
 }
@@ -180,9 +217,10 @@ void Player::Attack()
 		// チャージショット
 		if (isCharging_ && chargeReady_) {
 			auto chargeBullet = std::make_unique<PlayerChargeBullet>();
-			chargeBullet->Initialize(worldTransform_.GetTranslate(), "playerChargeBulletParameters");
-			chargeBullet->Update();
-			bullets_.push_back(std::move(chargeBullet));
+
+			chargeBullet->Initialize(this, "playerChargeBulletParameters");
+
+			chargeBullets_.push_back(std::move(chargeBullet));
 		}
 		// 通常ショット
 		else if (isCharging_ && chargeTime_ < parameters_.chargeReadySec) {

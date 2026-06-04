@@ -64,6 +64,8 @@
     <FxCompile Include="resources\shaders\SepiaTone.PS.hlsl">
       <Filter>DirectXGame\Engine\PostEffect\Hlsl</Filter>
     </FxCompile>
+    <FxCompile Include="resources\shaders\Line.hlsl" />
+    <FxCompile Include="resources\shaders\Line.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -250,6 +252,9 @@
     <ClCompile Include="DirectXGame\application\Object\enemy\MiniBoss.cpp" />
     <ClCompile Include="DirectXGame\application\scene\DebugScene.cpp" />
     <ClCompile Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\collider\LineCollider.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\collider\SphereCollider.cpp" />
+    <ClCompile Include="LineManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\Object\enemy\Enemy.h">
@@ -498,6 +503,9 @@
     <ClInclude Include="DirectXGame\application\Object\enemy\MiniBoss.h" />
     <ClInclude Include="DirectXGame\application\scene\DebugScene.h" />
     <ClInclude Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.h" />
+    <ClInclude Include="DirectXGame\engine\3d\collider\LineCollider.h" />
+    <ClInclude Include="DirectXGame\engine\3d\collider\SphereCollider.h" />
+    <ClInclude Include="LineManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\enemyAttackParameters.json">
@@ -539,6 +547,7 @@
     <None Include="resources\shaders\Particle.hlsli">
       <Filter>DirectXGame\Engine\Particle\Hlsl</Filter>
     </None>
+    <None Include="resources\shaders\Line.VS.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="DirectXGame">

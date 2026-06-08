@@ -114,6 +114,10 @@ void Player::Update()
 	if (controlEnabled_) {
 		Move();
 		Attack();
+	}else {
+		isCharging_ = false;
+		chargeTime_ = 0.0f;
+		chargeReady_ = false;
 	}
 
 	// スラスター方向
@@ -203,7 +207,7 @@ void Player::Attack()
 	Input* input = GetInput();
 
 	// チャージ
-	if (input->PushKey(DIK_SPACE)) {
+	if (input->PushKey(DIK_SPACE) && !IsLaserActive()) {
 		if (!isCharging_) {
 			isCharging_ = true;
 			chargeTime_ = 0.0f;
@@ -283,6 +287,18 @@ void Player::PlayDeathParticleOnce()
 		}
 		hasPlayedDeathParticle_ = true;
 	}
+}
+
+bool Player::IsLaserActive() const
+{
+	for (const auto& bullet : chargeBullets_)
+	{
+		if (bullet->IsAlive())
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void Player::SetParameters(const PlayerParameters& parameters)

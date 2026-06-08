@@ -114,6 +114,9 @@ public:
 	// プレイヤー死亡時に一度だけパーティクルを出す
 	void PlayDeathParticleOnce();
 
+	// レーザーがアクティブかどうかを判定
+	bool IsLaserActive() const;
+
 	// 中心座標を取得する純粋仮想関数
 	Vector3 GetCenterPosition() const override;
 
@@ -203,6 +206,7 @@ private:
 	float chargeTime_ = 0.0f;
 	bool isCharging_ = false;
 	bool chargeReady_ = false;
+	bool isLaserActive_ = false;
 
 	// 演出用プレイヤーが動かないフラグ
 	bool controlEnabled_ = true;

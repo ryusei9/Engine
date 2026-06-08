@@ -64,11 +64,19 @@ void SceneManager::Update()
 	}
 }
 
-void SceneManager::Draw()
+void SceneManager::Draw3D()
 {
 	// 実行中シーンを描画
 	if (nowScene_) {
-		nowScene_->Draw();
+		nowScene_->Draw3D();
+	}
+}
+
+void SceneManager::DrawUI()
+{
+	// 実行中シーンを描画
+	if (nowScene_) {
+		nowScene_->DrawUI();
 	}
 }
 

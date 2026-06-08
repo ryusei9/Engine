@@ -231,7 +231,7 @@ void TitleScene::Update()
 	Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
 }
 
-void TitleScene::Draw()
+void TitleScene::Draw3D()
 {
 	/*------オブジェクトの描画------*/
 	Object3dCommon::GetInstance()->DrawSettings();
@@ -250,15 +250,15 @@ void TitleScene::Draw()
 	}
 	// skydomeの描画
 	skydome_->Draw();
+}
 
-	
-
-
+void TitleScene::DrawUI()
+{
 	/*------スプライトの更新------*/
 	SpriteCommon::GetInstance()->DrawSettings();
 
 	//sprite_->Draw();
-	
+
 	// フェードマネージャの描画
 	fadeManager_->Draw();
 }

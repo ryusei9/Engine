@@ -120,7 +120,7 @@ void GameOverScene::Update()
 	Object3dCommon::GetInstance()->SetDefaultCamera(cameraManager_->GetMainCamera());
 }
 
-void GameOverScene::Draw()
+void GameOverScene::Draw3D()
 {
 	/*------3Dオブジェクト------*/
 	Object3dCommon::GetInstance()->DrawSettings();
@@ -129,7 +129,10 @@ void GameOverScene::Draw()
 	retryText_->Draw();
 	player_->Draw();
 	skydome_->Draw();
+}
 
+void GameOverScene::DrawUI()
+{
 	/*------スプライト------*/
 	SpriteCommon::GetInstance()->DrawSettings();
 	fadeManager_->Draw();

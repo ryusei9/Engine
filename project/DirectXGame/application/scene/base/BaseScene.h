@@ -34,9 +34,14 @@ public:
 	virtual void Update() = 0;
 
 	/// <summary>
-	/// 描画処理（純粋仮想関数）
+	/// 3D描画処理（純粋仮想関数）
 	/// </summary>
-	virtual void Draw() = 0;
+	virtual void Draw3D() = 0;
+
+	/// <summary>
+	/// 2D描画処理（純粋仮想関数）
+	/// </summary>
+	virtual void DrawUI() = 0;
 
 	/// <summary>
 	/// 終了処理（純粋仮想関数）

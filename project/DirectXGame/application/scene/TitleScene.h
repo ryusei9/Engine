@@ -55,8 +55,11 @@ public:
 	// 更新
 	void Update() override;
 
-	// 描画
-	void Draw() override;
+	// 3D描画
+	void Draw3D() override;
+
+	// 2D描画
+	void DrawUI() override;
 
 	// 終了
 	void Finalize() override;

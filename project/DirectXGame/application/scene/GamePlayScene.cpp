@@ -275,20 +275,18 @@ void GamePlayScene::Update()
 	
 }
 
-void GamePlayScene::Draw()
+void GamePlayScene::Draw3D()
 {
-	
-
 	// ゲームオブジェクトの描画
 	DrawGameObjects();
 
 	// UIの描画
-	DrawUI();
+	Draw3DUI();
+}
 
+void GamePlayScene::DrawUI()
+{
 	DrawSprite();
-
-	// スカイボックスの描画
-	//DrawSkybox();
 
 	// フェードの描画
 	DrawFade();
@@ -1397,7 +1395,7 @@ void GamePlayScene::DrawGameObjects()
 }
 
 // UIの描画
-void GamePlayScene::DrawUI()
+void GamePlayScene::Draw3DUI()
 {
 	// クリアテキストの描画
 	if (!gameClearTextVisible_) {

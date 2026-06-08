@@ -89,8 +89,11 @@ public:
 	// 更新
 	void Update() override;
 
-	// 描画
-	void Draw() override;
+	// 3D描画
+	void Draw3D() override;
+
+	// 2D描画
+	void DrawUI() override;
 
 	// 終了
 	void Finalize() override;
@@ -453,7 +456,7 @@ private:
 
 	// 描画系
 	void DrawGameObjects();
-	void DrawUI();
+	void Draw3DUI();
 	void DrawSkybox();
 	void DrawFade();
 	void DrawSprite();

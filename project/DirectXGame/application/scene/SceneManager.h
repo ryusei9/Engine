@@ -29,8 +29,11 @@ public:
 	// 更新
 	void Update();
 
-	// 描画
-	void Draw();
+	// 3D描画
+	void Draw3D();
+
+	// 2D描画
+	void DrawUI();
 
 	// ImGui描画
 	void DrawImGui();

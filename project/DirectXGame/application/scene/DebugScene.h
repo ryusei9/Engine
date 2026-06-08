@@ -14,7 +14,9 @@ class DebugScene : public BaseScene
 	// 更新
 	void Update() override;
 	// 描画
-	void Draw() override;
+	void Draw3D() override;
+
+	void DrawUI() override;
 	// 終了
 	void Finalize() override;
 	// ImGui描画

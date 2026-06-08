@@ -31,13 +31,15 @@ namespace MyEngine {
 	{
 		SRFramework::PrePostEffect();
 
-		sceneManager_->Draw();
+		sceneManager_->Draw3D();
 
 		ParticleManager::GetInstance()->Draw();
 
 		SRFramework::PreDraw();
 
 		SRFramework::DrawPostEffect();
+
+		sceneManager_->DrawUI();
 
 		imGuiManager_->Draw();
 

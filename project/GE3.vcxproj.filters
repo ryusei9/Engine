@@ -64,8 +64,12 @@
     <FxCompile Include="resources\shaders\SepiaTone.PS.hlsl">
       <Filter>DirectXGame\Engine\PostEffect\Hlsl</Filter>
     </FxCompile>
-    <FxCompile Include="resources\shaders\Line.hlsl" />
-    <FxCompile Include="resources\shaders\Line.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Line.hlsl">
+      <Filter>DirectXGame\Engine\3D\Hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Line.PS.hlsl">
+      <Filter>DirectXGame\Engine\3D\Hlsl</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -249,11 +253,21 @@
     <ClCompile Include="DirectXGame\engine\worldtransform\WorldTransform.cpp">
       <Filter>DirectXGame\Engine\WorldTransform</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\Object\enemy\MiniBoss.cpp" />
-    <ClCompile Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.cpp" />
-    <ClCompile Include="DirectXGame\engine\3d\collider\LineCollider.cpp" />
-    <ClCompile Include="DirectXGame\engine\3d\collider\SphereCollider.cpp" />
-    <ClCompile Include="DirectXGame\engine\manager\LineManager.cpp" />
+    <ClCompile Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.cpp">
+      <Filter>DirectXGame\Application\Object\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\3d\collider\LineCollider.cpp">
+      <Filter>DirectXGame\Engine\3D\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\manager\LineManager.cpp">
+      <Filter>DirectXGame\Engine\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\Object\enemy\MiniBoss.cpp">
+      <Filter>DirectXGame\Application\Object\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\3d\collider\SphereCollider.cpp">
+      <Filter>DirectXGame\Engine\3D\Collider</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\Object\enemy\Enemy.h">
@@ -499,11 +513,21 @@
     <ClInclude Include="tools\json.hpp">
       <Filter>External</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\Object\enemy\MiniBoss.h" />
-    <ClInclude Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.h" />
-    <ClInclude Include="DirectXGame\engine\3d\collider\LineCollider.h" />
-    <ClInclude Include="DirectXGame\engine\3d\collider\SphereCollider.h" />
-    <ClInclude Include="DirectXGame\engine\manager\LineManager.h" />
+    <ClInclude Include="DirectXGame\application\Object\enemy\EnemyHomingMissile.h">
+      <Filter>DirectXGame\Application\Object\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\3d\collider\LineCollider.h">
+      <Filter>DirectXGame\Engine\3D\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\manager\LineManager.h">
+      <Filter>DirectXGame\Engine\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\Object\enemy\MiniBoss.h">
+      <Filter>DirectXGame\Engine\3D\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\3d\collider\SphereCollider.h">
+      <Filter>DirectXGame\Engine\3D\Collider</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\enemyAttackParameters.json">
@@ -545,7 +569,9 @@
     <None Include="resources\shaders\Particle.hlsli">
       <Filter>DirectXGame\Engine\Particle\Hlsl</Filter>
     </None>
-    <None Include="resources\shaders\Line.VS.hlsli" />
+    <None Include="resources\shaders\Line.VS.hlsli">
+      <Filter>DirectXGame\Engine\3D\Hlsl</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="DirectXGame">

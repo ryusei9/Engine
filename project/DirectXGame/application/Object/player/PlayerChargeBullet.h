@@ -22,13 +22,24 @@ namespace PlayerChargeBulletDefaults {
 /// プレイヤーチャージ弾のパラメータ構造体（JSONから読み込み）
 /// </summary>
 struct PlayerChargeBulletParameters {
-	// ダメージ数
+	/// <summary>
+	/// ダメージ数
+	/// </summary>
 	float damage = PlayerChargeBulletDefaults::kDamage;
-	// 当たり半径
+
+	/// <summary>
+	/// 当たり半径
+	/// </summary>
 	float radius = PlayerChargeBulletDefaults::kRadius;
-	// 見た目スケール倍率
+
+	/// <summary>
+	/// 見た目スケール倍率
+	/// </summary>
 	float scaleFactor = PlayerChargeBulletDefaults::kScaleFactor;
-	// シリアルナンバー開始値
+
+	/// <summary>
+	/// シリアルナンバー開始値
+	/// </summary>
 	uint32_t serialStart = PlayerChargeBulletDefaults::kSerialStart;
 };
 

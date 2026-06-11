@@ -26,19 +26,39 @@ namespace PlayerBulletDefaults {
 /// プレイヤー弾のパラメータ構造体（JSONから読み込み）
 /// </summary>
 struct PlayerBulletParameters {
-	// 生存フレーム
+	/// <summary>
+	/// 生存フレーム
+	/// </summary>
 	uint32_t lifeFrames = PlayerBulletDefaults::kLifeFrames;
-	// 移動速度
+
+	/// <summary>
+	/// 移動速度
+	/// </summary>
 	float speed = PlayerBulletDefaults::kSpeed;
-	// 当たり半径
+
+	/// <summary>
+	/// 当たり半径
+	/// </summary>
 	float radius = PlayerBulletDefaults::kRadius;
-	// 初期スケール
+
+	/// <summary>
+	/// 初期スケール
+	/// </summary>
 	Vector3 initScale = PlayerBulletDefaults::kInitScale;
-	// 初期回転
+
+	/// <summary>
+	/// 初期回転
+	/// </summary>
 	Vector3 initRotate = PlayerBulletDefaults::kInitRotate;
-	// 速度ベクトル（デフォルトは右方向）
+
+	/// <summary>
+	/// 速度ベクトル（デフォルトは右方向）
+	/// </summary>
 	Vector3 velocityDirection = { 1.0f, 0.0f, 0.0f };
-	// モデルファイル名
+
+	/// <summary>
+	/// モデルファイル名
+	/// </summary>
 	std::string modelFileName = "player_bullet.obj";
 };
 

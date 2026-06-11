@@ -125,7 +125,9 @@ namespace MyEngine {
 	public:
 		/*------構造体------*/
 
-		// パーティクルの構造体
+		/// <summary>
+		/// パーティクルの構造体
+		/// </summary>
 		struct Particle {
 			Transform transform;
 			Vector3 velocity;
@@ -143,32 +145,42 @@ namespace MyEngine {
 			Vector3 direction = { 0,0,1 };
 		};
 
-		// GPU用パーティクル構造体
+		/// <summary>
+		/// GPU用パーティクル構造体
+		/// </summary>
 		struct ParticleForGPU {
 			Matrix4x4 WVP;
 			Matrix4x4 World;
 			Vector4 color;
 		};
 
-		// 軸合わせ用AABB構造体
+		/// <summary>
+		/// 軸合わせ用AABB構造体
+		/// </summary>
 		struct AABB {
 			Vector3 min;
 			Vector3 max;
 		};
 
-		// 加速度フィールドの構造体
+		/// <summary>
+		/// 加速度フィールドの構造体
+		/// </summary>
 		struct AccelerationField {
 			Vector3 acceleration;
 			AABB area;
 		};
 
-		// 風エリアの構造体
+		/// <summary>
+		/// 風エリアの構造体
+		/// </summary>
 		struct WindZone {
 			AABB area;
 			Vector3 strength;
 		};
 
-		// エミッターの構造体
+		/// <summary>
+		/// エミッターの構造体
+		/// </summary>
 		struct Emitter {
 			Transform transform;
 			uint32_t count;
@@ -177,7 +189,9 @@ namespace MyEngine {
 			std::string groupName;
 		};
 
-		// パーティクルグループの構造体
+		/// <summary>
+		/// パーティクルグループの構造体
+		/// </summary>
 		struct ParticleGroup {
 			MaterialData materialData;
 			std::list<Particle> particles;

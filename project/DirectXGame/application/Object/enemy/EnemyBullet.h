@@ -24,15 +24,29 @@ namespace EnemyBulletDefaults {
 /// 敵の弾のパラメータ構造体（JSONから読み込み）
 /// </summary>
 struct EnemyBulletParameters {
-	// 生存フレーム数
+	/// <summary>
+	/// 生存フレーム数
+	/// </summary>
 	uint32_t lifeFrames = EnemyBulletDefaults::kLifeFrames;
-	// 当たり判定半径
+
+	/// <summary>
+	/// 当たり判定半径
+	/// </summary>
 	float radius = EnemyBulletDefaults::kRadius;
-	// 初期スケール
+
+	/// <summary>
+	/// 初期スケール
+	/// </summary>
 	Vector3 initScale = EnemyBulletDefaults::kInitScale;
-	// 初期回転
+
+	/// <summary>
+	/// 初期回転
+	/// </summary>
 	Vector3 initRotate = EnemyBulletDefaults::kInitRotate;
-	// モデルファイル名
+
+	/// <summary>
+	/// モデルファイル名
+	/// </summary>
 	std::string modelFileName = "player_bullet.obj";
 };
 

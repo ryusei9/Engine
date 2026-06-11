@@ -1397,18 +1397,6 @@ void GamePlayScene::DrawGameObjects()
 // UIの描画
 void GamePlayScene::Draw3DUI()
 {
-	// クリアテキストの描画
-	if (!gameClearTextVisible_) {
-		if (!isStartCameraEasing_) {
-			// インゲーム中のガイド表示
-			if (gameSceneState_ == GameSceneState::InGame) {
-				/*wasdGuide_->Draw();
-				spaceKeyGuide_->Draw();
-				escGuide_->Draw();*/
-			}
-		}
-	}
-
 	// ポーズ中のUI描画
 	if (gameSceneState_ == GameSceneState::Pause) {
 		resumeGame_->Draw();

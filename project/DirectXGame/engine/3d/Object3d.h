@@ -81,25 +81,34 @@ namespace MyEngine {
 	class Object3d
 	{
 	public:
-		// 座標変換行列データ
+		/// <summary>
+		/// 座標変換行列データ
+		/// </summary>
 		struct WorldTransformationMatrix {
 			Matrix4x4 wvp;
 			Matrix4x4 world;
 			Matrix4x4 worldInverseTranspose;
 		};
 
-		// ディレクショナルライトデータ
+		/// <summary>
+		/// ディレクショナルライトデータ
+		/// </summary>
 		struct DirectionalLight {
 			Vector4 color; // ライトの色
 			Vector3 direction; // ライトの向き
 			float intensity; // 輝度
 		};
 
+		/// <summary>
+		/// GPU送信用カメラデータ
+		/// </summary>
 		struct CameraForGPU {
 			Vector3 worldPosition; // カメラのワールド座標
 		};
 
-		// ポイントライトデータ
+		/// <summary>
+		/// ポイントライトデータ
+		/// </summary>
 		struct PointLight {
 			Vector4 color; // ライトの色
 			Vector3 position; // ライトの位置
@@ -108,7 +117,9 @@ namespace MyEngine {
 			float decay; // 減衰率
 		};
 
-		// スポットライトデータ
+		/// <summary>
+		/// スポットライトデータ
+		/// </summary>
 		struct SpotLight {
 			Vector4 color; // ライトの色
 			Vector3 position; // ライトの位置

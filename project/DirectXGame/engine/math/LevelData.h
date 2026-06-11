@@ -12,18 +12,24 @@ enum class EnemyMove {
 	WavePlusY
 };
 
-// カーブデータ構造体（共通定義）
+/// <summary>
+/// カーブデータ構造体（共通定義）
+/// </summary>
 struct CurveData {
-    std::string fileName;
-    std::vector<Vector3> points;
-    std::vector<float> times;
+	std::string fileName;
+	std::vector<Vector3> points;
+	std::vector<float> times;
 };
 
-// レベルデータ構造体
+/// <summary>
+/// レベルデータ構造体
+/// </summary>
 struct LevelData {
-	// オブジェクトデータ構造体
-    struct ObjectData {
-        std::string fileName;
+	/// <summary>
+	/// オブジェクトデータ構造体
+	/// </summary>
+	struct ObjectData {
+		std::string fileName;
         std::string name;
         std::vector<LevelData::ObjectData> children;
         Vector3 translation;
@@ -31,18 +37,22 @@ struct LevelData {
         Vector3 scaling;
         bool disabled;
     };
-    std::vector<ObjectData> objects;
+	std::vector<ObjectData> objects;
 
-	// プレイヤーデータ構造体
-    struct PlayerData {
-        Vector3 translation; // プレイヤーの位置
-        Vector3 rotation;    // プレイヤーの回転
+	/// <summary>
+	/// プレイヤーデータ構造体
+	/// </summary>
+	struct PlayerData {
+		Vector3 translation; // プレイヤーの位置
+		Vector3 rotation;    // プレイヤーの回転
 	};
 	std::vector<PlayerData> players; // プレイヤーのデータ
 
-    // ★ 敵は「アンカー」と「動きの種類」だけ持つ
-    struct EnemyData {
-        std::string fileName;
+	/// <summary>
+	/// 敵データ構造体（アンカーと動きの種類を持つ）
+	/// </summary>
+	struct EnemyData {
+		std::string fileName;
         Vector3 translation;   // ← 最終到達点（アンカー）
         Vector3 rotation;
         EnemyMove move;        // enumで指定

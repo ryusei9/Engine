@@ -71,11 +71,6 @@ void GameOverScene::Initialize(DirectXCommon* /*directXCommon*/, WinApp* winApp)
 void GameOverScene::Update()
 {
 	UpdateInput();
-
-	//// スペースでタイトルへ
-	//if (input_->TriggerKey(DIK_SPACE)) {
-	//	returnToTitle_ = true;
-	//}
 	// フェードイン開始
 	if (returnToTitle_ && !fadeStarted_) {
 		fadeManager_->FadeInStart(GameOverDefaults::kFadeStep, [this]() {

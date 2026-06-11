@@ -55,35 +55,72 @@ namespace EnemyAttackDefaults {
 /// 敵攻撃のパラメータ構造体（JSONから読み込み）
 /// </summary>
 struct EnemyAttackParameters {
-	// Pattern1: 扇形
+	// --- Pattern1: 扇形 ---
+	/// <summary>扇形攻撃のY軸移動速度</summary>
 	float fanMoveSpeedY = EnemyAttackDefaults::kFanMoveSpeedY;
+
+	/// <summary>扇形攻撃のY軸移動範囲</summary>
 	float fanMoveRangeY = EnemyAttackDefaults::kFanMoveRangeY;
+
+	/// <summary>扇形攻撃の発射間隔（秒）</summary>
 	float fanShotIntervalSec = EnemyAttackDefaults::kFanShotIntervalSec;
+
+	/// <summary>扇形攻撃の同時発射数</summary>
 	int32_t fanShotCount = EnemyAttackDefaults::kFanShotCount;
+
+	/// <summary>扇形攻撃の基準角度（ラジアン）</summary>
 	float fanBaseAngle = EnemyAttackDefaults::kFanBaseAngle;
+
+	/// <summary>扇形攻撃の広がり角度（ラジアン）</summary>
 	float fanSpread = EnemyAttackDefaults::kFanSpread;
+
+	/// <summary>扇形攻撃の弾速</summary>
 	float fanBulletSpeed = EnemyAttackDefaults::kFanBulletSpeed;
 
-	// Pattern2: 自機狙い
+	// --- Pattern2: 自機狙い ---
+	/// <summary>自機狙い攻撃の発射間隔（秒）</summary>
 	float aimedShotIntervalSec = EnemyAttackDefaults::kAimedShotIntervalSec;
+
+	/// <summary>自機狙い攻撃の弾速</summary>
 	float aimedBulletSpeed = EnemyAttackDefaults::kAimedBulletSpeed;
+
+	/// <summary>速度のスケール倍率</summary>
 	float bulletSpeedScale = EnemyAttackDefaults::kBulletSpeedScale;
+
+	/// <summary>自機狙いの最小距離</summary>
 	float aimedMinLen = EnemyAttackDefaults::kAimedMinLen;
 
-	// Pattern3: 突進＋全方位
+	// --- Pattern3: 突進＋全方位 ---
+	/// <summary>突進攻撃の開始X座標</summary>
 	float rushStartX = EnemyAttackDefaults::kRushStartX;
+
+	/// <summary>突進攻撃のX軸速度</summary>
 	float rushSpeedX = EnemyAttackDefaults::kRushSpeedX;
+
+	/// <summary>突進中の全方位弾発射間隔（秒）</summary>
 	float rushShotIntervalSec = EnemyAttackDefaults::kRushShotIntervalSec;
+
+	/// <summary>全方位弾の同時発射数</summary>
 	int32_t rushRingCount = EnemyAttackDefaults::kRushRingCount;
+
+	/// <summary>全方位弾の弾速</summary>
 	float rushRingSpeed = EnemyAttackDefaults::kRushRingSpeed;
+
+	/// <summary>突進の左端（リスポーン判定位置）X座標</summary>
 	float rushLeftEndX = EnemyAttackDefaults::kRushLeftEndX;
+
+	/// <summary>突進後のリスポーン先X座標</summary>
 	float rushRespawnX = EnemyAttackDefaults::kRushRespawnX;
+
+	/// <summary>突進完了後の定位置X座標</summary>
 	float rushResetX = EnemyAttackDefaults::kRushResetX;
 
-	// Pattern遷移
+	// --- Pattern遷移 ---
+	/// <summary>Pattern1の継続時間（秒）</summary>
 	float pattern1DurationSec = EnemyAttackDefaults::kPattern1DurationSec;
 
-	// Pattern4: 待機
+	// --- Pattern4: 待機 ---
+	/// <summary>待機イージングの継続時間（秒）</summary>
 	float waitEasingDurationSec = EnemyAttackDefaults::kWaitEasingDurationSec;
 };
 

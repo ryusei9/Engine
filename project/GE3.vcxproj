@@ -114,7 +114,6 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DirectXGame\application\scene\DebugScene.cpp" />
     <ClCompile Include="DirectXGame\engine\util\CurveLibrary.cpp" />
     <ClCompile Include="DirectXGame\engine\manager\CurveMoveManager.cpp" />
     <ClCompile Include="DirectXGame\application\Object\enemy\Boss.cpp" />
@@ -185,7 +184,6 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\Object\player\PlayerBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DirectXGame\application\scene\DebugScene.h" />
     <ClInclude Include="DirectXGame\engine\util\CurveLibrary.h" />
     <ClInclude Include="DirectXGame\engine\manager\CurveMoveManager.h" />
     <ClInclude Include="DirectXGame\application\Object\enemy\Boss.h" />

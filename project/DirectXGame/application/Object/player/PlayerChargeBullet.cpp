@@ -24,6 +24,7 @@ void PlayerChargeBullet::Initialize(Player* player)
 
 void PlayerChargeBullet::Initialize(Player* player, const std::string& parameterFileName)
 {
+	// プレイヤーが設定されていない場合は何もしない
 	if (!player) {
 		return;
 	}
@@ -33,41 +34,27 @@ void PlayerChargeBullet::Initialize(Player* player, const std::string& parameter
 	} else {
 		chargeBulletParameters_ = defaultChargeBulletParameters_;
 	}
+	// プレイヤー情報を保持
 	player_ = player;
 
-	/*worldTransform_.Initialize();*/
 
-	// パラメータを適用
+	// ダメージパラメータを適用
 	damage_ = chargeBulletParameters_.damage;
-
-	// 基底クラスのパラメータを設定してから初期化
-	//PlayerBullet::SetParameters(chargeBulletParameters_.baseBulletParams);
-	
-	// 基底の初期化（位置・Transformなど）
-	// 空文字列を渡すことで、既に設定されたパラメータを使用
-	//PlayerBullet::Initialize(position, "");
 
 	// チャージ弾のコライダーID（基底クラスの初期化後に上書き）
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerChargeBullet));
 
-	//// worldTransformのスケールを拡大（パラメータから倍率取得）
-	//const Vector3 scaledTransform = worldTransform_.GetScale() * chargeBulletParameters_.scaleFactor;
-	//worldTransform_.SetScale(scaledTransform);
-
-	// 見た目のスケールも拡大
-	/*if (objectBullet_) {
-		objectBullet_->SetScale(scaledTransform);
-	}*/
+	// デバッグ用レーザーパーティクルの初期化
 	debugParticleEmitter_ = std::make_unique<ParticleEmitter>(ParticleManager::GetInstance(), "laser");
 	debugParticleEmitter_->SetParticleCount(1);
 	debugParticleEmitter_->SetParticleType(ParticleType::Laser);
 
+	// 発射時の相対オフセット初期化
 	offset_ = {1.0f, 0.0f, 0.0f };
 
 	// 当たり判定の半径も拡大（パラメータから取得）
 	SetRadius(chargeBulletParameters_.radius);
 	debugParticleEmitter_->SetRadius(chargeBulletParameters_.radius);
-	//chargeBulletParameters_.radius = chargeBulletParameters_.radius;
 }
 
 void PlayerChargeBullet::Update()
@@ -79,17 +66,18 @@ void PlayerChargeBullet::Update()
 
 	Vector3 playerPos = player_->GetPosition();
 
+	// 向きベクトルと長さを元に終点を計算
 	Vector3 dir = { 1.0f, 0.0f, 0.0f };
-
 	Vector3 end = playerPos + dir * length_;
 
+	// 線分コライダーの始点と終点を更新
 	SetStart(playerPos + offset_);
 	SetEnd(end);
 
-	//SetRadius(1.0f);
-
+	// 経過時間を更新
 	timer_ += 1.0f / 60.0f;
 
+	// 指定した持続時間を過ぎたら消滅させる
 	if (timer_ >= duration_) {
 		isAlive_ = false;
 	}
@@ -100,7 +88,6 @@ void PlayerChargeBullet::Update()
 void PlayerChargeBullet::Draw()
 {
 	// チャージ弾専用の描画があれば追加
-	//PlayerBullet::Draw();
 }
 
 void PlayerChargeBullet::OnCollision(Collider* other)
@@ -112,27 +99,30 @@ void PlayerChargeBullet::OnCollision(Collider* other)
 
 void PlayerChargeBullet::DebugLaserParticle(const Vector3& start, const Vector3& end)
 {
+	// 始点から終点へのベクトルと長さを算出
 	Vector3 dir = end - start;
-
 	float length = Vector3::Length(dir);
 
 	// 長さに応じて分割数を決定
 	int segment =
 		static_cast<int>(length * 20.0f);
 
-	// 最低保証
+	// 最低保証（分割数が少なすぎないようにする）
 	segment = std::max<int>(segment, 10);
 
+	// 線分上にパーティクルを配置して更新
 	for (int i = 0; i <= segment; ++i)
 	{
+		// 配置割合 t を計算
 		float t =
 			static_cast<float>(i) /
 			static_cast<float>(segment);
 
+		// tに基づく座標を計算
 		Vector3 pos = start + dir * t;
 
+		// パーティクルの表示座標を設定して更新
 		debugParticleEmitter_->SetPosition(pos);
-
 		debugParticleEmitter_->Update();
 	}
 }
@@ -153,16 +143,11 @@ void PlayerChargeBullet::SetChargeBulletParameters(const PlayerChargeBulletParam
 	chargeBulletParameters_ = parameters;
 	damage_ = chargeBulletParameters_.damage;
 	SetRadius(chargeBulletParameters_.radius);
-	
-	// 基底クラスのパラメータも設定
-	//PlayerBullet::SetParameters(chargeBulletParameters_.baseBulletParams);
 }
 
 void PlayerChargeBullet::SetDefaultChargeBulletParameters(const PlayerChargeBulletParameters& parameters)
 {
 	defaultChargeBulletParameters_ = parameters;
-	// 基底クラスのデフォルトパラメータも設定
-	//PlayerBullet::SetDefaultParameters(parameters.baseBulletParams);
 }
 
 const PlayerChargeBulletParameters& PlayerChargeBullet::GetDefaultChargeBulletParameters()

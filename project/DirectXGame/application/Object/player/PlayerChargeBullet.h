@@ -30,9 +30,6 @@ struct PlayerChargeBulletParameters {
 	float scaleFactor = PlayerChargeBulletDefaults::kScaleFactor;
 	// シリアルナンバー開始値
 	uint32_t serialStart = PlayerChargeBulletDefaults::kSerialStart;
-	
-	// 基底クラスのパラメータ（継承して上書き可能）
-	//PlayerBulletParameters baseBulletParams;
 };
 
 /// <summary>
@@ -40,46 +37,85 @@ struct PlayerChargeBulletParameters {
 /// </summary>
 class PlayerChargeBullet : public LineCollider {
 public:
-	// コンストラクタ
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
 	PlayerChargeBullet();
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	/// <param name="player">プレイヤーパーティへのポインタ</param>
 	void Initialize(Player* player);
 
-	// パラメータファイルから初期化
+	/// <summary>
+	/// パラメータファイルから初期化
+	/// </summary>
+	/// <param name="player">プレイヤー情報</param>
+	/// <param name="parameterFileName">JSONファイル名</param>
 	void Initialize(Player* player, const std::string& parameterFileName);
 
-	// 更新
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update();
 
-	// 描画
+	/// <summary>
+	/// 描画
+	/// </summary>
 	void Draw();
 
-	// 衝突判定（敵を貫通する）
+	/// <summary>
+	/// 衝突判定（敵を貫通する）
+	/// </summary>
+	/// <param name="other">衝突した他のコライダー</param>
 	void OnCollision(Collider* other) override;
 
+	/// <summary>
+	/// デバッグ用レーザーパーティクルの描画
+	/// </summary>
+	/// <param name="start">開始位置</param>
+	/// <param name="end">終了位置</param>
 	void DebugLaserParticle(const Vector3& start, const Vector3& end);
 
+	/// <summary>
+	/// ImGuiによるデバッグ情報描画
+	/// </summary>
 	void DrawImGui();
 
-	// ダメージ数の取得
+	/// <summary>
+	/// ダメージ数の取得
+	/// </summary>
 	float GetDamage() const { return damage_; }
 
-	// シリアルナンバーの取得
+	/// <summary>
+	/// シリアルナンバーの取得
+	/// </summary>
 	uint32_t GetSerialNumber() const { return serialNumber_; }
 
+	/// <summary>
+	/// 生存フラグの取得
+	/// </summary>
 	bool IsAlive() const { return isAlive_; }
 
-	// パラメータの取得
+	/// <summary>
+	/// パラメータの取得
+	/// </summary>
 	const PlayerChargeBulletParameters& GetChargeBulletParameters() const { return chargeBulletParameters_; }
 
-	// パラメータの設定
+	/// <summary>
+	/// パラメータの設定
+	/// </summary>
 	void SetChargeBulletParameters(const PlayerChargeBulletParameters& parameters);
 
-	// デフォルトパラメータを設定
+	/// <summary>
+	/// デフォルトパラメータを設定
+	/// </summary>
 	static void SetDefaultChargeBulletParameters(const PlayerChargeBulletParameters& parameters);
 
-	// デフォルトパラメータを取得
+	/// <summary>
+	/// デフォルトパラメータを取得
+	/// </summary>
 	static const PlayerChargeBulletParameters& GetDefaultChargeBulletParameters();
 
 private:
@@ -112,8 +148,4 @@ private:
 	static inline PlayerChargeBulletParameters defaultChargeBulletParameters_;
 
 	std::unique_ptr<ParticleEmitter> debugParticleEmitter_;
-
-	/*Vector3 start_;
-	Vector3 end_;
-	float radius_;*/
 };

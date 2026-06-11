@@ -2,50 +2,95 @@
 #include "BaseCharacter.h"
 #include <memory>
 
+/// <summary>
+/// 中ボスキャラクタークラス
+/// </summary>
 class MiniBoss : public BaseCharacter
 {
 public:
 
+    /// <summary>
+    /// ボスの状態
+    /// </summary>
     enum class State
     {
-        Alive,
-        Dead
+        Alive,  // 生きている
+        Dead    // 死亡
     };
 
 public:
 
-    // コンストラクタ
+    /// <summary>
+    /// コンストラクタ
+    /// </summary>
     MiniBoss();
 
-    // 初期化
+    /// <summary>
+    /// 初期化
+    /// </summary>
     void Initialize() override;
 
-    // 更新
+    /// <summary>
+    /// 更新処理
+    /// </summary>
     void Update() override;
 
-    // 描画
+    /// <summary>
+    /// 描画
+    /// </summary>
     void Draw() override;
 
-    // 移動（後で実装）
+    /// <summary>
+    /// 移動処理
+    /// </summary>
     void Move() override;
 
-    // 攻撃（後で実装）
+    /// <summary>
+    /// 攻撃処理
+    /// </summary>
     void Attack() override;
 
-    // 衝突
+    /// <summary>
+    /// 衝突発生時の処理
+    /// </summary>
+    /// <param name="other">衝突した他のコライダー</param>
     void OnCollision(Collider* other) override;
 
-    // 中心座標
+    /// <summary>
+    /// 中心座標の取得
+    /// </summary>
     Vector3 GetCenterPosition() const override;
 
     // Getter
+    /// <summary>
+    /// HPの取得
+    /// </summary>
     int GetHp() const { return hp_; }
+
+    /// <summary>
+    /// 半径の取得
+    /// </summary>
     float GetRadius() const { return radius_; }
+
+    /// <summary>
+    /// 状態の取得
+    /// </summary>
     State GetState() const { return state_; }
 
     // Setter
+    /// <summary>
+    /// HPの設定
+    /// </summary>
     void SetHp(int hp) { hp_ = hp; }
+
+    /// <summary>
+    /// 半径の設定
+    /// </summary>
     void SetRadius(float radius) { radius_ = radius; }
+
+    /// <summary>
+    /// 状態の設定
+    /// </summary>
     void SetState(State state) { state_ = state; }
 
 private:

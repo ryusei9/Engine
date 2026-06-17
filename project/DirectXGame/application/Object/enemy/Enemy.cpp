@@ -62,7 +62,7 @@ void Enemy::Initialize(const std::string& parameterFileName)
 
 	// 敵の3Dオブジェクトを生成・初期化
 	object3d_ = std::make_unique<Object3d>();
-	object3d_->Initialize("enemy.obj");
+	object3d_->Initialize("wingEnemy.obj");
 
 	// パーティクルマネージャの初期化
 	particleManager_ = ParticleManager::GetInstance();

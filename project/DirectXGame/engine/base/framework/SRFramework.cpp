@@ -59,6 +59,7 @@ namespace MyEngine {
 		TextureManager::GetInstance()->LoadTexture("resources/WASD.png");
 		TextureManager::GetInstance()->LoadTexture("resources/SpaceShot.png");
 		TextureManager::GetInstance()->LoadTexture("resources/pause.png");
+		TextureManager::GetInstance()->LoadTexture("resources/building.png");
 
 		// スプライト共通部の初期化
 

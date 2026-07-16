@@ -9,7 +9,16 @@ enum class EnemyMove {
 	WaveMinusZ,
 	WavePlusZ,
 	WaveMinusY,
-	WavePlusY
+	WavePlusY,
+	StraightMinusX
+};
+
+/// <summary>
+/// EnemyType列挙型（敵の種類を定義）
+/// </summary>
+enum class EnemyType {
+	Fighter,	// その場で停止して弾を撃つタイプ
+	Attacker,	// 真っすぐ突っ込むタイプ
 };
 
 /// <summary>
@@ -56,6 +65,9 @@ struct LevelData {
         Vector3 translation;   // ← 最終到達点（アンカー）
         Vector3 rotation;
         EnemyMove move;        // enumで指定
+
+		int formation = 0;
+		EnemyType enemyType = EnemyType::Fighter;
     };
     std::vector<EnemyData> enemies;
 

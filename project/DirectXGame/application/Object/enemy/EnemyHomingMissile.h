@@ -91,4 +91,6 @@ private:
     float rotateSpeed_ = 0.05f; // 旋回力
 
     float speed_ = 0.03f; // 好きな速さに調整
+
+    float radius_ = 0.05f; // 当たり判定の半径
 };

@@ -6,26 +6,149 @@ import bpy.ops
 # Enemy Move Type Enum
 # =========================
 def enemy_move_items(self, context):
-    bpy.types.Object.enemy_move = bpy.props.EnumProperty(
-        name="Enemy Move",
-        items=[
-            ("None", "None", ""),
-            ("Enemy_Wave_-Z", "Wave -Z", ""),
-            ("Enemy_Wave_+Z", "Wave +Z", ""),
-        ],
-         default=0
+    return [
+        ("None", "None", ""),
+        ("Enemy_Wave_-Z", "Wave -Z", ""),
+        ("Enemy_Wave_+Z", "Wave +Z", ""),
+        ("Enemy_Wave_-Y", "Wave -Y", ""),
+        ("Enemy_Wave_+Y", "Wave +Y", ""),
+    ]
+
+
+def enemy_type_items(self, context):
+    return [
+        ##("Turret", "Turret", ""),
+        ("Attacker", "Attacker", ""),
+        ("Fighter", "Fighter", ""),
+        ##("Boss", "Boss", ""),
+    ]
+
+def update_enemy_type(self, context):
+
+    obj = context.object
+
+    if obj is None:
+        return
+
+    if obj.get("type") != "EnemySpawn":
+        return
+
+    enemy_type = obj.enemy_type
+
+    # 現在のメッシュ削除
+    if obj.data:
+        old_mesh = obj.data
+        obj.data = None
+
+        if old_mesh.users == 0:
+            bpy.data.meshes.remove(old_mesh)
+
+    # タイプごとのモデル読み込み
+    if enemy_type == "Fighter":
+        filepath = "enemy/wingEnemy.obj"
+
+    elif enemy_type == "Attacker":
+        filepath = "enemy/enemy.obj"
+
+    else:
+        return
+
+    addon_directory = os.path.dirname(__file__)
+    full_path = os.path.join(addon_directory, filepath)
+
+    bpy.ops.wm.obj_import(
+        filepath=full_path,
+        forward_axis='Z',
+        up_axis='Y'
     )
+
+    imported = bpy.context.active_object
+
+    print(imported.rotation_euler)
+
+    bpy.ops.object.transform_apply(
+        location=False,
+        rotation=True,
+        scale=False
+    )
+
+
+    new_mesh = imported.data.copy()
+
+    obj.data = new_mesh
+
+    bpy.data.objects.remove(imported)
+
+
+def formation_items(self, context):
+    return [
+        ("Single", "Single", ""),
+        ("Line", "Line", ""),
+    ]
+def update_formation(self, context):
+    obj = context.object
+
+    if obj is None:
+        return
+
+    if obj.get("type") != "EnemySpawn":
+        return
+
+    # 古いPreview削除
+    for child in list(obj.children):
+        if child.name.startswith("Preview_"):
+            bpy.data.objects.remove(child, do_unlink=True)
+
+    if obj.formation == "Single":
+        return
+
+    if obj.formation == "Line":
+        offsets = [
+            ( 0, 0, 0),
+            ( -1, 0, 0),
+            ( -2, 0, 0),
+            ( -3, 0, 0),
+            ( -4, 0, 0),
+        ]
+
+        for i, offset in enumerate(offsets):
+            preview = obj.copy()
+            preview.data = obj.data
+            preview.name = f"Preview_{i}"
+            preview.empty_display_size = 0.4
+
+            bpy.context.collection.objects.link(preview)
+
+            preview.parent = obj
+            preview.location = offset
 
 def register_enemy_props():
     bpy.types.Object.enemy_move = bpy.props.EnumProperty(
         name="Enemy Move",
         description="Enemy movement curve",
         items=enemy_move_items,
-         default=0
     )
+    bpy.types.Object.enemy_type = bpy.props.EnumProperty(
+        name="Enemy Type",
+        description="Enemy Type",
+        items=enemy_type_items,
+        update=update_enemy_type
+    )
+    bpy.types.Object.formation = bpy.props.EnumProperty(
+        name="Formation",
+        description="Formation Type",
+        items=formation_items,
+        update=update_formation
+)
+
 
 def unregister_enemy_props():
     del bpy.types.Object.enemy_move
+    del bpy.types.Object.enemy_type
+    del bpy.types.Object.formation
+
+    
+
 
 #オペレータ 出現ポイントのシンボルを読み込む
 class MYADDON_OT_spawn_import_symbol(bpy.types.Operator):
@@ -89,18 +212,18 @@ class MYADDON_OT_spawn_create_symbol(bpy.types.Operator):
     bl_description = "出現ポイントのシンボルを配置します"
     bl_options = {'REGISTER', 'UNDO'}
 
-    type = bpy.props.StringProperty(name = "type",default = "Player")
+    spawn_type: bpy.props.StringProperty(name = "spawn_type",default = "Player")
 
     def execute(self, context):
         #プロトタイプオブジェクトを取得
-        spawn_object = bpy.data.objects.get(SpawnNames.names[self.type][SpawnNames.PROTOTYPE])
+        spawn_object = bpy.data.objects.get(SpawnNames.names[self.spawn_type][SpawnNames.PROTOTYPE])
 
         #まだ読み込んでいない場合
         if spawn_object is None:
             #読み込みオペレータを実行
             bpy.ops.myaddon.myaddon_ot_spawn_import_symbol('EXEC_DEFAULT')
             #再度取得
-            spawn_object = bpy.data.objects.get(SpawnNames.names[self.type][SpawnNames.PROTOTYPE])
+            spawn_object = bpy.data.objects.get(SpawnNames.names[self.spawn_type][SpawnNames.PROTOTYPE])
 
         print("出現ポイントのシンボルを作成します")
 
@@ -114,7 +237,7 @@ class MYADDON_OT_spawn_create_symbol(bpy.types.Operator):
         bpy.context.collection.objects.link(spawn_object)
 
         #オブジェクト名を変更
-        SpawnNames.names[self.type][SpawnNames.INSTANCE]
+        spawn_object.name = SpawnNames.names[self.spawn_type][SpawnNames.INSTANCE]
 
         return {'FINISHED'}
 
@@ -136,7 +259,7 @@ class PlayerSpawnCreateSymbol(bpy.types.Operator):
 
     def execute(self, context):
         #プレイヤー出現ポイントのシンボルを作成
-        bpy.ops.myaddon.myaddon_ot_spawn_create_symbol('EXEC_DEFAULT', type="Player")
+        bpy.ops.myaddon.myaddon_ot_spawn_create_symbol('EXEC_DEFAULT', spawn_type="Player")
         return {'FINISHED'}
     
 class EnemySpawnCreateSymbol(bpy.types.Operator):
@@ -146,7 +269,7 @@ class EnemySpawnCreateSymbol(bpy.types.Operator):
 
     def execute(self, context):
         #敵出現ポイントのシンボルを作成
-        bpy.ops.myaddon.myaddon_ot_spawn_create_symbol('EXEC_DEFAULT', type="Enemy")
+        bpy.ops.myaddon.myaddon_ot_spawn_create_symbol('EXEC_DEFAULT', spawn_type="Enemy")
         return {'FINISHED'}
     
 class MYADDON_PT_enemy_spawn_panel(bpy.types.Panel):
@@ -170,3 +293,9 @@ class MYADDON_PT_enemy_spawn_panel(bpy.types.Panel):
 
         layout.label(text="Enemy Movement")
         layout.prop(obj, "enemy_move", text="")
+
+        layout.label(text="Enemy Type")
+        layout.prop(obj, "enemy_type", text="")
+
+        layout.label(text="Formation")
+        layout.prop(obj, "formation", text="")

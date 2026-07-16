@@ -7,6 +7,7 @@ import json
 class MYADDON_OT_export_scene(bpy.types.Operator, bpy_extras.io_utils.ExportHelper):
     bl_idname = "myaddon.myaddon_ot_export_scene"
     bl_label = "シーンを出力"
+    print("=== NEW EXPORT SCRIPT ===")
     bl_description = "シーン情報をexportします"
     #出力するファイルの拡張子
     filename_ext = ".json"
@@ -122,6 +123,17 @@ class MYADDON_OT_export_scene(bpy.types.Operator, bpy_extras.io_utils.ExportHelp
             collider["center"] = object["collider_center"].to_list()
             collider["size"] = object["collider_size"].to_list()
             json_object["collider"] = collider
+        # enemy_typeプロパティがあれば登録
+        if hasattr(object, "enemy_type") and object.get("type") == "EnemySpawn":
+            print("object =", object.name)
+            print("enemy_type =", object.enemy_type)
+            print("enemy_type type =", type(object.enemy_type))
+
+            json_object["enemy_type"] = str(object.enemy_type)
+
+        if hasattr(object, "enemy_type"):
+            print("enemy_type =", object.enemy_type)
+            print("type =", type(object.enemy_type))
 
         #1個分のjsonオブジェクトを親オブジェクトに登録
         data_parent.append(json_object)

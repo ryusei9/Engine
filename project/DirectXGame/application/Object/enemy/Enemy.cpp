@@ -27,10 +27,10 @@ Enemy::Enemy()
 void Enemy::Initialize()
 {
 	// デフォルトパラメータで初期化
-	Initialize("enemyParameters");
+	//Initialize("enemyParameters");
 }
 
-void Enemy::Initialize(const std::string& parameterFileName)
+void Enemy::Initialize(const std::string& parameterFileName, const std::string& modelFileName)
 {
 	// パラメータファイルから読み込み
 	parameters_ = JsonLoader::LoadEnemyParameters(parameterFileName);
@@ -62,7 +62,7 @@ void Enemy::Initialize(const std::string& parameterFileName)
 
 	// 敵の3Dオブジェクトを生成・初期化
 	object3d_ = std::make_unique<Object3d>();
-	object3d_->Initialize("wingEnemy.obj");
+	object3d_->Initialize(modelFileName);
 
 	// パーティクルマネージャの初期化
 	particleManager_ = ParticleManager::GetInstance();
@@ -125,6 +125,9 @@ void Enemy::Update()
 
 		case EnemyMoveState::FollowZ:
 			UpdateFollowZ();
+			break;
+		case EnemyMoveState::Straight:
+			UpdateStraight();
 			break;
 		}
 
@@ -292,6 +295,8 @@ void Enemy::StartCurveMove()
 {
 	if(!moveCurve_ || moveState_ != EnemyMoveState::Idle) return;
 
+	hasStartedCurveMove_ = true;
+
 	curveMoveManager_ = std::make_unique<CurveMoveManager>();
 	curveMoveManager_->Start(*moveCurve_);
 
@@ -322,7 +327,12 @@ void Enemy::UpdateCurveMove()
 
 		// ★ カーブ終了時に「追従Z」を確定
 		//desiredZ_ = player_->GetPosition().z;
-		moveState_ = EnemyMoveState::FollowZ;
+		if (moveType_ == EnemyMove::StraightMinusX) {
+			moveState_ = EnemyMoveState::Straight;
+		}
+		else {
+			moveState_ = EnemyMoveState::FollowZ;
+		}
 	}
 }
 
@@ -338,6 +348,24 @@ void Enemy::UpdateFollowZ()
 	float dz = targetZ - currentZ;
 	currentZ += dz * zFollowSpeed_ * kUpdateDeltaTime;
 
+	pos.z = currentZ;
+	SetPosition(pos);
+}
+
+void Enemy::UpdateStraight()
+{
+	// zを追従しながらx方向に移動
+	WorldTransform& worldTransform = GetWorldTransform();
+	Vector3 pos = worldTransform.GetTranslate();
+	float targetZ = player_->GetPosition().z;
+	float currentZ = pos.z;
+
+	// なめらか補間
+	float dz = targetZ - currentZ;
+	currentZ += dz * zFollowSpeed_ * kUpdateDeltaTime;
+
+	
+	pos.x -= moveSpeed_ * kUpdateDeltaTime;
 	pos.z = currentZ;
 	SetPosition(pos);
 }

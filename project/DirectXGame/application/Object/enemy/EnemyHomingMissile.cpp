@@ -25,6 +25,7 @@ void EnemyHomingMissile::Initialize(
 
     vel *= speed_;
     SetVelocity(vel);
+	SetRadius(radius_);
 }
 
 void EnemyHomingMissile::Update()
@@ -86,7 +87,8 @@ void EnemyHomingMissile::OnCollision(Collider* other)
     }
 
     // プレイヤーの弾で破壊
-    if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerBullet)) {
+    if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerBullet) ||
+        other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerChargeBullet)) {
         SetAlive(false);
         SetRadius(0.0f);
         return;

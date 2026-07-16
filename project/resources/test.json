@@ -470,16 +470,34 @@
                                     1.9087642431259155
                                 ],
                                 "handle_left": [
-                                    30.415861129760742,
-                                    -2.1297502517700195,
-                                    2.4528656005859375
+                                    30.33810043334961,
+                                    -2.4909229278564453,
+                                    2.1825859546661377
                                 ],
                                 "handle_right": [
-                                    38.25760269165039,
-                                    -3.583907127380371,
-                                    1.364663004875183
+                                    37.71491241455078,
+                                    -3.1659586429595947,
+                                    1.6774301528930664
                                 ],
                                 "time": 4.0
+                            },
+                            {
+                                "co": [
+                                    43.045936584472656,
+                                    -2.8568286895751953,
+                                    1.9087642431259155
+                                ],
+                                "handle_left": [
+                                    39.6457633972168,
+                                    -2.8568286895751953,
+                                    1.9087642431259155
+                                ],
+                                "handle_right": [
+                                    46.446109771728516,
+                                    -2.8568286895751953,
+                                    1.9087642431259155
+                                ],
+                                "time": 8.0
                             }
                         ]
                     }
@@ -509,57 +527,12 @@
         },
         {
             "type": "EnemySpawn",
-            "name": "EnemySpawn.001",
-            "transform": {
-                "translation": [
-                    3.5589325428009033,
-                    0.0,
-                    0.0
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    -170.91917419433594
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "disabled": false,
-            "enemy_move": 3
-        },
-        {
-            "type": "EnemySpawn",
-            "name": "EnemySpawn.002",
-            "transform": {
-                "translation": [
-                    6.266045570373535,
-                    0.0,
-                    1.4519176483154297
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    -160.07728576660156
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "enemy_move": 4
-        },
-        {
-            "type": "EnemySpawn",
             "name": "EnemySpawn.003",
             "transform": {
                 "translation": [
-                    11.587899208068848,
+                    10.36125659942627,
                     0.0,
-                    0.0
+                    1.2771092653274536
                 ],
                 "rotation": [
                     0.0,
@@ -572,7 +545,8 @@
                     1.0
                 ]
             },
-            "enemy_move": 3
+            "enemy_move": 3,
+            "enemy_type": "Attacker"
         },
         {
             "type": "EnemySpawn",
@@ -594,7 +568,8 @@
                     1.0
                 ]
             },
-            "enemy_move": 4
+            "enemy_move": 4,
+            "enemy_type": "Attacker"
         },
         {
             "type": "EnemySpawn",
@@ -616,7 +591,8 @@
                     1.0
                 ]
             },
-            "enemy_move": 3
+            "enemy_move": 3,
+            "enemy_type": "Attacker"
         },
         {
             "type": "EnemySpawn",
@@ -638,14 +614,15 @@
                     1.0
                 ]
             },
-            "enemy_move": 3
+            "enemy_move": 3,
+            "enemy_type": "Attacker"
         },
         {
             "type": "EnemySpawn",
             "name": "EnemySpawn.007",
             "transform": {
                 "translation": [
-                    20.643844604492188,
+                    32.63668441772461,
                     0.0,
                     0.7568777799606323
                 ],
@@ -660,14 +637,15 @@
                     1.0
                 ]
             },
-            "enemy_move": 3
+            "enemy_move": 3,
+            "enemy_type": "Attacker"
         },
         {
             "type": "EnemySpawn",
             "name": "EnemySpawn.008",
             "transform": {
                 "translation": [
-                    8.123942375183105,
+                    6.249277114868164,
                     0.0,
                     0.0
                 ],
@@ -682,60 +660,17 @@
                     1.0
                 ]
             },
-            "enemy_move": 3
-        },
-        {
-            "type": "EnemySpawn",
-            "name": "EnemySpawn.009",
-            "transform": {
-                "translation": [
-                    9.831960678100586,
-                    0.0,
-                    -0.6875641345977783
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    -133.97080993652344
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "enemy_move": 3
-        },
-        {
-            "type": "EnemySpawn",
-            "name": "EnemySpawn.010",
-            "transform": {
-                "translation": [
-                    16.56913948059082,
-                    0.0,
-                    2.501016616821289
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    -151.74452209472656
-                ],
-                "scale": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "enemy_move": 4
+            "enemy_move": 3,
+            "enemy_type": "Attacker"
         },
         {
             "type": "EnemySpawn",
             "name": "EnemySpawn.011",
             "transform": {
                 "translation": [
-                    22.519290924072266,
+                    25.763629913330078,
                     0.0,
-                    2.1446943283081055
+                    2.812366008758545
                 ],
                 "rotation": [
                     0.0,
@@ -748,7 +683,9 @@
                     1.0
                 ]
             },
-            "enemy_move": 3
+            "enemy_move": 5,
+            "formation": 1,
+            "enemy_type": "Fighter"
         },
         {
             "type": "EnemySpawn",
@@ -770,7 +707,102 @@
                     1.0
                 ]
             },
-            "enemy_move": 4
+            "enemy_move": 4,
+            "enemy_type": "Attacker"
+        },
+        {
+            "type": "EnemySpawn",
+            "name": "EnemySpawn.013",
+            "transform": {
+                "translation": [
+                    16.244897842407227,
+                    0.0,
+                    0.8611016273498535
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    175.6376190185547
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "formation": 1,
+            "enemy_move": 5,
+            "enemy_type": "Fighter"
+        },
+        {
+            "type": "EnemySpawn",
+            "name": "EnemySpawn.001",
+            "transform": {
+                "translation": [
+                    41.536476135253906,
+                    0.0,
+                    2.824007749557495
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    179.19898986816406
+                ],
+                "scale": [
+                    0.9999999403953552,
+                    0.9999999403953552,
+                    1.0
+                ]
+            },
+            "enemy_move": 5,
+            "formation": 1,
+            "enemy_type": "Fighter"
+        },
+        {
+            "type": "EnemySpawn",
+            "name": "EnemySpawn.002",
+            "transform": {
+                "translation": [
+                    22.055908203125,
+                    0.0,
+                    2.043238878250122
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    -171.58151245117188
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "enemy_move": 4,
+            "enemy_type": "Attacker"
+        },
+        {
+            "type": "EnemySpawn",
+            "name": "EnemySpawn.009",
+            "transform": {
+                "translation": [
+                    37.87908172607422,
+                    0.0,
+                    0.7906770706176758
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    -173.33663940429688
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "enemy_move": 3,
+            "enemy_type": "Attacker"
         }
     ]
 }

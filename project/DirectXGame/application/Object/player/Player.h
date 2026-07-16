@@ -152,6 +152,9 @@ public:
 	// パラメータを設定
 	void SetParameters(const PlayerParameters& parameters);
 
+	// プレイヤーの無敵モード
+	void SetDebugInvincible(bool invincible) { debugInvincible_ = invincible; }
+
 private:
 	/*------メンバ変数------*/
 

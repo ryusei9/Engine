@@ -123,12 +123,26 @@ namespace MyEngine {
 						else if (v == 2) enemyData.move = EnemyMove::WavePlusZ;
 						else if (v == 3) enemyData.move = EnemyMove::WavePlusY;
 						else if (v == 4) enemyData.move = EnemyMove::WaveMinusY;
+						else if (v == 5) enemyData.move = EnemyMove::StraightMinusX;
 						else enemyData.move = EnemyMove::None;
 					}
 					else {
 						enemyData.move = EnemyMove::WaveMinusZ; // デフォルト
 					}
+					if (objectJson.contains("formation")) {
+						enemyData.formation = objectJson["formation"].get<int>();
+						
+					}
+					if (objectJson.contains("enemy_type")) {
+						std::string type = objectJson["enemy_type"].get<std::string>();
 
+						if (type == "Fighter") {
+							enemyData.enemyType = EnemyType::Fighter;
+						}
+						else if (type == "Attacker") {
+							enemyData.enemyType = EnemyType::Attacker;
+						}
+					}
 					levelData->enemies.push_back(enemyData);
 				}
 			}
@@ -203,6 +217,9 @@ namespace MyEngine {
 		}
 		if (move == "Enemy_Wave_+Y") {
 			return EnemyMove::WavePlusY;
+		}
+		if (move == "Enemy_Straight_-X") {
+			return EnemyMove::StraightMinusX;
 		}
 		return EnemyMove::None;
 	}

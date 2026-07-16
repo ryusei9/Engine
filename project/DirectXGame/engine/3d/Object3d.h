@@ -34,10 +34,10 @@ namespace MyEngine {
 
 		// ライトのデフォルト値
 		constexpr float kDefaultLightIntensity = 3.0f;
-		constexpr float kDefaultPointLightIntensity = 1.0f;
+		constexpr float kDefaultPointLightIntensity = 0.0f;
 		constexpr float kDefaultPointLightRadius = 10.0f;
 		constexpr float kDefaultPointLightDecay = 1.0f;
-		constexpr float kDefaultSpotLightIntensity = 4.0f;
+		constexpr float kDefaultSpotLightIntensity = 1.0f;
 		constexpr float kDefaultSpotLightDistance = 7.0f;
 		constexpr float kDefaultSpotLightDecay = 2.0f;
 
@@ -52,7 +52,7 @@ namespace MyEngine {
 
 		// ポジションのデフォルト値
 		constexpr float kDefaultLightPositionY = 2.0f;
-		constexpr float kDefaultDirectionalLightDirectionY = -1.0f;
+		constexpr float kDefaultDirectionalLightDirectionY = 1.0f;
 
 		// スポットライトの角度
 		constexpr float kSpotLightAngleDivisor = 3.0f;

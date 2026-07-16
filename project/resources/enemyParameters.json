@@ -1,5 +1,5 @@
 {
-  "moveSpeed": 0.1,
+  "moveSpeed": 1.0,
   "initialHp": 1,
   "respawnTimeSec": 3.0,
   "colliderRadius": 0.1,

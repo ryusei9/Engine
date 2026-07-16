@@ -85,7 +85,7 @@ public:
 	void Initialize() override;
 
 	// パラメータファイルから初期化
-	void Initialize(const std::string& parameterFileName);
+	void Initialize(const std::string& parameterFileName, const std::string& modelFileName);
 
 	// 更新
 	void Update() override;
@@ -123,6 +123,7 @@ public:
 		Idle,        // まだカーブ開始前（待機）
 		CurveMove,   // カーブ再生中
 		FollowZ,     // カーブ終了後：Zだけ追従
+		Straight
 	};
 
 
@@ -131,6 +132,8 @@ public:
 	void UpdateCurveMove();
 
 	void UpdateFollowZ();
+
+	void UpdateStraight();
 
 	void EnterDyingState();
 

@@ -199,6 +199,13 @@ void Player::Move()
 
 	// 速度を座標に反映
 	worldTransform_.SetTranslate(worldTransform_.GetTranslate() + velocity_);
+
+	// 床にめり込まないようにする
+	Vector3 pos = worldTransform_.GetTranslate();
+	if (pos.y < -2.0f) {
+		pos.y = -2.0f;
+	}
+	worldTransform_.SetTranslate(pos);
 }
 
 void Player::Attack()
@@ -248,9 +255,10 @@ void Player::OnCollision(Collider* other)
 			other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyMissile)) {
 			if (!debugInvincible_) {
 				SetIsAlive(false);
+				PlayDeathParticleOnce();
 			}
 			respawnTimer_ = parameters_.respawnWaitSec;
-			PlayDeathParticleOnce();
+			
 		}
 	}
 }

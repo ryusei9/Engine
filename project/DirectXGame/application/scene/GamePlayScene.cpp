@@ -118,6 +118,9 @@ void GamePlayScene::InitializeEnemyCurves()
 		else if (curve.fileName == "Enemy_Wave_-Y") {
 			CurveLibrary::Register(EnemyMove::WaveMinusY, curve);
 		}
+		else if (curve.fileName == "Enemy_Straight_-X") {
+			CurveLibrary::Register(EnemyMove::StraightMinusX, curve);
+		}
 	}
 }
 
@@ -272,7 +275,7 @@ void GamePlayScene::Update()
 
 	// カメラの更新
 	UpdateCameraSystem();
-	
+
 }
 
 void GamePlayScene::Draw3D()
@@ -328,9 +331,9 @@ void GamePlayScene::DrawImGui()
 	ImGui::SliderFloat2("WASD Sprite Position", &wasdGuideSpritePos_.x, 0.0f, 800.0f);
 
 	ImGui::SliderFloat2("ESC Sprite Position", &escGuideSpritePos_.x, 0.0f, 1200.0f);
-	
+
 	ImGui::SliderFloat2("clear Sprite Position", &stageClearSpritePos_.x, 0.0f, 800.0f);
-	
+
 	ImGui::SliderFloat2("Press Space Key Sprite Position", &pressSpaceKeySpritePos_.x, 0.0f, 800.0f);
 
 	ImGui::SliderFloat2("Charge UI Sprite Position", &chargeUISpritePos_.x, 0.0f, 800.0f);
@@ -425,42 +428,56 @@ void GamePlayScene::CreateObjectsFromLevelData()
 		Model* model = nullptr;
 		auto it = models_.find(enemyData.fileName);
 		if (it != models_.end()) { model = it->second.get(); }
-		// 敵オブジェクトの生成
-		auto newEnemy = std::make_unique<Enemy>();
-		newEnemy->Initialize();
-		
-		newEnemy->SetPosition(enemyData.translation);
-		newEnemy->SetMoveType(enemyData.move);
-		if (enemyData.move == EnemyMove::WavePlusY) {
-			newEnemy->SetAttackPattern(4);
-			newEnemy->SetColor(Vector4(0.0f, 1.0f, 0.0f, 1.0f)); // 緑
-		}
-		newEnemy->SetPlayer(player_.get());
+		int count = (enemyData.formation == 1) ? 5 : 1;
 
-		if (enemyData.move != EnemyMove::None) {
-			const CurveData& baseCurve = CurveLibrary::Get(enemyData.move);
+		constexpr float kSpacing = 0.5f;
 
-			auto curve = std::make_shared<CurveData>(baseCurve);
-			// --- アンカー補正（X/Y） ---
-			for (auto& p : curve->points) {
-				p.x += enemyData.translation.x;
-				p.y += enemyData.translation.y;
+		for (int i = 0; i < count; i++) {
+			// 敵オブジェクトの生成
+			auto newEnemy = std::make_unique<Enemy>();
+			std::string modelName =
+				(enemyData.enemyType == EnemyType::Attacker)
+				? "enemy.obj"
+				: "wingEnemy.obj";
+
+			newEnemy->Initialize("enemyParameters", modelName);
+
+			Vector3 pos = enemyData.translation;
+
+			pos.x -= kSpacing * i;
+			
+			newEnemy->SetPosition(pos);
+			newEnemy->SetMoveType(enemyData.move);
+			if (enemyData.enemyType == EnemyType::Attacker) {
+				newEnemy->SetAttackPattern(4);
+			}
+			newEnemy->SetPlayer(player_.get());
+
+			if (enemyData.move != EnemyMove::None) {
+				const CurveData& baseCurve = CurveLibrary::Get(enemyData.move);
+
+				auto curve = std::make_shared<CurveData>(baseCurve);
+				// --- アンカー補正（X/Y） ---
+				for (auto& p : curve->points) {
+					p.x += pos.x;
+					p.y += pos.y;
+				}
+
+				// --- ★ Z をプレイヤーに合わせる ---
+				float playerZ = player_->GetPosition().z;
+				float curveEndZ = curve->points.back().z;
+
+				float zOffset = playerZ - curveEndZ;
+
+				for (auto& p : curve->points) {
+					p.z += zOffset;
+				}
+
+				newEnemy->SetMoveCurve(curve);
 			}
 
-			// --- ★ Z をプレイヤーに合わせる ---
-			float playerZ = player_->GetPosition().z;
-			float curveEndZ = curve->points.back().z;
-
-			float zOffset = playerZ - curveEndZ;
-				
-			for (auto& p : curve->points) {
-				p.z += zOffset;
-			}
-
-			newEnemy->SetMoveCurve(curve);
+			enemies_.push_back(std::move(newEnemy));
 		}
-
-		enemies_.push_back(std::move(newEnemy));
 	}
 }
 
@@ -576,7 +593,7 @@ void GamePlayScene::UpdateStartCameraEasing()
 
 	// プレイヤー開始位置保存
 	if (!playerStartPosInitialized_) {
-		startPlayerPos_ = player_->GetPosition() + Vector3(-70.0f,0.0f,0.0f);
+		startPlayerPos_ = player_->GetPosition() + Vector3(-70.0f, 0.0f, 0.0f);
 		playerStartPosInitialized_ = true;
 	}
 
@@ -607,10 +624,10 @@ void GamePlayScene::UpdateStartCameraEasing()
 	};
 
 	player_->SetPosition(playerPos);
-
+	player_->SetDebugInvincible(true); // デバッグ用無敵状態
 	if (t >= 1.0f) {
 		isStartCameraEasing_ = false;
-
+		player_->SetDebugInvincible(false);
 		player_->SetPlayerControlEnabled(true);
 
 		for (auto& enemy : enemies_) {
@@ -722,13 +739,13 @@ void GamePlayScene::RestrictPlayerInsideCameraView() {
 		newWorldPos.x / newWorldPos.w,
 		newWorldPos.y / newWorldPos.w,
 		newWorldPos.z / newWorldPos.w
-	};  
+	};
 	player_->SetPosition(clampedWorldPos);
 }
 
 void GamePlayScene::UpdatePlayerFollowCamera()
 {
-	
+
 	Vector3 prevCamPos = cameraManager_->GetMainCamera()->GetTranslate();
 
 	if (!isStartCameraEasing_) {
@@ -1179,7 +1196,7 @@ void GamePlayScene::UpdateUIObjects()
 	pressSpaceKeySprite_->SetColor(Vector4(1.0f, 1.0f, 1.0f, pressSpaceKeyAlpha_));
 	pressSpaceKeySprite_->Update();
 
-	
+
 	// -------------------------
 	// チャージUI登場演出
 	// -------------------------
@@ -1187,7 +1204,7 @@ void GamePlayScene::UpdateUIObjects()
 
 		chargeUIAnimTimer_ += GamePlayDefaults::kDeltaTime60Hz;
 
-		float t = std::clamp(chargeUIAnimTimer_ / GamePlayDefaults::kChargeUIAnimDuration_,0.0f,1.0f);
+		float t = std::clamp(chargeUIAnimTimer_ / GamePlayDefaults::kChargeUIAnimDuration_, 0.0f, 1.0f);
 
 		// EaseOutBack
 		float c1 = 1.70158f;
@@ -1266,7 +1283,7 @@ void GamePlayScene::UpdateUIObjects()
 		chargeBlinkTimer_ = 0.0f;
 	}
 	chargeGaugeSprite_->SetVisibleRate(chargeRate);
-	
+
 	chargeGaugeSprite_->Update();
 
 	// 各種ガイドテキストの位置更新
@@ -1425,7 +1442,7 @@ void GamePlayScene::DrawFade()
 void GamePlayScene::DrawSprite()
 {
 	SpriteCommon::GetInstance()->DrawSettings();
-	
+
 	if (gameSceneState_ == GameSceneState::InGame) {
 		if (!gameClearTextVisible_ && !gameClearPlayerLaunched_) {
 			if (!isStartCameraEasing_) {
@@ -1437,10 +1454,10 @@ void GamePlayScene::DrawSprite()
 			}
 		}
 	}
-	
+
 	if (gameClearTextVisible_ && !gameClearPlayerLaunched_) {
 		stageClearSprite_->Draw();
 		pressSpaceKeySprite_->Draw();
 	}
-	
+
 }

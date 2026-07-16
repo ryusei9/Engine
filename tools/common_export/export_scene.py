@@ -60,6 +60,10 @@ class MYADDON_OT_export_scene(bpy.types.Operator, bpy_extras.io_utils.ExportHelp
 
     def parse_scene_recursive_json(self, data_parent, object, level):
         """JSON形式出力用再帰関数"""
+        # Previewオブジェクトはexportしない
+        if object.name.startswith("Preview_"):
+            return
+        
         json_object = dict()
         json_object["type"] = getattr(object, "type", "UNKNOWN")
         json_object["name"] = object.name
@@ -77,8 +81,21 @@ class MYADDON_OT_export_scene(bpy.types.Operator, bpy_extras.io_utils.ExportHelp
 
         # --- カスタムプロパティ ---
         for key, value in object.items():
-            if key not in "_RNA_UI":
-                json_object[key] = value
+            if key in {"_RNA_UI", "enemy_type"}:
+                continue
+            json_object[key] = value
+        print("after items:", json_object)
+
+        if object.get("type") == "EnemySpawn":
+            json_object["enemy_type"] = object.enemy_type
+            print("after overwrite:", json_object)
+
+        print("name =", object.name)
+        print("custom props =", list(object.items()))
+        print("has enemy_type =", hasattr(object, "enemy_type"))
+
+        if hasattr(object, "enemy_type"):
+            print("enemy_type =", object.enemy_type)
 
          # --- Curveデータ対応（制御点と時間の出力） ---
         if object.type == 'CURVE':
@@ -119,10 +136,13 @@ class MYADDON_OT_export_scene(bpy.types.Operator, bpy_extras.io_utils.ExportHelp
                 json_object["curve"]["splines"].append(spline_data)
 
         # --- 子オブジェクト ---
-        if len(object.children) > 0:
-            json_object["children"] = []
-            for child in object.children:
-                self.parse_scene_recursive_json(json_object["children"], child, level + 1)
+        children = []
+
+        for child in object.children:
+            self.parse_scene_recursive_json(children, child, level + 1)
+
+        if children:
+            json_object["children"] = children
 
         data_parent.append(json_object)
 
@@ -133,8 +153,8 @@ class MYADDON_OT_export_scene(bpy.types.Operator, bpy_extras.io_utils.ExportHelp
         for object in bpy.context.scene.objects:
             if object.parent:
                 continue
+           
             self.parse_scene_recursive_json(json_object_root["objects"], object, 0)
-
         json_text = json.dumps(json_object_root, ensure_ascii=False, indent=4)
         print(json_text)
 

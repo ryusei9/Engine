@@ -137,7 +137,7 @@ void EnemyAttackPatternMissile::Update(
 
 	if (shotTimer_ < 3.0f) return;
 
-	const int missileCount = 3;
+	const int missileCount = 1;
 	const float spread = EnemyAttackDefaults::kPi / 6.0f;
 	const float baseAngle = EnemyAttackDefaults::kPi;
 
@@ -145,7 +145,7 @@ void EnemyAttackPatternMissile::Update(
 
 		float angle =
 			baseAngle - spread / 2.0f +
-			spread * (float(i) / float(missileCount - 1));
+			spread * (float(i) / float(missileCount));
 
 		Vector3 vel{
 			std::cos(angle) * 0.12f,

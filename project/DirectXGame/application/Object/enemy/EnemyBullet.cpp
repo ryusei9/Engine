@@ -80,7 +80,9 @@ void EnemyBullet::OnCollision(Collider* other)
 	}
 
 	// プレイヤーと衝突した場合に消滅
-	if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayer)) {
+	if (other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayer) || 
+		other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerBullet) || 
+		other->GetTypeID() == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerChargeBullet)) {
 		isAlive_ = false;
 		// 半径を0にして当たり判定も即無効化
 		SetRadius(0.0f);

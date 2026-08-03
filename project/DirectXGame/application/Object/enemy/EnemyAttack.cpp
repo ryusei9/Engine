@@ -51,7 +51,9 @@ void EnemyAttackPatternFan::DrawImGui(int32_t idx, bool selected) {
 void EnemyAttackPatternAimed::Update(Enemy* enemy, Player* player, std::list<std::unique_ptr<EnemyBullet>>& bullets, float deltaTime) {
 	shotTimer_ += deltaTime;
 	if (shotTimer_ >= parameters_.aimedShotIntervalSec && player) {
-		Vector3 toPlayer = player->GetCenterPosition() - enemy->GetWorldTransform().GetTranslate();
+		Vector3 targetPos = player->GetCenterPosition();
+		targetPos += player->GetVelocity() * 10.0f; // 予測
+		Vector3 toPlayer = targetPos - enemy->GetWorldTransform().GetTranslate();
 		float len = std::sqrt(toPlayer.x * toPlayer.x + toPlayer.y * toPlayer.y + toPlayer.z * toPlayer.z);
 		if (len > parameters_.aimedMinLen) {
 			float speed = parameters_.aimedBulletSpeed * parameters_.bulletSpeedScale;
@@ -60,6 +62,7 @@ void EnemyAttackPatternAimed::Update(Enemy* enemy, Player* player, std::list<std
 						  0.0f };
 			auto bullet = std::make_unique<EnemyBullet>();
 			bullet->Initialize(enemy->GetWorldTransform().GetTranslate(), v, "enemyBulletParameters");
+			bullet->SetCameraManager(cameraManager_);
 			bullet->Update();
 			bullets.push_back(std::move(bullet));
 		}

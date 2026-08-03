@@ -139,7 +139,6 @@ void Enemy::Update()
 			EnterDyingState();
 		}
 	}
-
 	// ワールド変換の更新
 	
 	worldTransform.Update();

@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <string>
 #include <CurveMoveManager.h>
+#include <CameraManager.h>
 #include "LevelData.h" // EnemyMove と CurveData の定義
 
 // 前方宣言
@@ -189,6 +190,8 @@ public:
 
 	void SetColor(const Vector4& color) {object3d_->SetMaterialColor(color);}
 
+	void SetCameraManager(CameraManager* cameraManager) { cameraManager_ = cameraManager; }
+
 private:
 	/*------メンバ変数------*/
 
@@ -289,5 +292,6 @@ private:
 	float zFollowSpeed_ = 8.0f;   // 補間速度
 	float desiredZ_ = 0.0f;       // 追従目標Z
 
+	CameraManager* cameraManager_ = nullptr;
 };
 

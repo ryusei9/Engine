@@ -6,6 +6,7 @@
 #include <EnemyBullet.h>
 #include <Player.h>
 #include <EnemyHomingMissile.h>
+#include <CameraManager.h>
 
 // 前方宣言
 class Enemy;
@@ -30,7 +31,7 @@ namespace EnemyAttackDefaults {
 
 	// Pattern2: 自機狙い
 	inline constexpr float kAimedShotIntervalSec = 2.0f;
-	inline constexpr float kAimedBulletSpeed = 0.18f;
+	inline constexpr float kAimedBulletSpeed = 0.36f;
 	inline constexpr float kBulletSpeedScale = 0.5f;
 	inline constexpr float kAimedMinLen = 0.01f;
 
@@ -182,8 +183,11 @@ public:
 	// パターン名取得
 	const char* GetName() const override { return "Pattern2:Aimed"; }
 
+
 private:
 	float shotTimer_ = 0.0f;
+	
+	CameraManager* cameraManager_ = nullptr;
 };
 
 /// <summary>
@@ -268,6 +272,8 @@ public:
 	// パラメータ設定
 	void SetParameters(const EnemyAttackParameters& params);
 
+	void SetCameraManager(CameraManager* cameraManager) { cameraManager_ = cameraManager; }
+
 	// パラメータ取得
 	const EnemyAttackParameters& GetParameters() const { return parameters_; }
 
@@ -286,4 +292,6 @@ private:
 
 	// パターン3突進フラグ
 	bool pattern3Rushed_ = false;
+
+	CameraManager* cameraManager_ = nullptr;
 };

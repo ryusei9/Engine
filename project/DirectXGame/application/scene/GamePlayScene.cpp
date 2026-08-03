@@ -452,7 +452,7 @@ void GamePlayScene::CreateObjectsFromLevelData()
 				newEnemy->SetAttackPattern(4);
 			}
 			newEnemy->SetPlayer(player_.get());
-
+			
 			if (enemyData.move != EnemyMove::None) {
 				const CurveData& baseCurve = CurveLibrary::Get(enemyData.move);
 
@@ -768,8 +768,8 @@ void GamePlayScene::UpdatePlayerFollowCamera()
 	playerPos.x += camMove.x;   // ← X/Y軸で追従
 	playerPos.y += camMove.y;
 
-	// カメラから一定距離に固定（例: +10）
-	playerPos.z = camPos.z + 10.0f;
+	// カメラから一定距離に固定（例: +15）
+	playerPos.z = camPos.z + 15.0f;
 
 	player_->SetPosition(playerPos);
 }
@@ -1067,12 +1067,25 @@ void GamePlayScene::UpdatePlayerBullets()
 	Camera* cam = cameraManager_->GetMainCamera();
 	for (auto& bullet : player_->GetBullets()) {
 		if (bullet && bullet->IsAlive()) {
+			Vector3 prevCamPos = cameraManager_->GetMainCamera()->GetTranslate();
+
+			Camera* cam = cameraManager_->GetMainCamera();
+			Vector3 camPos = cam->GetTranslate();
+
+			// カメラの移動量（前フレームとの差）
+			Vector3 camMove = {
+				camPos.x - prevCamPos.x,
+				camPos.y - prevCamPos.y,
+				camPos.z - prevCamPos.z
+			};
 			Vector3 bulletPos = bullet->GetTranslate();
 			// 画面外の場合は消す
 			if (!IsInCameraView(bulletPos)) {
 				bullet->SetIsAlive(false);
 			}
-			bulletPos.z = cam->GetTranslate().z + 10.0f;
+			bulletPos.x += camMove.x;   // ← X/Y軸で追従
+			bulletPos.y += camMove.y;
+			bulletPos.z = cam->GetTranslate().z + 15.0f;
 			bullet->SetTranslate(bulletPos);
 		}
 	}
@@ -1113,8 +1126,23 @@ void GamePlayScene::UpdateEnemyBehavior(Enemy* enemy)
 	// 敵の弾の奥行き調整
 	for (auto& bullet : enemy->GetBullets()) {
 		if (bullet && bullet->IsAlive()) {
+			Vector3 prevCamPos = cameraManager_->GetMainCamera()->GetTranslate();
+
+			Camera* cam = cameraManager_->GetMainCamera();
+			Vector3 camPos = cam->GetTranslate();
+
+			// カメラの移動量（前フレームとの差）
+			Vector3 camMove = {
+				camPos.x - prevCamPos.x,
+				camPos.y - prevCamPos.y,
+				camPos.z - prevCamPos.z
+			};
+
 			Vector3 bulletPos = bullet->GetPosition();
-			bulletPos.z = cam->GetTranslate().z + 10.0f;
+			// プレイヤーの位置を更新（カメラ移動分を打ち消す）
+			bulletPos.x += camMove.x;   // ← X/Y軸で追従
+			bulletPos.y += camMove.y;
+			bulletPos.z = cam->GetTranslate().z + 15.0f;
 			bullet->SetPosition(bulletPos);
 		}
 	}

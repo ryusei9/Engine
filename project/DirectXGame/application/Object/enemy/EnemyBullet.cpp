@@ -50,9 +50,11 @@ void EnemyBullet::Update()
 	// 生存フレームのカウントダウン
 	if (lifeFrame_ > 0) {
 		--lifeFrame_;
-	} else {
+	}
+	else {
 		isAlive_ = false;
 	}
+
 
 	// 変換更新と描画パラメータ反映
 	worldTransform_.Update();

@@ -52,9 +52,9 @@ namespace GamePlayDefaults {
 	// スタート演出
 	inline constexpr bool  kStartCameraEasing = true;
 	inline constexpr float kStartCameraDurationSec = 5.0f;
-	inline constexpr Vector3 kStartCamPos{ -50.0f, 10.0f, -20.0f };
+	inline constexpr Vector3 kStartCamPos{ -50.0f, 10.0f, -30.0f };
 	inline constexpr Vector3 kStartCamRot{ 0.0f,  0.0f,   0.0f };
-	inline constexpr Vector3 kEndCamPos{   0.0f,   1.0f, -10.0f };
+	inline constexpr Vector3 kEndCamPos{   0.0f,   1.0f, -14.0f };
 	inline constexpr Vector3 kEndCamRot{   0.1f,   0.0f,   0.0f };
 
 	// カーブ移動

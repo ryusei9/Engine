@@ -8,7 +8,7 @@
   "fanBulletSpeed": 0.15,
   "aimedShotIntervalSec": 1.0,
   "aimedBulletSpeed": 0.18,
-  "bulletSpeedScale": 0.25,
+  "bulletSpeedScale": 0.5,
   "aimedMinLen": 0.01,
   "rushStartX": 5.0,
   "rushSpeedX": 0.08,

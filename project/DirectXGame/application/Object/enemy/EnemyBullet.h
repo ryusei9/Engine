@@ -6,6 +6,7 @@
 #include <string>
 #include <cstdint>
 #include <SphereCollider.h>
+#include <CameraManager.h>
 
 // 前方宣言
 struct Vector3;
@@ -97,6 +98,8 @@ public:
 	// パラメータ設定
 	void SetParameters(const EnemyBulletParameters& parameters);
 
+	void SetCameraManager(CameraManager* cameraManager) { cameraManager_ = cameraManager; }
+
 	// パラメータ取得
 	const EnemyBulletParameters& GetParameters() const { return parameters_; }
 
@@ -127,6 +130,8 @@ private:
 
 	// デフォルトパラメータ（静的メンバ）
 	static inline EnemyBulletParameters defaultParameters_;
+
+	CameraManager* cameraManager_ = nullptr;
 protected:
 	// 弾の速度
 	Vector3 velocity_ = {};

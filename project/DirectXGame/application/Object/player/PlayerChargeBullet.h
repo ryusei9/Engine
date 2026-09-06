@@ -136,7 +136,7 @@ private:
 
 	Vector3 offset_ = { 0.0f, 0.0f, 0.0f };
 
-	float length_ = 10.0f;
+	float length_ = 13.0f;
 
 	float duration_ = 2.0f;
 

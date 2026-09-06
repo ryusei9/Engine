@@ -446,6 +446,7 @@ private:
 	void UpdateFadeAndTransitions();
 	void UpdateGameObjects();
 	void UpdatePlayerBullets();
+	void UpdatePlayerChargeBullet();
 	void UpdateEnemies();
 	void UpdateEnemyBehavior(Enemy* enemy);
 	void CleanupDestroyedObjects();

@@ -1052,6 +1052,7 @@ void GamePlayScene::UpdateGameObjects()
 
 		// プレイヤーの弾の奥行き調整
 		UpdatePlayerBullets();
+		UpdatePlayerChargeBullet();
 	}
 
 	// 敵の更新
@@ -1089,6 +1090,40 @@ void GamePlayScene::UpdatePlayerBullets()
 			bullet->SetTranslate(bulletPos);
 		}
 	}
+}
+
+void GamePlayScene::UpdatePlayerChargeBullet()
+{
+	for (auto& bullet : player_->GetChargeBullets()) {
+		if (bullet && bullet->IsAlive()) {
+			Vector3 prevCamPos = cameraManager_->GetMainCamera()->GetTranslate();
+
+			Camera* cam = cameraManager_->GetMainCamera();
+			Vector3 camPos = cam->GetTranslate();
+
+			// カメラの移動量（前フレームとの差）
+			Vector3 camMove = {
+				camPos.x - prevCamPos.x,
+				camPos.y - prevCamPos.y,
+				camPos.z - prevCamPos.z
+			};
+			Vector3 startPos = bullet->GetStart();
+			Vector3 endPos = bullet->GetEnd();
+			//// 画面外の場合は消す
+			//if (!IsInCameraView(startPos)) {
+			//	bullet->SetIsAlive(false);
+			//}
+			startPos.x += camMove.x;   // ← X/Y軸で追従
+			startPos.y += camMove.y;
+			startPos.z = cam->GetTranslate().z + 15.0f;
+			endPos.x += camMove.x;
+			endPos.y += camMove.y;
+			endPos.z = cam->GetTranslate().z + 15.0f;
+			bullet->SetStart(startPos);
+			bullet->SetEnd(endPos);
+		}
+	}
+	
 }
 
 // 敵の更新
